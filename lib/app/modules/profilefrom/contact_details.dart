@@ -143,7 +143,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   "Contact Details",
                   style: opensansMedium.copyWith(
                     color: ColorResources.blackcolor,
-                    fontSize: 16, 
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
