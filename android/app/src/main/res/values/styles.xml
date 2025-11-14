@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Launch Theme -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+
+        <!-- STATUS BAR COLOR -->
+        <item name="android:statusBarColor">#EB1D7B</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <!-- Normal Theme -->
+    <style name="NormalTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+
+        <!-- STATUS BAR COLOR -->
+        <item name="android:statusBarColor">#EB1D7B</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+</resources>
