@@ -198,7 +198,7 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
             TextSpan(
               text: text,
               style: opensansMedium.copyWith(
-                fontSize: 15,
+                fontSize: 14,
                 color: ColorResources.blackgrey,
               ),
             ),

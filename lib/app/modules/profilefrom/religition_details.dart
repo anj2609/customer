@@ -1,20 +1,23 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/profilefrom/aadhar_number.dart';
+import 'package:vivashri/app/modules/profilefrom/reference_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 
-class ContactDetailsScreen extends StatefulWidget {
-  const ContactDetailsScreen({super.key});
+class ReligionDetailsScreen extends StatefulWidget {
+  const ReligionDetailsScreen({super.key});
 
   @override
-  State<ContactDetailsScreen> createState() => _ContactDetailsScreenState();
+  State<ReligionDetailsScreen> createState() => _ReligionDetailsScreenState();
 }
 
-class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
-  String? selectedReference;
+class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
+  String? religion = "Hindu";
+  String? caste;
+  String? subcaste;
+  String? gotra;
 
   @override
   Widget build(BuildContext context) {
@@ -24,46 +27,49 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
         child: Column(
           children: [
             _header(),
-            Divider(),
+ Divider(),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(left: 15, right: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label("Contact Number:"),
-                    _readOnlyBox("+91 98739 85789"),
+                    _label("Religion:"),
+                    _dropdown(
+                      value: religion,
+                      onChanged: (v) => setState(() => religion = v),
+                      items: ["Hindu", "Muslim", "Sikh", "Christian", "Other"],
+                    ),
 
-                    _emailWithOtp(),
+                    _label("Caste:"),
+                    _dropdown(
+                      value: caste,
+                      onChanged: (v) => setState(() => caste = v),
+                      items: ["Brahmin", "Rajput", "OBC", "SC", "ST"],
+                    ),
 
-                    _label("Insagram Id:"),
-                    _inputField(),
+                    _label("Subcaste:"),
+                    _dropdown(
+                      value: subcaste,
+                      onChanged: (v) => setState(() => subcaste = v),
+                      items: ["Sub 1", "Sub 2", "Sub 3"],
+                    ),
 
-                    _label("Facebook Id:"),
-                    _inputField(),
+                    _label("Gotra:"),
+                    _dropdown(
+                      value: gotra,
+                      onChanged: (v) => setState(() => gotra = v),
+                      items: ["Kashyap", "Bhardwaj", "Vashishth", "Other"],
+                    ),
 
                     const SizedBox(height: 10),
-                    Text(
-                      "Reference:",
-                      style: opensansMedium.copyWith(
-                        fontSize: 16,
-                        // fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    _hintBox("This field will come when other selected"),
 
-                    _label("Reference Details:"),
-                    _dropdownBox(
-                      hint: "Select",
-                      items: ["Friend", "Relative", "Advertisement"],
-                      value: selectedReference,
-                      onChanged: (v) => setState(() => selectedReference = v),
-                    ),
+                    _label("Dosh:"),
+                    _textField(),
 
-                    _label("Other"),
-                    _inputField(),
-
-                    const SizedBox(height: 25),
-                    _bottomButtons(),
+                    const SizedBox(height: 30),
+                    _buttons(),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -74,8 +80,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
       ),
     );
   }
-
-  // ---------------- TOP HEADER ----------------
 
   Widget _header() {
     return Container(
@@ -97,7 +101,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   ),
                 ),
                 AutoSizeText(
-                  "Basic Details",
+                  "Aadhaar Verification",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -128,7 +132,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                       ),
                     ),
                     Text(
-                      "2 of 4",
+                      "5 of 18",
                       style: opensansMedium.copyWith(
                         color: ColorResources.blackgrey,
                         fontSize: 15,
@@ -140,7 +144,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                 SizedBox(height: 8),
 
                 Text(
-                  "Contact Details",
+                  "Religion Details",
                   style: opensansMedium.copyWith(
                     color: ColorResources.blackcolor,
                     fontSize: 16,
@@ -166,7 +170,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   ),
                 ),
                 AutoSizeText(
-                  "Aadhaar Verification",
+                  "Reference Details",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -196,9 +200,9 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                 color: ColorResources.blackgrey,
               ),
             ),
-            TextSpan(
+            const TextSpan(
               text: " *",
-              style: opensansMedium.copyWith(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.red, // ⭐ RED COLOR
@@ -209,90 +213,27 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
       ),
     );
   }
-  // ---------------- INPUT FIELD ----------------
 
-  Widget _inputField({int maxLines = 1}) {
-    return TextField(maxLines: maxLines, decoration: _decoration());
-  }
-
-  // ---------------- READONLY PHONE BOX ----------------
-
-  Widget _readOnlyBox(String text) {
-    return Container(
-      height: 55,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: opensansMedium.copyWith(
-          fontSize: 17,
-          color: ColorResources.blackgrey,
-        ),
-      ),
-    );
-  }
-
-  // ---------------- EMAIL + OTP ----------------
-
-  Widget _emailWithOtp() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _label("Contact Email Address:"),
-                  Text(
-                    "Send OTP",
-                    style: opensansMedium.copyWith(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-              _inputField(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ---------------- DROPDOWN ----------------
-
-  Widget _dropdownBox({
-    required String hint,
-    required List<String> items,
+  // ---------------------- Dropdown ------------------------
+  Widget _dropdown({
     required String? value,
-    required void Function(String?) onChanged,
+    required Function(String?) onChanged,
+    required List<String> items,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade400),
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
+        child: DropdownButton(
           value: value,
-          hint: Text(
-            hint,
-            style: opensansMedium.copyWith(
-              color: ColorResources.blackhalka,
-              fontSize: 14,
-            ),
-          ),
           isExpanded: true,
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(color: ColorResources.blackhalka,    fontSize: 14,),
+          ),
           items: items
               .map(
                 (e) => DropdownMenuItem(
@@ -300,8 +241,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   child: Text(
                     e,
                     style: opensansMedium.copyWith(
-                      color: ColorResources.blackhalka,
-                      fontSize: 14,
+                      color: ColorResources.blackhalka,    fontSize: 14,
                     ),
                   ),
                 ),
@@ -313,9 +253,48 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
     );
   }
 
-  // ---------------- BOTTOM BUTTONS ----------------
+  // ---------------------- Hint Box ------------------------
+  Widget _hintBox(String text) {
+    return Container(
+      width: double.infinity,
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: opensansMedium.copyWith(color: ColorResources.blackhalka),
+        ),
+      ),
+    );
+  }
 
-  Widget _bottomButtons() {
+  // ---------------------- TextField ------------------------
+  Widget _textField() {
+    return TextField(
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 14,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: ColorResources.primarycolor),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------- Buttons ------------------------
+  Widget _buttons() {
     return Row(
       children: [
         Expanded(
@@ -340,7 +319,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           child: GestureDetector(
             onTap: () {
               Get.to(
-                AadharVerificationScreen(),
+                ReferenceDetailsScreen(),
                 duration: Duration(
                   milliseconds: ApiConstants.screenTransitionTime,
                 ),
@@ -367,24 +346,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  // ---------------- COMMON DECORATION ----------------
-
-  InputDecoration _decoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey.shade400),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.pink),
-      ),
     );
   }
 }

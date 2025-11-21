@@ -1,20 +1,29 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/profilefrom/aadhar_number.dart';
+import 'package:vivashri/app/modules/profilefrom/more_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 
-class ContactDetailsScreen extends StatefulWidget {
-  const ContactDetailsScreen({super.key});
+class FamilyDetailsScreen extends StatefulWidget {
+  const FamilyDetailsScreen({super.key});
 
   @override
-  State<ContactDetailsScreen> createState() => _ContactDetailsScreenState();
+  State<FamilyDetailsScreen> createState() => _FamilyDetailsScreenState();
 }
 
-class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
-  String? selectedReference;
+class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
+  String familyType = "";
+  String familyValue = "";
+
+  String? noOfSister;
+  String? marriedSister;
+  String? noOfBrother;
+  String? marriedBrother;
+  String? noOfSisterInLaw;
+  String? noOfBrotherInLaw;
+  String? totalFamilyMember;
 
   @override
   Widget build(BuildContext context) {
@@ -28,43 +37,68 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(left: 15, right: 15),
+
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label("Contact Number:"),
-                    _readOnlyBox("+91 98739 85789"),
+                    _label("Family Type:"),
+                    _familyTypeButtons(),
 
-                    _emailWithOtp(),
+                    _label("Family Value:"),
+                    _familyValueButtons(),
 
-                    _label("Insagram Id:"),
-                    _inputField(),
-
-                    _label("Facebook Id:"),
-                    _inputField(),
-
-                    const SizedBox(height: 10),
-                    Text(
-                      "Reference:",
-                      style: opensansMedium.copyWith(
-                        fontSize: 16,
-                        // fontWeight: FontWeight.bold,
-                      ),
+                    _label("No. of Sister:"),
+                    _dropdown(
+                      value: noOfSister,
+                      items: ["0", "1", "2", "3", "4"],
+                      onChanged: (v) => setState(() => noOfSister = v),
                     ),
 
-                    _label("Reference Details:"),
-                    _dropdownBox(
-                      hint: "Select",
-                      items: ["Friend", "Relative", "Advertisement"],
-                      value: selectedReference,
-                      onChanged: (v) => setState(() => selectedReference = v),
+                    _label("Married Sister:"),
+                    _dropdown(
+                      value: marriedSister,
+                      items: ["0", "1", "2", "3"],
+                      onChanged: (v) => setState(() => marriedSister = v),
                     ),
 
-                    _label("Other"),
-                    _inputField(),
+                    _label("No. of Brother:"),
+                    _dropdown(
+                      value: noOfBrother,
+                      items: ["0", "1", "2", "3"],
+                      onChanged: (v) => setState(() => noOfBrother = v),
+                    ),
 
-                    const SizedBox(height: 25),
-                    _bottomButtons(),
-                    const SizedBox(height: 40),
+                    _label("Married Brother:"),
+                    _dropdown(
+                      value: marriedBrother,
+                      items: ["0", "1", "2", "3"],
+                      onChanged: (v) => setState(() => marriedBrother = v),
+                    ),
+
+                    _label("No. of Sister in Law:"),
+                    _dropdown(
+                      value: noOfSisterInLaw,
+                      items: ["0", "1", "2", "3"],
+                      onChanged: (v) => setState(() => noOfSisterInLaw = v),
+                    ),
+
+                    _label("No. of Brother in Law:"),
+                    _dropdown(
+                      value: noOfBrotherInLaw,
+                      items: ["0", "1", "2", "3"],
+                      onChanged: (v) => setState(() => noOfBrotherInLaw = v),
+                    ),
+
+                    _label("Total Family Member:"),
+                    _dropdown(
+                      value: totalFamilyMember,
+                      items: ["1", "2", "3", "4", "5", "6", "7+"],
+                      onChanged: (v) => setState(() => totalFamilyMember = v),
+                    ),
+
+                    const SizedBox(height: 30),
+                    _buttons(),
+                    const SizedBox(height: 50),
                   ],
                 ),
               ),
@@ -74,8 +108,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
       ),
     );
   }
-
-  // ---------------- TOP HEADER ----------------
 
   Widget _header() {
     return Container(
@@ -97,7 +129,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   ),
                 ),
                 AutoSizeText(
-                  "Basic Details",
+                  "Location Details",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -128,7 +160,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                       ),
                     ),
                     Text(
-                      "2 of 4",
+                      "8 of 18",
                       style: opensansMedium.copyWith(
                         color: ColorResources.blackgrey,
                         fontSize: 15,
@@ -140,7 +172,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                 SizedBox(height: 8),
 
                 Text(
-                  "Contact Details",
+                  "Family Details",
                   style: opensansMedium.copyWith(
                     color: ColorResources.blackcolor,
                     fontSize: 16,
@@ -166,7 +198,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   ),
                 ),
                 AutoSizeText(
-                  "Aadhaar Verification",
+                  "More Details",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -198,7 +230,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
             ),
             TextSpan(
               text: " *",
-              style: opensansMedium.copyWith(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.red, // ⭐ RED COLOR
@@ -209,72 +241,103 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
       ),
     );
   }
-  // ---------------- INPUT FIELD ----------------
 
-  Widget _inputField({int maxLines = 1}) {
-    return TextField(maxLines: maxLines, decoration: _decoration());
-  }
-
-  // ---------------- READONLY PHONE BOX ----------------
-
-  Widget _readOnlyBox(String text) {
-    return Container(
-      height: 55,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: opensansMedium.copyWith(
-          fontSize: 17,
-          color: ColorResources.blackgrey,
-        ),
-      ),
-    );
-  }
-
-  // ---------------- EMAIL + OTP ----------------
-
-  Widget _emailWithOtp() {
+  // ------------------- FAMILY TYPE -------------------
+  Widget _familyTypeButtons() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _label("Contact Email Address:"),
-                  Text(
-                    "Send OTP",
-                    style: opensansMedium.copyWith(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-              _inputField(),
-            ],
-          ),
-        ),
+        _typeButton("Joint", familyType == "Joint", () {
+          setState(() => familyType = "Joint");
+        }),
+        const SizedBox(width: 12),
+        _typeButton("Nuclear", familyType == "Nuclear", () {
+          setState(() => familyType = "Nuclear");
+        }),
       ],
     );
   }
 
-  // ---------------- DROPDOWN ----------------
+  Widget _typeButton(String label, bool selected, VoidCallback onTap) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: 45,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selected
+                  ? ColorResources.primarycolor3
+                  : Colors.grey.shade400,
+              width: 1.4,
+            ),
+            color: selected ? Colors.pink.shade50 : Colors.white,
+          ),
+          child: Text(
+            label,
+            style: opensansMedium.copyWith(
+              fontSize: 14,
+              //fontWeight: FontWeight.w600,
+              color: selected ? ColorResources.primarycolor3 : Colors.black87,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-  Widget _dropdownBox({
-    required String hint,
-    required List<String> items,
+  // ------------------- FAMILY VALUE BUTTONS -------------------
+  Widget _familyValueButtons() {
+    final values = ["Orthodox", "Traditional", "Moderate", "Liberal"];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: values.map((v) {
+        bool selected = familyValue == v;
+
+        return Expanded(
+          child: Container(
+            margin: const EdgeInsets.only(right: 5),
+            child: InkWell(
+              onTap: () => setState(() => familyValue = v),
+              child: Container(
+                height: 45,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: selected ? Colors.pink.shade50 : Colors.white,
+                  border: Border.all(
+                    color: selected
+                        ? ColorResources.primarycolor3
+                        : Colors.grey.shade400,
+                    width: 1.3,
+                  ),
+                ),
+                child: Text(
+                  v,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: selected
+                        ? ColorResources.primarycolor3
+                        : Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // ------------------- DROPDOWN -------------------
+  Widget _dropdown({
     required String? value,
-    required void Function(String?) onChanged,
+    required List<String> items,
+    required Function(String?) onChanged,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -283,16 +346,16 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
         borderRadius: BorderRadius.circular(10),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
+        child: DropdownButton(
+          isExpanded: true,
           value: value,
           hint: Text(
-            hint,
+            "Select",
             style: opensansMedium.copyWith(
               color: ColorResources.blackhalka,
               fontSize: 14,
             ),
           ),
-          isExpanded: true,
           items: items
               .map(
                 (e) => DropdownMenuItem(
@@ -313,9 +376,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
     );
   }
 
-  // ---------------- BOTTOM BUTTONS ----------------
-
-  Widget _bottomButtons() {
+  Widget _buttons() {
     return Row(
       children: [
         Expanded(
@@ -340,7 +401,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           child: GestureDetector(
             onTap: () {
               Get.to(
-                AadharVerificationScreen(),
+                MoreDetailsScreen(),
                 duration: Duration(
                   milliseconds: ApiConstants.screenTransitionTime,
                 ),
@@ -367,24 +428,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  // ---------------- COMMON DECORATION ----------------
-
-  InputDecoration _decoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey.shade400),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.pink),
-      ),
     );
   }
 }

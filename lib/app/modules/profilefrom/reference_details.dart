@@ -1,85 +1,60 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/profilefrom/religition_details.dart';
+import 'package:vivashri/app/modules/profilefrom/location_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 
-class AadharOtpScreen extends StatefulWidget {
-  const AadharOtpScreen({super.key});
+class ReferenceDetailsScreen extends StatefulWidget {
+  const ReferenceDetailsScreen({super.key});
 
   @override
-  State<AadharOtpScreen> createState() => _AadharOtpScreenState();
+  State<ReferenceDetailsScreen> createState() => _ReferenceDetailsScreenState();
 }
 
-class _AadharOtpScreenState extends State<AadharOtpScreen> {
-  final aadhaar1 = TextEditingController();
-  final aadhaar2 = TextEditingController();
-  final aadhaar3 = TextEditingController();
-  final aadhaar4 = TextEditingController();
-  late FocusNode fn1;
-  late FocusNode fn2;
-  late FocusNode fn3;
-  late FocusNode fn4;
+class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
+  String? relation;
 
   @override
-  void initState() {
-    super.initState();
-    fn1 = FocusNode();
-    fn2 = FocusNode();
-    fn3 = FocusNode();
-    fn4 = FocusNode();
-  }
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _header(),
+ Divider(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(left: 15, right: 15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _label("Relation:"),
+                    _dropdown(
+                      value: relation,
+                      onChanged: (v) => setState(() => relation = v),
+                      items: ["Father", "Mother", "Friend", "Sibling", "Other"],
+                    ),
 
-  @override
-  void dispose() {
-    fn1.dispose();
-    fn2.dispose();
-    fn3.dispose();
-    fn4.dispose();
-    aadhaar1.dispose();
-    aadhaar2.dispose();
-    aadhaar3.dispose();
-    aadhaar4.dispose();
-    super.dispose();
-  }
+                    _label("Name:"),
+                    _textField(),
 
-  // -------------------- Single Aadhaar Input Box --------------------
-  Widget _aadhaarBox(
-    TextEditingController controller,
-    FocusNode focusNode,
-    FocusNode? next,
-  ) {
-    return SizedBox(
-      width: 60,
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        keyboardType: TextInputType.number,
-        textAlign: TextAlign.center,
-        maxLength: 1,
-        onChanged: (value) {
-          if (value.length == 1 && next != null) {
-            FocusScope.of(context).requestFocus(next);
-          }
-          if (value.isEmpty) {
-            FocusScope.of(context).previousFocus();
-          }
-        },
-        decoration: InputDecoration(
-          counterText: "",
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(vertical: 1),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade400),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Colors.pink, width: 1.5),
-          ),
+                    _label("Email Id:"),
+                    _textField(),
+
+                    _label("Mobile No. :"),
+                    _textFieldmobile(),
+
+                    const SizedBox(height: 30),
+                    _buttons(),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -90,7 +65,7 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       child: Row(
         children: [
-          // LEFT SIDE — Auto Resize
+          // LEFT
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,7 +80,7 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
                   ),
                 ),
                 AutoSizeText(
-                  "Aadhaar Verification",
+                  "Religion Details",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -118,7 +93,7 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
             ),
           ),
 
-          // CENTER — Circle + Large Text
+          // CENTER
           Center(
             child: Column(
               children: [
@@ -129,43 +104,43 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
                       width: 60,
                       height: 60,
                       child: CircularProgressIndicator(
-                        value: 1.0,
+                        value: 0.50,
                         strokeWidth: 5,
                         color: ColorResources.primarycolor2,
                         backgroundColor: Colors.grey.shade300,
                       ),
                     ),
                     Text(
-                      "4 of 4",
-                      style: TextStyle(
+                      "6 of 18",
+                      style: opensansMedium.copyWith(
                         color: ColorResources.blackgrey,
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 8),
 
-                // 👉 FIXED SIZE (Bada hi rahega)
                 Text(
-                  "OTP Verification",
+                  "Reference Details",
                   style: opensansMedium.copyWith(
                     color: ColorResources.blackcolor,
-                    fontSize: 17,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
 
-          // RIGHT SIDE empty but balanced
+          // RIGHT
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 AutoSizeText(
-                  "",
+                  "Next Step:",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -174,7 +149,7 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
                   ),
                 ),
                 AutoSizeText(
-                  "",
+                  "Location Details",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -193,7 +168,7 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
 
   Widget _label(String text) {
     return Padding(
-      padding: const EdgeInsets.only(top: 5, bottom: 8),
+      padding: const EdgeInsets.only(top: 10, bottom: 8),
       child: RichText(
         text: TextSpan(
           children: [
@@ -218,8 +193,93 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
     );
   }
 
-  // -------------------- BOTTOM BUTTONS --------------------
-  Widget _bottomButtons() {
+  // ---------------- DROPDOWN ----------------
+  Widget _dropdown({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<String> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton(
+          value: value,
+          isExpanded: true,
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(
+                    e,
+                    style: opensansMedium.copyWith(
+                      color: ColorResources.blackhalka,    fontSize: 14,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  Widget _textFieldmobile() {
+    return TextField(
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 14,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.pink, width: 1.3),
+        ),
+      ),
+    );
+  }
+
+  // ---------------- TEXT FIELD ----------------
+  Widget _textField() {
+    return TextField(
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 14,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.pink, width: 1.3),
+        ),
+      ),
+    );
+  }
+
+  Widget _buttons() {
     return Row(
       children: [
         Expanded(
@@ -244,13 +304,12 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
           child: GestureDetector(
             onTap: () {
               Get.to(
-                ReligionDetailsScreen(),
+                LocationDetailsScreen(),
                 duration: Duration(
                   milliseconds: ApiConstants.screenTransitionTime,
                 ),
                 transition: Transition.rightToLeft,
               );
-              //
             },
             child: Container(
               height: 45,
@@ -262,7 +321,7 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
                 ),
               ),
               child: Text(
-                "Verify OTP",
+                "Continue",
                 style: opensansMedium.copyWith(
                   color: Colors.white,
                   fontSize: 18,
@@ -272,69 +331,6 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  // -------------------- MAIN UI --------------------
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _label("Enter One Time Password:"),
-                    SizedBox(height: 10),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _aadhaarBox(aadhaar1, fn1, fn2),
-                        _aadhaarBox(aadhaar2, fn2, fn3),
-                        _aadhaarBox(aadhaar3, fn3, fn4),
-                        _aadhaarBox(aadhaar4, fn4, null),
-                      ],
-                    ),
-
-                    const SizedBox(height: 30),
-                    Center(
-                      child: Column(
-                        children: [
-                          Text(
-                            "OTP has been sent to your register mobile",
-                            style: opensansMedium.copyWith(
-                              color: Colors.grey,
-                              fontSize: 13,
-                            ),
-                          ),
-                          Text(
-                            "Please enter otp to verify.",
-                            style: opensansMedium.copyWith(
-                              color: Colors.grey,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-                    _bottomButtons(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -1,20 +1,42 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/profilefrom/aadhar_number.dart';
+import 'package:vivashri/app/modules/profilefrom/upload_image.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 
-class ContactDetailsScreen extends StatefulWidget {
-  const ContactDetailsScreen({super.key});
+class EducationDetailsScreen extends StatefulWidget {
+  const EducationDetailsScreen({super.key});
 
   @override
-  State<ContactDetailsScreen> createState() => _ContactDetailsScreenState();
+  State<EducationDetailsScreen> createState() => _EducationDetailsScreenState();
 }
 
-class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
-  String? selectedReference;
+class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
+  String? highestDegree = "M.Com";
+  String? bachelorDegree = "B.Com";
+  String? workingWith;
+
+  final masterCollege = TextEditingController(text: "Hindu College, Delhi");
+  final bachelorCollege = TextEditingController(text: "Hindu College, Delhi");
+  final otherEducationDetails = TextEditingController();
+  final annualIncome = TextEditingController();
+  final occupation = TextEditingController();
+  final organizationName = TextEditingController();
+  final previousWork = TextEditingController();
+
+  @override
+  void dispose() {
+    masterCollege.dispose();
+    bachelorCollege.dispose();
+    otherEducationDetails.dispose();
+    annualIncome.dispose();
+    occupation.dispose();
+    organizationName.dispose();
+    previousWork.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,46 +47,83 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           children: [
             _header(),
             Divider(),
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(left: 15, right: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label("Contact Number:"),
-                    _readOnlyBox("+91 98739 85789"),
+                    // Highest Degree
+                    _label("Highest Degree:"),
+                    _dropdown(
+                      value: highestDegree,
+                      items: ["M.Com", "MBA", "MCA", "MA", "MSc"],
+                      onChanged: (v) => setState(() => highestDegree = v),
+                    ),
 
-                    _emailWithOtp(),
+                    // Master College Name
+                    _topLabel("Master College Name"),
+                    _textField(controller: masterCollege),
 
-                    _label("Insagram Id:"),
-                    _inputField(),
+                    // Bachelor Degree
+                    _label("Bachelor Degree:"),
+                    _dropdown(
+                      value: bachelorDegree,
+                      items: ["B.Com", "BBA", "BCA", "BA", "BSc"],
+                      onChanged: (v) => setState(() => bachelorDegree = v),
+                    ),
 
-                    _label("Facebook Id:"),
-                    _inputField(),
+                    // Bachelor College Name
+                    _topLabel("Bachelor College Name"),
+                    _textField(controller: bachelorCollege),
 
-                    const SizedBox(height: 10),
+                    // Other Education Details
+                    _topLabel("Add Other Education Details If Any"),
+                    _multilineField(controller: otherEducationDetails),
+
+                    const SizedBox(height: 15),
                     Text(
-                      "Reference:",
+                      "Profession Details:",
                       style: opensansMedium.copyWith(
                         fontSize: 16,
                         // fontWeight: FontWeight.bold,
                       ),
                     ),
 
-                    _label("Reference Details:"),
-                    _dropdownBox(
-                      hint: "Select",
-                      items: ["Friend", "Relative", "Advertisement"],
-                      value: selectedReference,
-                      onChanged: (v) => setState(() => selectedReference = v),
+                    // Annual Income
+                    _label("Annual Income:"),
+                    _textField(controller: annualIncome),
+
+                    // Working With
+                    _label("Working With:"),
+                    _dropdown(
+                      value: workingWith,
+                      items: [
+                        "Private Job",
+                        "Government Job",
+                        "Business",
+                        "Self Employed",
+                        "Not Working",
+                      ],
+                      onChanged: (v) => setState(() => workingWith = v),
                     ),
 
-                    _label("Other"),
-                    _inputField(),
+                    // Occupation
+                    _label("Occupation:"),
+                    _textField(controller: occupation),
+
+                    // Organization Name
+                    _label("Organization Name:"),
+                    _textField(controller: organizationName),
+
+                    // Previous Working Detail
+                    _topLabel("Add Previous Working Detail:"),
+                    _multilineField(controller: previousWork),
 
                     const SizedBox(height: 25),
-                    _bottomButtons(),
-                    const SizedBox(height: 40),
+                    _buttons(),
+                    const SizedBox(height: 50),
                   ],
                 ),
               ),
@@ -74,8 +133,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
       ),
     );
   }
-
-  // ---------------- TOP HEADER ----------------
 
   Widget _header() {
     return Container(
@@ -97,7 +154,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   ),
                 ),
                 AutoSizeText(
-                  "Basic Details",
+                  "More Details",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -128,10 +185,10 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                       ),
                     ),
                     Text(
-                      "2 of 4",
+                      "10 of 18",
                       style: opensansMedium.copyWith(
                         color: ColorResources.blackgrey,
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -140,7 +197,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                 SizedBox(height: 8),
 
                 Text(
-                  "Contact Details",
+                  "Education Details",
                   style: opensansMedium.copyWith(
                     color: ColorResources.blackcolor,
                     fontSize: 16,
@@ -166,7 +223,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   ),
                 ),
                 AutoSizeText(
-                  "Aadhaar Verification",
+                  "Upload Details",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -198,7 +255,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
             ),
             TextSpan(
               text: " *",
-              style: opensansMedium.copyWith(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.red, // ⭐ RED COLOR
@@ -209,72 +266,26 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
       ),
     );
   }
-  // ---------------- INPUT FIELD ----------------
 
-  Widget _inputField({int maxLines = 1}) {
-    return TextField(maxLines: maxLines, decoration: _decoration());
-  }
-
-  // ---------------- READONLY PHONE BOX ----------------
-
-  Widget _readOnlyBox(String text) {
-    return Container(
-      height: 55,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-      ),
+  Widget _topLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 8),
       child: Text(
         text,
         style: opensansMedium.copyWith(
-          fontSize: 17,
+          fontSize: 14,
           color: ColorResources.blackgrey,
         ),
       ),
     );
   }
 
-  // ---------------- EMAIL + OTP ----------------
-
-  Widget _emailWithOtp() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _label("Contact Email Address:"),
-                  Text(
-                    "Send OTP",
-                    style: opensansMedium.copyWith(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-              _inputField(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ---------------- DROPDOWN ----------------
-
-  Widget _dropdownBox({
-    required String hint,
-    required List<String> items,
+  // -------------------- DROPDOWN --------------------
+  Widget _dropdown({
     required String? value,
-    required void Function(String?) onChanged,
+    required List<String> items,
+    required Function(String?) onChanged,
+    String hint = "Select",
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -283,7 +294,8 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
         borderRadius: BorderRadius.circular(10),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
+        child: DropdownButton(
+          isExpanded: true,
           value: value,
           hint: Text(
             hint,
@@ -292,7 +304,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
               fontSize: 14,
             ),
           ),
-          isExpanded: true,
           items: items
               .map(
                 (e) => DropdownMenuItem(
@@ -313,9 +324,54 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
     );
   }
 
-  // ---------------- BOTTOM BUTTONS ----------------
+  // -------------------- TEXT FIELD --------------------
+  Widget _textField({required TextEditingController controller}) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 14,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.pink),
+        ),
+      ),
+    );
+  }
 
-  Widget _bottomButtons() {
+  // -------------------- MULTILINE FIELD --------------------
+  Widget _multilineField({required TextEditingController controller}) {
+    return TextField(
+      controller: controller,
+      maxLines: 4,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 14,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.pink),
+        ),
+      ),
+    );
+  }
+
+  Widget _buttons() {
     return Row(
       children: [
         Expanded(
@@ -340,7 +396,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           child: GestureDetector(
             onTap: () {
               Get.to(
-                AadharVerificationScreen(),
+                UploadPhotoScreen(),
                 duration: Duration(
                   milliseconds: ApiConstants.screenTransitionTime,
                 ),
@@ -367,24 +423,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  // ---------------- COMMON DECORATION ----------------
-
-  InputDecoration _decoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey.shade400),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.pink),
-      ),
     );
   }
 }

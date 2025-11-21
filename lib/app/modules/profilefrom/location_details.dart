@@ -1,21 +1,60 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/profilefrom/aadhar_number.dart';
+import 'package:vivashri/app/modules/profilefrom/family_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 
-class ContactDetailsScreen extends StatefulWidget {
-  const ContactDetailsScreen({super.key});
+class LocationDetailsScreen extends StatefulWidget {
+  const LocationDetailsScreen({super.key});
 
   @override
-  State<ContactDetailsScreen> createState() => _ContactDetailsScreenState();
+  State<LocationDetailsScreen> createState() => _LocationDetailsScreenState();
 }
 
-class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
-  String? selectedReference;
+class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
+  // Dropdown values
+  String? nationality;
+  String? residenceType;
+  String? permanentHouse;
 
+  String? pState;
+  String? pCity;
+
+  String? tState;
+  String? tCity;
+
+  bool sameFill = false;
+
+  // Controllers
+  final pLandmark = TextEditingController();
+  final pPincode = TextEditingController();
+
+  final tLandmark = TextEditingController();
+  final tPincode = TextEditingController();
+
+  // ----------------- SAME FILL FUNCTION -----------------
+  void fillTemporaryAddress() {
+    if (sameFill) {
+      tState = pState;
+      tCity = pCity;
+      tLandmark.text = pLandmark.text;
+      tPincode.text = pPincode.text;
+    }
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    pLandmark.dispose();
+    pPincode.dispose();
+    tLandmark.dispose();
+    tPincode.dispose();
+    super.dispose();
+  }
+
+  // ---------------- UI ----------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,39 +70,130 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label("Contact Number:"),
-                    _readOnlyBox("+91 98739 85789"),
+                    // Nationality
+                    _label("Nationality:"),
+                    _dropdown(
+                      value: nationality,
+                      items: ["Indian", "NRI", "Other"],
+                      onChanged: (v) => setState(() => nationality = v),
+                    ),
 
-                    _emailWithOtp(),
+                    // Residence
+                    _label("Residence Type:"),
+                    _dropdown(
+                      value: residenceType,
+                      items: ["Urban", "Rural", "Semi-Urban"],
+                      onChanged: (v) => setState(() => residenceType = v),
+                    ),
 
-                    _label("Insagram Id:"),
-                    _inputField(),
+                    // Permanent House Type
+                    _label("Permanent House Type:"),
+                    _dropdown(
+                      value: permanentHouse,
+                      items: ["Owned", "Rented", "Ancestral"],
+                      onChanged: (v) => setState(() => permanentHouse = v),
+                    ),
 
-                    _label("Facebook Id:"),
-                    _inputField(),
-
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 15),
                     Text(
-                      "Reference:",
+                      "Permanent Address Location:",
                       style: opensansMedium.copyWith(
                         fontSize: 16,
-                        // fontWeight: FontWeight.bold,
+                        color: ColorResources.blackhalka,
                       ),
                     ),
 
-                    _label("Reference Details:"),
-                    _dropdownBox(
-                      hint: "Select",
-                      items: ["Friend", "Relative", "Advertisement"],
-                      value: selectedReference,
-                      onChanged: (v) => setState(() => selectedReference = v),
+                    _label("State:"),
+                    _dropdown(
+                      value: pState,
+                      items: ["Gujarat", "Delhi", "UP", "Maharashtra"],
+                      onChanged: (v) {
+                        pState = v;
+                        fillTemporaryAddress();
+                      },
                     ),
 
-                    _label("Other"),
-                    _inputField(),
+                    _label("City:"),
+                    _dropdown(
+                      value: pCity,
+                      items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
+                      onChanged: (v) {
+                        pCity = v;
+                        fillTemporaryAddress();
+                      },
+                    ),
 
-                    const SizedBox(height: 25),
-                    _bottomButtons(),
+                    _label("Landmark/Remarks"),
+                    _textField(
+                      controller: pLandmark,
+                      onChanged: (v) => fillTemporaryAddress(),
+                    ),
+
+                    _label("Pin code / zip code:"),
+                    _textField(
+                      controller: pPincode,
+                      keyboard: TextInputType.number,
+                      onChanged: (v) => fillTemporaryAddress(),
+                    ),
+
+                    const SizedBox(height: 20),
+                    Text(
+                      "Temporary Address Location:",
+                      style: opensansMedium.copyWith(
+                        fontSize: 16,
+                        color: ColorResources.blackhalka,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // SAME FILL CHECKBOX
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: sameFill,
+                          activeColor: Colors.pink,
+                          onChanged: (v) {
+                            setState(() {
+                              sameFill = v!;
+                              fillTemporaryAddress();
+                            });
+                          },
+                        ),
+                        const Text("Same Fill", style: TextStyle(fontSize: 16)),
+                      ],
+                    ),
+
+                    // TEMPORARY FIELDS
+                    _label("State:"),
+                    _dropdown(
+                      value: tState,
+                      items: ["Gujarat", "Delhi", "UP", "Maharashtra"],
+                      onChanged: sameFill
+                          ? null
+                          : (v) => setState(() => tState = v),
+                    ),
+
+                    _label("City:"),
+                    _dropdown(
+                      value: tCity,
+                      items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
+                      onChanged: sameFill
+                          ? null
+                          : (v) => setState(() => tCity = v),
+                    ),
+
+                    _label("Landmark/Remarks"),
+                    _textField(controller: tLandmark, enabled: !sameFill),
+
+                    _label("Pin code / zip code:"),
+                    _textField(
+                      controller: tPincode,
+                      keyboard: TextInputType.number,
+                      enabled: !sameFill,
+                    ),
+
+                    const SizedBox(height: 30),
+                    _buttons(),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -74,8 +204,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
       ),
     );
   }
-
-  // ---------------- TOP HEADER ----------------
 
   Widget _header() {
     return Container(
@@ -97,7 +225,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   ),
                 ),
                 AutoSizeText(
-                  "Basic Details",
+                  "Reference Details",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -128,7 +256,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                       ),
                     ),
                     Text(
-                      "2 of 4",
+                      "7 of 18",
                       style: opensansMedium.copyWith(
                         color: ColorResources.blackgrey,
                         fontSize: 15,
@@ -140,7 +268,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                 SizedBox(height: 8),
 
                 Text(
-                  "Contact Details",
+                  "Location Details",
                   style: opensansMedium.copyWith(
                     color: ColorResources.blackcolor,
                     fontSize: 16,
@@ -166,7 +294,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   ),
                 ),
                 AutoSizeText(
-                  "Aadhaar Verification",
+                  "Family Details",
                   maxLines: 1,
                   minFontSize: 8,
                   maxFontSize: 14,
@@ -198,7 +326,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
             ),
             TextSpan(
               text: " *",
-              style: opensansMedium.copyWith(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.red, // ⭐ RED COLOR
@@ -209,72 +337,12 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
       ),
     );
   }
-  // ---------------- INPUT FIELD ----------------
 
-  Widget _inputField({int maxLines = 1}) {
-    return TextField(maxLines: maxLines, decoration: _decoration());
-  }
-
-  // ---------------- READONLY PHONE BOX ----------------
-
-  Widget _readOnlyBox(String text) {
-    return Container(
-      height: 55,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: opensansMedium.copyWith(
-          fontSize: 17,
-          color: ColorResources.blackgrey,
-        ),
-      ),
-    );
-  }
-
-  // ---------------- EMAIL + OTP ----------------
-
-  Widget _emailWithOtp() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _label("Contact Email Address:"),
-                  Text(
-                    "Send OTP",
-                    style: opensansMedium.copyWith(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-              _inputField(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ---------------- DROPDOWN ----------------
-
-  Widget _dropdownBox({
-    required String hint,
-    required List<String> items,
+  // ---------------- Dropdown ----------------
+  Widget _dropdown({
     required String? value,
-    required void Function(String?) onChanged,
+    required List<String> items,
+    required Function(String?)? onChanged,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -283,10 +351,10 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
         borderRadius: BorderRadius.circular(10),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
+        child: DropdownButton(
           value: value,
           hint: Text(
-            hint,
+            "Select",
             style: opensansMedium.copyWith(
               color: ColorResources.blackhalka,
               fontSize: 14,
@@ -313,9 +381,38 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
     );
   }
 
-  // ---------------- BOTTOM BUTTONS ----------------
+  // ---------------- TextField ----------------
+  Widget _textField({
+    required TextEditingController controller,
+    bool enabled = true,
+    TextInputType keyboard = TextInputType.text,
+    void Function(String)? onChanged,
+  }) {
+    return TextField(
+      controller: controller,
+      enabled: enabled,
+      keyboardType: keyboard,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: enabled ? Colors.white : Colors.grey.shade200,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 14,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: ColorResources.primarycolor),
+        ),
+      ),
+    );
+  }
 
-  Widget _bottomButtons() {
+  Widget _buttons() {
     return Row(
       children: [
         Expanded(
@@ -340,7 +437,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           child: GestureDetector(
             onTap: () {
               Get.to(
-                AadharVerificationScreen(),
+                FamilyDetailsScreen(),
                 duration: Duration(
                   milliseconds: ApiConstants.screenTransitionTime,
                 ),
@@ -367,24 +464,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  // ---------------- COMMON DECORATION ----------------
-
-  InputDecoration _decoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey.shade400),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.pink),
-      ),
     );
   }
 }

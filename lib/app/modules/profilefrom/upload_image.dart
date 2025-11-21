@@ -1,0 +1,387 @@
+import 'dart:io';
+
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/style.dart';
+
+class UploadPhotoScreen extends StatefulWidget {
+  const UploadPhotoScreen({super.key});
+
+  @override
+  State<UploadPhotoScreen> createState() => _UploadPhotoScreenState();
+}
+
+class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
+  File? pickedImage;
+
+  Future<void> pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+
+    if (file != null) {
+      setState(() {
+        pickedImage = File(file.path);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      body: SafeArea(
+        child: Column(
+          children: [
+            _header(),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // ------------ TOP INFO ROW ------------
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _infoBox("10 MB", "Maximum image\nUpload size"),
+                        _infoBox(
+                          "576x576",
+                          "Recommended\ndimensions (in pixel)",
+                        ),
+                        _infoBox("01", "Photo 1 is\nmandatory."),
+                      ],
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    // ------------ Upload Box Label ------------
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Upload Image",
+                        style: opensansMedium.copyWith(
+                          fontSize: 15,
+
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // ------------ DOTTED BOX ------------
+                    _uploadBox(),
+
+                    const SizedBox(height: 15),
+                    _buttons(),
+
+                    const SizedBox(height: 30),
+
+                    // ------------ TIPS TEXT ------------
+                    Text(
+                      "Few tips to upload pics",
+                      style: opensansMedium.copyWith(
+                        fontSize: 16,
+
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Avoid the following photos to highlight your\nprofile better",
+                      textAlign: TextAlign.center,
+                      style: opensansMedium.copyWith(
+                        fontSize: 13,
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // ------------ TIPS IMAGES ROWS ------------
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _tipExample("Blur Photo", "assets/images/tips1 1.png"),
+                        _tipExample("Side Photo", "assets/images/tips2 1.png"),
+                      ],
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _tipExample(
+                          "Copyright Photo",
+                          "assets/images/tips4 1.png",
+                        ),
+                        _tipExample("Group Photo", "assets/images/tips4 1.png"),
+                      ],
+                    ),
+
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _header() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+      child: Row(
+        children: [
+          // LEFT
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AutoSizeText(
+                  "Prev Step:",
+                  maxLines: 1,
+                  minFontSize: 8,
+                  maxFontSize: 14,
+                  style: opensansBold.copyWith(
+                    color: ColorResources.primarycolor,
+                  ),
+                ),
+                AutoSizeText(
+                  "Education Details",
+                  maxLines: 1,
+                  minFontSize: 8,
+                  maxFontSize: 14,
+                  style: opensansBold.copyWith(
+                    color: ColorResources.primarycolor2,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // CENTER
+          Center(
+            child: Column(
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 60,
+                      height: 60,
+                      child: CircularProgressIndicator(
+                        value: 0.50,
+                        strokeWidth: 5,
+                        color: ColorResources.primarycolor2,
+                        backgroundColor: Colors.grey.shade300,
+                      ),
+                    ),
+                    Text(
+                      "10 of 18",
+                      style: opensansMedium.copyWith(
+                        color: ColorResources.blackgrey,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+
+                Text(
+                  "Upload Photo",
+                  style: opensansMedium.copyWith(
+                    color: ColorResources.blackcolor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // RIGHT
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                AutoSizeText(
+                  "Next Step:",
+                  maxLines: 1,
+                  minFontSize: 8,
+                  maxFontSize: 14,
+                  style: opensansBold.copyWith(
+                    color: ColorResources.primarycolor,
+                  ),
+                ),
+                AutoSizeText(
+                  "Partner’s Details",
+                  maxLines: 1,
+                  minFontSize: 8,
+                  maxFontSize: 14,
+                  style: opensansBold.copyWith(
+                    color: ColorResources.primarycolor2,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buttons() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 45,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: ColorResources.halkapink,
+            ),
+            child: Text(
+              "SKIP",
+              style: opensansMedium.copyWith(
+                color: ColorResources.primarycolor2,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              // Get.to(
+              //   UploadPhotoScreen(),
+              //   duration: Duration(
+              //     milliseconds: ApiConstants.screenTransitionTime,
+              //   ),
+              //   transition: Transition.rightToLeft,
+              // );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFBE266B), Color(0xFFEB1D7B)],
+                ),
+              ),
+              child: Text(
+                "Continue",
+                style: opensansMedium.copyWith(
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------- INFO BOX ----------------
+  Widget _infoBox(String big, String small) {
+    return Column(
+      children: [
+        Text(
+          big,
+          style: opensansMedium.copyWith(fontSize: 18, color: Colors.red),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          small,
+          textAlign: TextAlign.center,
+          style: opensansMedium.copyWith(fontSize: 12, color: Colors.red),
+        ),
+      ],
+    );
+  }
+
+  // ---------------- UPLOAD DOTTED BOX ----------------
+  Widget _uploadBox() {
+    return GestureDetector(
+      onTap: () {
+        pickImage();
+      },
+      child: DottedBorder(
+        options: RoundedRectDottedBorderOptions(
+          radius: Radius.circular(15),
+          strokeWidth: 1,
+          dashPattern: [8, 6],
+          color: Colors.grey,
+        ),
+        // color: Colors.grey,
+        // strokeWidth: 1.3,
+        // dashPattern: const [6, 4],
+        // borderType: BorderType.RRect,
+        // radius: const Radius.circular(15),
+        child: Container(
+          height: 220,
+          width: double.infinity,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              pickedImage == null
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset('assets/images/imagebackk.png', height: 50),
+                        SizedBox(height: 10),
+                        Text(
+                          "Select File",
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      ],
+                    )
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(pickedImage!, fit: BoxFit.cover),
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------- TIPS IMAGE ----------------
+  Widget _tipExample(String label, String assetPath) {
+    return Column(
+      children: [
+        Container(
+          height: 85,
+          width: 85,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.shade200,
+          ),
+          child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: opensansMedium.copyWith(fontSize: 14, color: Colors.black87),
+        ),
+      ],
+    );
+  }
+}

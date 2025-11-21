@@ -248,7 +248,7 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
             TextSpan(
               text: text,
               style: opensansMedium.copyWith(
-                fontSize: 15,
+                fontSize: 14,
                 color: ColorResources.blackgrey,
               ),
             ),
@@ -287,7 +287,10 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         child: DropdownButton<String>(
           hint: Text(
             hint,
-            style: opensansMedium.copyWith(color: ColorResources.blackhalka),
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
           ),
           value: value,
           isExpanded: true,
@@ -300,6 +303,7 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                     e,
                     style: opensansMedium.copyWith(
                       color: ColorResources.blackhalka,
+                      fontSize: 14,
                     ),
                   ),
                 ),
@@ -354,7 +358,7 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         child: Text(
           text,
           style: opensansMedium.copyWith(
-            fontSize: 15,
+            fontSize: 14,
             color: selected ? ColorResources.primarycolor3 : Colors.black87,
             // fontWeight: FontWeight.w600,
           ),
