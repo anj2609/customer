@@ -27,7 +27,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
         child: Column(
           children: [
             _header(),
- Divider(),
+            Divider(),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(left: 15, right: 15),
@@ -125,7 +125,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                       width: 60,
                       height: 60,
                       child: CircularProgressIndicator(
-                        value: 0.50,
+                        value: 0.08,
                         strokeWidth: 5,
                         color: ColorResources.primarycolor2,
                         backgroundColor: Colors.grey.shade300,
@@ -135,7 +135,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                       "5 of 18",
                       style: opensansMedium.copyWith(
                         color: ColorResources.blackgrey,
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -230,9 +230,13 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
         child: DropdownButton(
           value: value,
           isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
           hint: Text(
             "Select",
-            style: opensansMedium.copyWith(color: ColorResources.blackhalka,    fontSize: 14,),
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
           ),
           items: items
               .map(
@@ -241,7 +245,8 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                   child: Text(
                     e,
                     style: opensansMedium.copyWith(
-                      color: ColorResources.blackhalka,    fontSize: 14,
+                      color: ColorResources.blackhalka,
+                      fontSize: 14,
                     ),
                   ),
                 ),
@@ -259,7 +264,8 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
       width: double.infinity,
       height: 40,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        border: Border.all(color: Colors.grey.shade400),
+        // color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
@@ -279,7 +285,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 15,
-          vertical: 14,
+          vertical: 12,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

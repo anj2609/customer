@@ -213,7 +213,7 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
                       width: 60,
                       height: 60,
                       child: CircularProgressIndicator(
-                        value: 0.50,
+                        value: 0.40,
                         strokeWidth: 5,
                         color: ColorResources.primarycolor2,
                         backgroundColor: Colors.grey.shade300,
@@ -223,7 +223,7 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
                       "9 of 18",
                       style: opensansMedium.copyWith(
                         color: ColorResources.blackgrey,
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -349,9 +349,9 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
                   ),
                   child: Text(
                     hobby,
-                    style: TextStyle(
+                    style: opensansMedium.copyWith(
                       fontSize: 14,
-                      fontWeight: FontWeight.w600,
+
                       color: selected
                           ? ColorResources.primarycolor3
                           : Colors.black87,
@@ -381,7 +381,7 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton(
-          isExpanded: true,
+          isExpanded: true, icon: Icon(Icons.keyboard_arrow_down),
           value: value,
           hint: Text(
             hint,

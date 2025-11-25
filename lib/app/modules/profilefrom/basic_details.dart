@@ -26,120 +26,144 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
   String gender = "";
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.red,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-    );
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+ 
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopHeader(),
-            Divider(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _label("Create profile for:"),
-                    _dropDown(
-                      hint: "Select",
-                      value: selectedProfileFor,
-                      onChanged: (v) => setState(() => selectedProfileFor = v),
-                      items: [
-                        "Self",
-                        "Son",
-                        "Daughter",
-                        "Brother",
-                        "Sister",
-                        "Relative/Friend",
-                      ],
-                    ),
-                    _label("Gender:"),
-                    _genderButtons(),
-                    _label("Name:"),
-                    _textField(),
-
-                    _label("Marital Status:"),
-                    _dropDown(
-                      hint: "Select",
-                      value: selectedMaritalStatus,
-                      onChanged: (v) =>
-                          setState(() => selectedMaritalStatus = v),
-                      items: ["Single", "Married", "Divorced"],
-                    ),
-
-                    _label("State:"),
-                    _dropDown(
-                      hint: "Select",
-                      value: selectedState,
-                      onChanged: (v) => setState(() => selectedState = v),
-                      items: ["Gujarat", "Maharashtra", "Punjab"],
-                    ),
-
-                    _label("Date of Birth:"),
-                    Row(
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _buildTopHeader(),
+                Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: _dropDown(
-                            hint: "Date",
-                            value: selectedDay,
-                            onChanged: (v) => setState(() => selectedDay = v),
-                            items: List.generate(31, (i) => "${i + 1}"),
-                          ),
+                        _label("Create profile for:"),
+                        _dropDown(
+                          hint: "Select",
+                          value: selectedProfileFor,
+                          onChanged: (v) =>
+                              setState(() => selectedProfileFor = v),
+                          items: [
+                            "Self",
+                            "Son",
+                            "Daughter",
+                            "Brother",
+                            "Sister",
+                            "Relative/Friend",
+                          ],
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _dropDown(
-                            hint: "Months",
-                            value: selectedMonth,
-                            onChanged: (v) => setState(() => selectedMonth = v),
-                            items: [
-                              "Jan",
-                              "Feb",
-                              "Mar",
-                              "Apr",
-                              "May",
-                              "Jun",
-                              "Jul",
-                              "Aug",
-                              "Sep",
-                              "Oct",
-                              "Nov",
-                              "Dec",
-                            ],
-                          ),
+                        _label("Gender:"),
+                        _genderButtons(),
+                        _label("Name:"),
+                        _textField(),
+
+                        _label("Marital Status:"),
+                        _dropDown(
+                          hint: "Select",
+                          value: selectedMaritalStatus,
+                          onChanged: (v) =>
+                              setState(() => selectedMaritalStatus = v),
+                          items: ["Single", "Married", "Divorced"],
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _dropDown(
-                            hint: "Year",
-                            value: selectedYear,
-                            onChanged: (v) => setState(() => selectedYear = v),
-                            items: List.generate(60, (i) => "${1980 + i}"),
-                          ),
+
+                        _label("State:"),
+                        _dropDown(
+                          hint: "Select",
+                          value: selectedState,
+                          onChanged: (v) => setState(() => selectedState = v),
+                          items: ["Gujarat", "Maharashtra", "Punjab"],
                         ),
+
+                        _label("Date of Birth:"),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _dropDown(
+                                hint: "Date",
+                                value: selectedDay,
+                                onChanged: (v) =>
+                                    setState(() => selectedDay = v),
+                                items: List.generate(31, (i) => "${i + 1}"),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _dropDown(
+                                hint: "Months",
+                                value: selectedMonth,
+                                onChanged: (v) =>
+                                    setState(() => selectedMonth = v),
+                                items: [
+                                  "Jan",
+                                  "Feb",
+                                  "Mar",
+                                  "Apr",
+                                  "May",
+                                  "Jun",
+                                  "Jul",
+                                  "Aug",
+                                  "Sep",
+                                  "Oct",
+                                  "Nov",
+                                  "Dec",
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _dropDown(
+                                hint: "Year",
+                                value: selectedYear,
+                                onChanged: (v) =>
+                                    setState(() => selectedYear = v),
+                                items: List.generate(60, (i) => "${1980 + i}"),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        _label("About:"),
+                        _textField(maxLines: 4),
+
+                        const SizedBox(height: 25),
+                        _continueButton(),
+                        const SizedBox(height: 40),
                       ],
                     ),
-
-                    _label("About:"),
-                    _textField(maxLines: 4),
-
-                    const SizedBox(height: 25),
-                    _continueButton(),
-                    const SizedBox(height: 40),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }
@@ -153,14 +177,17 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         children: [
           // LEFT BACK BUTTON
           Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: InkWell(
-                onTap: () => Navigator.pop(context),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: ColorResources.blackcolor,
-                  size: 28,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 30),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: ColorResources.blackcolor,
+                    size: 28,
+                  ),
                 ),
               ),
             ),

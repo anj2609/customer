@@ -249,7 +249,7 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
                       width: 60,
                       height: 60,
                       child: CircularProgressIndicator(
-                        value: 0.50,
+                        value: 0.25,
                         strokeWidth: 5,
                         color: ColorResources.primarycolor2,
                         backgroundColor: Colors.grey.shade300,
@@ -361,6 +361,7 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
             ),
           ),
           isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
           items: items
               .map(
                 (e) => DropdownMenuItem(

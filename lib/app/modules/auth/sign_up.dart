@@ -136,7 +136,7 @@ class SignUpScreen extends StatelessWidget {
                           );
                         },
                         child: Container(
-                          height: 55,
+                          height: 50,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             gradient: const LinearGradient(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:vivashri/app/modules/profilefrom/aadhar_number.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
@@ -219,12 +220,12 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
 
   Widget _readOnlyBox(String text) {
     return Container(
-      height: 55,
+      height: 50,
       alignment: Alignment.centerLeft,
       padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         text,
@@ -293,6 +294,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
             ),
           ),
           isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
           items: items
               .map(
                 (e) => DropdownMenuItem(
@@ -319,18 +321,29 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                MainNavigation(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),

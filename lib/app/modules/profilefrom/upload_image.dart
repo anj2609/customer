@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:vivashri/app/modules/profilefrom/partner_qualities.dart';
 import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 
 class UploadPhotoScreen extends StatefulWidget {
@@ -40,7 +43,7 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
 
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.only(left: 15, right: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -77,7 +80,7 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
                     _uploadBox(),
 
                     const SizedBox(height: 15),
-                    _buttons(),
+                    pickedImage == null ? _uploadimage() : _buttons(),
 
                     const SizedBox(height: 30),
 
@@ -179,17 +182,17 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
                       width: 60,
                       height: 60,
                       child: CircularProgressIndicator(
-                        value: 0.50,
+                        value: 0.56,
                         strokeWidth: 5,
                         color: ColorResources.primarycolor2,
                         backgroundColor: Colors.grey.shade300,
                       ),
                     ),
                     Text(
-                      "10 of 18",
+                      "11 of 18",
                       style: opensansMedium.copyWith(
                         color: ColorResources.blackgrey,
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -265,13 +268,13 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              // Get.to(
-              //   UploadPhotoScreen(),
-              //   duration: Duration(
-              //     milliseconds: ApiConstants.screenTransitionTime,
-              //   ),
-              //   transition: Transition.rightToLeft,
-              // );
+              Get.to(
+                PartnerQualitiesScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
             },
             child: Container(
               height: 45,
@@ -284,6 +287,37 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
               ),
               child: Text(
                 "Continue",
+                style: opensansMedium.copyWith(
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _uploadimage() {
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              pickImage();
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFBE266B), Color(0xFFEB1D7B)],
+                ),
+              ),
+              child: Text(
+                "Upload",
                 style: opensansMedium.copyWith(
                   color: Colors.white,
                   fontSize: 18,

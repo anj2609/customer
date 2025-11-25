@@ -24,7 +24,7 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
         child: Column(
           children: [
             _header(),
- Divider(),
+            Divider(),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(left: 15, right: 15),
@@ -104,7 +104,7 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
                       width: 60,
                       height: 60,
                       child: CircularProgressIndicator(
-                        value: 0.50,
+                        value: 0.16,
                         strokeWidth: 5,
                         color: ColorResources.primarycolor2,
                         backgroundColor: Colors.grey.shade300,
@@ -209,6 +209,7 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
         child: DropdownButton(
           value: value,
           isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
           hint: Text(
             "Select",
             style: opensansMedium.copyWith(
@@ -223,7 +224,8 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
                   child: Text(
                     e,
                     style: opensansMedium.copyWith(
-                      color: ColorResources.blackhalka,    fontSize: 14,
+                      color: ColorResources.blackhalka,
+                      fontSize: 14,
                     ),
                   ),
                 ),

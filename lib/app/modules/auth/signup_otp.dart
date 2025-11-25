@@ -144,7 +144,7 @@ class SignUpOtpScreen extends StatelessWidget {
 
                       // Submit OTP Button
                       Container(
-                        height: 55,
+                        height: 50,
                         width: double.infinity,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),

@@ -178,7 +178,7 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
                       width: 60,
                       height: 60,
                       child: CircularProgressIndicator(
-                        value: 0.50,
+                        value: 0.48,
                         strokeWidth: 5,
                         color: ColorResources.primarycolor2,
                         backgroundColor: Colors.grey.shade300,
@@ -188,7 +188,7 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
                       "10 of 18",
                       style: opensansMedium.copyWith(
                         color: ColorResources.blackgrey,
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -296,7 +296,7 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton(
           isExpanded: true,
-          value: value,
+          value: value, icon: Icon(Icons.keyboard_arrow_down),
           hint: Text(
             hint,
             style: opensansMedium.copyWith(
@@ -333,7 +333,7 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 10,
-          vertical: 14,
+          vertical: 12,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -357,7 +357,7 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 15,
-          vertical: 14,
+          vertical: 12,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

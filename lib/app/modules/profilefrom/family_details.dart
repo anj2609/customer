@@ -153,7 +153,7 @@ class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
                       width: 60,
                       height: 60,
                       child: CircularProgressIndicator(
-                        value: 0.50,
+                        value: 0.33,
                         strokeWidth: 5,
                         color: ColorResources.primarycolor2,
                         backgroundColor: Colors.grey.shade300,
@@ -163,7 +163,7 @@ class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
                       "8 of 18",
                       style: opensansMedium.copyWith(
                         color: ColorResources.blackgrey,
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -348,6 +348,7 @@ class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton(
           isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
           value: value,
           hint: Text(
             "Select",
