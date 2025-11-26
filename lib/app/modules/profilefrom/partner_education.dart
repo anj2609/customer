@@ -25,125 +25,147 @@ class _PartnerEducationCareerScreenState
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
 
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipOval(
-                          child: Image.asset(
-                            "assets/images/femalee.png",
-                            height: 45,
-                            width: 45,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            "Provide Partner’s education & career details:",
-                            style: opensansMedium.copyWith(
-                              fontSize: 16,
-
-                              color: Colors.black87,
+                        Row(
+                          children: [
+                            ClipOval(
+                              child: Image.asset(
+                                "assets/images/femalee.png",
+                                height: 45,
+                                width: 45,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                "Provide Partner’s education & career details:",
+                                style: opensansMedium.copyWith(
+                                  fontSize: 16,
+
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
+
+                        const SizedBox(height: 10),
+
+                        // ---------------- HIGHEST QUALIFICATION ----------------
+                        _label("Highest Qualification:"),
+                        _dropdown(
+                          value: highestQualification,
+                          items: ["BA", "B.Com", "BSc", "MBA", "M.Com", "MSc"],
+                          onChanged: (v) =>
+                              setState(() => highestQualification = v),
+                        ),
+
+                        // ---------------- PROFESSIONAL QUALIFICATION ----------------
+                        _label("Professional Qualification:"),
+                        _dropdown(
+                          value: professionalQualification,
+                          items: ["CA", "CS", "Doctor", "Engineer", "Lawyer"],
+                          onChanged: (v) =>
+                              setState(() => professionalQualification = v),
+                        ),
+
+                        // ---------------- OCCUPATION ----------------
+                        _label("Occupation:"),
+                        _dropdown(
+                          value: occupation,
+                          items: [
+                            "Business",
+                            "Job",
+                            "Government Job",
+                            "Freelancer",
+                          ],
+                          onChanged: (v) => setState(() => occupation = v),
+                        ),
+
+                        // ---------------- WORKING AS ----------------
+                        _label("Working as:"),
+                        _dropdown(
+                          value: workingAs,
+                          items: [
+                            "Manager",
+                            "Executive",
+                            "Owner",
+                            "Self-employed",
+                          ],
+                          onChanged: (v) => setState(() => workingAs = v),
+                        ),
+
+                        // ---------------- ANNUAL INCOME ----------------
+                        _label("Annual Income Range:"),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _dropdown(
+                                value: incomeFrom,
+                                items: [
+                                  "1 Lakh",
+                                  "2 Lakh",
+                                  "5 Lakh",
+                                  "8 Lakh",
+                                  "10 Lakh",
+                                ],
+                                onChanged: (v) =>
+                                    setState(() => incomeFrom = v),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Text("To"),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _dropdown(
+                                value: incomeTo,
+                                items: [
+                                  "5 Lakh",
+                                  "10 Lakh",
+                                  "15 Lakh",
+                                  "20 Lakh",
+                                ],
+                                onChanged: (v) => setState(() => incomeTo = v),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 40),
+                        _buttons(),
+                        const SizedBox(height: 50),
                       ],
                     ),
-
-                    const SizedBox(height: 10),
-
-                    // ---------------- HIGHEST QUALIFICATION ----------------
-                    _label("Highest Qualification:"),
-                    _dropdown(
-                      value: highestQualification,
-                      items: ["BA", "B.Com", "BSc", "MBA", "M.Com", "MSc"],
-                      onChanged: (v) =>
-                          setState(() => highestQualification = v),
-                    ),
-
-                    // ---------------- PROFESSIONAL QUALIFICATION ----------------
-                    _label("Professional Qualification:"),
-                    _dropdown(
-                      value: professionalQualification,
-                      items: ["CA", "CS", "Doctor", "Engineer", "Lawyer"],
-                      onChanged: (v) =>
-                          setState(() => professionalQualification = v),
-                    ),
-
-                    // ---------------- OCCUPATION ----------------
-                    _label("Occupation:"),
-                    _dropdown(
-                      value: occupation,
-                      items: [
-                        "Business",
-                        "Job",
-                        "Government Job",
-                        "Freelancer",
-                      ],
-                      onChanged: (v) => setState(() => occupation = v),
-                    ),
-
-                    // ---------------- WORKING AS ----------------
-                    _label("Working as:"),
-                    _dropdown(
-                      value: workingAs,
-                      items: ["Manager", "Executive", "Owner", "Self-employed"],
-                      onChanged: (v) => setState(() => workingAs = v),
-                    ),
-
-                    // ---------------- ANNUAL INCOME ----------------
-                    _label("Annual Income Range:"),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _dropdown(
-                            value: incomeFrom,
-                            items: [
-                              "1 Lakh",
-                              "2 Lakh",
-                              "5 Lakh",
-                              "8 Lakh",
-                              "10 Lakh",
-                            ],
-                            onChanged: (v) => setState(() => incomeFrom = v),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text("To"),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _dropdown(
-                            value: incomeTo,
-                            items: ["5 Lakh", "10 Lakh", "15 Lakh", "20 Lakh"],
-                            onChanged: (v) => setState(() => incomeTo = v),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 40),
-                    _buttons(),
-                    const SizedBox(height: 50),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

@@ -23,93 +23,104 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
 
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-
-                    // ----------- Top Row with Icon and Title ----------
-                    Row(
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipOval(
-                          child: Image.asset(
-                            "assets/images/femalee.png",
-                            height: 45,
-                            width: 45,
-                            fit: BoxFit.cover,
+                        const SizedBox(height: 10),
+
+                        // ----------- Top Row with Icon and Title ----------
+                        Row(
+                          children: [
+                            ClipOval(
+                              child: Image.asset(
+                                "assets/images/femalee.png",
+                                height: 45,
+                                width: 45,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Partner’s preference detail:",
+                              style: opensansMedium.copyWith(
+                                fontSize: 16,
+
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        Text(
+                          "Partners Desired Qualities",
+                          style: opensansMedium.copyWith(
+                            fontSize: 14,
+
+                            color: ColorResources.blackgrey,
                           ),
                         ),
-                        const SizedBox(width: 12),
+
+                        const SizedBox(height: 10),
+
+                        _chips(qualities, selectedQualities),
+
+                        const SizedBox(height: 15),
                         Text(
-                          "Partner’s preference detail:",
+                          "Please provide your partner Hobbies\nor likings details:",
                           style: opensansMedium.copyWith(
                             fontSize: 16,
 
                             color: Colors.black87,
                           ),
                         ),
+
+                        const SizedBox(height: 10),
+                        Text(
+                          "Hobbies:",
+                          style: opensansMedium.copyWith(
+                            fontSize: 14,
+
+                            color: ColorResources.blackgrey,
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+                        _chips(hobbies, selectedPartnerHobbies),
+
+                        const SizedBox(height: 50),
+                        _buttons(),
+                        const SizedBox(height: 50),
                       ],
                     ),
-
-                    const SizedBox(height: 20),
-
-                    Text(
-                      "Partners Desired Qualities",
-                      style: opensansMedium.copyWith(
-                        fontSize: 14,
-
-                        color: ColorResources.blackgrey,
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    _chips(qualities, selectedQualities),
-
-                    const SizedBox(height: 15),
-                    Text(
-                      "Please provide your partner Hobbies\nor likings details:",
-                      style: opensansMedium.copyWith(
-                        fontSize: 16,
-
-                        color: Colors.black87,
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-                    Text(
-                      "Hobbies:",
-                      style: opensansMedium.copyWith(
-                        fontSize: 14,
-
-                        color: ColorResources.blackgrey,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-                    _chips(hobbies, selectedPartnerHobbies),
-
-                    const SizedBox(height: 50),
-                    _buttons(),
-                    const SizedBox(height: 50),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

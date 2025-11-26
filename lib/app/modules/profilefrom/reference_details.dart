@@ -18,44 +18,55 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+        final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _label("Relation:"),
-                    _dropdown(
-                      value: relation,
-                      onChanged: (v) => setState(() => relation = v),
-                      items: ["Father", "Mother", "Friend", "Sibling", "Other"],
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _label("Relation:"),
+                        _dropdown(
+                          value: relation,
+                          onChanged: (v) => setState(() => relation = v),
+                          items: ["Father", "Mother", "Friend", "Sibling", "Other"],
+                        ),
+          
+                        _label("Name:"),
+                        _textField(),
+          
+                        _label("Email Id:"),
+                        _textField(),
+          
+                        _label("Mobile No. :"),
+                        _textFieldmobile(),
+          
+                        const SizedBox(height: 30),
+                        _buttons(),
+                        const SizedBox(height: 40),
+                      ],
                     ),
-
-                    _label("Name:"),
-                    _textField(),
-
-                    _label("Email Id:"),
-                    _textField(),
-
-                    _label("Mobile No. :"),
-                    _textFieldmobile(),
-
-                    const SizedBox(height: 30),
-                    _buttons(),
-                    const SizedBox(height: 40),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+            Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

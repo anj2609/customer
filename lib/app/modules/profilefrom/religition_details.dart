@@ -21,62 +21,73 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+            final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _label("Religion:"),
-                    _dropdown(
-                      value: religion,
-                      onChanged: (v) => setState(() => religion = v),
-                      items: ["Hindu", "Muslim", "Sikh", "Christian", "Other"],
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _label("Religion:"),
+                        _dropdown(
+                          value: religion,
+                          onChanged: (v) => setState(() => religion = v),
+                          items: ["Hindu", "Muslim", "Sikh", "Christian", "Other"],
+                        ),
+          
+                        _label("Caste:"),
+                        _dropdown(
+                          value: caste,
+                          onChanged: (v) => setState(() => caste = v),
+                          items: ["Brahmin", "Rajput", "OBC", "SC", "ST"],
+                        ),
+          
+                        _label("Subcaste:"),
+                        _dropdown(
+                          value: subcaste,
+                          onChanged: (v) => setState(() => subcaste = v),
+                          items: ["Sub 1", "Sub 2", "Sub 3"],
+                        ),
+          
+                        _label("Gotra:"),
+                        _dropdown(
+                          value: gotra,
+                          onChanged: (v) => setState(() => gotra = v),
+                          items: ["Kashyap", "Bhardwaj", "Vashishth", "Other"],
+                        ),
+          
+                        const SizedBox(height: 10),
+                        _hintBox("This field will come when other selected"),
+          
+                        _label("Dosh:"),
+                        _textField(),
+          
+                        const SizedBox(height: 30),
+                        _buttons(),
+                        const SizedBox(height: 40),
+                      ],
                     ),
-
-                    _label("Caste:"),
-                    _dropdown(
-                      value: caste,
-                      onChanged: (v) => setState(() => caste = v),
-                      items: ["Brahmin", "Rajput", "OBC", "SC", "ST"],
-                    ),
-
-                    _label("Subcaste:"),
-                    _dropdown(
-                      value: subcaste,
-                      onChanged: (v) => setState(() => subcaste = v),
-                      items: ["Sub 1", "Sub 2", "Sub 3"],
-                    ),
-
-                    _label("Gotra:"),
-                    _dropdown(
-                      value: gotra,
-                      onChanged: (v) => setState(() => gotra = v),
-                      items: ["Kashyap", "Bhardwaj", "Vashishth", "Other"],
-                    ),
-
-                    const SizedBox(height: 10),
-                    _hintBox("This field will come when other selected"),
-
-                    _label("Dosh:"),
-                    _textField(),
-
-                    const SizedBox(height: 30),
-                    _buttons(),
-                    const SizedBox(height: 40),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+            Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

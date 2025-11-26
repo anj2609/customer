@@ -1,9 +1,15 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vivashri/app/modules/Deshboard/deshboard.dart';
 import 'package:vivashri/app/modules/chat/chatscreen.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/match/matchscreen.dart';
+import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/style.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -20,26 +26,81 @@ class _MainNavigationState extends State<MainNavigation> {
     MatchesScreen(),
     ConnectScreen(),
     ChatScreen(),
-    Placeholder(),
+    MembershipPlansPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          _pages[_currentIndex],
-          Container(
-            height: statusBarHeight,
-            width: double.infinity,
-            color: ColorResources.primarycolor2,
-          ),
-        ],
-      ),
+    return WillPopScope(
+      onWillPop: () async {
+        if (_currentIndex != 0) {
+          setState(() {
+            _currentIndex = 0;
+          });
+          return false;
+        }
 
-      bottomNavigationBar: _buildCustomBottomBar(),
+        bool shouldExit =
+            await showCupertinoDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return CupertinoAlertDialog(
+                  title: Text("Are you sure?"),
+                  content: Text("Do you want to exit the app?"),
+                  actions: <Widget>[
+                    CupertinoDialogAction(
+                      child: Text(
+                        "Cancel",
+                        style: opensansMedium.copyWith(color: Colors.blueGrey),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                    ),
+                    CupertinoDialogAction(
+                      child: Text(
+                        "Yes",
+                        style: opensansMedium.copyWith(
+                          color: ColorResources.primarycolor3,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                    ),
+                  ],
+                );
+              },
+            ) ??
+            false;
+
+        if (shouldExit) {
+          if (Platform.isAndroid) {
+            SystemNavigator.pop();
+          } else if (Platform.isIOS) {
+            exit(0);
+          }
+          return false;
+        }
+
+        return false;
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            _pages[_currentIndex],
+            Container(
+              height: statusBarHeight,
+              width: double.infinity,
+              color: ColorResources.primarycolor2,
+            ),
+          ],
+        ),
+
+        bottomNavigationBar: _buildCustomBottomBar(),
+      ),
     );
   }
 

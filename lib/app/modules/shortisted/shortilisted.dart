@@ -6,14 +6,14 @@ import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/widgets/drawer.dart';
 
-class MatchesScreen extends StatefulWidget {
-  const MatchesScreen({super.key});
+class ShortlistedScreen extends StatefulWidget {
+  const ShortlistedScreen({super.key});
 
   @override
-  State<MatchesScreen> createState() => _MatchesScreenState();
+  State<ShortlistedScreen> createState() => _ShortlistedScreenState();
 }
 
-class _MatchesScreenState extends State<MatchesScreen> {
+class _ShortlistedScreenState extends State<ShortlistedScreen> {
   int selectedFilter = 1;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -35,7 +35,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
               children: [
                 _buildTopBar(w),
 
-                _buildFilterBar(),
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.all(12),
@@ -88,7 +87,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              "Matches",
+              "Shortlisted",
               style: opensansMedium.copyWith(
                 fontSize: 17,
                 color: ColorResources.blackhalkaa,
@@ -211,7 +210,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.asset(
-                      "assets/images/imageback.png",
+                      "assets/images/Rectangle 77.png",
                       fit: BoxFit.cover,
                       width: double.infinity,
                     ),
@@ -326,6 +325,15 @@ class _MatchesScreenState extends State<MatchesScreen> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                Positioned(
+                  bottom: 50,
+
+                  right: 14,
+                  child: Image.asset(
+                    'assets/images/shortlist 2.png',
+                    height: 50,
                   ),
                 ),
               ],

@@ -27,84 +27,97 @@ class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _label("Family Type:"),
-                    _familyTypeButtons(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _label("Family Type:"),
+                        _familyTypeButtons(),
 
-                    _label("Family Value:"),
-                    _familyValueButtons(),
+                        _label("Family Value:"),
+                        _familyValueButtons(),
 
-                    _label("No. of Sister:"),
-                    _dropdown(
-                      value: noOfSister,
-                      items: ["0", "1", "2", "3", "4"],
-                      onChanged: (v) => setState(() => noOfSister = v),
+                        _label("No. of Sister:"),
+                        _dropdown(
+                          value: noOfSister,
+                          items: ["0", "1", "2", "3", "4"],
+                          onChanged: (v) => setState(() => noOfSister = v),
+                        ),
+
+                        _label("Married Sister:"),
+                        _dropdown(
+                          value: marriedSister,
+                          items: ["0", "1", "2", "3"],
+                          onChanged: (v) => setState(() => marriedSister = v),
+                        ),
+
+                        _label("No. of Brother:"),
+                        _dropdown(
+                          value: noOfBrother,
+                          items: ["0", "1", "2", "3"],
+                          onChanged: (v) => setState(() => noOfBrother = v),
+                        ),
+
+                        _label("Married Brother:"),
+                        _dropdown(
+                          value: marriedBrother,
+                          items: ["0", "1", "2", "3"],
+                          onChanged: (v) => setState(() => marriedBrother = v),
+                        ),
+
+                        _label("No. of Sister in Law:"),
+                        _dropdown(
+                          value: noOfSisterInLaw,
+                          items: ["0", "1", "2", "3"],
+                          onChanged: (v) => setState(() => noOfSisterInLaw = v),
+                        ),
+
+                        _label("No. of Brother in Law:"),
+                        _dropdown(
+                          value: noOfBrotherInLaw,
+                          items: ["0", "1", "2", "3"],
+                          onChanged: (v) =>
+                              setState(() => noOfBrotherInLaw = v),
+                        ),
+
+                        _label("Total Family Member:"),
+                        _dropdown(
+                          value: totalFamilyMember,
+                          items: ["1", "2", "3", "4", "5", "6", "7+"],
+                          onChanged: (v) =>
+                              setState(() => totalFamilyMember = v),
+                        ),
+
+                        const SizedBox(height: 30),
+                        _buttons(),
+                        const SizedBox(height: 50),
+                      ],
                     ),
-
-                    _label("Married Sister:"),
-                    _dropdown(
-                      value: marriedSister,
-                      items: ["0", "1", "2", "3"],
-                      onChanged: (v) => setState(() => marriedSister = v),
-                    ),
-
-                    _label("No. of Brother:"),
-                    _dropdown(
-                      value: noOfBrother,
-                      items: ["0", "1", "2", "3"],
-                      onChanged: (v) => setState(() => noOfBrother = v),
-                    ),
-
-                    _label("Married Brother:"),
-                    _dropdown(
-                      value: marriedBrother,
-                      items: ["0", "1", "2", "3"],
-                      onChanged: (v) => setState(() => marriedBrother = v),
-                    ),
-
-                    _label("No. of Sister in Law:"),
-                    _dropdown(
-                      value: noOfSisterInLaw,
-                      items: ["0", "1", "2", "3"],
-                      onChanged: (v) => setState(() => noOfSisterInLaw = v),
-                    ),
-
-                    _label("No. of Brother in Law:"),
-                    _dropdown(
-                      value: noOfBrotherInLaw,
-                      items: ["0", "1", "2", "3"],
-                      onChanged: (v) => setState(() => noOfBrotherInLaw = v),
-                    ),
-
-                    _label("Total Family Member:"),
-                    _dropdown(
-                      value: totalFamilyMember,
-                      items: ["1", "2", "3", "4", "5", "6", "7+"],
-                      onChanged: (v) => setState(() => totalFamilyMember = v),
-                    ),
-
-                    const SizedBox(height: 30),
-                    _buttons(),
-                    const SizedBox(height: 50),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

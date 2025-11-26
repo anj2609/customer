@@ -275,68 +275,79 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
   // -------------------- MAIN UI --------------------
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _label("Enter Aadhaar Number:"),
-                    SizedBox(height: 10),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _aadhaarBox(aadhaar1, fn1, fn2),
-                        _aadhaarBox(aadhaar2, fn2, fn3),
-                        _aadhaarBox(aadhaar3, fn3, null),
+                        _label("Enter Aadhaar Number:"),
+                        SizedBox(height: 10),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _aadhaarBox(aadhaar1, fn1, fn2),
+                            _aadhaarBox(aadhaar2, fn2, fn3),
+                            _aadhaarBox(aadhaar3, fn3, null),
+                          ],
+                        ),
+
+                        const SizedBox(height: 30),
+                        Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                "You will receive an 4 digit OTP",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.grey,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                "(One Time Password) with registered",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.grey,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                "Aadhaar Card",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.grey,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 40),
+                        _bottomButtons(),
                       ],
                     ),
-
-                    const SizedBox(height: 30),
-                    Center(
-                      child: Column(
-                        children: [
-                          Text(
-                            "You will receive an 4 digit OTP",
-                            style: opensansMedium.copyWith(
-                              color: Colors.grey,
-                              fontSize: 13,
-                            ),
-                          ),
-                          Text(
-                            "(One Time Password) with registered",
-                            style: opensansMedium.copyWith(
-                              color: Colors.grey,
-                              fontSize: 13,
-                            ),
-                          ),
-                          Text(
-                            "Aadhaar Card",
-                            style: opensansMedium.copyWith(
-                              color: Colors.grey,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-                    _bottomButtons(),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

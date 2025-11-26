@@ -41,130 +41,141 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+        final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
-
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ---------------- HOBBIES ----------------
-                    _label("Hobbies:"),
-                    _hobbiesScrollableBox(),
-
-                    // ---------------- DIET ----------------
-                    _label("Diet:"),
-                    _dropdown(
-                      value: diet,
-                      items: ["Veg", "Non-Veg", "Jain", "Vegan"],
-                      onChanged: (v) => setState(() => diet = v),
-                    ),
-
-                    // ---------------- TIME OF BIRTH ----------------
-                    _label("Time of Birth: *"),
-                    Row(
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
+          
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: _dropdown(
-                            value: null,
-                            hint: "Hour",
-                            items: ["01", "02", "03", "04", "05", "06", "07"],
-                            onChanged: (v) {},
-                          ),
+                        // ---------------- HOBBIES ----------------
+                        _label("Hobbies:"),
+                        _hobbiesScrollableBox(),
+          
+                        // ---------------- DIET ----------------
+                        _label("Diet:"),
+                        _dropdown(
+                          value: diet,
+                          items: ["Veg", "Non-Veg", "Jain", "Vegan"],
+                          onChanged: (v) => setState(() => diet = v),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _dropdown(
-                            value: null,
-                            hint: "Min",
-                            items: ["00", "10", "20", "30", "40", "50"],
-                            onChanged: (v) {},
-                          ),
+          
+                        // ---------------- TIME OF BIRTH ----------------
+                        _label("Time of Birth: *"),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _dropdown(
+                                value: null,
+                                hint: "Hour",
+                                items: ["01", "02", "03", "04", "05", "06", "07"],
+                                onChanged: (v) {},
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _dropdown(
+                                value: null,
+                                hint: "Min",
+                                items: ["00", "10", "20", "30", "40", "50"],
+                                onChanged: (v) {},
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _dropdown(
+                                value: null,
+                                hint: "Am",
+                                items: ["AM", "PM"],
+                                onChanged: (v) {},
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _dropdown(
-                            value: null,
-                            hint: "Am",
-                            items: ["AM", "PM"],
-                            onChanged: (v) {},
-                          ),
+          
+                        // ---------------- City of Birth ----------------
+                        _label("City of Birth: *"),
+                        _dropdown(
+                          value: cityOfBirth,
+                          items: ["Delhi", "Mumbai", "Ahmedabad"],
+                          onChanged: (v) => setState(() => cityOfBirth = v),
                         ),
+          
+                        // ---------------- Manglik ----------------
+                        _label("Manglik Status: *"),
+                        _manglikButtons(),
+          
+                        // ---------------- Weight ----------------
+                        _label("Weight (in Kg): *"),
+                        _dropdown(
+                          value: weight,
+                          items: ["40", "45", "50", "55", "60", "65", "70", "80"],
+                          onChanged: (v) => setState(() => weight = v),
+                        ),
+          
+                        // ---------------- Height ----------------
+                        _label("Height: *"),
+                        _dropdown(
+                          value: height,
+                          items: ["5.0", "5.2", "5.4", "5.6", "5.8", "6.0"],
+                          onChanged: (v) => setState(() => height = v),
+                        ),
+          
+                        // ---------------- Complexion ----------------
+                        _label("Complexion: *"),
+                        _dropdown(
+                          value: complexion,
+                          items: ["Fair", "Medium", "Dark"],
+                          onChanged: (v) => setState(() => complexion = v),
+                        ),
+          
+                        // ---------------- Health Info ----------------
+                        _label("Health Information: *"),
+                        _dropdown(
+                          value: healthInfo,
+                          items: ["Fit", "Average", "Weak"],
+                          onChanged: (v) => setState(() => healthInfo = v),
+                        ),
+          
+                        // ---------------- Disability ----------------
+                        _label("Any Disability: *"),
+                        _disabilityButtons(),
+          
+                        // ---------------- Blood Group ----------------
+                        _label("Blood Group: *"),
+                        _dropdown(
+                          value: bloodGroup,
+                          items: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+"],
+                          onChanged: (v) => setState(() => bloodGroup = v),
+                        ),
+          
+                        const SizedBox(height: 30),
+                        _buttons(),
+                        const SizedBox(height: 50),
                       ],
                     ),
-
-                    // ---------------- City of Birth ----------------
-                    _label("City of Birth: *"),
-                    _dropdown(
-                      value: cityOfBirth,
-                      items: ["Delhi", "Mumbai", "Ahmedabad"],
-                      onChanged: (v) => setState(() => cityOfBirth = v),
-                    ),
-
-                    // ---------------- Manglik ----------------
-                    _label("Manglik Status: *"),
-                    _manglikButtons(),
-
-                    // ---------------- Weight ----------------
-                    _label("Weight (in Kg): *"),
-                    _dropdown(
-                      value: weight,
-                      items: ["40", "45", "50", "55", "60", "65", "70", "80"],
-                      onChanged: (v) => setState(() => weight = v),
-                    ),
-
-                    // ---------------- Height ----------------
-                    _label("Height: *"),
-                    _dropdown(
-                      value: height,
-                      items: ["5.0", "5.2", "5.4", "5.6", "5.8", "6.0"],
-                      onChanged: (v) => setState(() => height = v),
-                    ),
-
-                    // ---------------- Complexion ----------------
-                    _label("Complexion: *"),
-                    _dropdown(
-                      value: complexion,
-                      items: ["Fair", "Medium", "Dark"],
-                      onChanged: (v) => setState(() => complexion = v),
-                    ),
-
-                    // ---------------- Health Info ----------------
-                    _label("Health Information: *"),
-                    _dropdown(
-                      value: healthInfo,
-                      items: ["Fit", "Average", "Weak"],
-                      onChanged: (v) => setState(() => healthInfo = v),
-                    ),
-
-                    // ---------------- Disability ----------------
-                    _label("Any Disability: *"),
-                    _disabilityButtons(),
-
-                    // ---------------- Blood Group ----------------
-                    _label("Blood Group: *"),
-                    _dropdown(
-                      value: bloodGroup,
-                      items: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+"],
-                      onChanged: (v) => setState(() => bloodGroup = v),
-                    ),
-
-                    const SizedBox(height: 30),
-                    _buttons(),
-                    const SizedBox(height: 50),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+             Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

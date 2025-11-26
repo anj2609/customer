@@ -278,62 +278,73 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
   // -------------------- MAIN UI --------------------
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _label("Enter One Time Password:"),
-                    SizedBox(height: 10),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _aadhaarBox(aadhaar1, fn1, fn2),
-                        _aadhaarBox(aadhaar2, fn2, fn3),
-                        _aadhaarBox(aadhaar3, fn3, fn4),
-                        _aadhaarBox(aadhaar4, fn4, null),
+                        _label("Enter One Time Password:"),
+                        SizedBox(height: 10),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _aadhaarBox(aadhaar1, fn1, fn2),
+                            _aadhaarBox(aadhaar2, fn2, fn3),
+                            _aadhaarBox(aadhaar3, fn3, fn4),
+                            _aadhaarBox(aadhaar4, fn4, null),
+                          ],
+                        ),
+
+                        const SizedBox(height: 30),
+                        Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                "OTP has been sent to your register mobile",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.grey,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                "Please enter otp to verify.",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.grey,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 40),
+                        _bottomButtons(),
                       ],
                     ),
-
-                    const SizedBox(height: 30),
-                    Center(
-                      child: Column(
-                        children: [
-                          Text(
-                            "OTP has been sent to your register mobile",
-                            style: opensansMedium.copyWith(
-                              color: Colors.grey,
-                              fontSize: 13,
-                            ),
-                          ),
-                          Text(
-                            "Please enter otp to verify.",
-                            style: opensansMedium.copyWith(
-                              color: Colors.grey,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-                    _bottomButtons(),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

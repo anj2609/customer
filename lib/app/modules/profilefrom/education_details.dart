@@ -40,96 +40,107 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Highest Degree
-                    _label("Highest Degree:"),
-                    _dropdown(
-                      value: highestDegree,
-                      items: ["M.Com", "MBA", "MCA", "MA", "MSc"],
-                      onChanged: (v) => setState(() => highestDegree = v),
-                    ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Highest Degree
+                        _label("Highest Degree:"),
+                        _dropdown(
+                          value: highestDegree,
+                          items: ["M.Com", "MBA", "MCA", "MA", "MSc"],
+                          onChanged: (v) => setState(() => highestDegree = v),
+                        ),
 
-                    // Master College Name
-                    _topLabel("Master College Name"),
-                    _textField(controller: masterCollege),
+                        // Master College Name
+                        _topLabel("Master College Name"),
+                        _textField(controller: masterCollege),
 
-                    // Bachelor Degree
-                    _label("Bachelor Degree:"),
-                    _dropdown(
-                      value: bachelorDegree,
-                      items: ["B.Com", "BBA", "BCA", "BA", "BSc"],
-                      onChanged: (v) => setState(() => bachelorDegree = v),
-                    ),
+                        // Bachelor Degree
+                        _label("Bachelor Degree:"),
+                        _dropdown(
+                          value: bachelorDegree,
+                          items: ["B.Com", "BBA", "BCA", "BA", "BSc"],
+                          onChanged: (v) => setState(() => bachelorDegree = v),
+                        ),
 
-                    // Bachelor College Name
-                    _topLabel("Bachelor College Name"),
-                    _textField(controller: bachelorCollege),
+                        // Bachelor College Name
+                        _topLabel("Bachelor College Name"),
+                        _textField(controller: bachelorCollege),
 
-                    // Other Education Details
-                    _topLabel("Add Other Education Details If Any"),
-                    _multilineField(controller: otherEducationDetails),
+                        // Other Education Details
+                        _topLabel("Add Other Education Details If Any"),
+                        _multilineField(controller: otherEducationDetails),
 
-                    const SizedBox(height: 15),
-                    Text(
-                      "Profession Details:",
-                      style: opensansMedium.copyWith(
-                        fontSize: 16,
-                        // fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                        const SizedBox(height: 15),
+                        Text(
+                          "Profession Details:",
+                          style: opensansMedium.copyWith(
+                            fontSize: 16,
+                            // fontWeight: FontWeight.bold,
+                          ),
+                        ),
 
-                    // Annual Income
-                    _label("Annual Income:"),
-                    _textField(controller: annualIncome),
+                        // Annual Income
+                        _label("Annual Income:"),
+                        _textField(controller: annualIncome),
 
-                    // Working With
-                    _label("Working With:"),
-                    _dropdown(
-                      value: workingWith,
-                      items: [
-                        "Private Job",
-                        "Government Job",
-                        "Business",
-                        "Self Employed",
-                        "Not Working",
+                        // Working With
+                        _label("Working With:"),
+                        _dropdown(
+                          value: workingWith,
+                          items: [
+                            "Private Job",
+                            "Government Job",
+                            "Business",
+                            "Self Employed",
+                            "Not Working",
+                          ],
+                          onChanged: (v) => setState(() => workingWith = v),
+                        ),
+
+                        // Occupation
+                        _label("Occupation:"),
+                        _textField(controller: occupation),
+
+                        // Organization Name
+                        _label("Organization Name:"),
+                        _textField(controller: organizationName),
+
+                        // Previous Working Detail
+                        _topLabel("Add Previous Working Detail:"),
+                        _multilineField(controller: previousWork),
+
+                        const SizedBox(height: 25),
+                        _buttons(),
+                        const SizedBox(height: 50),
                       ],
-                      onChanged: (v) => setState(() => workingWith = v),
                     ),
-
-                    // Occupation
-                    _label("Occupation:"),
-                    _textField(controller: occupation),
-
-                    // Organization Name
-                    _label("Organization Name:"),
-                    _textField(controller: organizationName),
-
-                    // Previous Working Detail
-                    _topLabel("Add Previous Working Detail:"),
-                    _multilineField(controller: previousWork),
-
-                    const SizedBox(height: 25),
-                    _buttons(),
-                    const SizedBox(height: 50),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }
@@ -296,7 +307,8 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton(
           isExpanded: true,
-          value: value, icon: Icon(Icons.keyboard_arrow_down),
+          value: value,
+          icon: Icon(Icons.keyboard_arrow_down),
           hint: Text(
             hint,
             style: opensansMedium.copyWith(

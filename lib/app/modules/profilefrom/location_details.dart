@@ -57,150 +57,164 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
   // ---------------- UI ----------------
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Nationality
-                    _label("Nationality:"),
-                    _dropdown(
-                      value: nationality,
-                      items: ["Indian", "NRI", "Other"],
-                      onChanged: (v) => setState(() => nationality = v),
-                    ),
-
-                    // Residence
-                    _label("Residence Type:"),
-                    _dropdown(
-                      value: residenceType,
-                      items: ["Urban", "Rural", "Semi-Urban"],
-                      onChanged: (v) => setState(() => residenceType = v),
-                    ),
-
-                    // Permanent House Type
-                    _label("Permanent House Type:"),
-                    _dropdown(
-                      value: permanentHouse,
-                      items: ["Owned", "Rented", "Ancestral"],
-                      onChanged: (v) => setState(() => permanentHouse = v),
-                    ),
-
-                    const SizedBox(height: 15),
-                    Text(
-                      "Permanent Address Location:",
-                      style: opensansMedium.copyWith(
-                        fontSize: 16,
-                        color: ColorResources.blackhalka,
-                      ),
-                    ),
-
-                    _label("State:"),
-                    _dropdown(
-                      value: pState,
-                      items: ["Gujarat", "Delhi", "UP", "Maharashtra"],
-                      onChanged: (v) {
-                        pState = v;
-                        fillTemporaryAddress();
-                      },
-                    ),
-
-                    _label("City:"),
-                    _dropdown(
-                      value: pCity,
-                      items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
-                      onChanged: (v) {
-                        pCity = v;
-                        fillTemporaryAddress();
-                      },
-                    ),
-
-                    _label("Landmark/Remarks"),
-                    _textField(
-                      controller: pLandmark,
-                      onChanged: (v) => fillTemporaryAddress(),
-                    ),
-
-                    _label("Pin code / zip code:"),
-                    _textField(
-                      controller: pPincode,
-                      keyboard: TextInputType.number,
-                      onChanged: (v) => fillTemporaryAddress(),
-                    ),
-
-                    const SizedBox(height: 20),
-                    Text(
-                      "Temporary Address Location:",
-                      style: opensansMedium.copyWith(
-                        fontSize: 16,
-                        color: ColorResources.blackhalka,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // SAME FILL CHECKBOX
-                    Row(
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Checkbox(
-                          value: sameFill,
-                          activeColor: Colors.pink,
+                        // Nationality
+                        _label("Nationality:"),
+                        _dropdown(
+                          value: nationality,
+                          items: ["Indian", "NRI", "Other"],
+                          onChanged: (v) => setState(() => nationality = v),
+                        ),
+
+                        // Residence
+                        _label("Residence Type:"),
+                        _dropdown(
+                          value: residenceType,
+                          items: ["Urban", "Rural", "Semi-Urban"],
+                          onChanged: (v) => setState(() => residenceType = v),
+                        ),
+
+                        // Permanent House Type
+                        _label("Permanent House Type:"),
+                        _dropdown(
+                          value: permanentHouse,
+                          items: ["Owned", "Rented", "Ancestral"],
+                          onChanged: (v) => setState(() => permanentHouse = v),
+                        ),
+
+                        const SizedBox(height: 15),
+                        Text(
+                          "Permanent Address Location:",
+                          style: opensansMedium.copyWith(
+                            fontSize: 16,
+                            color: ColorResources.blackhalka,
+                          ),
+                        ),
+
+                        _label("State:"),
+                        _dropdown(
+                          value: pState,
+                          items: ["Gujarat", "Delhi", "UP", "Maharashtra"],
                           onChanged: (v) {
-                            setState(() {
-                              sameFill = v!;
-                              fillTemporaryAddress();
-                            });
+                            pState = v;
+                            fillTemporaryAddress();
                           },
                         ),
-                        const Text("Same Fill", style: TextStyle(fontSize: 16)),
+
+                        _label("City:"),
+                        _dropdown(
+                          value: pCity,
+                          items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
+                          onChanged: (v) {
+                            pCity = v;
+                            fillTemporaryAddress();
+                          },
+                        ),
+
+                        _label("Landmark/Remarks"),
+                        _textField(
+                          controller: pLandmark,
+                          onChanged: (v) => fillTemporaryAddress(),
+                        ),
+
+                        _label("Pin code / zip code:"),
+                        _textField(
+                          controller: pPincode,
+                          keyboard: TextInputType.number,
+                          onChanged: (v) => fillTemporaryAddress(),
+                        ),
+
+                        const SizedBox(height: 20),
+                        Text(
+                          "Temporary Address Location:",
+                          style: opensansMedium.copyWith(
+                            fontSize: 16,
+                            color: ColorResources.blackhalka,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // SAME FILL CHECKBOX
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: sameFill,
+                              activeColor: Colors.pink,
+                              onChanged: (v) {
+                                setState(() {
+                                  sameFill = v!;
+                                  fillTemporaryAddress();
+                                });
+                              },
+                            ),
+                            const Text(
+                              "Same Fill",
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+
+                        // TEMPORARY FIELDS
+                        _label("State:"),
+                        _dropdown(
+                          value: tState,
+                          items: ["Gujarat", "Delhi", "UP", "Maharashtra"],
+                          onChanged: sameFill
+                              ? null
+                              : (v) => setState(() => tState = v),
+                        ),
+
+                        _label("City:"),
+                        _dropdown(
+                          value: tCity,
+                          items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
+                          onChanged: sameFill
+                              ? null
+                              : (v) => setState(() => tCity = v),
+                        ),
+
+                        _label("Landmark/Remarks"),
+                        _textField(controller: tLandmark, enabled: !sameFill),
+
+                        _label("Pin code / zip code:"),
+                        _textField(
+                          controller: tPincode,
+                          keyboard: TextInputType.number,
+                          enabled: !sameFill,
+                        ),
+
+                        const SizedBox(height: 30),
+                        _buttons(),
+                        const SizedBox(height: 40),
                       ],
                     ),
-
-                    // TEMPORARY FIELDS
-                    _label("State:"),
-                    _dropdown(
-                      value: tState,
-                      items: ["Gujarat", "Delhi", "UP", "Maharashtra"],
-                      onChanged: sameFill
-                          ? null
-                          : (v) => setState(() => tState = v),
-                    ),
-
-                    _label("City:"),
-                    _dropdown(
-                      value: tCity,
-                      items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
-                      onChanged: sameFill
-                          ? null
-                          : (v) => setState(() => tCity = v),
-                    ),
-
-                    _label("Landmark/Remarks"),
-                    _textField(controller: tLandmark, enabled: !sameFill),
-
-                    _label("Pin code / zip code:"),
-                    _textField(
-                      controller: tPincode,
-                      keyboard: TextInputType.number,
-                      enabled: !sameFill,
-                    ),
-
-                    const SizedBox(height: 30),
-                    _buttons(),
-                    const SizedBox(height: 40),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

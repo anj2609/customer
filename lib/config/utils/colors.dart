@@ -12,4 +12,5 @@ class ColorResources {
   static Color blackhalka = const Color(0xFF323232);
   static Color blackcolor11 = const Color(0xFF000000);
   static Color blackhalkaa = const Color(0xFF202020);
+  static Color blacktext = const Color(0xFF3A3A3A);
 }

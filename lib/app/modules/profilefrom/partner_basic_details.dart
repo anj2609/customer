@@ -38,187 +38,200 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
 
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipOval(
-                          child: Image.asset(
-                            "assets/images/femalee.png",
-                            height: 45,
-                            width: 45,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          "Provide partner’s basic details:",
-                          style: opensansMedium.copyWith(
-                            fontSize: 16,
+                        Row(
+                          children: [
+                            ClipOval(
+                              child: Image.asset(
+                                "assets/images/femalee.png",
+                                height: 45,
+                                width: 45,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Provide partner’s basic details:",
+                              style: opensansMedium.copyWith(
+                                fontSize: 16,
 
-                            color: Colors.black87,
-                          ),
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
                         ),
+
+                        const SizedBox(height: 10),
+
+                        // ---------------- AGE RANGE ----------------
+                        _label("Age Range:"),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _dropdown(
+                                value: fromAge,
+                                items: [
+                                  "18 Years",
+                                  "20 Years",
+                                  "22 Years",
+                                  "25 Years",
+                                ],
+                                onChanged: (v) => setState(() => fromAge = v),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Text("To"),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _dropdown(
+                                value: toAge,
+                                items: [
+                                  "25 Years",
+                                  "28 Years",
+                                  "30 Years",
+                                  "35 Years",
+                                ],
+                                onChanged: (v) => setState(() => toAge = v),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        _label("Body Weight:"),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _dropdown(
+                                value: fromWeight,
+                                items: ["40 Kg", "45 Kg", "50 Kg", "55 Kg"],
+                                onChanged: (v) =>
+                                    setState(() => fromWeight = v),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Text("To"),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _dropdown(
+                                value: toWeight,
+                                items: ["60 Kg", "65 Kg", "70 Kg", "80 Kg"],
+                                onChanged: (v) => setState(() => toWeight = v),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        _label("Height Range:"),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _dropdown(
+                                value: fromHeight,
+                                items: ["4 fit", "4.5 fit", "5 fit"],
+                                onChanged: (v) =>
+                                    setState(() => fromHeight = v),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Text("To"),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _dropdown(
+                                value: toHeight,
+                                items: ["5.5 fit", "6 fit", "6.2 fit"],
+                                onChanged: (v) => setState(() => toHeight = v),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        _label("Complexion:"),
+                        _dropdown(
+                          value: complexion,
+                          items: ["Fair", "Medium", "Dark"],
+                          onChanged: (v) => setState(() => complexion = v),
+                        ),
+
+                        // ---------------- LANGUAGE ----------------
+                        _label("Languages Known:"),
+                        _dropdown(
+                          value: language,
+                          items: ["English", "Hindi", "Gujarati", "Punjabi"],
+                          onChanged: (v) => setState(() => language = v),
+                        ),
+
+                        // ---------------- MARITAL STATUS ----------------
+                        _label("Marital Status:"),
+                        Row(
+                          children: [
+                            _selectButton(
+                              "Married",
+                              maritalStatus == "Married",
+                              () {
+                                setState(() => maritalStatus = "Married");
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            _selectButton(
+                              "Unmarried",
+                              maritalStatus == "Unmarried",
+                              () {
+                                setState(() => maritalStatus = "Unmarried");
+                              },
+                            ),
+                          ],
+                        ),
+
+                        // ---------------- CHILDREN ----------------
+                        _label("Have Children:"),
+                        _dropdown(
+                          value: children,
+                          items: ["No", "Yes (1)", "Yes (2)"],
+                          onChanged: (v) => setState(() => children = v),
+                        ),
+
+                        // ---------------- MOTHER TONGUE ----------------
+                        _label("Mother Tongue:"),
+                        _dropdown(
+                          value: motherTongue,
+                          items: ["Hindi", "Gujarati", "Marathi", "Punjabi"],
+                          onChanged: (v) => setState(() => motherTongue = v),
+                        ),
+
+                        const SizedBox(height: 30),
+                        _buttons(),
+                        const SizedBox(height: 50),
                       ],
                     ),
-
-                    const SizedBox(height: 10),
-
-                    // ---------------- AGE RANGE ----------------
-                    _label("Age Range:"),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _dropdown(
-                            value: fromAge,
-                            items: [
-                              "18 Years",
-                              "20 Years",
-                              "22 Years",
-                              "25 Years",
-                            ],
-                            onChanged: (v) => setState(() => fromAge = v),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text("To"),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _dropdown(
-                            value: toAge,
-                            items: [
-                              "25 Years",
-                              "28 Years",
-                              "30 Years",
-                              "35 Years",
-                            ],
-                            onChanged: (v) => setState(() => toAge = v),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    _label("Body Weight:"),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _dropdown(
-                            value: fromWeight,
-                            items: ["40 Kg", "45 Kg", "50 Kg", "55 Kg"],
-                            onChanged: (v) => setState(() => fromWeight = v),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text("To"),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _dropdown(
-                            value: toWeight,
-                            items: ["60 Kg", "65 Kg", "70 Kg", "80 Kg"],
-                            onChanged: (v) => setState(() => toWeight = v),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    _label("Height Range:"),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _dropdown(
-                            value: fromHeight,
-                            items: ["4 fit", "4.5 fit", "5 fit"],
-                            onChanged: (v) => setState(() => fromHeight = v),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text("To"),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _dropdown(
-                            value: toHeight,
-                            items: ["5.5 fit", "6 fit", "6.2 fit"],
-                            onChanged: (v) => setState(() => toHeight = v),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    _label("Complexion:"),
-                    _dropdown(
-                      value: complexion,
-                      items: ["Fair", "Medium", "Dark"],
-                      onChanged: (v) => setState(() => complexion = v),
-                    ),
-
-                    // ---------------- LANGUAGE ----------------
-                    _label("Languages Known:"),
-                    _dropdown(
-                      value: language,
-                      items: ["English", "Hindi", "Gujarati", "Punjabi"],
-                      onChanged: (v) => setState(() => language = v),
-                    ),
-
-                    // ---------------- MARITAL STATUS ----------------
-                    _label("Marital Status:"),
-                    Row(
-                      children: [
-                        _selectButton(
-                          "Married",
-                          maritalStatus == "Married",
-                          () {
-                            setState(() => maritalStatus = "Married");
-                          },
-                        ),
-                        const SizedBox(width: 12),
-                        _selectButton(
-                          "Unmarried",
-                          maritalStatus == "Unmarried",
-                          () {
-                            setState(() => maritalStatus = "Unmarried");
-                          },
-                        ),
-                      ],
-                    ),
-
-                    // ---------------- CHILDREN ----------------
-                    _label("Have Children:"),
-                    _dropdown(
-                      value: children,
-                      items: ["No", "Yes (1)", "Yes (2)"],
-                      onChanged: (v) => setState(() => children = v),
-                    ),
-
-                    // ---------------- MOTHER TONGUE ----------------
-                    _label("Mother Tongue:"),
-                    _dropdown(
-                      value: motherTongue,
-                      items: ["Hindi", "Gujarati", "Marathi", "Punjabi"],
-                      onChanged: (v) => setState(() => motherTongue = v),
-                    ),
-
-                    const SizedBox(height: 30),
-                    _buttons(),
-                    const SizedBox(height: 50),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

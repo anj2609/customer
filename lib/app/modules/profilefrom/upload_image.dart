@@ -33,107 +33,127 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
 
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // ------------ TOP INFO ROW ------------
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        _infoBox("10 MB", "Maximum image\nUpload size"),
-                        _infoBox(
-                          "576x576",
-                          "Recommended\ndimensions (in pixel)",
+                        // ------------ TOP INFO ROW ------------
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _infoBox("10 MB", "Maximum image\nUpload size"),
+                            _infoBox(
+                              "576x576",
+                              "Recommended\ndimensions (in pixel)",
+                            ),
+                            _infoBox("01", "Photo 1 is\nmandatory."),
+                          ],
                         ),
-                        _infoBox("01", "Photo 1 is\nmandatory."),
+
+                        const SizedBox(height: 25),
+
+                        // ------------ Upload Box Label ------------
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Upload Image",
+                            style: opensansMedium.copyWith(
+                              fontSize: 15,
+
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // ------------ DOTTED BOX ------------
+                        _uploadBox(),
+
+                        const SizedBox(height: 15),
+                        pickedImage == null ? _uploadimage() : _buttons(),
+
+                        const SizedBox(height: 30),
+
+                        // ------------ TIPS TEXT ------------
+                        Text(
+                          "Few tips to upload pics",
+                          style: opensansMedium.copyWith(
+                            fontSize: 16,
+
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Avoid the following photos to highlight your\nprofile better",
+                          textAlign: TextAlign.center,
+                          style: opensansMedium.copyWith(
+                            fontSize: 13,
+                            color: Colors.black54,
+                          ),
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // ------------ TIPS IMAGES ROWS ------------
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _tipExample(
+                              "Blur Photo",
+                              "assets/images/tips1 1.png",
+                            ),
+                            _tipExample(
+                              "Side Photo",
+                              "assets/images/tips2 1.png",
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 25),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _tipExample(
+                              "Copyright Photo",
+                              "assets/images/tips4 1.png",
+                            ),
+                            _tipExample(
+                              "Group Photo",
+                              "assets/images/tips4 1.png",
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 40),
                       ],
                     ),
-
-                    const SizedBox(height: 25),
-
-                    // ------------ Upload Box Label ------------
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Upload Image",
-                        style: opensansMedium.copyWith(
-                          fontSize: 15,
-
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // ------------ DOTTED BOX ------------
-                    _uploadBox(),
-
-                    const SizedBox(height: 15),
-                    pickedImage == null ? _uploadimage() : _buttons(),
-
-                    const SizedBox(height: 30),
-
-                    // ------------ TIPS TEXT ------------
-                    Text(
-                      "Few tips to upload pics",
-                      style: opensansMedium.copyWith(
-                        fontSize: 16,
-
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Avoid the following photos to highlight your\nprofile better",
-                      textAlign: TextAlign.center,
-                      style: opensansMedium.copyWith(
-                        fontSize: 13,
-                        color: Colors.black54,
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    // ------------ TIPS IMAGES ROWS ------------
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _tipExample("Blur Photo", "assets/images/tips1 1.png"),
-                        _tipExample("Side Photo", "assets/images/tips2 1.png"),
-                      ],
-                    ),
-
-                    const SizedBox(height: 25),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _tipExample(
-                          "Copyright Photo",
-                          "assets/images/tips4 1.png",
-                        ),
-                        _tipExample("Group Photo", "assets/images/tips4 1.png"),
-                      ],
-                    ),
-
-                    const SizedBox(height: 40),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

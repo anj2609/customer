@@ -8,8 +8,34 @@ import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  TextEditingController inputCtrl = TextEditingController();
+  bool isValid = false;
+  void validateInput(String value) {
+    if (RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+      setState(() => isValid = true);
+
+      FocusScope.of(context).unfocus();
+      return;
+    }
+
+    if (value.contains("@") &&
+        (value.endsWith("@gmail.com") || value.endsWith("@gmail.in"))) {
+      setState(() => isValid = true);
+
+      FocusScope.of(context).unfocus();
+      return;
+    }
+
+    setState(() => isValid = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,8 +134,12 @@ class SignUpScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: Colors.black38),
                         ),
-                        child: const TextField(
-                          decoration: InputDecoration(border: InputBorder.none),
+                        child: TextField(
+                          onChanged: validateInput,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            counterText: '',
+                          ),
                         ),
                       ),
 
@@ -126,22 +156,31 @@ class SignUpScreen extends StatelessWidget {
                       const SizedBox(height: 40),
 
                       GestureDetector(
-                        onTap: () {
-                          Get.to(
-                            SignUpOtpScreen(),
-                            duration: Duration(
-                              milliseconds: ApiConstants.screenTransitionTime,
-                            ),
-                            transition: Transition.rightToLeft,
-                          );
-                        },
+                        onTap: isValid
+                            ? () {
+                                Get.to(
+                                  SignUpOtpScreen(),
+                                  duration: Duration(
+                                    milliseconds:
+                                        ApiConstants.screenTransitionTime,
+                                  ),
+                                  transition: Transition.rightToLeft,
+                                );
+                              }
+                            : null,
                         child: Container(
                           height: 50,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFBE266B), Color(0xFFEB1D7B)],
-                            ),
+                            gradient: isValid
+                                ? const LinearGradient(
+                                    colors: [
+                                      Color(0xFFFBE266B),
+                                      Color(0xFFEB1D7B),
+                                    ],
+                                  )
+                                : null,
+                            color: !isValid ? Colors.grey.shade400 : null,
                           ),
                           child: Center(
                             child: Text(

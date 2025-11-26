@@ -22,78 +22,89 @@ class _PartnerLocationDetailsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
 
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipOval(
-                          child: Image.asset(
-                            "assets/images/femalee.png",
-                            height: 45,
-                            width: 45,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          "Provide location details:",
-                          style: opensansMedium.copyWith(
-                            fontSize: 16,
+                        Row(
+                          children: [
+                            ClipOval(
+                              child: Image.asset(
+                                "assets/images/femalee.png",
+                                height: 45,
+                                width: 45,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Provide location details:",
+                              style: opensansMedium.copyWith(
+                                fontSize: 16,
 
-                            color: Colors.black87,
-                          ),
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
                         ),
+
+                        const SizedBox(height: 10),
+
+                        // --------------- NATIONALITY ---------------
+                        _label("Nationality:"),
+                        _dropdown(
+                          value: nationality,
+                          items: ["Indian", "NRI", "Other"],
+                          onChanged: (v) => setState(() => nationality = v),
+                        ),
+
+                        // --------------- STATE ---------------
+                        _label("State:"),
+                        _dropdown(
+                          value: stateValue,
+                          items: ["Gujarat", "Maharashtra", "Delhi", "Punjab"],
+                          onChanged: (v) => setState(() => stateValue = v),
+                        ),
+
+                        // --------------- CITY / DISTRICT ---------------
+                        _label("City / District:"),
+                        _dropdown(
+                          value: cityValue,
+                          items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
+                          onChanged: (v) => setState(() => cityValue = v),
+                        ),
+
+                        const SizedBox(height: 40),
+                        _buttons(),
+                        const SizedBox(height: 50),
                       ],
                     ),
-
-                    const SizedBox(height: 10),
-
-                    // --------------- NATIONALITY ---------------
-                    _label("Nationality:"),
-                    _dropdown(
-                      value: nationality,
-                      items: ["Indian", "NRI", "Other"],
-                      onChanged: (v) => setState(() => nationality = v),
-                    ),
-
-                    // --------------- STATE ---------------
-                    _label("State:"),
-                    _dropdown(
-                      value: stateValue,
-                      items: ["Gujarat", "Maharashtra", "Delhi", "Punjab"],
-                      onChanged: (v) => setState(() => stateValue = v),
-                    ),
-
-                    // --------------- CITY / DISTRICT ---------------
-                    _label("City / District:"),
-                    _dropdown(
-                      value: cityValue,
-                      items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
-                      onChanged: (v) => setState(() => cityValue = v),
-                    ),
-
-                    const SizedBox(height: 40),
-                    _buttons(),
-                    const SizedBox(height: 50),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

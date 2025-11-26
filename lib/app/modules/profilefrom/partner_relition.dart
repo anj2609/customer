@@ -23,82 +23,99 @@ class _PartnerReligionCasteScreenState
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
 
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipOval(
-                          child: Image.asset(
-                            "assets/images/femalee.png",
-                            height: 45,
-                            width: 45,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          "Provide religion & caste details:",
-                          style: opensansMedium.copyWith(
-                            fontSize: 16,
+                        Row(
+                          children: [
+                            ClipOval(
+                              child: Image.asset(
+                                "assets/images/femalee.png",
+                                height: 45,
+                                width: 45,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Provide religion & caste details:",
+                              style: opensansMedium.copyWith(
+                                fontSize: 16,
 
-                            color: Colors.black87,
-                          ),
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
                         ),
+
+                        const SizedBox(height: 10),
+
+                        // ---------------- RELIGION ----------------
+                        _label("Religion:"),
+                        _dropdown(
+                          value: religion,
+                          items: [
+                            "Hindu",
+                            "Jain",
+                            "Muslim",
+                            "Sikh",
+                            "Christian",
+                          ],
+                          onChanged: (v) => setState(() => religion = v),
+                        ),
+
+                        // ---------------- CASTE ----------------
+                        _label("Caste:"),
+                        _dropdown(
+                          value: caste,
+                          items: ["Brahmin", "Rajput", "Patel", "Maratha"],
+                          onChanged: (v) => setState(() => caste = v),
+                        ),
+
+                        // ---------------- SUBCASTE ----------------
+                        _topLabel("Subcaste:"),
+                        _dropdown(
+                          value: subcaste,
+                          items: ["Leva", "Kokanastha", "Modh", "Shah"],
+                          onChanged: (v) => setState(() => subcaste = v),
+                        ),
+
+                        // ---------------- DOSH ----------------
+                        _topLabel("Dosh:"),
+                        _textfield(doshController),
+
+                        const SizedBox(height: 40),
+                        _buttons(),
+                        const SizedBox(height: 50),
                       ],
                     ),
-
-                    const SizedBox(height: 10),
-
-                    // ---------------- RELIGION ----------------
-                    _label("Religion:"),
-                    _dropdown(
-                      value: religion,
-                      items: ["Hindu", "Jain", "Muslim", "Sikh", "Christian"],
-                      onChanged: (v) => setState(() => religion = v),
-                    ),
-
-                    // ---------------- CASTE ----------------
-                    _label("Caste:"),
-                    _dropdown(
-                      value: caste,
-                      items: ["Brahmin", "Rajput", "Patel", "Maratha"],
-                      onChanged: (v) => setState(() => caste = v),
-                    ),
-
-                    // ---------------- SUBCASTE ----------------
-                    _topLabel("Subcaste:"),
-                    _dropdown(
-                      value: subcaste,
-                      items: ["Leva", "Kokanastha", "Modh", "Shah"],
-                      onChanged: (v) => setState(() => subcaste = v),
-                    ),
-
-                    // ---------------- DOSH ----------------
-                    _topLabel("Dosh:"),
-                    _textfield(doshController),
-
-                    const SizedBox(height: 40),
-                    _buttons(),
-                    const SizedBox(height: 50),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

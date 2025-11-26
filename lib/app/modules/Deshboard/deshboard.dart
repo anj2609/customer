@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
+import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/app/modules/myprofile/my_profile.dart';
 import 'package:vivashri/app/modules/notification/notification.dart';
+import 'package:vivashri/app/modules/search/search.dart';
+import 'package:vivashri/app/modules/shortisted/shortilisted.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
@@ -117,10 +120,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Image.asset(
-                'assets/images/search-alt_svgrepo.com.png',
-                height: 25,
-                color: ColorResources.blackcolor11,
+              GestureDetector(
+                onTap: () {
+                  Get.to(
+                    BasicSearchPage(),
+                    duration: Duration(
+                      milliseconds: ApiConstants.screenTransitionTime,
+                    ),
+                    transition: Transition.rightToLeft,
+                  );
+                },
+                child: Image.asset(
+                  'assets/images/search-alt_svgrepo.com.png',
+                  height: 25,
+                  color: ColorResources.blackcolor11,
+                ),
               ),
               const SizedBox(width: 16),
               GestureDetector(
@@ -155,12 +169,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(14),
-            child: Container(
-              width: w * 0.25,
-              height: w * 0.30,
-              child: Image.asset(
-                "assets/images/profilee.png",
-                fit: BoxFit.contain,
+            child: GestureDetector(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                  ),
+                  builder: (context) => UploadImageBottomSheet(),
+                );
+              },
+              child: Container(
+                width: w * 0.25,
+                height: w * 0.30,
+                child: Image.asset(
+                  "assets/images/profilee.png",
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ),
@@ -378,7 +406,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             );
           }),
           statCard("02", "Shortlisted Profiles", Colors.pink, () {
-            // Get.to(() => ShortlistedPage());
+            Get.to(
+              () => ShortlistedScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
           }),
           statCard("18", "Sent Invitations", Colors.deepPurple, () {
             Get.to(
@@ -411,21 +445,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(width: 6),
               Text("My Plan", style: opensansMedium.copyWith(fontSize: 16)),
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Text(
-                  "Upgrade Now",
-                  style: TextStyle(
-                    color: ColorResources.primarycolor3,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+              GestureDetector(
+                onTap: () {
+                  Get.to(
+                    MembershipPlansPage(),
+                    duration: Duration(
+                      milliseconds: ApiConstants.screenTransitionTime,
+                    ),
+                    transition: Transition.rightToLeft,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Text(
+                    "Upgrade Now",
+                    style: TextStyle(
+                      color: ColorResources.primarycolor3,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
@@ -854,6 +899,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class UploadImageBottomSheet extends StatelessWidget {
+  const UploadImageBottomSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Close Button (top right)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Choose From", style: opensansMedium.copyWith(fontSize: 20)),
+              InkWell(
+                onTap: () => Navigator.pop(context),
+                child: const Icon(Icons.close, size: 30),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Image.asset('assets/images/Group 371.png', height: 50),
+              Image.asset('assets/images/Group 372.png', height: 50),
+            ],
+          ),
+
+          const SizedBox(height: 25),
+
+          Text(
+            "Few tips to upload pics",
+            style: opensansMedium.copyWith(fontSize: 16),
+          ),
+
+          const SizedBox(height: 5),
+
+          Text(
+            "Avoid the following photos to highlight your profile better",
+            style: opensansMedium.copyWith(fontSize: 13, color: Colors.grey),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Tips Row
+          Center(
+            child: Image.asset('assets/images/Frame 66 2.png', height: 100),
+          ),
+
+          const SizedBox(height: 25),
         ],
       ),
     );

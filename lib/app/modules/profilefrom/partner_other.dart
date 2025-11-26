@@ -19,86 +19,97 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
 
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipOval(
-                          child: Image.asset(
-                            "assets/images/femalee.png",
-                            height: 45,
-                            width: 45,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          "Provide other details:",
-                          style: opensansMedium.copyWith(
-                            fontSize: 16,
+                        Row(
+                          children: [
+                            ClipOval(
+                              child: Image.asset(
+                                "assets/images/femalee.png",
+                                height: 45,
+                                width: 45,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Provide other details:",
+                              style: opensansMedium.copyWith(
+                                fontSize: 16,
 
-                            color: Colors.black87,
-                          ),
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
                         ),
+
+                        const SizedBox(height: 10),
+
+                        // ---------------- Diet Preference ----------------
+                        _label("Diet Preference:"),
+                        _dropdown(
+                          value: diet,
+                          items: ["Veg", "Non-Veg", "Jain", "Vegan"],
+                          onChanged: (v) => setState(() => diet = v),
+                        ),
+
+                        // ---------------- Drinking Habit ----------------
+                        _label("Drinking Habit:"),
+                        _dropdown(
+                          value: drinking,
+                          items: ["No", "Occasionally", "Yes"],
+                          onChanged: (v) => setState(() => drinking = v),
+                        ),
+
+                        // ---------------- Smoking Habit ----------------
+                        _label("Smoking Habit:"),
+                        _dropdown(
+                          value: smoking,
+                          items: ["No", "Occasionally", "Yes"],
+                          onChanged: (v) => setState(() => smoking = v),
+                        ),
+
+                        // ---------------- Profile Managed ----------------
+                        _label("Profile Managed by:"),
+                        _dropdown(
+                          value: profileManaged,
+                          items: ["Self", "Parent", "Sibling", "Guardian"],
+                          onChanged: (v) => setState(() => profileManaged = v),
+                        ),
+
+                        const SizedBox(height: 40),
+                        _buttons(),
+                        const SizedBox(height: 50),
                       ],
                     ),
-
-                    const SizedBox(height: 10),
-
-                    // ---------------- Diet Preference ----------------
-                    _label("Diet Preference:"),
-                    _dropdown(
-                      value: diet,
-                      items: ["Veg", "Non-Veg", "Jain", "Vegan"],
-                      onChanged: (v) => setState(() => diet = v),
-                    ),
-
-                    // ---------------- Drinking Habit ----------------
-                    _label("Drinking Habit:"),
-                    _dropdown(
-                      value: drinking,
-                      items: ["No", "Occasionally", "Yes"],
-                      onChanged: (v) => setState(() => drinking = v),
-                    ),
-
-                    // ---------------- Smoking Habit ----------------
-                    _label("Smoking Habit:"),
-                    _dropdown(
-                      value: smoking,
-                      items: ["No", "Occasionally", "Yes"],
-                      onChanged: (v) => setState(() => smoking = v),
-                    ),
-
-                    // ---------------- Profile Managed ----------------
-                    _label("Profile Managed by:"),
-                    _dropdown(
-                      value: profileManaged,
-                      items: ["Self", "Parent", "Sibling", "Guardian"],
-                      onChanged: (v) => setState(() => profileManaged = v),
-                    ),
-
-                    const SizedBox(height: 40),
-                    _buttons(),
-                    const SizedBox(height: 50),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }

@@ -19,59 +19,71 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _header(),
-            Divider(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 15, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _label("Contact Number:"),
-                    _readOnlyBox("+91 98739 85789"),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _header(),
+                Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _label("Contact Number:"),
+                        _readOnlyBox("+91 98739 85789"),
 
-                    _emailWithOtp(),
+                        _emailWithOtp(),
 
-                    _label("Insagram Id:"),
-                    _inputField(),
+                        _label("Insagram Id:"),
+                        _inputField(),
 
-                    _label("Facebook Id:"),
-                    _inputField(),
+                        _label("Facebook Id:"),
+                        _inputField(),
 
-                    const SizedBox(height: 10),
-                    Text(
-                      "Reference:",
-                      style: opensansMedium.copyWith(
-                        fontSize: 16,
-                        // fontWeight: FontWeight.bold,
-                      ),
+                        const SizedBox(height: 10),
+                        Text(
+                          "Reference:",
+                          style: opensansMedium.copyWith(
+                            fontSize: 16,
+                            // fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        _label("Reference Details:"),
+                        _dropdownBox(
+                          hint: "Select",
+                          items: ["Friend", "Relative", "Advertisement"],
+                          value: selectedReference,
+                          onChanged: (v) =>
+                              setState(() => selectedReference = v),
+                        ),
+
+                        _label("Other"),
+                        _inputField(),
+
+                        const SizedBox(height: 25),
+                        _bottomButtons(),
+                        const SizedBox(height: 40),
+                      ],
                     ),
-
-                    _label("Reference Details:"),
-                    _dropdownBox(
-                      hint: "Select",
-                      items: ["Friend", "Relative", "Advertisement"],
-                      value: selectedReference,
-                      onChanged: (v) => setState(() => selectedReference = v),
-                    ),
-
-                    _label("Other"),
-                    _inputField(),
-
-                    const SizedBox(height: 25),
-                    _bottomButtons(),
-                    const SizedBox(height: 40),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: statusBarHeight,
+            width: double.infinity,
+            color: ColorResources.primarycolor2,
+          ),
+        ],
       ),
     );
   }
