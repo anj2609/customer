@@ -255,18 +255,13 @@ class _ConnectScreenState extends State<ConnectScreen>
                     children: [
                       Image.asset('assets/images/Group 285.png', height: 25),
                       SizedBox(height: 10),
-                      Positioned(
-                        top: 12,
-                        right: 12,
-
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Image.asset(
-                            'assets/images/imagecount.png',
-                            height: 40,
-                          ),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Image.asset(
+                          'assets/images/imagecount.png',
+                          height: 40,
                         ),
                       ),
                     ],

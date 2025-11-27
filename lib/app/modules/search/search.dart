@@ -57,15 +57,17 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
       body: Stack(
         children: [
           SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildTopBar(w),
-                  _buildTopTabs(),
-                  Divider(),
-                  _buildSearchBox(w),
-                ],
-              ),
+            child: Column(
+              children: [
+                _buildTopBar(w),
+                _buildTopTabs(),
+                Divider(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(children: [_buildSearchBox(w)]),
+                  ),
+                ),
+              ],
             ),
           ),
           Container(
