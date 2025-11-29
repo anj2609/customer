@@ -89,7 +89,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
             ),
             child: Text(
               "Profile",
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 fontSize: 17,
                 color: ColorResources.blackhalkaa,
               ),
@@ -195,15 +195,15 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                         children: [
                           Text(
                             "Manoj Kumar Yadav ",
-                            style: opensansMedium.copyWith(
+                            style: opensansSemiBold.copyWith(
                               color: Colors.white,
                               fontSize: 17,
                             ),
                           ),
                           Text(
                             "(ID: 600155)",
-                            style: opensansMedium.copyWith(
-                              color: ColorResources.primarycolor,
+                            style: opensansSemiBold.copyWith(
+                              color: ColorResources.primarycolor2,
                               fontSize: 12,
                             ),
                           ),
@@ -214,17 +214,17 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
 
                       Text(
                         "• 22, 5’ 6”   • Hindu   • Agarwal   • Non Manglik  • MCA",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: 11,
                         ),
                       ),
 
                       Text(
                         "• Teacher   • Earns ₹15 Lacs p.a   • Bihar",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: 11,
                         ),
                       ),
                     ],
@@ -305,7 +305,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
           SizedBox(width: 5),
           Text(
             text,
-            style: opensansMedium.copyWith(color: Colors.white, fontSize: 11),
+            style: opensansSemiBold.copyWith(color: Colors.white, fontSize: 11),
           ),
         ],
       ),
@@ -321,7 +321,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
       ),
       child: Text(
         text,
-        style: opensansMedium.copyWith(color: Colors.white, fontSize: 11),
+        style: opensansSemiBold.copyWith(color: Colors.white, fontSize: 11),
       ),
     );
   }
@@ -529,7 +529,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
               children: [
                 Text(
                   title,
-                  style: opensansMedium.copyWith(
+                  style: opensansSemiBold.copyWith(
                     fontSize: 16,
 
                     color: ColorResources.primarycolor4,
@@ -578,9 +578,9 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: opensansMedium.copyWith(fontSize: 14)),
+          Text(label, style: opensansSemiBold.copyWith(fontSize: 13.5)),
 
-          Text(value, style: opensansRegular.copyWith(fontSize: 12)),
+          Text(value, style: opensansMedium.copyWith(fontSize: 12)),
         ],
       ),
     );
@@ -673,7 +673,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
               children: [
                 Text(
                   title,
-                  style: opensansMedium.copyWith(
+                  style: opensansSemiBold.copyWith(
                     fontSize: 16,
 
                     color: ColorResources.primarycolor4,

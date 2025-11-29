@@ -57,7 +57,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                               children: [
                                 TextSpan(
                                   text: "22",
-                                  style: opensansMedium.copyWith(
+                                  style: opensansSemiBold.copyWith(
                                     fontSize: 13,
                                     color: ColorResources.blacktext,
                                   ),
@@ -75,7 +75,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                               children: [
                                 TextSpan(
                                   text: "5 ft 6 in",
-                                  style: opensansMedium.copyWith(
+                                  style: opensansSemiBold.copyWith(
                                     fontSize: 13,
                                     color: ColorResources.blacktext,
                                   ),
@@ -100,7 +100,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                               children: [
                                 TextSpan(
                                   text: "Hindu",
-                                  style: opensansMedium.copyWith(
+                                  style: opensansSemiBold.copyWith(
                                     fontSize: 13,
                                     color: ColorResources.blacktext,
                                   ),
@@ -118,7 +118,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                               children: [
                                 TextSpan(
                                   text: "Female",
-                                  style: opensansMedium.copyWith(
+                                  style: opensansSemiBold.copyWith(
                                     fontSize: 13,
                                     color: ColorResources.blacktext,
                                   ),
@@ -144,7 +144,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                               children: [
                                 TextSpan(
                                   text: "No",
-                                  style: opensansMedium.copyWith(
+                                  style: opensansSemiBold.copyWith(
                                     fontSize: 13,
                                     color: ColorResources.blacktext,
                                   ),
@@ -162,7 +162,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                               children: [
                                 TextSpan(
                                   text: "Single",
-                                  style: opensansMedium.copyWith(
+                                  style: opensansSemiBold.copyWith(
                                     fontSize: 13,
                                     color: ColorResources.blacktext,
                                   ),
@@ -186,7 +186,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                               children: [
                                 TextSpan(
                                   text: "Bihar, Patna",
-                                  style: opensansMedium.copyWith(
+                                  style: opensansSemiBold.copyWith(
                                     fontSize: 13,
                                     color: ColorResources.blacktext,
                                   ),
@@ -201,7 +201,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
 
                       Text(
                         "It is a pleasure introducing myself. My perspective towards life is being optimistic yet realistic. I am looking for a life partner who would be my friend and stand by me in every phase of life. Please feel free to connect and know more.",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           fontSize: 14,
                           color: ColorResources.blacktext,
                         ),
@@ -218,13 +218,13 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                         children: [
                           Image.asset(
                             'assets/images/call-191_svgrepo.com.png',
-                            height: 17,
+                            height: 16,
                           ),
                           SizedBox(width: 8),
                           Text(
                             "Contact Details",
-                            style: opensansMedium.copyWith(
-                              fontSize: 16,
+                            style: opensansSemiBold.copyWith(
+                              fontSize: 15,
                               color: ColorResources.primarycolor3,
                             ),
                           ),
@@ -241,13 +241,13 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                         children: [
                           Image.asset(
                             'assets/images/info_svgrepo.com.png',
-                            height: 17,
+                            height: 16,
                           ),
                           SizedBox(width: 8),
                           Text(
                             "Basic Info",
-                            style: opensansMedium.copyWith(
-                              fontSize: 16,
+                            style: opensansSemiBold.copyWith(
+                              fontSize: 15,
                               color: ColorResources.primarycolor3,
                             ),
                           ),
@@ -299,13 +299,13 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                         children: [
                           Image.asset(
                             'assets/images/temple_svgrepo.com.png',
-                            height: 18,
+                            height: 17,
                           ),
                           SizedBox(width: 8),
                           Text(
                             "Background and Religious Details",
-                            style: opensansMedium.copyWith(
-                              fontSize: 16,
+                            style: opensansSemiBold.copyWith(
+                              fontSize: 15,
                               color: ColorResources.primarycolor3,
                             ),
                           ),
@@ -339,13 +339,13 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                         children: [
                           Image.asset(
                             'assets/images/location_svgrepo.com.png',
-                            height: 17,
+                            height: 16,
                           ),
                           SizedBox(width: 8),
                           Text(
                             "Location",
-                            style: opensansMedium.copyWith(
-                              fontSize: 16,
+                            style: opensansSemiBold.copyWith(
+                              fontSize: 15,
                               color: ColorResources.primarycolor3,
                             ),
                           ),
@@ -367,13 +367,13 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                         children: [
                           Image.asset(
                             'assets/images/degree-hat_svgrepo.com.png',
-                            height: 17,
+                            height: 16,
                           ),
                           SizedBox(width: 8),
                           Text(
                             "Education and Profession",
-                            style: opensansMedium.copyWith(
-                              fontSize: 16,
+                            style: opensansSemiBold.copyWith(
+                              fontSize: 15,
                               color: ColorResources.primarycolor3,
                             ),
                           ),
@@ -407,13 +407,13 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                         children: [
                           Image.asset(
                             'assets/images/team_svgrepo.com.png',
-                            height: 17,
+                            height: 16,
                           ),
                           SizedBox(width: 8),
                           Text(
                             "Family Details",
-                            style: opensansMedium.copyWith(
-                              fontSize: 16,
+                            style: opensansSemiBold.copyWith(
+                              fontSize: 15,
                               color: ColorResources.primarycolor3,
                             ),
                           ),
@@ -448,13 +448,13 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                         children: [
                           Image.asset(
                             'assets/images/party-horn_svgrepo.com.png',
-                            height: 17,
+                            height: 16,
                           ),
                           SizedBox(width: 8),
                           Text(
                             "Lifestyle, Interests and more",
-                            style: opensansMedium.copyWith(
-                              fontSize: 16,
+                            style: opensansSemiBold.copyWith(
+                              fontSize: 15,
                               color: ColorResources.primarycolor3,
                             ),
                           ),
@@ -483,13 +483,13 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                         children: [
                           Image.asset(
                             'assets/images/user-search-alt-1_svgrepo.com.png',
-                            height: 18,
+                            height: 17,
                           ),
                           SizedBox(width: 6),
                           Text(
                             "Partner Preference",
-                            style: opensansMedium.copyWith(
-                              fontSize: 16,
+                            style: opensansSemiBold.copyWith(
+                              fontSize: 15,
                               color: ColorResources.primarycolor3,
                             ),
                           ),
@@ -502,11 +502,11 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                         children: [
                           Text(
                             "Her Expectations",
-                            style: opensansMedium.copyWith(fontSize: 14),
+                            style: opensansSemiBold.copyWith(fontSize: 14),
                           ),
                           Text(
                             "Your Match",
-                            style: opensansMedium.copyWith(fontSize: 14),
+                            style: opensansSemiBold.copyWith(fontSize: 14),
                           ),
                         ],
                       ),
@@ -531,7 +531,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                             ),
                             Text(
                               "Match: 10,  Unmatched: 10",
-                              style: opensansMedium.copyWith(
+                              style: opensansSemiBold.copyWith(
                                 color: ColorResources.primarycolor3,
                                 fontSize: 14,
                               ),
@@ -589,9 +589,9 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                 ),
 
                 preferenceRow(
-                  leftKey: "Religion/Community",
+                  leftKey: "Religion/Commu",
                   leftValue: "Hindu / Lingayat",
-                  rightKey: "Religion/Community",
+                  rightKey: "Religion/Commu",
                   rightValue: "Hindu / Lingayat",
                   isMatch: true,
                 ),
@@ -740,8 +740,8 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                 children: [
                   Text(
                     leftKey,
-                    style: opensansMedium.copyWith(
-                      fontSize: 13.5,
+                    style: opensansSemiBold.copyWith(
+                      fontSize: 13,
                       color: ColorResources.blacktext,
                     ),
                   ),
@@ -749,7 +749,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                   Text(
                     leftValue,
                     style: opensansMedium.copyWith(
-                      fontSize: 13,
+                      fontSize: 12,
                       color: ColorResources.blacktext,
                     ),
                   ),
@@ -760,7 +760,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
 
           Container(
             width: 55,
-            height: 60,
+            height: 55,
             decoration: BoxDecoration(color: Color(0xFFFDEAEE)),
             child: Center(
               child: isMatch
@@ -790,8 +790,8 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                 children: [
                   Text(
                     rightKey,
-                    style: opensansMedium.copyWith(
-                      fontSize: 13.5,
+                    style: opensansSemiBold.copyWith(
+                      fontSize: 13,
                       color: ColorResources.blacktext,
                     ),
                   ),
@@ -799,7 +799,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                   Text(
                     rightValue,
                     style: opensansMedium.copyWith(
-                      fontSize: 13,
+                      fontSize: 12,
                       color: ColorResources.blacktext,
                     ),
                   ),
@@ -864,12 +864,12 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
             children: [
               Text(
                 key,
-                style: opensansMedium.copyWith(
-                  fontSize: 14,
+                style: opensansSemiBold.copyWith(
+                  fontSize: 13,
                   color: ColorResources.blacktext,
                 ),
               ),
-              SizedBox(height: 2),
+
               Text(
                 value,
                 style: opensansMedium.copyWith(
@@ -945,12 +945,12 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
               children: [
                 Text(
                   key1,
-                  style: opensansMedium.copyWith(
+                  style: opensansSemiBold.copyWith(
                     fontSize: 14,
                     color: ColorResources.blacktext,
                   ),
                 ),
-                SizedBox(height: 2),
+
                 Text(
                   val1,
                   style: opensansMedium.copyWith(
@@ -971,12 +971,12 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
               children: [
                 Text(
                   key2,
-                  style: opensansMedium.copyWith(
+                  style: opensansSemiBold.copyWith(
                     fontSize: 14,
                     color: ColorResources.blacktext,
                   ),
                 ),
-                SizedBox(height: 2),
+
                 Text(
                   val2,
                   style: opensansMedium.copyWith(
@@ -1002,15 +1002,14 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
             children: [
               Text(
                 "Rupali Vimal Jha",
-                style: opensansMedium.copyWith(fontSize: 18),
+                style: opensansSemiBold.copyWith(fontSize: 18),
               ),
               SizedBox(width: 10),
               Text(
                 "(ID: 600155)",
-                style: TextStyle(
-                  fontSize: 15,
+                style: opensansSemiBold.copyWith(
+                  fontSize: 14,
                   color: ColorResources.primarycolor2,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(width: 10),
@@ -1024,13 +1023,13 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
             children: [
               Text(
                 "Profile created by Myself",
-                style: opensansMedium.copyWith(
+                style: opensansSemiBold.copyWith(
                   color: ColorResources.blackgrey,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
               SizedBox(width: 15),
-              Image.asset('assets/images/Frame 64.png', height: 20),
+              Image.asset('assets/images/Frame 64.png', height: 19),
             ],
           ),
         ],

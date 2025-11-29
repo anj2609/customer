@@ -129,7 +129,7 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
             ),
             child: Text(
               "Membership Plans",
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 fontSize: 17,
                 color: ColorResources.blackhalkaa,
               ),

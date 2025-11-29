@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vivashri/app/modules/auth/login_screen.dart';
+import 'package:vivashri/app/modules/profilefrom/basic_details.dart';
+import 'package:vivashri/app/modules/profilefrom/contact_details.dart';
+import 'package:vivashri/app/modules/profilefrom/family_details.dart';
+import 'package:vivashri/app/modules/profilefrom/location_details.dart';
+import 'package:vivashri/app/modules/profilefrom/more_details.dart';
+import 'package:vivashri/app/modules/profilefrom/religition_details.dart';
 import 'package:vivashri/config/route.dart';
 import 'package:vivashri/config/utils/all_images.dart';
+import 'package:vivashri/config/utils/constants.dart';
 
 class VivashriIntro extends StatefulWidget {
   const VivashriIntro({super.key});
@@ -58,6 +67,25 @@ class _VivashriIntroState extends State<VivashriIntro>
     // After logo animation → show content
     Future.delayed(const Duration(milliseconds: 1400), () {
       contentController.forward();
+    });
+    Future.delayed(const Duration(milliseconds: 2300), () async {
+      final prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("token");
+      print('Token:::::::::${token}');
+      if (token != null && token.isNotEmpty) {
+        Get.off(
+          MoreDetailsScreen(),
+          duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+          transition: Transition.rightToLeft,
+        );
+      } else {
+        Get.to(
+          LoginScreen(),
+          duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+          transition: Transition.rightToLeft,
+        );
+        //  Get.offAllNamed(RouteHelper.loginScreen);
+      }
     });
   }
 

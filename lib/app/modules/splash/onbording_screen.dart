@@ -137,7 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         },
                         child: Text(
                           "Skip",
-                          style: opensansMedium.copyWith(
+                          style: opensansSemiBold.copyWith(
                             color: ColorResources.primarycolor,
                             fontSize: 20,
                           ),

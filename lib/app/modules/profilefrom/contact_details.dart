@@ -6,6 +6,7 @@ import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
 
 class ContactDetailsScreen extends StatefulWidget {
   const ContactDetailsScreen({super.key});
@@ -16,6 +17,11 @@ class ContactDetailsScreen extends StatefulWidget {
 
 class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
   String? selectedReference;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController instgramidController = TextEditingController();
+  TextEditingController facebookController = TextEditingController();
+  TextEditingController otherController = TextEditingController();
+  StaperfromController stapercontroller = Get.put(StaperfromController());
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +48,10 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                         _emailWithOtp(),
 
                         _label("Insagram Id:"),
-                        _inputField(),
+                        _inputField(controller: instgramidController),
 
                         _label("Facebook Id:"),
-                        _inputField(),
+                        _inputField(controller: facebookController),
 
                         const SizedBox(height: 10),
                         Text(
@@ -59,14 +65,21 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                         _label("Reference Details:"),
                         _dropdownBox(
                           hint: "Select",
-                          items: ["Friend", "Relative", "Advertisement"],
+                          items: [
+                            "Google Search",
+                            "Facebook",
+                            "Instagram",
+                            "WhatsApp",
+                            "Event",
+                            "Linked In",
+                          ],
                           value: selectedReference,
                           onChanged: (v) =>
                               setState(() => selectedReference = v),
                         ),
 
                         _label("Other"),
-                        _inputField(),
+                        _inputField(controller: otherController),
 
                         const SizedBox(height: 25),
                         _bottomButtons(),
@@ -224,8 +237,15 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
   }
   // ---------------- INPUT FIELD ----------------
 
-  Widget _inputField({int maxLines = 1}) {
-    return TextField(maxLines: maxLines, decoration: _decoration());
+  Widget _inputField({
+    int maxLines = 1,
+    required TextEditingController controller,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: _decoration(),
+    );
   }
 
   // ---------------- READONLY PHONE BOX ----------------
@@ -273,7 +293,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   ),
                 ],
               ),
-              _inputField(),
+              _inputField(controller: emailController),
             ],
           ),
         ),
@@ -364,13 +384,62 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                AadharVerificationScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
-              );
+              if (emailController.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Email Address',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (instgramidController.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Insagram Id',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (facebookController.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Facebook Id',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (selectedReference == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Reference Details',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (otherController.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Reference Other',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.conectdetailsProfile(
+                  formData: {
+                    "contact_no": '9090909090',
+                    "contact_email": emailController.text.trim(),
+                    "instagram": instgramidController.text.trim(),
+                    "facebook": facebookController.text,
+                    "reference": selectedReference,
+                    "reference_other": otherController.text.trim(),
+                    "app_step": '2',
+                    "step": '2',
+                  },
+                );
+              }
+              // Get.to(
+              //   AadharVerificationScreen(),
+              //   duration: Duration(
+              //     milliseconds: ApiConstants.screenTransitionTime,
+              //   ),
+              //   transition: Transition.rightToLeft,
+              // );
             },
             child: Container(
               height: 45,

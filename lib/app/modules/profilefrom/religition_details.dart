@@ -5,6 +5,11 @@ import 'package:vivashri/app/modules/profilefrom/reference_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/castecontroller.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
+import 'package:vivashri/data/controller/gotra.dart';
+import 'package:vivashri/data/controller/religion.dart';
+import 'package:vivashri/data/controller/subcaste.dart';
 
 class ReligionDetailsScreen extends StatefulWidget {
   const ReligionDetailsScreen({super.key});
@@ -18,10 +23,17 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
   String? caste;
   String? subcaste;
   String? gotra;
+  final religionC = Get.put(ReligionController());
+  final casteC = Get.put(CasteController());
+  final subCasteC = Get.put(SubCasteController());
+  TextEditingController dostController = TextEditingController();
+  final gotraC = Get.put(GotraController());
+  TextEditingController othergotraController = TextEditingController();
+  StaperfromController stapercontroller = Get.put(StaperfromController());
 
   @override
   Widget build(BuildContext context) {
-            final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -39,39 +51,134 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _label("Religion:"),
-                        _dropdown(
-                          value: religion,
-                          onChanged: (v) => setState(() => religion = v),
-                          items: ["Hindu", "Muslim", "Sikh", "Christian", "Other"],
-                        ),
-          
+                        Obx(() {
+                          return _dropdown(
+                            value: religionC.selectedId.value.isEmpty
+                                ? null
+                                : religionC.selectedId.value,
+
+                            onChanged: (v) {
+                              religionC.onSelectById(v!);
+                              casteC.fetchCaste(v);
+                              subCasteC.subCasteList.clear();
+                            },
+
+                            items: religionC.religionList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
+
                         _label("Caste:"),
-                        _dropdown(
-                          value: caste,
-                          onChanged: (v) => setState(() => caste = v),
-                          items: ["Brahmin", "Rajput", "OBC", "SC", "ST"],
-                        ),
-          
+                        Obx(() {
+                          return _dropdown(
+                            value: casteC.selectedCasteId.value.isEmpty
+                                ? null
+                                : casteC.selectedCasteId.value,
+
+                            onChanged: (v) {
+                              casteC.onSelect(v!); // v = ID
+                              subCasteC.fetchSubCaste(v);
+                            },
+
+                            items: casteC.casteList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id, // ID
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
+
                         _label("Subcaste:"),
-                        _dropdown(
-                          value: subcaste,
-                          onChanged: (v) => setState(() => subcaste = v),
-                          items: ["Sub 1", "Sub 2", "Sub 3"],
-                        ),
-          
+                        Obx(() {
+                          return _dropdown(
+                            value: subCasteC.selectedSubCasteId.value.isEmpty
+                                ? null
+                                : subCasteC.selectedSubCasteId.value,
+
+                            onChanged: (v) {
+                              print('lllll${v}');
+                              subCasteC.onSelect(v!);
+                              gotraC.fetchGotra(v);
+                            },
+
+                            items: subCasteC.subCasteList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
+
                         _label("Gotra:"),
-                        _dropdown(
-                          value: gotra,
-                          onChanged: (v) => setState(() => gotra = v),
-                          items: ["Kashyap", "Bhardwaj", "Vashishth", "Other"],
-                        ),
-          
+                        Obx(() {
+                          return _dropdown(
+                            value: gotraC.selectedGotraId.value.isEmpty
+                                ? null
+                                : gotraC.selectedGotraId.value,
+
+                            onChanged: (v) {
+                              gotraC.onSelect(v!);
+                              setState(() {});
+                            },
+
+                            items: gotraC.gotraList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id, // ID
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
+
                         const SizedBox(height: 10),
-                        _hintBox("This field will come when other selected"),
-          
+
+                        gotraC.selectedGotraName.value == "Other"
+                            ? _textField22()
+                            : _hintBox(
+                                "This field will come when other selected",
+                              ),
+
                         _label("Dosh:"),
                         _textField(),
-          
+
                         const SizedBox(height: 30),
                         _buttons(),
                         const SizedBox(height: 40),
@@ -82,7 +189,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
               ],
             ),
           ),
-            Container(
+          Container(
             height: statusBarHeight,
             width: double.infinity,
             color: ColorResources.primarycolor2,
@@ -225,8 +332,38 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
     );
   }
 
-  // ---------------------- Dropdown ------------------------
   Widget _dropdown({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  // ---------------------- Dropdown ------------------------
+  Widget _dropdown111({
     required String? value,
     required Function(String?) onChanged,
     required List<String> items,
@@ -288,9 +425,32 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
     );
   }
 
+  Widget _textField22() {
+    return TextField(
+      controller: othergotraController,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 12,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: ColorResources.primarycolor),
+        ),
+      ),
+    );
+  }
+
   // ---------------------- TextField ------------------------
   Widget _textField() {
     return TextField(
+      controller: dostController,
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
@@ -335,13 +495,66 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                ReferenceDetailsScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
-              );
+              if (religionC.selectedName.value == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Religion',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (casteC.selectedCasteName.value == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Caste',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (subCasteC.selectedSubCasteName.value == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Subcaste',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (gotraC.selectedGotraName.value == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Gotra',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (dostController.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Dosh',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.religiondeytalsProfile(
+                  formData: {
+                    "religion": religionC.selectedId.value,
+                    "caste": casteC.selectedCasteId.value,
+                    "sub_caste": subCasteC.selectedSubCasteId.value,
+                    "gotra": gotraC.selectedGotraId.value,
+                    "gotra_other": othergotraController.text.trim(),
+                    "dosh": dostController.text.trim(),
+                    "app_step": '5',
+                    "step": '5',
+                  },
+                );
+              }
+
+              // print(
+              //   'religion:::::::${religionC.selectedId.value}:::caste::::::${casteC.selectedCasteId.value}::::subcaste::::::${subCasteC.selectedSubCasteId.value}',
+              // );
+              // Get.to(
+              //   ReferenceDetailsScreen(),
+              //   duration: Duration(
+              //     milliseconds: ApiConstants.screenTransitionTime,
+              //   ),
+              //   transition: Transition.rightToLeft,
+              // );
             },
             child: Container(
               height: 45,

@@ -89,7 +89,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
             ),
             child: Text(
               "Matches",
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 fontSize: 17,
                 color: ColorResources.blackhalkaa,
               ),

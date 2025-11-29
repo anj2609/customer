@@ -58,7 +58,9 @@ class ApiClient extends GetxService {
         }
         print('====> GetX Basebodyy: $body');
         Http.Response _response = await Http.post(
-          Uri.parse('https://aamdeal.beelink.bio/api/' + uri),
+          Uri.parse(
+            'https://testing.akslearning.in/vivashribackend/api/' + uri,
+          ),
           body: jsonEncode(body),
           headers: _mainHeaders,
         ).timeout(Duration(seconds: timeoutInSeconds));

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:vivashri/config/route.dart';
 import 'package:vivashri/config/utils/app_constants.dart';
 import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/helper/get_di.dart' as di;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +19,7 @@ void main() async {
       statusBarBrightness: Brightness.dark,
     ),
   );
-
+  await di.init();
   runApp(MyApp());
   configLoading();
 }

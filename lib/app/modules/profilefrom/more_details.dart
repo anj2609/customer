@@ -5,6 +5,11 @@ import 'package:vivashri/app/modules/profilefrom/education_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/citycontroller.dart';
+import 'package:vivashri/data/controller/complecxion.dart';
+import 'package:vivashri/data/controller/dietcontroller.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
+import 'package:vivashri/data/controller/hobbies.dart';
 
 class MoreDetailsScreen extends StatefulWidget {
   const MoreDetailsScreen({super.key});
@@ -26,8 +31,74 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
     "Music",
     "Others",
   ];
+  StaperfromController stapercontroller = Get.put(StaperfromController());
+  final cityC = Get.put(CityController());
+
+  final hobbyC = Get.put(HobbyController());
+  final dietC = Get.put(DietController());
 
   List<String> selectedHobbies = [];
+  final complexionC = Get.put(ComplexionController());
+  final heights = [
+    {"value": "4.1", "label": "4 ft 1 in"},
+    {"value": "4.2", "label": "4 ft 2 in"},
+    {"value": "4.3", "label": "4 ft 3 in"},
+    {"value": "4.4", "label": "4 ft 4 in"},
+    {"value": "4.5", "label": "4 ft 5 in"},
+    {"value": "4.6", "label": "4 ft 6 in"},
+    {"value": "4.7", "label": "4 ft 7 in"},
+    {"value": "4.8", "label": "4 ft 8 in"},
+    {"value": "4.9", "label": "4 ft 9 in"},
+    {"value": "4.10", "label": "4 ft 10 in"},
+    {"value": "4.11", "label": "4 ft 11 in"},
+
+    {"value": "5.0", "label": "5 ft"},
+    {"value": "5.1", "label": "5 ft 1 in"},
+    {"value": "5.2", "label": "5 ft 2 in"},
+    {"value": "5.3", "label": "5 ft 3 in"},
+    {"value": "5.4", "label": "5 ft 4 in"},
+    {"value": "5.5", "label": "5 ft 5 in"},
+    {"value": "5.6", "label": "5 ft 6 in"},
+    {"value": "5.7", "label": "5 ft 7 in"},
+    {"value": "5.8", "label": "5 ft 8 in"},
+    {"value": "5.9", "label": "5 ft 9 in"},
+    {"value": "5.10", "label": "5 ft 10 in"},
+    {"value": "5.11", "label": "5 ft 11 in"},
+
+    {"value": "6.0", "label": "6 ft"},
+    {"value": "6.1", "label": "6 ft 1 in"},
+    {"value": "6.2", "label": "6 ft 2 in"},
+    {"value": "6.3", "label": "6 ft 3 in"},
+    {"value": "6.4", "label": "6 ft 4 in"},
+    {"value": "6.5", "label": "6 ft 5 in"},
+    {"value": "6.6", "label": "6 ft 6 in"},
+    {"value": "6.7", "label": "6 ft 7 in"},
+    {"value": "6.8", "label": "6 ft 8 in"},
+    {"value": "6.9", "label": "6 ft 9 in"},
+    {"value": "6.10", "label": "6 ft 10 in"},
+    {"value": "6.11", "label": "6 ft 11 in"},
+
+    {"value": "7.0", "label": "7 ft"},
+    {"value": "7.1", "label": "7 ft 1 in"},
+    {"value": "7.2", "label": "7 ft 2 in"},
+    {"value": "7.3", "label": "7 ft 3 in"},
+    {"value": "7.4", "label": "7 ft 4 in"},
+    {"value": "7.5", "label": "7 ft 5 in"},
+    {"value": "7.6", "label": "7 ft 6 in"},
+    {"value": "7.7", "label": "7 ft 7 in"},
+    {"value": "7.8", "label": "7 ft 8 in"},
+    {"value": "7.9", "label": "7 ft 9 in"},
+    {"value": "7.10", "label": "7 ft 10 in"},
+    {"value": "7.11", "label": "7 ft 11 in"},
+
+    {"value": "8.0", "label": "8 ft"},
+    {"value": "8.1", "label": "8 ft 1 in"},
+    {"value": "8.2", "label": "8 ft 2 in"},
+    {"value": "8.3", "label": "8 ft 3 in"},
+    {"value": "8.4", "label": "8 ft 4 in"},
+    {"value": "8.5", "label": "8 ft 5 in"},
+    {"value": "8.6", "label": "8 ft 6 in"},
+  ];
 
   String? diet;
   String? cityOfBirth;
@@ -38,10 +109,19 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
   String? healthInfo;
   String disability = "";
   String? bloodGroup;
+  String? selectedHour;
+  String? selectedMin;
+  String? selectedAmPm;
+  @override
+  void initState() {
+    super.initState();
+
+    cityC.fetchCity('68cd23efc04fec5457f4a866');
+  }
 
   @override
   Widget build(BuildContext context) {
-        final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -52,7 +132,7 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
               children: [
                 _header(),
                 Divider(),
-          
+
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.only(left: 15, right: 15),
@@ -61,105 +141,350 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
                       children: [
                         // ---------------- HOBBIES ----------------
                         _label("Hobbies:"),
-                        _hobbiesScrollableBox(),
-          
+                        hobbiesScrollableBox(),
+
                         // ---------------- DIET ----------------
-                        _label("Diet:"),
-                        _dropdown(
-                          value: diet,
-                          items: ["Veg", "Non-Veg", "Jain", "Vegan"],
-                          onChanged: (v) => setState(() => diet = v),
-                        ),
-          
+                        _label("Diet"),
+                        Obx(() {
+                          return _dropdown22(
+                            value: dietC.selectedDietId.value.isEmpty
+                                ? null
+                                : dietC.selectedDietId.value,
+
+                            onChanged: (v) {
+                              dietC.onSelect(v!);
+                            },
+
+                            items: dietC.dietList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
+
                         // ---------------- TIME OF BIRTH ----------------
-                        _label("Time of Birth: *"),
+                        _label("Time of Birth:"),
+
                         Row(
                           children: [
                             Expanded(
                               child: _dropdown(
-                                value: null,
+                                value: selectedHour,
                                 hint: "Hour",
-                                items: ["01", "02", "03", "04", "05", "06", "07"],
-                                onChanged: (v) {},
+                                items: [
+                                  "01",
+                                  "02",
+                                  "03",
+                                  "04",
+                                  "05",
+                                  "06",
+                                  "07",
+                                ],
+                                onChanged: (v) {
+                                  setState(() => selectedHour = v);
+                                },
                               ),
                             ),
                             const SizedBox(width: 10),
+
                             Expanded(
                               child: _dropdown(
-                                value: null,
+                                value: selectedMin,
                                 hint: "Min",
-                                items: ["00", "10", "20", "30", "40", "50"],
-                                onChanged: (v) {},
+                                items: [
+                                  "00",
+                                  "05",
+                                  "10",
+                                  "15",
+                                  "20",
+                                  "25",
+                                  "30",
+                                  "35",
+                                  "40",
+                                  "45",
+                                  "50",
+                                  "55",
+                                ],
+
+                                onChanged: (v) {
+                                  setState(() => selectedMin = v);
+                                },
                               ),
                             ),
                             const SizedBox(width: 10),
+
                             Expanded(
                               child: _dropdown(
-                                value: null,
-                                hint: "Am",
+                                value: selectedAmPm,
+                                hint: "AM",
                                 items: ["AM", "PM"],
-                                onChanged: (v) {},
+                                onChanged: (v) {
+                                  setState(() => selectedAmPm = v);
+                                },
                               ),
                             ),
                           ],
                         ),
-          
+
                         // ---------------- City of Birth ----------------
-                        _label("City of Birth: *"),
-                        _dropdown(
-                          value: cityOfBirth,
-                          items: ["Delhi", "Mumbai", "Ahmedabad"],
-                          onChanged: (v) => setState(() => cityOfBirth = v),
-                        ),
-          
+                        _label("City of Birth:"),
+                        Obx(() {
+                          return _cityc(
+                            value: cityC.selectedCityId.value.isEmpty
+                                ? null
+                                : cityC.selectedCityId.value,
+
+                            onChanged: (v) {
+                              cityC.onSelect(v!);
+                            },
+
+                            items: cityC.cityList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
+
                         // ---------------- Manglik ----------------
-                        _label("Manglik Status: *"),
+                        _label("Manglik Status:"),
                         _manglikButtons(),
-          
+
                         // ---------------- Weight ----------------
-                        _label("Weight (in Kg): *"),
+                        _label("Weight (in Kg):"),
                         _dropdown(
                           value: weight,
-                          items: ["40", "45", "50", "55", "60", "65", "70", "80"],
+                          items: [
+                            "40",
+                            "41",
+                            "42",
+                            "43",
+                            "44",
+                            "45",
+                            "46",
+                            "47",
+                            "48",
+                            "49",
+                            "50",
+                            "51",
+                            "52",
+                            "53",
+                            "54",
+                            "55",
+                            "56",
+                            "57",
+                            "58",
+                            "59",
+                            "60",
+                            "61",
+                            "62",
+                            "63",
+                            "64",
+                            "65",
+                            "66",
+                            "67",
+                            "68",
+                            "69",
+                            "70",
+                            "71",
+                            "72",
+                            "73",
+                            "74",
+                            "75",
+                            "76",
+                            "77",
+                            "78",
+                            "79",
+                            "80",
+                            "81",
+                            "82",
+                            "83",
+                            "84",
+                            "85",
+                            "86",
+                            "87",
+                            "88",
+                            "89",
+                            "90",
+                            "91",
+                            "92",
+                            "93",
+                            "94",
+                            "95",
+                            "96",
+                            "97",
+                            "98",
+                            "99",
+                            "100",
+                            "101",
+                            "102",
+                            "103",
+                            "104",
+                            "105",
+                            "106",
+                            "107",
+                            "108",
+                            "109",
+                            "110",
+                            "111",
+                            "112",
+                            "113",
+                            "114",
+                            "115",
+                            "116",
+                            "117",
+                            "118",
+                            "119",
+                            "120",
+                            "121",
+                            "122",
+                            "123",
+                            "124",
+                            "125",
+                            "126",
+                            "127",
+                            "128",
+                            "129",
+                            "130",
+                            "131",
+                            "132",
+                            "133",
+                            "134",
+                            "135",
+                            "136",
+                            "137",
+                            "138",
+                            "139",
+                            "140",
+                            "141",
+                            "142",
+                            "143",
+                            "144",
+                            "145",
+                            "146",
+                            "147",
+                            "148",
+                            "149",
+                            "150",
+                          ],
+
                           onChanged: (v) => setState(() => weight = v),
                         ),
-          
+
                         // ---------------- Height ----------------
-                        _label("Height: *"),
-                        _dropdown(
+                        _label("Height:"),
+                        _dropdown22(
                           value: height,
-                          items: ["5.0", "5.2", "5.4", "5.6", "5.8", "6.0"],
-                          onChanged: (v) => setState(() => height = v),
+                          items: heights
+                              .map(
+                                (h) => DropdownMenuItem(
+                                  value: h["value"], // value = 8.6
+                                  child: Text(
+                                    h["label"]!,
+                                    style: opensansMedium.copyWith(
+                                      color: ColorResources.blackhalka,
+                                      fontSize: 14,
+                                    ),
+                                  ), // label = 8 ft 6 in
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) {
+                            setState(() => height = v);
+                            print(
+                              "Selected Height Value: $v",
+                            ); // yaha 8.6 print hoga
+                          },
                         ),
-          
+
                         // ---------------- Complexion ----------------
-                        _label("Complexion: *"),
-                        _dropdown(
-                          value: complexion,
-                          items: ["Fair", "Medium", "Dark"],
-                          onChanged: (v) => setState(() => complexion = v),
-                        ),
-          
+                        _label("Complexion"),
+                        Obx(() {
+                          return _dropdown22(
+                            value:
+                                complexionC.selectedComplexionId.value.isEmpty
+                                ? null
+                                : complexionC.selectedComplexionId.value,
+
+                            onChanged: (v) {
+                              complexionC.onSelect(v!);
+                            },
+
+                            items: complexionC.complexionList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
+
                         // ---------------- Health Info ----------------
-                        _label("Health Information: *"),
+                        _label("Health Information:"),
                         _dropdown(
                           value: healthInfo,
-                          items: ["Fit", "Average", "Weak"],
+                          items: [
+                            "No Health Problems",
+                            "Average",
+                            "Weak",
+                            "Diabetes",
+                            "HIV Positive",
+                            "Low BP",
+                            "High BP",
+                            "Heart Ailments",
+                            "Others",
+                          ],
                           onChanged: (v) => setState(() => healthInfo = v),
                         ),
-          
+
                         // ---------------- Disability ----------------
-                        _label("Any Disability: *"),
+                        _label("Any Disability:"),
                         _disabilityButtons(),
-          
+
                         // ---------------- Blood Group ----------------
-                        _label("Blood Group: *"),
+                        _label("Blood Group:"),
                         _dropdown(
                           value: bloodGroup,
-                          items: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+"],
+                          items: [
+                            "A+",
+                            "A-",
+                            "B+",
+                            "B-",
+                            "O+",
+                            "O-",
+                            "AB+",
+                            "AB-",
+                          ],
                           onChanged: (v) => setState(() => bloodGroup = v),
                         ),
-          
+
                         const SizedBox(height: 30),
                         _buttons(),
                         const SizedBox(height: 50),
@@ -170,12 +495,72 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
               ],
             ),
           ),
-             Container(
+          Container(
             height: statusBarHeight,
             width: double.infinity,
             color: ColorResources.primarycolor2,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _cityc({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  Widget _dropdown22({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
       ),
     );
   }
@@ -313,68 +698,64 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
     );
   }
 
-  // ---------------- HOBBIES SCROLLABLE BOX ----------------
-  Widget _hobbiesScrollableBox() {
-    return Container(
-      height: 170,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey.shade400),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Scrollbar(
-        thumbVisibility: true,
-        thickness: 5,
-        radius: const Radius.circular(8),
-        child: SingleChildScrollView(
-          child: Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: hobbies.map((hobby) {
-              bool selected = selectedHobbies.contains(hobby);
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    if (selected) {
-                      selectedHobbies.remove(hobby);
-                    } else {
-                      selectedHobbies.add(hobby);
-                    }
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: selected ? Colors.pink.shade50 : Colors.white,
-                    border: Border.all(
-                      color: selected
-                          ? ColorResources.primarycolor3
-                          : Colors.grey.shade400,
-                      width: 1.3,
-                    ),
-                  ),
-                  child: Text(
-                    hobby,
-                    style: opensansMedium.copyWith(
-                      fontSize: 14,
+  Widget hobbiesScrollableBox() {
+    return Obx(() {
+      return Container(
+        height: 170,
+        width: double.infinity,
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Scrollbar(
+          thumbVisibility: true,
+          thickness: 5,
+          radius: const Radius.circular(8),
+          child: SingleChildScrollView(
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: hobbyC.hobbyList.map((h) {
+                bool selected = hobbyC.selectedHobbyIds.contains(h.id);
 
-                      color: selected
-                          ? ColorResources.primarycolor3
-                          : Colors.black87,
+                return InkWell(
+                  onTap: () {
+                    hobbyC.toggleHobby(h.id);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: selected ? Colors.pink.shade50 : Colors.white,
+                      border: Border.all(
+                        color: selected
+                            ? ColorResources.primarycolor3
+                            : Colors.grey.shade400,
+                        width: 1.3,
+                      ),
+                    ),
+                    child: Text(
+                      h.name, // Name show
+                      style: opensansSemiBold.copyWith(
+                        fontSize: 13,
+                        color: selected
+                            ? ColorResources.primarycolor3
+                            : Colors.black87,
+                      ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   // ---------------- DROPDOWN ----------------
@@ -392,7 +773,8 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton(
-          isExpanded: true, icon: Icon(Icons.keyboard_arrow_down),
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
           value: value,
           hint: Text(
             hint,
@@ -578,12 +960,24 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                EducationDetailsScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
+              stapercontroller.moredetailsapi(
+                formData: {
+                  "health_information": healthInfo,
+                  "disability": disability,
+                  "blood_group": bloodGroup,
+                  "diet": dietC.selectedDietId.value,
+                  "birth_hour": selectedHour,
+                  "birth_minute": selectedMin,
+                  "birth_am": selectedAmPm,
+                  "birth_city": cityC.selectedCityId.value,
+                  "manglik": manglik,
+                  "weight": weight,
+                  "height": height,
+                  "complexion": complexionC.selectedComplexionId.value,
+                  "app_step": '9',
+                  "step": '9',
+                },
+                selected: hobbyC.selectedHobbyIds,
               );
             },
             child: Container(

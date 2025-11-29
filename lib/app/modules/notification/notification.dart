@@ -77,7 +77,7 @@ class _NotificationPageState extends State<NotificationPage> {
             ),
             child: Text(
               "Notification",
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 fontSize: 17,
                 color: ColorResources.blackhalkaa,
               ),
@@ -111,7 +111,7 @@ class _NotificationPageState extends State<NotificationPage> {
           children: [
             Text(
               "All",
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Colors.pink,
@@ -128,7 +128,7 @@ class _NotificationPageState extends State<NotificationPage> {
                 child: DropdownButton<String>(
                   value: dropdownValue,
                   icon: Icon(Icons.arrow_drop_down),
-                  style: opensansMedium.copyWith(
+                  style: opensansSemiBold.copyWith(
                     fontSize: 13,
 
                     color: Colors.black,
@@ -138,7 +138,7 @@ class _NotificationPageState extends State<NotificationPage> {
                       value: "All Notification",
                       child: Text(
                         "All Notification",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           fontSize: 13,
 
                           color: Colors.black,
@@ -149,7 +149,7 @@ class _NotificationPageState extends State<NotificationPage> {
                       value: "Accepted",
                       child: Text(
                         "Accepted",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           fontSize: 13,
 
                           color: Colors.black,
@@ -160,7 +160,7 @@ class _NotificationPageState extends State<NotificationPage> {
                       value: "Viewed",
                       child: Text(
                         "Viewed",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           fontSize: 13,
 
                           color: Colors.black,
@@ -189,7 +189,7 @@ class _NotificationPageState extends State<NotificationPage> {
           Expanded(
             child: Text(
               "Alerts about Invitations & Requests you sent",
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 fontSize: 14,
                 color: Colors.black87,
               ),
@@ -243,7 +243,7 @@ class _NotificationPageState extends State<NotificationPage> {
                     children: [
                       TextSpan(
                         text: "Kimmy K ",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           fontSize: 13,
                           color: ColorResources.primarycolor3,
                         ),
@@ -252,8 +252,8 @@ class _NotificationPageState extends State<NotificationPage> {
                       TextSpan(
                         text:
                             "has Accepted your Interest\n2 Hour   viewed your Profile",
-                        style: opensansMedium.copyWith(
-                          fontSize: 13,
+                        style: opensansSemiBold.copyWith(
+                          fontSize: 12,
                           color: ColorResources.blackhalka,
                         ),
                       ),
@@ -265,12 +265,12 @@ class _NotificationPageState extends State<NotificationPage> {
 
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 16, color: Colors.black54),
+                    Icon(Icons.calendar_today, size: 14, color: Colors.black54),
                     SizedBox(width: 6),
                     Text(
                       "6 Oct 2025",
-                      style: opensansMedium.copyWith(
-                        fontSize: 14,
+                      style: opensansSemiBold.copyWith(
+                        fontSize: 11.5,
                         color: Colors.black87,
                       ),
                     ),

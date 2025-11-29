@@ -53,7 +53,9 @@ class _MainNavigationState extends State<MainNavigation> {
                     CupertinoDialogAction(
                       child: Text(
                         "Cancel",
-                        style: opensansMedium.copyWith(color: Colors.blueGrey),
+                        style: opensansSemiBold.copyWith(
+                          color: Colors.blueGrey,
+                        ),
                       ),
                       onPressed: () {
                         Navigator.of(context).pop(false);
@@ -62,7 +64,7 @@ class _MainNavigationState extends State<MainNavigation> {
                     CupertinoDialogAction(
                       child: Text(
                         "Yes",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           color: ColorResources.primarycolor3,
                         ),
                       ),
@@ -139,7 +141,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   child: Image.asset(
                     item.img,
                     height: 70,
-                    width: 70,
+                    width: 75,
                     fit: BoxFit.contain,
                     color: ColorResources.primarycolor3,
                   ),
@@ -162,17 +164,16 @@ class _MainNavigationState extends State<MainNavigation> {
                         width: 24,
                         color: selected
                             ? ColorResources.primarycolor3
-                            : ColorResources.blackgrey,
+                            : ColorResources.blkackvoor,
                       ),
                       const SizedBox(height: 2),
                       Text(
                         item.label,
-                        style: TextStyle(
+                        style: opensansSemiBold.copyWith(
                           fontSize: 12,
                           color: selected
                               ? ColorResources.primarycolor3
-                              : ColorResources.blackgrey,
-                          fontWeight: FontWeight.w600,
+                              : ColorResources.blkackvoor,
                         ),
                       ),
                     ],

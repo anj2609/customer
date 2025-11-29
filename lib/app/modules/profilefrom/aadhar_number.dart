@@ -5,6 +5,7 @@ import 'package:vivashri/app/modules/profilefrom/aadhar_otp.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
 
 class AadharVerificationScreen extends StatefulWidget {
   const AadharVerificationScreen({super.key});
@@ -18,6 +19,7 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
   final aadhaar1 = TextEditingController();
   final aadhaar2 = TextEditingController();
   final aadhaar3 = TextEditingController();
+  StaperfromController stapercontroller = Get.put(StaperfromController());
 
   late FocusNode fn1;
   late FocusNode fn2;
@@ -241,12 +243,39 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                AadharOtpScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
+              if (aadhaar1.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Aadhaar Number',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (aadhaar2.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Aadhaar Number',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (aadhaar3.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Aadhaar Number',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.aadharnumberProfile(
+                  formData: {
+                    "aadhaar_no":
+                        '${aadhaar1.text}${aadhaar2.text}${aadhaar3.text}',
+                    "app_step": "3",
+                    "step": "3",
+                  },
+                );
+              }
+              print(
+                'otp::::::${aadhaar1.text}${aadhaar2.text}${aadhaar3.text}',
               );
             },
             child: Container(

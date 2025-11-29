@@ -6,6 +6,11 @@ import 'package:vivashri/app/modules/profilefrom/contact_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/auth_controller.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
+import 'package:vivashri/data/controller/looking_for_controller.dart';
+import 'package:vivashri/data/controller/marital_staus.contro.dart';
+import 'package:vivashri/data/controller/statecontroller.dart';
 
 class BasicDetailsScreen extends StatefulWidget {
   const BasicDetailsScreen({super.key});
@@ -24,6 +29,12 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
   String? selectedYear;
 
   String gender = "";
+  final lookingC = Get.put(LookingForController());
+  final maritalC = Get.put(MaritalStatusController());
+  final stateC = Get.put(StateController());
+  TextEditingController nameCtrl = TextEditingController();
+  TextEditingController abouttrl = TextEditingController();
+  StaperfromController stapercontroller = Get.put(StaperfromController());
 
   @override
   void initState() {
@@ -43,7 +54,6 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
- 
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -61,41 +71,43 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _label("Create profile for:"),
-                        _dropDown(
-                          hint: "Select",
-                          value: selectedProfileFor,
-                          onChanged: (v) =>
-                              setState(() => selectedProfileFor = v),
-                          items: [
-                            "Self",
-                            "Son",
-                            "Daughter",
-                            "Brother",
-                            "Sister",
-                            "Relative/Friend",
-                          ],
-                        ),
+                        Obx(() {
+                          return _dropDown(
+                            hint: "Select",
+                            value: lookingC.selectedName.value,
+                            onChanged: (v) => lookingC.onSelect(v!),
+                            items: lookingC.lookingList
+                                .map((e) => e.name)
+                                .toList(),
+                          );
+                        }),
+
                         _label("Gender:"),
                         _genderButtons(),
                         _label("Name:"),
                         _textField(),
 
                         _label("Marital Status:"),
-                        _dropDown(
-                          hint: "Select",
-                          value: selectedMaritalStatus,
-                          onChanged: (v) =>
-                              setState(() => selectedMaritalStatus = v),
-                          items: ["Single", "Married", "Divorced"],
-                        ),
+                        Obx(() {
+                          return _dropDown(
+                            hint: "Select",
+                            value: maritalC.selectedName.value,
+                            onChanged: (v) => maritalC.onSelect(v!),
+                            items: maritalC.maritalList
+                                .map((e) => e.name)
+                                .toList(),
+                          );
+                        }),
 
                         _label("State:"),
-                        _dropDown(
-                          hint: "Select",
-                          value: selectedState,
-                          onChanged: (v) => setState(() => selectedState = v),
-                          items: ["Gujarat", "Maharashtra", "Punjab"],
-                        ),
+                        Obx(() {
+                          return _dropDown(
+                            hint: "Select State",
+                            value: stateC.selectedName.value,
+                            onChanged: (v) => stateC.onSelect(v!),
+                            items: stateC.stateList.map((e) => e.name).toList(),
+                          );
+                        }),
 
                         _label("Date of Birth:"),
                         Row(
@@ -114,8 +126,16 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                               child: _dropDown(
                                 hint: "Months",
                                 value: selectedMonth,
-                                onChanged: (v) =>
-                                    setState(() => selectedMonth = v),
+                                onChanged: (v) {
+                                  setState(() {
+                                    selectedMonth = v;
+                                    selectedMonthNumber =
+                                        monthNumber[v]; // <-- yaha number mil jayega
+                                  });
+
+                                  print("Month Name: $v");
+                                  print("Month Number: $selectedMonthNumber");
+                                },
                                 items: [
                                   "Jan",
                                   "Feb",
@@ -139,14 +159,17 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                                 value: selectedYear,
                                 onChanged: (v) =>
                                     setState(() => selectedYear = v),
-                                items: List.generate(60, (i) => "${1980 + i}"),
+                                items: List.generate(
+                                  60,
+                                  (i) => "${DateTime.now().year - 18 - i}",
+                                ),
                               ),
                             ),
                           ],
                         ),
 
                         _label("About:"),
-                        _textField(maxLines: 4),
+                        _textaboutField(maxLines: 4),
 
                         const SizedBox(height: 25),
                         _continueButton(),
@@ -296,9 +319,37 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
   // ---------------- TEXTFIELD ----------------
 
   Widget _textField({int maxLines = 1}) {
-    return TextField(maxLines: maxLines, decoration: _borderDecoration());
+    return TextField(
+      maxLines: maxLines,
+      keyboardType: TextInputType.text,
+      decoration: _borderDecoration(),
+      controller: nameCtrl,
+    );
   }
 
+  Widget _textaboutField({int maxLines = 1}) {
+    return TextField(
+      maxLines: maxLines,
+      decoration: _borderDecoration(),
+      controller: abouttrl,
+    );
+  }
+
+  Map<String, String> monthNumber = {
+    "Jan": "1",
+    "Feb": "2",
+    "Mar": "3",
+    "Apr": "4",
+    "May": "5",
+    "Jun": "6",
+    "Jul": "7",
+    "Aug": "8",
+    "Sep": "9",
+    "Oct": "10",
+    "Nov": "11",
+    "Dec": "12",
+  };
+  String? selectedMonthNumber;
   // ---------------- DROPDOWN ----------------
 
   Widget _dropDown({
@@ -399,11 +450,95 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
   Widget _continueButton() {
     return GestureDetector(
       onTap: () {
-        Get.to(
-          ContactDetailsScreen(),
-          duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-          transition: Transition.rightToLeft,
+        if (lookingC.selectedName.value == null) {
+          Get.snackbar(
+            'Error',
+            'Please Select Profile',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } else if (gender.isEmpty) {
+          Get.snackbar(
+            'Error',
+            'Please Select Gender',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } else if (nameCtrl.text.isEmpty) {
+          Get.snackbar(
+            'Error',
+            'Please Enter Your Name',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } else if (maritalC.selectedName.value == null) {
+          Get.snackbar(
+            'Error',
+            'Please Select Your Marital Status',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } else if (stateC.selectedName.value == null) {
+          Get.snackbar(
+            'Error',
+            'Please Select Your State',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } else if (selectedDay == null) {
+          Get.snackbar(
+            'Error',
+            'Please Select Your Date',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } else if (selectedMonth == null) {
+          Get.snackbar(
+            'Error',
+            'Please Select Your Month',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } else if (selectedYear == null) {
+          Get.snackbar(
+            'Error',
+            'Please Select Your Year',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } else if (abouttrl.text.isEmpty) {
+          Get.snackbar(
+            'Error',
+            'Please Enter Your About',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } else {
+          stapercontroller.submitBasicProfile(
+            formData: {
+              "profile_for": lookingC.selectedId.value,
+              "gender": gender,
+              "name": nameCtrl.text,
+              "marital_status": maritalC.selectedId.value,
+
+              "birth_day": selectedDay,
+              "birth_month": selectedMonthNumber,
+              "birth_year": selectedYear,
+              "birth_state": stateC.selectedStateId.value,
+              "about": abouttrl.text,
+              "app_step": "1",
+              "step": "1",
+            },
+          );
+        }
+        print(
+          'profile:::::::${lookingC.selectedId.value}::gender${gender}::name${nameCtrl.text}::marital:::::::${maritalC.selectedId.value}::state:::::${stateC.selectedStateId.value}:::::${selectedDay}::::${selectedMonth}:::::${selectedYear}',
         );
+        // Get.to(
+        //   ContactDetailsScreen(),
+        //   duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+        //   transition: Transition.rightToLeft,
+        // );
       },
       child: Container(
         height: 45,

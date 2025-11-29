@@ -5,6 +5,8 @@ import 'package:vivashri/app/modules/profilefrom/location_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
+import 'package:vivashri/data/controller/looking_for_controller.dart';
 
 class ReferenceDetailsScreen extends StatefulWidget {
   const ReferenceDetailsScreen({super.key});
@@ -15,10 +17,16 @@ class ReferenceDetailsScreen extends StatefulWidget {
 
 class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
   String? relation;
+  final lookingC = Get.put(LookingForController());
+  TextEditingController refnameCtrl = TextEditingController();
+  TextEditingController refemaildCtrl = TextEditingController();
+  StaperfromController stapercontroller = Get.put(StaperfromController());
+
+  TextEditingController refmobileCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-        final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -36,21 +44,31 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _label("Relation:"),
-                        _dropdown(
-                          value: relation,
-                          onChanged: (v) => setState(() => relation = v),
-                          items: ["Father", "Mother", "Friend", "Sibling", "Other"],
-                        ),
-          
+                        Obx(() {
+                          return _dropdown(
+                            //  hint: "Select",
+                            value: lookingC.selectedName.value,
+                            onChanged: (v) => lookingC.onSelect(v!),
+                            items: lookingC.lookingList
+                                .map((e) => e.name)
+                                .toList(),
+                          );
+                        }),
+
+                        // _dropdown(
+                        //   value: relation,
+                        //   onChanged: (v) => setState(() => relation = v),
+                        //   items: ["Father", "Mother", "Friend", "Sibling", "Other"],
+                        // ),
                         _label("Name:"),
-                        _textField(),
-          
+                        _textField(controller: refnameCtrl),
+
                         _label("Email Id:"),
-                        _textField(),
-          
+                        _textField(controller: refemaildCtrl),
+
                         _label("Mobile No. :"),
                         _textFieldmobile(),
-          
+
                         const SizedBox(height: 30),
                         _buttons(),
                         const SizedBox(height: 40),
@@ -61,7 +79,7 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
               ],
             ),
           ),
-            Container(
+          Container(
             height: statusBarHeight,
             width: double.infinity,
             color: ColorResources.primarycolor2,
@@ -250,8 +268,11 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
 
   Widget _textFieldmobile() {
     return TextField(
+      controller: refmobileCtrl,
       keyboardType: TextInputType.number,
+      maxLength: 10,
       decoration: InputDecoration(
+        counterText: '',
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(
@@ -271,8 +292,9 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
   }
 
   // ---------------- TEXT FIELD ----------------
-  Widget _textField() {
+  Widget _textField({required TextEditingController controller}) {
     return TextField(
+      controller: controller,
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
@@ -316,13 +338,53 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                LocationDetailsScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
-              );
+              if (lookingC.selectedName.value == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Relation',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (refnameCtrl.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Reference Name',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (refemaildCtrl.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Reference EmailId',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (refmobileCtrl.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Your Reference Mobile No.',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.referencedProfile(
+                  formData: {
+                    "loc_relation": lookingC.selectedName.value,
+                    "loc_relation_name": refnameCtrl.text.trim(),
+                    "loc_relation_email": refemaildCtrl.text.trim(),
+                    "loc_relation_mobile": refmobileCtrl.text,
+                    "app_step": '6',
+                    "step": '6',
+                  },
+                );
+              }
+              // Get.to(
+              //   LocationDetailsScreen(),
+              //   duration: Duration(
+              //     milliseconds: ApiConstants.screenTransitionTime,
+              //   ),
+              //   transition: Transition.rightToLeft,
+              // );
             },
             child: Container(
               height: 45,

@@ -80,7 +80,7 @@ class _ChatScreenState extends State<ChatScreen>
             ),
             child: Text(
               "My Chats",
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 fontSize: 17,
                 color: ColorResources.blackhalkaa,
               ),
@@ -113,7 +113,7 @@ class _ChatScreenState extends State<ChatScreen>
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             "Online Matches",
-            style: opensansMedium.copyWith(fontSize: 16),
+            style: opensansSemiBold.copyWith(fontSize: 16),
           ),
         ),
         Padding(
@@ -185,10 +185,10 @@ class _ChatScreenState extends State<ChatScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
           child: Text(
             "Online Chat",
-            style: opensansMedium.copyWith(fontSize: 16),
+            style: opensansSemiBold.copyWith(fontSize: 16),
           ),
         ),
         TabBar(
@@ -275,7 +275,7 @@ class _ChatScreenState extends State<ChatScreen>
   ) {
     return ListTile(
       leading: CircleAvatar(radius: 26, backgroundImage: AssetImage(img)),
-      title: Text(name, style: opensansMedium.copyWith(fontSize: 15)),
+      title: Text(name, style: opensansSemiBold.copyWith(fontSize: 15)),
       subtitle: Text(
         msg,
         style: opensansMedium.copyWith(
@@ -314,7 +314,7 @@ class _ChatScreenState extends State<ChatScreen>
 
   Widget _divider() {
     return Padding(
-      padding: const EdgeInsets.only(left: 5, right: 15),
+      padding: const EdgeInsets.only(left: 5, right: 10),
       child: Divider(color: Colors.grey.shade400, thickness: 1),
     );
   }

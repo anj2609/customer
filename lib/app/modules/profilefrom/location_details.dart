@@ -5,6 +5,9 @@ import 'package:vivashri/app/modules/profilefrom/family_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/citycontroller.dart';
+import 'package:vivashri/data/controller/nationality.dart';
+import 'package:vivashri/data/controller/statecontroller.dart';
 
 class LocationDetailsScreen extends StatefulWidget {
   const LocationDetailsScreen({super.key});
@@ -18,6 +21,7 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
   String? nationality;
   String? residenceType;
   String? permanentHouse;
+  final cityC = Get.put(CityController());
 
   String? pState;
   String? pCity;
@@ -26,6 +30,7 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
   String? tCity;
 
   bool sameFill = false;
+  final countryC = Get.put(CountryController());
 
   // Controllers
   final pLandmark = TextEditingController();
@@ -33,6 +38,7 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
 
   final tLandmark = TextEditingController();
   final tPincode = TextEditingController();
+  final stateC = Get.put(StateController());
 
   // ----------------- SAME FILL FUNCTION -----------------
   void fillTemporaryAddress() {
@@ -76,17 +82,47 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
                       children: [
                         // Nationality
                         _label("Nationality:"),
-                        _dropdown(
-                          value: nationality,
-                          items: ["Indian", "NRI", "Other"],
-                          onChanged: (v) => setState(() => nationality = v),
-                        ),
+                        Obx(() {
+                          return _dropdown22(
+                            value: countryC.selectedCountryId.value.isEmpty
+                                ? null
+                                : countryC.selectedCountryId.value,
+
+                            onChanged: (v) {
+                              countryC.onSelect(v!);
+                            },
+
+                            items: countryC.countryList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id, // value = ID
+                                    child: Text(
+                                      e.name, // Show country name
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
 
                         // Residence
                         _label("Residence Type:"),
                         _dropdown(
                           value: residenceType,
-                          items: ["Urban", "Rural", "Semi-Urban"],
+                          items: [
+                            "Owned House",
+                            "Rented House",
+                            "Staying with Family",
+                            "Hostel / PG",
+                            "Company Accommodation",
+                            "Living Alone",
+                            "Living Abroad",
+                            "Other",
+                          ],
                           onChanged: (v) => setState(() => residenceType = v),
                         ),
 
@@ -94,7 +130,15 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
                         _label("Permanent House Type:"),
                         _dropdown(
                           value: permanentHouse,
-                          items: ["Owned", "Rented", "Ancestral"],
+                          items: [
+                            "Independent House",
+                            "Apartment / Flat",
+                            "Bungalow",
+                            "Ancestral Home",
+                            "Government Quarters / Staff Housing",
+                            "Temporary / Rented House",
+                            "Other",
+                          ],
                           onChanged: (v) => setState(() => permanentHouse = v),
                         ),
 
@@ -108,25 +152,70 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
                         ),
 
                         _label("State:"),
-                        _dropdown(
-                          value: pState,
-                          items: ["Gujarat", "Delhi", "UP", "Maharashtra"],
-                          onChanged: (v) {
-                            pState = v;
-                            fillTemporaryAddress();
-                          },
-                        ),
+                        Obx(() {
+                          return _cityc(
+                            value: stateC.selectedStateId.value.isEmpty
+                                ? null
+                                : stateC.selectedStateId.value,
+
+                            onChanged: (v) {
+                              stateC.onSelect(v!);
+                              cityC.fetchCity(v);
+                            },
+
+                            items: stateC.stateList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
 
                         _label("City:"),
-                        _dropdown(
-                          value: pCity,
-                          items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
-                          onChanged: (v) {
-                            pCity = v;
-                            fillTemporaryAddress();
-                          },
-                        ),
+                        Obx(() {
+                          return _cityc(
+                            value: cityC.selectedCityId.value.isEmpty
+                                ? null
+                                : cityC.selectedCityId.value,
 
+                            onChanged: (v) {
+                              cityC.onSelect(v!);
+                            },
+
+                            items: cityC.cityList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
+
+                        // _dropdown(
+                        //   value: pCity,
+                        //   items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
+                        //   onChanged: (v) {
+                        //     pCity = v;
+                        //     fillTemporaryAddress();
+                        //   },
+                        // ),
                         _label("Landmark/Remarks"),
                         _textField(
                           controller: pLandmark,
@@ -215,6 +304,85 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
             color: ColorResources.primarycolor2,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _cityc({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _boxDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: Colors.grey.shade400),
+    );
+  }
+
+  Widget _dropstateDown({
+    required String hint,
+    required String? value,
+    required Function(String?) onChanged,
+    required List<String> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: _boxDecoration(),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          hint: Text(
+            hint,
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          items: items
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(
+                    e,
+                    style: opensansMedium.copyWith(
+                      color: ColorResources.blackhalka,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: onChanged,
+        ),
       ),
     );
   }
@@ -321,6 +489,36 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _dropdown22({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
       ),
     );
   }

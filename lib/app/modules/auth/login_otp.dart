@@ -1,15 +1,43 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/auth/sign_up.dart';
 import 'package:vivashri/app/modules/profilefrom/basic_details.dart';
 import 'package:vivashri/config/utils/all_images.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/auth_controller.dart';
 
-class OtpScreen extends StatelessWidget {
-  const OtpScreen({super.key});
+class OtpScreen extends StatefulWidget {
+  final String? mobileemail;
+  final String? userid;
+  const OtpScreen({super.key, this.mobileemail, this.userid});
+
+  @override
+  State<OtpScreen> createState() => _OtpScreenState();
+}
+
+class _OtpScreenState extends State<OtpScreen> {
+  final List<TextEditingController> controllers = List.generate(
+    4,
+    (index) => TextEditingController(),
+  );
+
+  final List<FocusNode> focusNodes = List.generate(4, (index) => FocusNode());
+
+  void checkOtpAndSubmit() {
+    String otp = controllers.map((e) => e.text).join();
+    if (otp.length == 4) {
+      FocusScope.of(context).unfocus(); // hide keyboard
+      print("OTP Done: $otp");
+      //  hitApi(otp);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    focusNodes[0].requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +97,7 @@ class OtpScreen extends StatelessWidget {
                   child: Center(
                     child: Text(
                       "Login To Your Account",
-                      style: opensansMedium.copyWith(
+                      style: opensansSemiBold.copyWith(
                         fontSize: 20,
                         color: Colors.white,
                       ),
@@ -95,9 +123,9 @@ class OtpScreen extends StatelessWidget {
                     children: [
                       Text(
                         "Enter the one time password",
-                        style: opensansRegular.copyWith(
+                        style: opensansSemiBold.copyWith(
                           fontSize: 16,
-                          color: ColorResources.primarycolor,
+                          color: ColorResources.primarycolor3,
                         ),
                       ),
                       const SizedBox(height: 5),
@@ -106,8 +134,8 @@ class OtpScreen extends StatelessWidget {
                       const SizedBox(height: 5),
 
                       Text(
-                        "A code has been sent to nam*****@gmail.com",
-                        style: opensansRegular.copyWith(
+                        "A code has been sent to ${widget.mobileemail}",
+                        style: opensansMedium.copyWith(
                           color: ColorResources.blackgrey,
                           fontSize: 13,
                         ),
@@ -115,7 +143,6 @@ class OtpScreen extends StatelessWidget {
 
                       const SizedBox(height: 25),
 
-                      // OTP Boxes Row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: List.generate(
@@ -128,31 +155,63 @@ class OtpScreen extends StatelessWidget {
                               border: Border.all(color: Colors.black38),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const TextField(
+                            child: TextField(
+                              controller: controllers[index],
+                              focusNode: focusNodes[index],
                               textAlign: TextAlign.center,
                               keyboardType: TextInputType.number,
                               maxLength: 1,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 border: InputBorder.none,
                                 counterText: "",
                               ),
+
+                              onChanged: (value) {
+                                if (value.isNotEmpty) {
+                                  if (index < 3) {
+                                    FocusScope.of(
+                                      context,
+                                    ).requestFocus(focusNodes[index + 1]);
+                                  }
+                                  checkOtpAndSubmit();
+                                } else {
+                                  if (index > 0) {
+                                    FocusScope.of(
+                                      context,
+                                    ).requestFocus(focusNodes[index - 1]);
+
+                                    Future.delayed(
+                                      Duration(milliseconds: 50),
+                                      () {
+                                        controllers[index - 1].clear();
+                                      },
+                                    );
+                                  }
+                                }
+                              },
+
+                              onSubmitted: (_) => checkOtpAndSubmit(),
                             ),
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 35),
 
-                      // Submit OTP Button
                       GestureDetector(
                         onTap: () {
-                          Get.to(
-                            BasicDetailsScreen(),
-                            duration: Duration(
-                              milliseconds: ApiConstants.screenTransitionTime,
-                            ),
-                            transition: Transition.rightToLeft,
+                          Get.find<AuthController>().ortverifyapi(
+                            context: context,
+                            userid: widget.userid,
+                            otp: '1234',
+                            devicetoken: '',
                           );
+                          // Get.to(
+                          //   BasicDetailsScreen(),
+                          //   duration: Duration(
+                          //     milliseconds: ApiConstants.screenTransitionTime,
+                          //   ),
+                          //   transition: Transition.rightToLeft,
+                          // );
                         },
                         child: Container(
                           height: 50,
@@ -166,9 +225,9 @@ class OtpScreen extends StatelessWidget {
                           child: Center(
                             child: Text(
                               "Submit OTP",
-                              style: opensansRegular.copyWith(
+                              style: opensansSemiBold.copyWith(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 17,
                               ),
                             ),
                           ),
@@ -176,39 +235,6 @@ class OtpScreen extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 25),
-
-                      // Sign Up
-                      RichText(
-                        text: TextSpan(
-                          text: "New to Vivashri? ",
-                          style: opensansMedium.copyWith(
-                            color: Colors.grey.shade700,
-                            fontSize: 15,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: "Sign Up",
-                              style: opensansMedium.copyWith(
-                                color: ColorResources.primarycolor,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Get.to(
-                                    SignUpScreen(),
-                                    duration: Duration(
-                                      milliseconds:
-                                          ApiConstants.screenTransitionTime,
-                                    ),
-                                    transition: Transition.rightToLeft,
-                                  );
-                                },
-                            ),
-                            const TextSpan(text: " free."),
-                          ],
-                        ),
-                      ),
 
                       const SizedBox(height: 60),
                     ],

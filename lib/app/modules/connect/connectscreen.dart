@@ -99,7 +99,7 @@ class _ConnectScreenState extends State<ConnectScreen>
             ),
             child: Text(
               "Connect",
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 fontSize: 17,
                 color: ColorResources.blackhalkaa,
               ),
@@ -159,7 +159,7 @@ class _ConnectScreenState extends State<ConnectScreen>
         ),
         child: Text(
           title,
-          style: opensansMedium.copyWith(
+          style: opensansSemiBold.copyWith(
             color: isActive
                 ? ColorResources.primarycolor3
                 : ColorResources.blackhalka,
@@ -315,6 +315,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                         ),
                       ),
 
+                      // DETAILS L2
                       Text(
                         "• Teacher • Earns ₹15 Lacs p.a • Bihar",
                         style: opensansMedium.copyWith(
@@ -333,9 +334,9 @@ class _ConnectScreenState extends State<ConnectScreen>
             padding: const EdgeInsets.all(8.0),
             child: Text(
               "Invitation Received on 10 Sep",
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 color: ColorResources.primarycolor2,
-                fontSize: 15,
+                fontSize: 14,
               ),
             ),
           ),
@@ -381,7 +382,7 @@ class _ConnectScreenState extends State<ConnectScreen>
           SizedBox(width: 5),
           Text(
             text,
-            style: opensansMedium.copyWith(color: Colors.white, fontSize: 11),
+            style: opensansSemiBold.copyWith(color: Colors.white, fontSize: 11),
           ),
         ],
       ),
@@ -397,7 +398,7 @@ class _ConnectScreenState extends State<ConnectScreen>
       ),
       child: Text(
         text,
-        style: opensansMedium.copyWith(color: Colors.white, fontSize: 11),
+        style: opensansSemiBold.copyWith(color: Colors.white, fontSize: 11),
       ),
     );
   }

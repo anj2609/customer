@@ -1,15 +1,38 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/auth/login_otp.dart';
-import 'package:vivashri/app/modules/auth/sign_up.dart';
 import 'package:vivashri/config/utils/all_images.dart';
 import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/auth_controller.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  TextEditingController inputCtrl = TextEditingController();
+  bool isValid = false;
+  void validateInput(String value) {
+    if (RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+      setState(() => isValid = true);
+
+      FocusScope.of(context).unfocus();
+      return;
+    }
+
+    if (value.contains("@") &&
+        (value.endsWith("@gmail.com") || value.endsWith("@gmail.in"))) {
+      setState(() => isValid = true);
+
+      FocusScope.of(context).unfocus();
+      return;
+    }
+
+    setState(() => isValid = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +92,7 @@ class LoginScreen extends StatelessWidget {
                   child: Center(
                     child: Text(
                       "Login To Your Account",
-                      style: opensansMedium.copyWith(
+                      style: opensansSemiBold.copyWith(
                         fontSize: 20,
                         color: Colors.white,
                       ),
@@ -95,12 +118,12 @@ class LoginScreen extends StatelessWidget {
                     children: [
                       Text(
                         "Mobile No. / Email ID",
-                        style: opensansMedium.copyWith(
-                          fontSize: 15,
+                        style: opensansSemiBold.copyWith(
+                          fontSize: 14,
                           color: ColorResources.blackgrey,
                         ),
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 7),
 
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -108,7 +131,9 @@ class LoginScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: Colors.black38),
                         ),
-                        child: const TextField(
+                        child: TextField(
+                          onChanged: validateInput,
+                          controller: inputCtrl,
                           decoration: InputDecoration(border: InputBorder.none),
                         ),
                       ),
@@ -117,7 +142,7 @@ class LoginScreen extends StatelessWidget {
 
                       Text(
                         "We will send you OTP to login",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           fontSize: 13,
                           color: ColorResources.blackgrey,
                         ),
@@ -127,28 +152,43 @@ class LoginScreen extends StatelessWidget {
 
                       GestureDetector(
                         onTap: () {
-                          Get.to(
-                            OtpScreen(),
-                            duration: Duration(
-                              milliseconds: ApiConstants.screenTransitionTime,
-                            ),
-                            transition: Transition.rightToLeft,
-                          );
+                          if (isValid) {
+                            Get.find<AuthController>().userloginapi(
+                              context: context,
+                              mobileemail: inputCtrl.text.trim(),
+                            );
+                          } else {
+                            Get.snackbar(
+                              "Error",
+                              "Please Enter Your Number/Email",
+                              snackPosition: SnackPosition.TOP,
+                              backgroundColor: ColorResources.primarycolor2,
+                              colorText: Colors.white,
+                              margin: EdgeInsets.all(12),
+                            );
+                          }
                         },
+
                         child: Container(
                           height: 50,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFBE266B), Color(0xFFEB1D7B)],
-                            ),
+                            gradient: isValid
+                                ? const LinearGradient(
+                                    colors: [
+                                      Color(0xFFFBE266B),
+                                      Color(0xFFEB1D7B),
+                                    ],
+                                  )
+                                : null,
+                            color: !isValid ? Colors.grey.shade400 : null,
                           ),
                           child: Center(
                             child: Text(
                               "Send OTP",
-                              style: opensansRegular.copyWith(
+                              style: opensansMedium.copyWith(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 17,
                               ),
                             ),
                           ),
@@ -157,40 +197,42 @@ class LoginScreen extends StatelessWidget {
 
                       const SizedBox(height: 40),
 
-                      Center(
-                        child: RichText(
-                          text: TextSpan(
-                            text: "New to Vivashri? ",
-                            style: opensansMedium.copyWith(
-                              color: ColorResources.blackgrey,
-                              fontSize: 15,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: "Sign Up",
-                                style: opensansMedium.copyWith(
-                                  color: ColorResources.primarycolor,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Get.to(
-                                      SignUpScreen(),
-                                      duration: Duration(
-                                        milliseconds:
-                                            ApiConstants.screenTransitionTime,
-                                      ),
-                                      transition: Transition.rightToLeft,
-                                    );
-                                  },
-                              ),
-                              const TextSpan(text: " free."),
-                            ],
-                          ),
-                        ),
-                      ),
-
+                      // Center(
+                      //   child: RichText(
+                      //     text: TextSpan(
+                      //       text: "New to Vivashri? ",
+                      //       style: opensansSemiBold.copyWith(
+                      //         color: ColorResources.blackgrey,
+                      //         fontSize: 15,
+                      //       ),
+                      //       children: [
+                      //         TextSpan(
+                      //           text: "Sign Up",
+                      //           style: opensansSemiBold.copyWith(
+                      //             color: ColorResources.primarycolor,
+                      //             fontWeight: FontWeight.bold,
+                      //             decoration: TextDecoration.underline,
+                      //           ),
+                      //           recognizer: TapGestureRecognizer()
+                      //             ..onTap = () {
+                      //               Get.to(
+                      //                 SignUpScreen(),
+                      //                 duration: Duration(
+                      //                   milliseconds:
+                      //                       ApiConstants.screenTransitionTime,
+                      //                 ),
+                      //                 transition: Transition.rightToLeft,
+                      //               );
+                      //             },
+                      //         ),
+                      //         TextSpan(
+                      //           text: " free.",
+                      //           style: opensansSemiBold.copyWith(),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
                       const SizedBox(height: 120),
                     ],
                   ),

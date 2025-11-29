@@ -5,6 +5,7 @@ import 'package:vivashri/app/modules/profilefrom/more_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
 
 class FamilyDetailsScreen extends StatefulWidget {
   const FamilyDetailsScreen({super.key});
@@ -24,6 +25,23 @@ class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
   String? noOfSisterInLaw;
   String? noOfBrotherInLaw;
   String? totalFamilyMember;
+  StaperfromController stapercontroller = Get.put(StaperfromController());
+
+  List<String> getMarriedSisterList() {
+    if (noOfSister == null) return ["0"];
+
+    int count = int.tryParse(noOfSister!) ?? 0;
+
+    return List.generate(count + 1, (i) => "$i");
+  }
+
+  List<String> getMarriedBrotherList() {
+    if (noOfBrother == null) return ["0"];
+
+    int count = int.tryParse(noOfBrother!) ?? 0;
+
+    return List.generate(count + 1, (i) => "$i");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,42 +72,101 @@ class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
                         _label("No. of Sister:"),
                         _dropdown(
                           value: noOfSister,
-                          items: ["0", "1", "2", "3", "4"],
-                          onChanged: (v) => setState(() => noOfSister = v),
+                          items: [
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ],
+                          onChanged: (v) {
+                            setState(() {
+                              noOfSister = v;
+                              marriedSister = "0";
+                            });
+                          },
                         ),
 
                         _label("Married Sister:"),
+
                         _dropdown(
                           value: marriedSister,
-                          items: ["0", "1", "2", "3"],
-                          onChanged: (v) => setState(() => marriedSister = v),
+                          items: getMarriedSisterList(),
+                          onChanged: (v) {
+                            setState(() => marriedSister = v);
+                          },
                         ),
 
                         _label("No. of Brother:"),
                         _dropdown(
                           value: noOfBrother,
-                          items: ["0", "1", "2", "3"],
-                          onChanged: (v) => setState(() => noOfBrother = v),
+                          items: [
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ],
+                          onChanged: (v) {
+                            setState(() {
+                              noOfBrother = v;
+                              marriedBrother = "0"; // Reset married brother
+                            });
+                          },
                         ),
 
                         _label("Married Brother:"),
                         _dropdown(
                           value: marriedBrother,
-                          items: ["0", "1", "2", "3"],
-                          onChanged: (v) => setState(() => marriedBrother = v),
+                          items: getMarriedBrotherList(), // 🔥 Dynamic items
+                          onChanged: (v) {
+                            setState(() => marriedBrother = v);
+                          },
                         ),
 
                         _label("No. of Sister in Law:"),
                         _dropdown(
                           value: noOfSisterInLaw,
-                          items: ["0", "1", "2", "3"],
+                          items: [
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ],
                           onChanged: (v) => setState(() => noOfSisterInLaw = v),
                         ),
 
                         _label("No. of Brother in Law:"),
                         _dropdown(
                           value: noOfBrotherInLaw,
-                          items: ["0", "1", "2", "3"],
+                          items: [
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ],
                           onChanged: (v) =>
                               setState(() => noOfBrotherInLaw = v),
                         ),
@@ -97,7 +174,18 @@ class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
                         _label("Total Family Member:"),
                         _dropdown(
                           value: totalFamilyMember,
-                          items: ["1", "2", "3", "4", "5", "6", "7+"],
+                          items: [
+                            "0",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9",
+                          ],
                           onChanged: (v) =>
                               setState(() => totalFamilyMember = v),
                         ),
@@ -414,13 +502,28 @@ class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                MoreDetailsScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
+              stapercontroller.familydeatilsProfile(
+                formData: {
+                  "family_type": familyType,
+                  "family_value": familyValue,
+                  "no_of_sister": noOfSister,
+                  "married_sister": marriedSister,
+                  "no_of_brother": noOfBrother,
+                  "married_brother": marriedBrother,
+                  "no_of_sister_in_law": noOfSisterInLaw,
+                  "no_of_brother_in_law": noOfBrotherInLaw,
+                  "total_family": totalFamilyMember,
+                  "app_step": '8',
+                  "step": '8',
+                },
               );
+              // Get.to(
+              //   MoreDetailsScreen(),
+              //   duration: Duration(
+              //     milliseconds: ApiConstants.screenTransitionTime,
+              //   ),
+              //   transition: Transition.rightToLeft,
+              // );
             },
             child: Container(
               height: 45,

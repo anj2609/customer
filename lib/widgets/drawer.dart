@@ -54,13 +54,13 @@ class CustomAppDrawer extends StatelessWidget {
                     children: [
                       Text(
                         "Manoj Kumar Yadav",
-                        style: opensansMedium.copyWith(fontSize: 16),
+                        style: opensansSemiBold.copyWith(fontSize: 16),
                       ),
 
                       const SizedBox(height: 4),
                       Text(
                         "VS0733874596",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           fontSize: 13,
                           color: ColorResources.blackgrey,
                         ),
@@ -82,7 +82,7 @@ class CustomAppDrawer extends StatelessWidget {
                               children: [
                                 Text(
                                   "Upgrade Plan",
-                                  style: opensansMedium.copyWith(
+                                  style: opensansSemiBold.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
                                   ),
@@ -249,19 +249,19 @@ class CustomAppDrawer extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: opensansMedium.copyWith(
-                      fontSize: 16,
+                    style: opensansSemiBold.copyWith(
+                      fontSize: 15,
                       color: ColorResources.blackhalka,
                     ),
                   ),
                 ),
 
-                if (showArrow)
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: ColorResources.primarycolor3,
-                  ),
+                // if (showArrow)
+                //   Icon(
+                //     Icons.arrow_forward_ios,
+                //     size: 16,
+                //     color: ColorResources.primarycolor3,
+                //   ),
               ],
             ),
           ),

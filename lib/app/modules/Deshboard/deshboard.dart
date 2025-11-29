@@ -110,7 +110,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: Text(
               "Dashboard",
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 fontSize: 17,
                 color: ColorResources.blackhalkaa,
               ),
@@ -192,7 +192,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 5),
 
           Expanded(
             child: Column(
@@ -204,7 +204,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Flexible(
                       child: Text(
                         "Manoj Kumar Yadav",
-                        style: opensansMedium.copyWith(fontSize: 15),
+                        style: opensansSemiBold.copyWith(fontSize: 15),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -218,7 +218,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     Text(
                       "VS074596",
-                      style: opensansMedium.copyWith(
+                      style: opensansSemiBold.copyWith(
                         color: ColorResources.blackgrey,
                         fontSize: 13,
                       ),
@@ -246,7 +246,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       },
                       child: Text(
                         "My Profile",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           color: ColorResources.primarycolor3,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -304,7 +304,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     SizedBox(width: 4),
                     Text(
                       "Upload Photo",
-                      style: opensansMedium.copyWith(
+                      style: opensansSemiBold.copyWith(
                         color: ColorResources.primarycolor3,
                         fontSize: 13,
                       ),
@@ -318,7 +318,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Expanded(
                       child: Text(
                         "Record Short Intro",
-                        style: opensansMedium.copyWith(
+                        style: opensansSemiBold.copyWith(
                           color: ColorResources.primarycolor3,
                           fontSize: 13,
                         ),
@@ -366,7 +366,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 child: Text(
                   count,
-                  style: opensansMedium.copyWith(
+                  style: opensansSemiBold.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
@@ -374,7 +374,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              Text(label, style: opensansMedium.copyWith(fontSize: 14)),
+              Text(label, style: opensansSemiBold.copyWith(fontSize: 14)),
             ],
           ),
         ),
@@ -443,7 +443,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Image.asset('assets/images/Crown.png', height: 25),
 
               const SizedBox(width: 6),
-              Text("My Plan", style: opensansMedium.copyWith(fontSize: 16)),
+              Text("My Plan", style: opensansSemiBold.copyWith(fontSize: 16)),
               const Spacer(),
               GestureDetector(
                 onTap: () {
@@ -466,9 +466,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   child: Text(
                     "Upgrade Now",
-                    style: TextStyle(
+                    style: opensansSemiBold.copyWith(
                       color: ColorResources.primarycolor3,
-                      fontWeight: FontWeight.w600,
+
                       fontSize: 12,
                     ),
                   ),
@@ -533,7 +533,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: opensansMedium.copyWith(
+              style: opensansSemiBold.copyWith(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: ColorResources.primarycolor3,
@@ -542,7 +542,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(
               value,
               textAlign: TextAlign.center,
-              style: opensansMedium.copyWith(fontSize: 13),
+              style: opensansSemiBold.copyWith(fontSize: 13),
             ),
           ],
         ),
@@ -602,7 +602,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         Text(
                           "Contact Viewed",
-                          style: opensansMedium.copyWith(fontSize: 12.5),
+                          style: opensansSemiBold.copyWith(fontSize: 12.5),
                         ),
                       ],
                     ),
@@ -653,15 +653,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Text(
                 "Your Matches",
-                style: opensansMedium.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: opensansSemiBold.copyWith(fontSize: 16),
               ),
               Spacer(),
               Text(
                 "View All",
-                style: opensansMedium.copyWith(
+                style: opensansSemiBold.copyWith(
                   color: ColorResources.primarycolor3,
                   fontSize: 14,
                 ),
@@ -697,15 +694,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Text(
                 "Premium Matches",
-                style: opensansMedium.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: opensansSemiBold.copyWith(fontSize: 16),
               ),
               Spacer(),
               Text(
                 "View All",
-                style: opensansMedium.copyWith(
+                style: opensansSemiBold.copyWith(
                   color: ColorResources.primarycolor3,
                   fontSize: 14,
                 ),
@@ -765,22 +759,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Text(
                     "Srivalli Goyal",
-                    style: opensansMedium.copyWith(fontSize: 15),
+                    style: opensansSemiBold.copyWith(fontSize: 15),
                   ),
                   SizedBox(height: 4),
                   Text(
                     "33 yrs, 5' 3\", Hindi, Mumbai",
                     style: opensansMedium.copyWith(
                       fontSize: 12.5,
-                      color: ColorResources.blackgrey,
+                      color: ColorResources.blackcolor11,
                     ),
                   ),
-                  SizedBox(height: 2),
+
                   Text(
                     "Public Relations Professional",
                     style: opensansMedium.copyWith(
                       fontSize: 12.5,
-                      color: ColorResources.blackgrey,
+                      color: ColorResources.blackcolor11,
                     ),
                   ),
                 ],
@@ -851,7 +845,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Text(
                     "Srivalli Goyal",
-                    style: opensansMedium.copyWith(fontSize: 15),
+                    style: opensansSemiBold.copyWith(fontSize: 15),
                   ),
                   SizedBox(height: 4),
                   Text(
@@ -859,16 +853,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     maxLines: 1,
                     style: opensansMedium.copyWith(
                       fontSize: 12.5,
-                      color: ColorResources.blackgrey,
+                      color: ColorResources.blackcolor11,
                     ),
                   ),
-                  SizedBox(height: 2),
+
                   Text(
                     "Public Relations Professional",
                     maxLines: 1,
                     style: opensansMedium.copyWith(
                       fontSize: 12.5,
-                      color: ColorResources.blackgrey,
+                      color: ColorResources.blackcolor11,
                     ),
                   ),
                 ],

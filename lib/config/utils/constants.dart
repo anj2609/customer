@@ -1,10 +1,11 @@
 class ApiConstants {
   //==== base url =====
 
-  static const String baseUrl = 'https://aamdeal.beelink.bio/api/';
+  static const String baseUrl =
+      'https://testing.akslearning.in/vivashribackend/api/';
 
-  static const String signupapi = 'send-otp-signup';
-
+  static const String loginapi = 'front/send-otp';
+  static const String otpapi = 'user/verify-otp';
   static const int screenTransitionTime = 0;
 
   static const String theme = 'theme';
