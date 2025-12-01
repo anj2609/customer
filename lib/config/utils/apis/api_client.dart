@@ -17,6 +17,7 @@ class ApiClient extends GetxService {
   final int timeoutInSeconds = 30;
 
   String? token;
+  String? profileid;
   String? username;
   String? emailid;
   String? pancardno;

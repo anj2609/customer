@@ -101,11 +101,29 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
 
                         _label("State:"),
                         Obx(() {
-                          return _dropDown(
-                            hint: "Select State",
-                            value: stateC.selectedName.value,
-                            onChanged: (v) => stateC.onSelect(v!),
-                            items: stateC.stateList.map((e) => e.name).toList(),
+                          return _cityc(
+                            value: stateC.selectedStateId.value.isEmpty
+                                ? null
+                                : stateC.selectedStateId.value,
+
+                            onChanged: (v) {
+                              stateC.onSelect(v!);
+                            },
+
+                            items: stateC.stateList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
                           );
                         }),
 
@@ -191,6 +209,35 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
     );
   }
 
+  Widget _cityc({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
   // ---------------- TOP HEADER ----------------
 
   Widget _buildTopHeader() {

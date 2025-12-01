@@ -6,7 +6,10 @@ class CityController extends GetxController {
   var cityList = <CityModel>[].obs;
 
   var selectedCityId = "".obs;
+  var sameselectedCityId = "".obs;
+
   var selectedCityName = RxnString();
+  var sameeselectedCityName = RxnString();
 
   Future<void> fetchCity(String stateId) async {
     selectedCityId.value = "";
@@ -25,7 +28,23 @@ class CityController extends GetxController {
       ).map((e) => CityModel.fromJson(e)).toList();
     }
   }
+ Future<void> fetchCity222(String stateId) async {
+    sameselectedCityId.value = "";
+    sameeselectedCityName.value = null;
 
+    final url =
+        "https://testing.akslearning.in/vivashribackend/api/front/city/$stateId";
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+
+      cityList.value = List.from(
+        jsonData["data"],
+      ).map((e) => CityModel.fromJson(e)).toList();
+    }
+  }
   void onSelect(String id) {
     selectedCityId.value = id;
 
@@ -33,6 +52,15 @@ class CityController extends GetxController {
     selectedCityName.value = model.name;
 
     print("CITY ID = ${selectedCityId.value}");
+  }
+
+  void onSelect222(String id) {
+    sameselectedCityId.value = id;
+
+    var model = cityList.firstWhere((e) => e.id == id);
+    sameeselectedCityName.value = model.name;
+
+    print("CITY ID = ${sameselectedCityId.value}");
   }
 }
 

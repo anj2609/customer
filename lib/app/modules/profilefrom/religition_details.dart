@@ -545,16 +545,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                 );
               }
 
-              // print(
-              //   'religion:::::::${religionC.selectedId.value}:::caste::::::${casteC.selectedCasteId.value}::::subcaste::::::${subCasteC.selectedSubCasteId.value}',
-              // );
-              // Get.to(
-              //   ReferenceDetailsScreen(),
-              //   duration: Duration(
-              //     milliseconds: ApiConstants.screenTransitionTime,
-              //   ),
-              //   transition: Transition.rightToLeft,
-              // );
+         
             },
             child: Container(
               height: 45,

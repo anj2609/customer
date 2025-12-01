@@ -1,15 +1,14 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/profilefrom/education_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/citycontroller.dart';
 import 'package:vivashri/data/controller/complecxion.dart';
 import 'package:vivashri/data/controller/dietcontroller.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
 import 'package:vivashri/data/controller/hobbies.dart';
+import 'package:vivashri/widgets/dropdownitems.dart';
 
 class MoreDetailsScreen extends StatefulWidget {
   const MoreDetailsScreen({super.key});
@@ -39,66 +38,6 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
 
   List<String> selectedHobbies = [];
   final complexionC = Get.put(ComplexionController());
-  final heights = [
-    {"value": "4.1", "label": "4 ft 1 in"},
-    {"value": "4.2", "label": "4 ft 2 in"},
-    {"value": "4.3", "label": "4 ft 3 in"},
-    {"value": "4.4", "label": "4 ft 4 in"},
-    {"value": "4.5", "label": "4 ft 5 in"},
-    {"value": "4.6", "label": "4 ft 6 in"},
-    {"value": "4.7", "label": "4 ft 7 in"},
-    {"value": "4.8", "label": "4 ft 8 in"},
-    {"value": "4.9", "label": "4 ft 9 in"},
-    {"value": "4.10", "label": "4 ft 10 in"},
-    {"value": "4.11", "label": "4 ft 11 in"},
-
-    {"value": "5.0", "label": "5 ft"},
-    {"value": "5.1", "label": "5 ft 1 in"},
-    {"value": "5.2", "label": "5 ft 2 in"},
-    {"value": "5.3", "label": "5 ft 3 in"},
-    {"value": "5.4", "label": "5 ft 4 in"},
-    {"value": "5.5", "label": "5 ft 5 in"},
-    {"value": "5.6", "label": "5 ft 6 in"},
-    {"value": "5.7", "label": "5 ft 7 in"},
-    {"value": "5.8", "label": "5 ft 8 in"},
-    {"value": "5.9", "label": "5 ft 9 in"},
-    {"value": "5.10", "label": "5 ft 10 in"},
-    {"value": "5.11", "label": "5 ft 11 in"},
-
-    {"value": "6.0", "label": "6 ft"},
-    {"value": "6.1", "label": "6 ft 1 in"},
-    {"value": "6.2", "label": "6 ft 2 in"},
-    {"value": "6.3", "label": "6 ft 3 in"},
-    {"value": "6.4", "label": "6 ft 4 in"},
-    {"value": "6.5", "label": "6 ft 5 in"},
-    {"value": "6.6", "label": "6 ft 6 in"},
-    {"value": "6.7", "label": "6 ft 7 in"},
-    {"value": "6.8", "label": "6 ft 8 in"},
-    {"value": "6.9", "label": "6 ft 9 in"},
-    {"value": "6.10", "label": "6 ft 10 in"},
-    {"value": "6.11", "label": "6 ft 11 in"},
-
-    {"value": "7.0", "label": "7 ft"},
-    {"value": "7.1", "label": "7 ft 1 in"},
-    {"value": "7.2", "label": "7 ft 2 in"},
-    {"value": "7.3", "label": "7 ft 3 in"},
-    {"value": "7.4", "label": "7 ft 4 in"},
-    {"value": "7.5", "label": "7 ft 5 in"},
-    {"value": "7.6", "label": "7 ft 6 in"},
-    {"value": "7.7", "label": "7 ft 7 in"},
-    {"value": "7.8", "label": "7 ft 8 in"},
-    {"value": "7.9", "label": "7 ft 9 in"},
-    {"value": "7.10", "label": "7 ft 10 in"},
-    {"value": "7.11", "label": "7 ft 11 in"},
-
-    {"value": "8.0", "label": "8 ft"},
-    {"value": "8.1", "label": "8 ft 1 in"},
-    {"value": "8.2", "label": "8 ft 2 in"},
-    {"value": "8.3", "label": "8 ft 3 in"},
-    {"value": "8.4", "label": "8 ft 4 in"},
-    {"value": "8.5", "label": "8 ft 5 in"},
-    {"value": "8.6", "label": "8 ft 6 in"},
-  ];
 
   String? diet;
   String? cityOfBirth;
@@ -115,7 +54,8 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
   @override
   void initState() {
     super.initState();
-
+    hobbyC.fetchHobbies();
+    dietC.fetchDiet();
     cityC.fetchCity('68cd23efc04fec5457f4a866');
   }
 
@@ -870,26 +810,6 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
     );
   }
 
-  // ---------------- MANGLIK BUTTONS ----------------
-  // Widget _manglikButtons() {
-  //   return Row(
-  //     children: [
-  //       _selectButton("Yes", manglik == "Yes", () {
-  //         setState(() => manglik = "Yes");
-  //       }),
-  //       const SizedBox(width: 10),
-  //       _selectButton("No", manglik == "No", () {
-  //         setState(() => manglik = "No");
-  //       }),
-  //       const SizedBox(width: 10),
-  //       _selectButton("Angshik Manglik", manglik == "Angshik Manglik", () {
-  //         setState(() => manglik = "Angshik Manglik");
-  //       }),
-  //     ],
-  //   );
-  // }
-
-  // ---------------- DISABILITY BUTTONS ----------------
   Widget _disabilityButtons() {
     return Row(
       children: [
@@ -960,25 +880,118 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              stapercontroller.moredetailsapi(
-                formData: {
-                  "health_information": healthInfo,
-                  "disability": disability,
-                  "blood_group": bloodGroup,
-                  "diet": dietC.selectedDietId.value,
-                  "birth_hour": selectedHour,
-                  "birth_minute": selectedMin,
-                  "birth_am": selectedAmPm,
-                  "birth_city": cityC.selectedCityId.value,
-                  "manglik": manglik,
-                  "weight": weight,
-                  "height": height,
-                  "complexion": complexionC.selectedComplexionId.value,
-                  "app_step": '9',
-                  "step": '9',
-                },
-                selected: hobbyC.selectedHobbyIds,
-              );
+              if (hobbyC.selectedHobbyIds.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Hobbies ',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (dietC.selectedDietId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Diet ',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (selectedHour == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Time of Birth ',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (selectedMin == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Time of Birth ',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (selectedAmPm == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Time of Birth ',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (cityC.selectedCityId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your City of Birth ',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (manglik == "") {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Manglik Status ',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (weight == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Weight (in kg) ',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (height == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Height',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (complexionC.selectedComplexionId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Complexion',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (healthInfo == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Health Information',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (disability == "") {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Any Disability',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (bloodGroup == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Blood Group',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.moredetailsapi(
+                  formData: {
+                    "health_information": healthInfo,
+                    "disability": disability,
+                    "blood_group": bloodGroup,
+                    "diet": dietC.selectedDietId.value,
+                    "birth_hour": selectedHour,
+                    "birth_minute": selectedMin,
+                    "birth_am": selectedAmPm,
+                    "birth_city": cityC.selectedCityId.value,
+                    "manglik": manglik,
+                    "weight": weight,
+                    "height": height,
+                    "complexion": complexionC.selectedComplexionId.value,
+                    "app_step": '9',
+                    "step": '9',
+                  },
+                  selected: hobbyC.selectedHobbyIds,
+                );
+              }
             },
             child: Container(
               height: 45,

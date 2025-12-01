@@ -14,12 +14,12 @@ class EducationDetailsScreen extends StatefulWidget {
 }
 
 class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
-  String? highestDegree = "M.Com";
-  String? bachelorDegree = "B.Com";
+  String? highestDegree;
+  String? bachelorDegree;
   String? workingWith;
 
-  final masterCollege = TextEditingController(text: "Hindu College, Delhi");
-  final bachelorCollege = TextEditingController(text: "Hindu College, Delhi");
+  final masterCollege = TextEditingController();
+  final bachelorCollege = TextEditingController();
   final otherEducationDetails = TextEditingController();
   final annualIncome = TextEditingController();
   final occupation = TextEditingController();

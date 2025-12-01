@@ -8,7 +8,11 @@ class DietController extends GetxController {
   var selectedDietId = "".obs;
   var selectedDietName = RxnString();
 
-
+  @override
+  void onInit() {
+    fetchDiet();
+    super.onInit();
+  }
 
   Future<void> fetchDiet() async {
     final url = "https://testing.akslearning.in/vivashribackend/api/front/diet";
@@ -28,11 +32,10 @@ class DietController extends GetxController {
     selectedDietId.value = id;
 
     var selected = dietList.firstWhere((e) => e.id == id);
-
     selectedDietName.value = selected.name;
 
-    print("DIET SELECTED ID = ${selectedDietId.value}");
-    print("DIET SELECTED NAME = ${selectedDietName.value}");
+    print("DIET ID = ${selectedDietId.value}");
+    print("DIET NAME = ${selectedDietName.value}");
   }
 }
 

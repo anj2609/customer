@@ -3,14 +3,11 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/auth/login_screen.dart';
 import 'package:vivashri/app/modules/profilefrom/basic_details.dart';
-import 'package:vivashri/app/modules/profilefrom/contact_details.dart';
-import 'package:vivashri/app/modules/profilefrom/family_details.dart';
-import 'package:vivashri/app/modules/profilefrom/location_details.dart';
 import 'package:vivashri/app/modules/profilefrom/more_details.dart';
-import 'package:vivashri/app/modules/profilefrom/religition_details.dart';
 import 'package:vivashri/config/route.dart';
 import 'package:vivashri/config/utils/all_images.dart';
 import 'package:vivashri/config/utils/constants.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 
 class VivashriIntro extends StatefulWidget {
   const VivashriIntro({super.key});
@@ -28,6 +25,7 @@ class _VivashriIntroState extends State<VivashriIntro>
   late AnimationController contentController;
   late Animation<double> contentOpacity;
   late Animation<double> contentSlide;
+  final userC = Get.put(UserDetailController());
 
   @override
   void initState() {
@@ -71,10 +69,14 @@ class _VivashriIntroState extends State<VivashriIntro>
     Future.delayed(const Duration(milliseconds: 2300), () async {
       final prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString("token");
+      String? profileid = prefs.getString("profileid");
       print('Token:::::::::${token}');
+      print('profileid:::::::::${profileid}');
+
       if (token != null && token.isNotEmpty) {
+        // checkUser(profileid);
         Get.off(
-          MoreDetailsScreen(),
+          BasicDetailsScreen(),
           duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
           transition: Transition.rightToLeft,
         );
@@ -88,6 +90,62 @@ class _VivashriIntroState extends State<VivashriIntro>
       }
     });
   }
+
+  // Future<void> checkUser(userid) async {
+  //   await userC.fetchUserDetail(userid);
+
+  //   final step = userC.userData.value?.appStep;
+
+  //   if (step == null) {
+  //     Get.offAllNamed(Routes.dashboard);
+  //     return;
+  //   }
+
+  //   // if text → dashboard
+  //   if (step is String) {
+  //     Get.offAllNamed(Routes.dashboard);
+  //     return;
+  //   }
+
+  //   // 0 to 18 but skip 4
+  //   if (step is int) {
+  //     if (step == 4) {
+  //       Get.offAllNamed(Routes.dashboard);
+  //       return;
+  //     }
+
+  //     switch (step) {
+  //       case 0:
+  //         Get.offAllNamed(Routes.profilePage);
+  //         break;
+  //       case 1:
+  //         Get.offAllNamed(Routes.mobileDetailsPage);
+  //         break;
+  //       case 2:
+  //         Get.offAllNamed(Routes.addressPage);
+  //         break;
+  //       case 3:
+  //         Get.offAllNamed(Routes.educationPage);
+  //         break;
+
+  //       // 4 skip
+
+  //       case 5:
+  //         Get.offAllNamed(Routes.familyDetailsPage);
+  //         break;
+  //       case 6:
+  //         Get.offAllNamed(Routes.hobbiesPage);
+  //         break;
+
+  //       case 18:
+  //         Get.offAllNamed(Routes.finalSubmitPage);
+  //         break;
+
+  //       default:
+  //         Get.offAllNamed(Routes.dashboard);
+  //     }
+  //   }
+  // }
 
   @override
   void dispose() {

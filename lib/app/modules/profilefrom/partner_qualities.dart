@@ -5,6 +5,8 @@ import 'package:vivashri/app/modules/profilefrom/partner_basic_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
+import 'package:vivashri/data/controller/hobbies.dart';
 
 class PartnerQualitiesScreen extends StatefulWidget {
   const PartnerQualitiesScreen({super.key});
@@ -17,9 +19,11 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
   List<String> qualities = ["Independent", "Affectionate", "Curious", "Calm"];
 
   List<String> hobbies = ["Dancing", "Painting", "Politics", "Cooking"];
+  StaperfromController stapercontroller = Get.put(StaperfromController());
 
   List<String> selectedQualities = [];
   List<String> selectedPartnerHobbies = [];
+  final hobbyC = Get.put(HobbyController());
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +84,7 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
 
                         const SizedBox(height: 10),
 
-                        _chips(qualities, selectedQualities),
+                        _chips(qualities),
 
                         const SizedBox(height: 15),
                         Text(
@@ -103,8 +107,9 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
                         ),
 
                         const SizedBox(height: 8),
-                        _chips(hobbies, selectedPartnerHobbies),
+                        hobbiesScrollableBox(),
 
+                        // _chips(hobbies, selectedPartnerHobbies),
                         const SizedBox(height: 50),
                         _buttons(),
                         const SizedBox(height: 50),
@@ -231,22 +236,19 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
     );
   }
 
+  String? selectedChip;
   // ---------------- Chips / Selectable Tags ----------------
-  Widget _chips(List<String> items, List<String> selectedList) {
+  Widget _chips(List<String> items) {
     return Wrap(
       spacing: 5,
       runSpacing: 5,
       children: items.map((item) {
-        bool selected = selectedList.contains(item);
+        bool selected = selectedChip == item;
 
         return InkWell(
           onTap: () {
             setState(() {
-              if (selected) {
-                selectedList.remove(item);
-              } else {
-                selectedList.add(item);
-              }
+              selectedChip = item; // <-- sirf ek select hoga
             });
           },
           child: Container(
@@ -263,7 +265,6 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
               item,
               style: opensansMedium.copyWith(
                 fontSize: 13,
-
                 color: selected ? Colors.pink : Colors.black87,
               ),
             ),
@@ -271,6 +272,66 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
         );
       }).toList(),
     );
+  }
+
+  Widget hobbiesScrollableBox() {
+    return Obx(() {
+      return Container(
+        height: 170,
+        width: double.infinity,
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Scrollbar(
+          thumbVisibility: true,
+          thickness: 5,
+          radius: const Radius.circular(8),
+          child: SingleChildScrollView(
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: hobbyC.hobbyList.map((h) {
+                bool selected = hobbyC.selectedHobbyIds.contains(h.id);
+
+                return InkWell(
+                  onTap: () {
+                    hobbyC.toggleHobby(h.id);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: selected ? Colors.pink.shade50 : Colors.white,
+                      border: Border.all(
+                        color: selected
+                            ? ColorResources.primarycolor3
+                            : Colors.grey.shade400,
+                        width: 1.3,
+                      ),
+                    ),
+                    child: Text(
+                      h.name, // Name show
+                      style: opensansSemiBold.copyWith(
+                        fontSize: 13,
+                        color: selected
+                            ? ColorResources.primarycolor3
+                            : Colors.black87,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buttons() {
@@ -297,13 +358,38 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                PartnerBasicDetailsScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
-              );
+              if (selectedChip == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Partners Qualities',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (hobbyC.selectedHobbyIds.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Partners Hobbies',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.partnerqualities(
+                  formData: {
+                    "partner_qualities": selectedChip,
+
+                    "app_step": '12',
+                    "step": '12',
+                  },
+                  selected: hobbyC.selectedHobbyIds,
+                );
+              }
+              // Get.to(
+              //   PartnerBasicDetailsScreen(),
+              //   duration: Duration(
+              //     milliseconds: ApiConstants.screenTransitionTime,
+              //   ),
+              //   transition: Transition.rightToLeft,
+              // );
             },
             child: Container(
               height: 45,

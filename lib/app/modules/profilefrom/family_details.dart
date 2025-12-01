@@ -1,9 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/profilefrom/more_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
 
@@ -417,9 +415,9 @@ class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
                 ),
                 child: Text(
                   v,
-                  style: TextStyle(
+                  style: opensansSemiBold.copyWith(
                     fontSize: 13,
-                    fontWeight: FontWeight.w600,
+
                     color: selected
                         ? ColorResources.primarycolor3
                         : Colors.black87,
@@ -502,28 +500,86 @@ class _FamilyDetailsScreenState extends State<FamilyDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              stapercontroller.familydeatilsProfile(
-                formData: {
-                  "family_type": familyType,
-                  "family_value": familyValue,
-                  "no_of_sister": noOfSister,
-                  "married_sister": marriedSister,
-                  "no_of_brother": noOfBrother,
-                  "married_brother": marriedBrother,
-                  "no_of_sister_in_law": noOfSisterInLaw,
-                  "no_of_brother_in_law": noOfBrotherInLaw,
-                  "total_family": totalFamilyMember,
-                  "app_step": '8',
-                  "step": '8',
-                },
-              );
-              // Get.to(
-              //   MoreDetailsScreen(),
-              //   duration: Duration(
-              //     milliseconds: ApiConstants.screenTransitionTime,
-              //   ),
-              //   transition: Transition.rightToLeft,
-              // );
+              if (familyType == "") {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Family Type',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (familyValue == "") {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Family Value',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (noOfSister == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select No. of Sister',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (marriedSister == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select No. of Married Sister',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (noOfBrother == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select No. of Brother',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (marriedBrother == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select No. of Married Brother',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (noOfSisterInLaw == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select No. of Sister in Law',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (noOfBrotherInLaw == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select No. of Brother in Law',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (totalFamilyMember == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Total Family Member',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.familydeatilsProfile(
+                  formData: {
+                    "family_type": familyType,
+                    "family_value": familyValue,
+                    "no_of_sister": noOfSister,
+                    "married_sister": marriedSister,
+                    "no_of_brother": noOfBrother,
+                    "married_brother": marriedBrother,
+                    "no_of_sister_in_law": noOfSisterInLaw,
+                    "no_of_brother_in_law": noOfBrotherInLaw,
+                    "total_family": totalFamilyMember,
+                    "app_step": '8',
+                    "step": '8',
+                  },
+                );
+              }
             },
             child: Container(
               height: 45,

@@ -1,7 +1,10 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/dietcontroller.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
 
 class PartnerOtherDetailsScreen extends StatefulWidget {
   const PartnerOtherDetailsScreen({super.key});
@@ -14,8 +17,17 @@ class PartnerOtherDetailsScreen extends StatefulWidget {
 class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
   String? diet;
   String? drinking;
+  StaperfromController stapercontroller = Get.put(StaperfromController());
+
   String? smoking;
   String? profileManaged;
+  final dietC = Get.put(DietController());
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    dietC.fetchDiet();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,11 +76,33 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
 
                         // ---------------- Diet Preference ----------------
                         _label("Diet Preference:"),
-                        _dropdown(
-                          value: diet,
-                          items: ["Veg", "Non-Veg", "Jain", "Vegan"],
-                          onChanged: (v) => setState(() => diet = v),
-                        ),
+
+                        Obx(() {
+                          return _dropdown22(
+                            value: dietC.selectedDietId.value.isEmpty
+                                ? null
+                                : dietC.selectedDietId.value,
+
+                            onChanged: (v) {
+                              dietC.onSelect(v!);
+                            },
+
+                            items: dietC.dietList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
 
                         // ---------------- Drinking Habit ----------------
                         _label("Drinking Habit:"),
@@ -90,7 +124,12 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
                         _label("Profile Managed by:"),
                         _dropdown(
                           value: profileManaged,
-                          items: ["Self", "Parent", "Sibling", "Guardian"],
+                          items: [
+                            "Self",
+                            "Parent/Guardian",
+                            "Sibling/Friend/Other",
+                            "Open to All",
+                          ],
                           onChanged: (v) => setState(() => profileManaged = v),
                         ),
 
@@ -247,6 +286,36 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
     );
   }
 
+  Widget _dropdown22({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
   // ---------------- DROPDOWN ----------------
   Widget _dropdown({
     required String? value,
@@ -315,13 +384,47 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              // Get.to(
-              //   PartnerOtherDetailsScreen(),
-              //   duration: Duration(
-              //     milliseconds: ApiConstants.screenTransitionTime,
-              //   ),
-              //   transition: Transition.rightToLeft,
-              // );
+              if (dietC.selectedDietId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Diet Preference',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (drinking == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Drinking Habit',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (smoking == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Smoking Habit',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (profileManaged == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Profile Managed by',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.partnerotheredetauls(
+                  formData: {
+                    "partner_diet": dietC.selectedDietId.value,
+                    "partner_drinking": drinking,
+                    "partner_smoking": smoking,
+                    "partner_managed_by": profileManaged,
+                    "form_status": 'Completed',
+                    "app_step": '18',
+                    "step": '18',
+                  },
+                );
+              }
             },
             child: Container(
               height: 45,

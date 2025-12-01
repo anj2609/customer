@@ -76,6 +76,7 @@ class AuthController extends GetxController implements GetxService {
       print(':::::::::${response.body['user_id']}');
       EasyLoading.dismiss();
       authRepo.saveUserToken(response.body['token'].toString());
+      authRepo.saveUserprofileid(userid);
       Get.to(
         BasicDetailsScreen(),
         duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
@@ -100,6 +101,10 @@ class AuthController extends GetxController implements GetxService {
 
   String? getAuthToken() {
     return authRepo.getUserToken();
+  }
+
+  String? getAuthprofileid() {
+    return authRepo.getUserprofileid();
   }
 
   void logOut() {

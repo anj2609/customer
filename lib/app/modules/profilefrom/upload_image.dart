@@ -9,6 +9,7 @@ import 'package:vivashri/app/modules/profilefrom/partner_qualities.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/uplaodimagecontrol.dart';
 
 class UploadPhotoScreen extends StatefulWidget {
   const UploadPhotoScreen({super.key});
@@ -20,16 +21,17 @@ class UploadPhotoScreen extends StatefulWidget {
 class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
   File? pickedImage;
 
-  Future<void> pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+  // Future<void> pickImage() async {
+  //   final ImagePicker picker = ImagePicker();
+  //   final XFile? file = await picker.pickImage(source: ImageSource.gallery);
 
-    if (file != null) {
-      setState(() {
-        pickedImage = File(file.path);
-      });
-    }
-  }
+  //   if (file != null) {
+  //     setState(() {
+  //       pickedImage = File(file.path);
+  //     });
+  //   }
+  // }
+  final imgC = Get.put(ImageUploadController());
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +83,11 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
                         const SizedBox(height: 10),
 
                         // ------------ DOTTED BOX ------------
-                        _uploadBox(),
+                        _showBox(),
 
                         const SizedBox(height: 15),
-                        pickedImage == null ? _uploadimage() : _buttons(),
+                        //imgC.images.isEmpty ? _uploadimage() :
+                         _buttons(),
 
                         const SizedBox(height: 30),
 
@@ -268,33 +271,16 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                PartnerQualitiesScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
-              );
+              imgC.uploadImages();
+              // Get.to(
+              //   PartnerQualitiesScreen(),
+              //   duration: Duration(
+              //     milliseconds: ApiConstants.screenTransitionTime,
+              //   ),
+              //   transition: Transition.rightToLeft,
+              // );
             },
             child: Container(
               height: 45,
@@ -325,7 +311,7 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              pickImage();
+              imgC.pickImages();
             },
             child: Container(
               height: 45,
@@ -338,10 +324,7 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
               ),
               child: Text(
                 "Upload",
-                style: opensansMedium.copyWith(
-                  color: Colors.white,
-                  fontSize: 18,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
           ),
@@ -349,6 +332,37 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
       ],
     );
   }
+
+  // Widget _uploadimage() {
+  //   return Row(
+  //     children: [
+  //       Expanded(
+  //         child: GestureDetector(
+  //           onTap: () {
+  //             pickImage();
+  //           },
+  //           child: Container(
+  //             height: 45,
+  //             alignment: Alignment.center,
+  //             decoration: BoxDecoration(
+  //               borderRadius: BorderRadius.circular(10),
+  //               gradient: const LinearGradient(
+  //                 colors: [Color(0xFFBE266B), Color(0xFFEB1D7B)],
+  //               ),
+  //             ),
+  //             child: Text(
+  //               "Upload",
+  //               style: opensansMedium.copyWith(
+  //                 color: Colors.white,
+  //                 fontSize: 18,
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   // ---------------- INFO BOX ----------------
   Widget _infoBox(String big, String small) {
@@ -368,54 +382,134 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
     );
   }
 
-  // ---------------- UPLOAD DOTTED BOX ----------------
-  Widget _uploadBox() {
+  Widget _showBox() {
     return GestureDetector(
       onTap: () {
-        pickImage();
+        imgC.pickImages();
       },
-      child: DottedBorder(
-        options: RoundedRectDottedBorderOptions(
-          radius: Radius.circular(15),
-          strokeWidth: 1,
-          dashPattern: [8, 6],
-          color: Colors.grey,
-        ),
-        // color: Colors.grey,
-        // strokeWidth: 1.3,
-        // dashPattern: const [6, 4],
-        // borderType: BorderType.RRect,
-        // radius: const Radius.circular(15),
-        child: Container(
-          height: 220,
-          width: double.infinity,
-          alignment: Alignment.center,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              pickedImage == null
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        child: Obx(() {
+          return imgC.images.isEmpty
+              ? _emptyBox()
+              : GridView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: imgC.images.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemBuilder: (_, index) {
+                    return Stack(
                       children: [
-                        Image.asset('assets/images/imagebackk.png', height: 50),
-                        SizedBox(height: 10),
-                        Text(
-                          "Select File",
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            imgC.images[index],
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          ),
+                        ),
+
+                        /// delete button
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              imgC.images.removeAt(index);
+                            },
+                            child: CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Colors.red,
+                              child: Icon(
+                                Icons.close,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
-                    )
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(pickedImage!, fit: BoxFit.cover),
-                    ),
-            ],
-          ),
+                    );
+                  },
+                );
+        }),
+      ),
+    );
+  }
+
+  Widget _emptyBox() {
+    return DottedBorder(
+      // color: Colors.grey,
+      // strokeWidth: 1,
+      // dashPattern: [8, 6],
+      // borderType: BorderType.RRect,
+      // radius: Radius.circular(15),
+      child: Container(
+        height: 220,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/imagebackk.png', height: 50),
+            SizedBox(height: 10),
+            Text(
+              "Select File",
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  // ---------------- UPLOAD DOTTED BOX ----------------
+  // Widget _showBox() {
+  //   return GestureDetector(
+  //     onTap: () {
+  //       pickImage();
+  //     },
+  //     child: DottedBorder(
+  //       options: RoundedRectDottedBorderOptions(
+  //         radius: Radius.circular(15),
+  //         strokeWidth: 1,
+  //         dashPattern: [8, 6],
+  //         color: Colors.grey,
+  //       ),
+
+  //       child: Container(
+  //         height: 220,
+  //         width: double.infinity,
+  //         alignment: Alignment.center,
+  //         padding: const EdgeInsets.all(20),
+  //         child: Column(
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [
+  //             pickedImage == null
+  //                 ? Column(
+  //                     mainAxisAlignment: MainAxisAlignment.center,
+  //                     children: [
+  //                       Image.asset('assets/images/imagebackk.png', height: 50),
+  //                       SizedBox(height: 10),
+  //                       Text(
+  //                         "Select File",
+  //                         style: TextStyle(fontSize: 16, color: Colors.grey),
+  //                       ),
+  //                     ],
+  //                   )
+  //                 : ClipRRect(
+  //                     borderRadius: BorderRadius.circular(12),
+  //                     child: Image.file(pickedImage!, fit: BoxFit.cover),
+  //                   ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // ---------------- TIPS IMAGE ----------------
   Widget _tipExample(String label, String assetPath) {

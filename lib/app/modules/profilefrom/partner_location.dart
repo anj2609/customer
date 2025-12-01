@@ -5,6 +5,10 @@ import 'package:vivashri/app/modules/profilefrom/partner_education.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/citycontroller.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
+import 'package:vivashri/data/controller/nationality.dart';
+import 'package:vivashri/data/controller/statecontroller.dart';
 
 class PartnerLocationDetailsScreen extends StatefulWidget {
   const PartnerLocationDetailsScreen({super.key});
@@ -18,7 +22,12 @@ class _PartnerLocationDetailsScreenState
     extends State<PartnerLocationDetailsScreen> {
   String? nationality;
   String? stateValue;
+  StaperfromController stapercontroller = Get.put(StaperfromController());
+
   String? cityValue;
+  final countryC = Get.put(CountryController());
+  final stateC = Get.put(StateController());
+  final cityC = Get.put(CityController());
 
   @override
   Widget build(BuildContext context) {
@@ -67,27 +76,89 @@ class _PartnerLocationDetailsScreenState
 
                         // --------------- NATIONALITY ---------------
                         _label("Nationality:"),
-                        _dropdown(
-                          value: nationality,
-                          items: ["Indian", "NRI", "Other"],
-                          onChanged: (v) => setState(() => nationality = v),
-                        ),
+                        Obx(() {
+                          return _dropdown22(
+                            value: countryC.selectedCountryId.value.isEmpty
+                                ? null
+                                : countryC.selectedCountryId.value,
 
+                            onChanged: (v) {
+                              countryC.onSelect(v!);
+                            },
+
+                            items: countryC.countryList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id, // value = ID
+                                    child: Text(
+                                      e.name, // Show country name
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
                         // --------------- STATE ---------------
                         _label("State:"),
-                        _dropdown(
-                          value: stateValue,
-                          items: ["Gujarat", "Maharashtra", "Delhi", "Punjab"],
-                          onChanged: (v) => setState(() => stateValue = v),
-                        ),
+                        Obx(() {
+                          return _cityc(
+                            value: stateC.selectedStateId.value.isEmpty
+                                ? null
+                                : stateC.selectedStateId.value,
 
+                            onChanged: (v) {
+                              stateC.onSelect(v!);
+                              cityC.fetchCity(v);
+                            },
+
+                            items: stateC.stateList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
                         // --------------- CITY / DISTRICT ---------------
                         _label("City / District:"),
-                        _dropdown(
-                          value: cityValue,
-                          items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
-                          onChanged: (v) => setState(() => cityValue = v),
-                        ),
+                        Obx(() {
+                          return _cityc(
+                            value: cityC.selectedCityId.value.isEmpty
+                                ? null
+                                : cityC.selectedCityId.value,
+
+                            onChanged: (v) {
+                              cityC.onSelect(v!);
+                            },
+
+                            items: cityC.cityList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
 
                         const SizedBox(height: 40),
                         _buttons(),
@@ -105,6 +176,66 @@ class _PartnerLocationDetailsScreenState
             color: ColorResources.primarycolor2,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _cityc({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  Widget _dropdown22({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
       ),
     );
   }
@@ -243,48 +374,6 @@ class _PartnerLocationDetailsScreenState
   }
 
   // ---------------- DROPDOWN ----------------
-  Widget _dropdown({
-    required String? value,
-    required List<String> items,
-    required Function(String?) onChanged,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade400),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton(
-          value: value,
-          isExpanded: true,
-          icon: Icon(Icons.keyboard_arrow_down),
-          hint: Text(
-            "Select",
-            style: opensansMedium.copyWith(
-              color: ColorResources.blackhalka,
-              fontSize: 14,
-            ),
-          ),
-          items: items
-              .map(
-                (e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(
-                    e,
-                    style: opensansMedium.copyWith(
-                      color: ColorResources.blackhalka,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
 
   Widget _buttons() {
     return Row(
@@ -310,13 +399,46 @@ class _PartnerLocationDetailsScreenState
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                PartnerEducationCareerScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
-              );
+              if (countryC.selectedCountryId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Nationality',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (stateC.selectedStateId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your State',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (cityC.selectedCityId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your City',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.partnerlocationdetails(
+                  formData: {
+                    "partner_country": countryC.selectedCountryId.value,
+                    "partner_state": stateC.selectedStateId.value,
+                    "partner_city": cityC.selectedCityId.value,
+                    "app_step": '15',
+                    "step": '15',
+                  },
+                );
+              }
+
+              // Get.to(
+              //   PartnerEducationCareerScreen(),
+              //   duration: Duration(
+              //     milliseconds: ApiConstants.screenTransitionTime,
+              //   ),
+              //   transition: Transition.rightToLeft,
+              // );
             },
             child: Container(
               height: 45,

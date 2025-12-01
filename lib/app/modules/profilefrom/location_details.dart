@@ -6,6 +6,7 @@ import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/citycontroller.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
 import 'package:vivashri/data/controller/nationality.dart';
 import 'package:vivashri/data/controller/statecontroller.dart';
 
@@ -22,6 +23,7 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
   String? residenceType;
   String? permanentHouse;
   final cityC = Get.put(CityController());
+  StaperfromController stapercontroller = Get.put(StaperfromController());
 
   String? pState;
   String? pCity;
@@ -208,14 +210,6 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
                           );
                         }),
 
-                        // _dropdown(
-                        //   value: pCity,
-                        //   items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
-                        //   onChanged: (v) {
-                        //     pCity = v;
-                        //     fillTemporaryAddress();
-                        //   },
-                        // ),
                         _label("Landmark/Remarks"),
                         _textField(
                           controller: pLandmark,
@@ -223,7 +217,7 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
                         ),
 
                         _label("Pin code / zip code:"),
-                        _textField(
+                        _textpincode(
                           controller: pPincode,
                           keyboard: TextInputType.number,
                           onChanged: (v) => fillTemporaryAddress(),
@@ -252,37 +246,154 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
                                 });
                               },
                             ),
-                            const Text(
+                            Text(
                               "Same Fill",
-                              style: TextStyle(fontSize: 16),
+                              style: opensansSemiBold.copyWith(fontSize: 14),
                             ),
                           ],
                         ),
 
                         // TEMPORARY FIELDS
-                        _label("State:"),
-                        _dropdown(
-                          value: tState,
-                          items: ["Gujarat", "Delhi", "UP", "Maharashtra"],
-                          onChanged: sameFill
-                              ? null
-                              : (v) => setState(() => tState = v),
-                        ),
+                        sameFill == true
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _label("State:"),
+                                  Obx(() {
+                                    return _cityc(
+                                      value:
+                                          stateC.selectedStateId.value.isEmpty
+                                          ? null
+                                          : stateC.selectedStateId.value,
 
-                        _label("City:"),
-                        _dropdown(
-                          value: tCity,
-                          items: ["Ahmedabad", "Surat", "Mumbai", "Delhi"],
-                          onChanged: sameFill
-                              ? null
-                              : (v) => setState(() => tCity = v),
-                        ),
+                                      onChanged: (v) {
+                                        stateC.onSelect(v!);
+                                        cityC.fetchCity(v);
+                                      },
+
+                                      items: stateC.stateList
+                                          .map(
+                                            (e) => DropdownMenuItem(
+                                              value: e.id,
+                                              child: Text(
+                                                e.name,
+                                                style: opensansMedium.copyWith(
+                                                  color:
+                                                      ColorResources.blackhalka,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                    );
+                                  }),
+
+                                  _label("City:"),
+                                  Obx(() {
+                                    return _cityc(
+                                      value: cityC.selectedCityId.value.isEmpty
+                                          ? null
+                                          : cityC.selectedCityId.value,
+
+                                      onChanged: (v) {
+                                        cityC.onSelect(v!);
+                                      },
+
+                                      items: cityC.cityList
+                                          .map(
+                                            (e) => DropdownMenuItem(
+                                              value: e.id,
+                                              child: Text(
+                                                e.name,
+                                                style: opensansMedium.copyWith(
+                                                  color:
+                                                      ColorResources.blackhalka,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                    );
+                                  }),
+                                ],
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _label("State:"),
+                                  Obx(() {
+                                    return _cityc(
+                                      value:
+                                          stateC
+                                              .sameselectedStateId
+                                              .value
+                                              .isEmpty
+                                          ? null
+                                          : stateC.sameselectedStateId.value,
+
+                                      onChanged: (v) {
+                                        stateC.onSelect22(v!);
+                                        cityC.fetchCity222(v);
+                                      },
+
+                                      items: stateC.stateList
+                                          .map(
+                                            (e) => DropdownMenuItem(
+                                              value: e.id,
+                                              child: Text(
+                                                e.name,
+                                                style: opensansMedium.copyWith(
+                                                  color:
+                                                      ColorResources.blackhalka,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                    );
+                                  }),
+                                  _label("City:"),
+                                  Obx(() {
+                                    return _cityc(
+                                      value:
+                                          cityC.sameselectedCityId.value.isEmpty
+                                          ? null
+                                          : cityC.sameselectedCityId.value,
+
+                                      onChanged: (v) {
+                                        cityC.onSelect222(v!);
+                                      },
+
+                                      items: cityC.cityList
+                                          .map(
+                                            (e) => DropdownMenuItem(
+                                              value: e.id,
+                                              child: Text(
+                                                e.name,
+                                                style: opensansMedium.copyWith(
+                                                  color:
+                                                      ColorResources.blackhalka,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                    );
+                                  }),
+                                ],
+                              ),
 
                         _label("Landmark/Remarks"),
                         _textField(controller: tLandmark, enabled: !sameFill),
 
                         _label("Pin code / zip code:"),
-                        _textField(
+                        _textpincode(
                           controller: tPincode,
                           keyboard: TextInputType.number,
                           enabled: !sameFill,
@@ -594,6 +705,38 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
     );
   }
 
+  Widget _textpincode({
+    required TextEditingController controller,
+    bool enabled = true,
+    TextInputType keyboard = TextInputType.text,
+    void Function(String)? onChanged,
+  }) {
+    return TextField(
+      controller: controller,
+      enabled: enabled,
+      keyboardType: keyboard,
+      onChanged: onChanged,
+      maxLength: 6,
+      decoration: InputDecoration(
+        counterText: '',
+        filled: true,
+        fillColor: enabled ? Colors.white : Colors.grey.shade200,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 14,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: ColorResources.primarycolor),
+        ),
+      ),
+    );
+  }
+
   // ---------------- TextField ----------------
   Widget _textField({
     required TextEditingController controller,
@@ -649,13 +792,82 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                FamilyDetailsScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
-              );
+              if (countryC.selectedCountryId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Nationality',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (residenceType == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Residence Type',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (permanentHouse == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Permanent House Type',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (stateC.selectedStateId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select State',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (cityC.selectedCityId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select City',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (pLandmark.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Landmark',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (pPincode.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Pincode',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.locationdeatilss(
+                  formData: {
+                    "loc_nationality": countryC.selectedCountryId.value,
+                    "loc_residence_type": residenceType,
+                    "loc_house_type": permanentHouse,
+                    "loc_state": stateC.selectedStateId.value,
+                    "loc_city": cityC.selectedCityId.value,
+                    "loc_landmark": pLandmark.text.trim(),
+                    "loc_pincode": pPincode.text.trim(),
+                    "loc_temp_state": sameFill == true
+                        ? stateC.selectedStateId.value
+                        : stateC.sameselectedStateId.value,
+                    "loc_temp_city": sameFill == true
+                        ? cityC.selectedCityId.value
+                        : cityC.sameselectedCityId.value,
+                    "loc_temp_landmark": sameFill == true
+                        ? pLandmark.text.trim()
+                        : tLandmark.text.trim(),
+                    "loc_temp_pincode": sameFill == true
+                        ? pPincode.text.trim()
+                        : tPincode.text.trim(),
+                    "app_step": '7',
+                    "step": '7',
+                  },
+                );
+              }
             },
             child: Container(
               height: 45,

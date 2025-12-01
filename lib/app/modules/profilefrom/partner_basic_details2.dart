@@ -5,6 +5,7 @@ import 'package:vivashri/app/modules/profilefrom/partner_location.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
 
 class PartnerFamilyDetailsScreen extends StatefulWidget {
   const PartnerFamilyDetailsScreen({super.key});
@@ -18,6 +19,7 @@ class _PartnerFamilyDetailsScreenState
     extends State<PartnerFamilyDetailsScreen> {
   String familyType = "";
   String familyValue = "";
+  StaperfromController stapercontroller = Get.put(StaperfromController());
 
   List<String> familyValuesList = [
     "Orthodox",
@@ -340,13 +342,37 @@ class _PartnerFamilyDetailsScreenState
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                PartnerLocationDetailsScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
-              );
+              if (familyType == "") {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Family Type ',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (familyValue == "") {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Your Family Value',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.partnerfamilydetauls(
+                  formData: {
+                    "partner_family_type": familyType,
+                    "partner_family_value": familyValue,
+                    "app_step": '14',
+                    "step": '14',
+                  },
+                );
+              }
+              // Get.to(
+              //   PartnerLocationDetailsScreen(),
+              //   duration: Duration(
+              //     milliseconds: ApiConstants.screenTransitionTime,
+              //   ),
+              //   transition: Transition.rightToLeft,
+              // );
             },
             child: Container(
               height: 45,
