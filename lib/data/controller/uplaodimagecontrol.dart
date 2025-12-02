@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -37,7 +38,7 @@ class ImageUploadController extends GetxController {
       Get.snackbar("Error", "Please select at least 1 photo");
       return;
     }
-
+    EasyLoading.show();
     String? token = Get.find<AuthController>().getAuthToken();
 
     var url = Uri.parse(
@@ -51,8 +52,8 @@ class ImageUploadController extends GetxController {
       "Accept": "application/json",
     });
 
-    request.fields["formData[app_step]"] = "11";
-    request.fields["formData[step]"] = "11";
+    request.fields["app_step"] = "11";
+    request.fields["step"] = "11";
     Map<String, dynamic> formJson = {
       "formData": {
         "photo": images.isNotEmpty ? basename(images[0].path) : "",
@@ -68,7 +69,7 @@ class ImageUploadController extends GetxController {
     print(formJson);
 
     for (int i = 0; i < images.length; i++) {
-      String fieldName = i == 0 ? "formData[photo]" : "formData[photo$i]";
+      String fieldName = i == 0 ? "photo" : "photo$i";
 
       request.files.add(
         await http.MultipartFile.fromPath(
@@ -80,7 +81,7 @@ class ImageUploadController extends GetxController {
     }
 
     for (int i = images.length; i < 5; i++) {
-      String fieldName = i == 0 ? "formData[photo]" : "formData[photo$i]";
+      String fieldName = i == 0 ? "photo" : "photo$i";
       request.fields[fieldName] = "";
     }
 
@@ -88,9 +89,8 @@ class ImageUploadController extends GetxController {
       var response = await request.send();
       var resData = await response.stream.bytesToString();
 
-      print("📌 RESPONSE: $resData");
-
       if (response.statusCode == 200) {
+        EasyLoading.dismiss();
         Get.snackbar(
           "Success",
           "Uploaded Successfully",
@@ -104,9 +104,11 @@ class ImageUploadController extends GetxController {
           transition: Transition.rightToLeft,
         );
       } else {
+        EasyLoading.dismiss();
         Get.snackbar("Error", "Upload Failed", backgroundColor: Colors.red);
       }
     } catch (e) {
+      EasyLoading.dismiss();
       Get.snackbar("Exception", e.toString(), backgroundColor: Colors.red);
     }
   }

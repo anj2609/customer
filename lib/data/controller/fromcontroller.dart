@@ -15,6 +15,7 @@ import 'package:vivashri/app/modules/profilefrom/partner_education.dart';
 import 'package:vivashri/app/modules/profilefrom/partner_location.dart';
 import 'package:vivashri/app/modules/profilefrom/partner_other.dart';
 import 'package:vivashri/app/modules/profilefrom/partner_relition.dart';
+import 'package:vivashri/app/modules/profilefrom/upload_image.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/data/controller/auth_controller.dart';
 
@@ -1006,6 +1007,69 @@ class StaperfromController extends GetxController implements GetxService {
 
           Get.to(
             FamilyDetailsScreen(),
+            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+            transition: Transition.rightToLeft,
+          );
+        } else {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Error",
+            jsonResponse["message"] ?? "Something went wrong",
+          );
+        }
+      } else {
+        EasyLoading.dismiss();
+        Get.snackbar(
+          "Server Error",
+          jsonResponse["message"] ?? "Something went wrong",
+        );
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      print("Exception: $e");
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  //--=-=-=-=-=-=-==-=-- education details=-=-=-= -=-=-==-=-=--=-=
+  Future<void> edcuationdetailss({
+    required Map<String, dynamic> formData,
+  }) async {
+    String? token = Get.find<AuthController>().getAuthToken();
+
+    EasyLoading.show();
+
+    try {
+      isLoading.value = true;
+
+      var url = Uri.parse(
+        "https://testing.akslearning.in/vivashribackend/api/user/education-detail",
+      );
+
+      var body = jsonEncode({"formData": formData});
+
+      var response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: body,
+      );
+
+      print("Response: ${response.body}");
+
+      var jsonResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (jsonResponse["status"] == true) {
+          EasyLoading.dismiss();
+
+          Get.to(
+            UploadPhotoScreen(),
             duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
             transition: Transition.rightToLeft,
           );

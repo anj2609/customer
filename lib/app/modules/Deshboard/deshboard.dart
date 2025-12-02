@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
@@ -9,6 +10,7 @@ import 'package:vivashri/app/modules/shortisted/shortilisted.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/widgets/drawer.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -19,7 +21,20 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final usercontroller = Get.put(UserDetailController());
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool deshboard = true;
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        deshboard = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,51 +45,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: Color.fromARGB(255, 244, 229, 214),
       drawer: CustomAppDrawer(),
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopBar(w),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildProfileCard(context),
-                    const SizedBox(height: 1),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(25),
-                          topRight: Radius.circular(25),
+        child: Obx(() {
+          if (usercontroller.isLoading.value) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: ColorResources.primarycolor2,
+              ),
+            );
+          }
+
+          if (usercontroller.userData.value == null) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: ColorResources.primarycolor2,
+              ),
+            );
+          }
+
+          final data = usercontroller.userData.value!;
+          return Column(
+            children: [
+              _buildTopBar(w),
+
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildProfileCard(context),
+                      const SizedBox(height: 1),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(25),
+                            topRight: Radius.circular(25),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 15, bottom: 10),
+                          child: _buildInvitationStats(context),
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 15, bottom: 10),
-                        child: _buildInvitationStats(context),
+                      _buildMyPlanSection(context),
+
+                      Container(
+                        decoration: BoxDecoration(color: Colors.white),
+                        child: _buildPremiumInfoCard(context),
                       ),
-                    ),
-                    _buildMyPlanSection(context),
+                      Container(
+                        decoration: BoxDecoration(color: Colors.white),
+                        child: _buildMatchesSection(context),
+                      ),
 
-                    Container(
-                      decoration: BoxDecoration(color: Colors.white),
-                      child: _buildPremiumInfoCard(context),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(color: Colors.white),
-                      child: _buildMatchesSection(context),
-                    ),
-
-                    Container(
-                      decoration: BoxDecoration(color: Colors.white),
-                      child: _buildpremuimSection(context),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+                      Container(
+                        decoration: BoxDecoration(color: Colors.white),
+                        child: _buildpremuimSection(context),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -158,6 +193,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildProfileCard(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
+    final u = usercontroller.userData.value!;
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -203,12 +239,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     Flexible(
                       child: Text(
-                        "Manoj Kumar Yadav",
+                        "${u.name![0].toUpperCase()}${u.name!.substring(1).toLowerCase()}",
                         style: opensansSemiBold.copyWith(fontSize: 15),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
                     ),
+
                     const SizedBox(width: 6),
                     const Icon(Icons.verified, color: Colors.green, size: 15),
                   ],
@@ -339,6 +376,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildInvitationStats(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
     final cardWidth = (w - 16 * 3) / 2;
+    final u = usercontroller.userData.value!;
 
     Widget statCard(
       String count,
@@ -387,24 +425,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
         spacing: 16,
         runSpacing: 12,
         children: [
-          statCard("01", "Received Invitations", Colors.orange, () {
-            Get.to(
-              () => ConnectScreen(initialIndex: 0),
-              duration: Duration(
-                milliseconds: ApiConstants.screenTransitionTime,
-              ),
-              transition: Transition.rightToLeft,
-            );
-          }),
-          statCard("02", "Accepted Invitations", Colors.green, () {
-            Get.to(
-              () => ConnectScreen(initialIndex: 1),
-              duration: Duration(
-                milliseconds: ApiConstants.screenTransitionTime,
-              ),
-              transition: Transition.rightToLeft,
-            );
-          }),
+          statCard(
+            "${u.receivedInvitation}",
+            "Received Invitations",
+            Colors.orange,
+            () {
+              Get.to(
+                () => ConnectScreen(initialIndex: 0),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+          ),
+          statCard(
+            "${u.receivedInvitation}",
+            "Accepted Invitations",
+            Colors.green,
+            () {
+              Get.to(
+                () => ConnectScreen(initialIndex: 1),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+          ),
           statCard("02", "Shortlisted Profiles", Colors.pink, () {
             Get.to(
               () => ShortlistedScreen(),
@@ -414,15 +462,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
               transition: Transition.rightToLeft,
             );
           }),
-          statCard("18", "Sent Invitations", Colors.deepPurple, () {
-            Get.to(
-              () => ConnectScreen(initialIndex: 2),
-              duration: Duration(
-                milliseconds: ApiConstants.screenTransitionTime,
-              ),
-              transition: Transition.rightToLeft,
-            );
-          }),
+          statCard(
+            "${u.interestuser}",
+            "Sent Invitations",
+            Colors.deepPurple,
+            () {
+              Get.to(
+                () => ConnectScreen(initialIndex: 2),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+          ),
         ],
       ),
     );

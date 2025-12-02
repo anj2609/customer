@@ -4,10 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:vivashri/app/modules/profilefrom/partner_qualities.dart';
 import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/uplaodimagecontrol.dart';
 
@@ -87,7 +84,7 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
 
                         const SizedBox(height: 15),
                         //imgC.images.isEmpty ? _uploadimage() :
-                         _buttons(),
+                        _buttons(),
 
                         const SizedBox(height: 30),
 
@@ -273,14 +270,16 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              imgC.uploadImages();
-              // Get.to(
-              //   PartnerQualitiesScreen(),
-              //   duration: Duration(
-              //     milliseconds: ApiConstants.screenTransitionTime,
-              //   ),
-              //   transition: Transition.rightToLeft,
-              // );
+              if (imgC.images.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please select at least 1 and at most 5 images.',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                imgC.uploadImages();
+              }
             },
             child: Container(
               height: 45,
@@ -297,34 +296,6 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
                   color: Colors.white,
                   fontSize: 18,
                 ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _uploadimage() {
-    return Row(
-      children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              imgC.pickImages();
-            },
-            child: Container(
-              height: 45,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFBE266B), Color(0xFFEB1D7B)],
-                ),
-              ),
-              child: Text(
-                "Upload",
-                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
           ),
@@ -443,6 +414,11 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
 
   Widget _emptyBox() {
     return DottedBorder(
+      options: RectDottedBorderOptions(
+        strokeWidth: 1,
+        dashPattern: [3, 5],
+        color: Colors.grey.shade600,
+      ),
       // color: Colors.grey,
       // strokeWidth: 1,
       // dashPattern: [8, 6],

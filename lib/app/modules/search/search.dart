@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/nationality.dart';
+import 'package:vivashri/data/controller/occupation.dart';
+import 'package:vivashri/data/controller/qualification.dart';
+import 'package:vivashri/data/controller/religion.dart';
+import 'package:vivashri/data/controller/statecontroller.dart';
 import 'package:vivashri/widgets/drawer.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:vivashri/widgets/dropdownitems.dart';
 
 class BasicSearchPage extends StatefulWidget {
   const BasicSearchPage({super.key});
@@ -18,6 +25,9 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
 
   RangeValues ageRange = const RangeValues(25, 45);
   RangeValues heightRange = const RangeValues(120, 183);
+  final searchprofileid = TextEditingController();
+  final countryC = Get.put(CountryController());
+  final eduC = Get.put(EducationController());
 
   String? maritalStatus;
   String? motherTongue;
@@ -28,13 +38,16 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
   String? income;
   String? occupation;
   String? manglik;
+  final religionC = Get.put(ReligionController());
 
   List<String> maritalList = [
     "Never Married",
+    "Married",
     "Divorced",
     "Widow",
     "Separated",
   ];
+
   List<String> motherTongueList = ["Hindi", "English", "Gujarati", "Punjabi"];
   List<String> religionList = ["Hindu", "Muslim", "Sikh", "Christian"];
   List<String> countryList = ["India", "USA", "Canada", "UK"];
@@ -43,6 +56,7 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
   List<String> incomeList = ["1-2 Lakh", "2-5 Lakh", "5-10 Lakh", "10+ Lakh"];
   List<String> occupationList = ["Teacher", "Engineer", "Doctor", "Business"];
   List<String> manglikList = ["Yes", "No", "Angshik"];
+  final stateC = Get.put(StateController());
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +93,8 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
       ),
     );
   }
+
+  final occC = Get.put(OccupationController());
 
   Widget _buildTopBar(double width) {
     return Container(
@@ -165,6 +181,39 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
     );
   }
 
+  String? incomeFrom;
+  List<DropdownMenuItem<String>> buildIncomeItems(List<String> keys) {
+    return keys
+        .map(
+          (key) => DropdownMenuItem(
+            value: key, // "100000-200000"
+            child: Text(
+              incomeRange[key]!,
+              style: opensansMedium.copyWith(
+                color: ColorResources.blackhalka,
+                fontSize: 14,
+              ),
+            ), // "1 Lakh - 2 Lakh"
+          ),
+        )
+        .toList();
+  }
+
+  List<String> get fromIncomeKeys => incomeRange.keys.toList();
+  List<String> filteredToIncome(String? fromIncome) {
+    if (fromIncome == null) return incomeRange.keys.toList();
+
+    // extract first number from "100000-200000"
+    int selectedMin =
+        int.tryParse(fromIncome.split("-").first.replaceAll("Above ", "")) ?? 0;
+
+    return incomeRange.keys.where((key) {
+      String minPart = key.split("-").first.replaceAll("Above ", "");
+      int minValue = int.tryParse(minPart) ?? 0;
+      return minValue >= selectedMin;
+    }).toList();
+  }
+
   Widget _buildSearchBox(double w) {
     return Padding(
       padding: const EdgeInsets.only(left: 15, right: 15, top: 10),
@@ -187,7 +236,7 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _title("Search Profile Id:"),
-              _textField("Search Profile Id"),
+              _textField("Search Profile Id", controller: searchprofileid),
 
               _centerText("---- or ----"),
 
@@ -221,48 +270,156 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
                 motherTongue,
                 (v) => setState(() => motherTongue = v),
               ),
+              _label("Religion:"),
+              Obx(() {
+                return _dropdown(
+                  value: religionC.selectedId.value.isEmpty
+                      ? null
+                      : religionC.selectedId.value,
 
-              _dropDown(
-                "Religion",
-                religionList,
-                religion,
-                (v) => setState(() => religion = v),
-              ),
+                  onChanged: (v) {
+                    religionC.onSelectById(v!);
+                  },
 
-              _dropDown(
-                "Country",
-                countryList,
-                country,
-                (v) => setState(() => country = v),
-              ),
+                  items: religionC.religionList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+              _label("Nationality:"),
+              Obx(() {
+                return _dropdown(
+                  value: countryC.selectedCountryId.value.isEmpty
+                      ? null
+                      : countryC.selectedCountryId.value,
 
-              _dropDown(
-                "State",
-                stateList,
-                state,
-                (v) => setState(() => state = v),
-              ),
+                  onChanged: (v) {
+                    countryC.onSelect(v!);
+                  },
 
-              _dropDown(
-                "Education",
-                educationList,
-                education,
-                (v) => setState(() => education = v),
-              ),
+                  items: countryC.countryList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id, // value = ID
+                          child: Text(
+                            e.name, // Show country name
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
 
-              _dropDown(
-                "Annual Income",
-                incomeList,
-                income,
-                (v) => setState(() => income = v),
-              ),
+              _label("State:"),
+              Obx(() {
+                return _dropdown(
+                  value: stateC.selectedStateId.value.isEmpty
+                      ? null
+                      : stateC.selectedStateId.value,
 
-              _dropDown(
-                "Occupation",
-                occupationList,
-                occupation,
-                (v) => setState(() => occupation = v),
+                  onChanged: (v) {
+                    stateC.onSelect(v!);
+                  },
+
+                  items: stateC.stateList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+              SizedBox(height: 5),
+              _label("Highest Qualification"),
+              Obx(() {
+                return _dropdown(
+                  value: eduC.selectedEduId.value.isEmpty
+                      ? null
+                      : eduC.selectedEduId.value,
+
+                  onChanged: (v) {
+                    eduC.onSelect(v!);
+                  },
+
+                  items: eduC.educationList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+              SizedBox(height: 5),
+              _label("Annual Income"),
+              _dropdown(
+                value: incomeFrom,
+                items: buildIncomeItems(fromIncomeKeys),
+                onChanged: (v) {
+                  setState(() {
+                    incomeFrom = v;
+                    print('$incomeFrom');
+                  });
+                },
               ),
+              SizedBox(height: 5),
+              _label("Occupation"),
+              Obx(() {
+                return _dropdown(
+                  value: occC.selectedOccId.value.isEmpty
+                      ? null
+                      : occC.selectedOccId.value,
+
+                  onChanged: (v) {
+                    occC.onSelect(v!);
+                  },
+
+                  items: occC.occupationList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
 
               _dropDown(
                 "Manglik Status",
@@ -275,6 +432,56 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
               _searchBtn(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _label(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 5, bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: text,
+              style: opensansMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackgrey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _dropdown({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
         ),
       ),
     );
@@ -294,10 +501,11 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
     );
   }
 
-  Widget _textField(String hint) {
+  Widget _textField(String hint, {required TextEditingController controller}) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
       child: TextField(
+        controller: controller,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: opensansMedium.copyWith(
@@ -446,18 +654,18 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
   Widget _searchBtn() {
     return GestureDetector(
       onTap: () {
-        print("----- SEARCH VALUES -----");
+        print("----- SEARCH VALUES ----- ${searchprofileid.text}");
         print("Gender: ${gender == 0 ? "Bride" : "Groom"}");
         print("Age: ${ageRange.start} - ${ageRange.end}");
         print("Height: ${heightRange.start} - ${heightRange.end}");
         print("Marital: $maritalStatus");
         print("Mother Tongue: $motherTongue");
-        print("Religion: $religion");
-        print("Country: $country");
-        print("State: $state");
-        print("Education: $education");
-        print("Income: $income");
-        print("Occupation: $occupation");
+        print("Religion: ${religionC.selectedId.value}");
+        print("Country: ${countryC.selectedCountryId.value}");
+        print("State: ${stateC.selectedStateId.value}");
+        print("Education: ${eduC.selectedEduId.value}");
+        print("Income: ${incomeFrom}");
+        print("Occupation: ${occC.selectedOccId.value}");
         print("Manglik: $manglik");
       },
       child: Container(

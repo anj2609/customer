@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/match/matchscreen.dart';
+import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/app/modules/myprofile/my_profile.dart';
 import 'package:vivashri/app/modules/notification/notification.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 
 class CustomAppDrawer extends StatelessWidget {
   const CustomAppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(UserDetailController());
+
+    final u = controller.userData.value!;
+
     return Drawer(
       backgroundColor: Colors.white,
       width: MediaQuery.of(context).size.width * 0.78,
@@ -53,7 +59,7 @@ class CustomAppDrawer extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Manoj Kumar Yadav",
+                        "${u.name}",
                         style: opensansSemiBold.copyWith(fontSize: 16),
                       ),
 
@@ -67,44 +73,51 @@ class CustomAppDrawer extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 15,
-                              vertical: 4,
+                      GestureDetector(
+                        onTap: () {
+                          Get.to(
+                            MembershipPlansPage(),
+                            duration: Duration(
+                              milliseconds: ApiConstants.screenTransitionTime,
                             ),
-                            decoration: BoxDecoration(
-                              color: ColorResources.primarycolor3,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              children: [
-                                Text(
-                                  "Upgrade Plan",
-                                  style: opensansSemiBold.copyWith(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(3.0),
-                                    child: Image.asset(
-                                      "assets/images/Crown.png",
-                                      height: 18,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            transition: Transition.rightToLeft,
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 4,
                           ),
-                        ],
+                          decoration: BoxDecoration(
+                            color: ColorResources.primarycolor3,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                "Upgrade Plan",
+                                style: opensansSemiBold.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(3.0),
+                                  child: Image.asset(
+                                    "assets/images/Crown.png",
+                                    height: 18,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),

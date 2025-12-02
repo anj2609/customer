@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:vivashri/app/modules/auth/login_screen.dart';
 import 'package:vivashri/app/modules/profilefrom/basic_details.dart';
+import 'package:vivashri/app/modules/profilefrom/education_details.dart';
 import 'package:vivashri/app/modules/profilefrom/more_details.dart';
+import 'package:vivashri/app/modules/profilefrom/upload_image.dart';
 import 'package:vivashri/config/route.dart';
 import 'package:vivashri/config/utils/all_images.dart';
 import 'package:vivashri/config/utils/constants.dart';
@@ -76,7 +79,7 @@ class _VivashriIntroState extends State<VivashriIntro>
       if (token != null && token.isNotEmpty) {
         // checkUser(profileid);
         Get.off(
-          BasicDetailsScreen(),
+          EducationDetailsScreen(),
           duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
           transition: Transition.rightToLeft,
         );

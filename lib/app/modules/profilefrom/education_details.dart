@@ -5,6 +5,11 @@ import 'package:vivashri/app/modules/profilefrom/upload_image.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/eductiondrop.dart';
+import 'package:vivashri/data/controller/fromcontroller.dart';
+import 'package:vivashri/data/controller/occupation.dart';
+import 'package:vivashri/data/controller/workingas.dart';
+import 'package:vivashri/widgets/dropdownitems.dart';
 
 class EducationDetailsScreen extends StatefulWidget {
   const EducationDetailsScreen({super.key});
@@ -17,7 +22,6 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
   String? highestDegree;
   String? bachelorDegree;
   String? workingWith;
-
   final masterCollege = TextEditingController();
   final bachelorCollege = TextEditingController();
   final otherEducationDetails = TextEditingController();
@@ -25,6 +29,10 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
   final occupation = TextEditingController();
   final organizationName = TextEditingController();
   final previousWork = TextEditingController();
+  final controller = Get.put(EducationController22222());
+  StaperfromController stapercontroller = Get.put(StaperfromController());
+  final workingC = Get.put(WorkingWithController());
+  final occC = Get.put(OccupationController());
 
   @override
   void dispose() {
@@ -38,6 +46,9 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
     super.dispose();
   }
 
+  dynamic idddd;
+  dynamic bcaaaa;
+  dynamic secoudddddd;
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
@@ -58,25 +69,194 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Highest Degree
                         _label("Highest Degree:"),
-                        _dropdown(
-                          value: highestDegree,
-                          items: ["M.Com", "MBA", "MCA", "MA", "MSc"],
-                          onChanged: (v) => setState(() => highestDegree = v),
-                        ),
+                        Obx(() {
+                          // if (controller.isLoading.value) {
+                          //   return CircularProgressIndicator();
+                          // }
+
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 0,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade400),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: DropdownButton<EducationModel>(
+                              isExpanded: true,
+                              underline: SizedBox(),
+                              hint: Text(
+                                "Select",
+                                style: opensansMedium.copyWith(
+                                  color: ColorResources.blackhalka,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              value: controller.selectedMain.value,
+                              icon: Icon(Icons.keyboard_arrow_down),
+
+                              items: controller.educationList.map((item) {
+                                return DropdownMenuItem(
+                                  value: item,
+                                  child: Text(
+                                    item.name,
+                                    style: opensansMedium.copyWith(
+                                      color: ColorResources.blackhalka,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+
+                              onChanged: (value) {
+                                controller.selectedMain.value = value;
+                                controller.selectedSub.value = null;
+                                controller.selectedThird.value = null;
+                                print("Main Selected ID: ${value!.id}");
+                                print(
+                                  "Main Selected Type: ${value.educationType}",
+                                );
+                                bcaaaa = value.id;
+                                idddd = value.educationType;
+                                controller.updateFilteredList();
+                                setState(() {});
+                              },
+                            ),
+                          );
+                        }),
+                        controller.selectedMain.value == null
+                            ? SizedBox()
+                            : idddd == 2
+                            ? _label("Bachelor Degree::")
+                            : _label("PG Degree::"),
+
+                        SizedBox(height: 5),
+                        Obx(() {
+                          if (controller.selectedMain.value == null)
+                            return SizedBox();
+
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade400),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: DropdownButton<EducationModel>(
+                              isExpanded: true,
+                              underline: SizedBox(),
+                              hint: Text(
+                                "Select",
+                                style: opensansMedium.copyWith(
+                                  color: ColorResources.blackhalka,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              value: controller.selectedSub.value,
+                              icon: Icon(Icons.keyboard_arrow_down),
+
+                              items: controller.filteredList.map((item) {
+                                return DropdownMenuItem(
+                                  value: item,
+                                  child: Text(
+                                    item.name,
+                                    style: opensansMedium.copyWith(
+                                      color: ColorResources.blackhalka,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+
+                              onChanged: (value) {
+                                controller.selectedSub.value = value;
+                                secoudddddd = value!.id;
+                                print(
+                                  "Second Dropdown Selected ID: ${value!.id}",
+                                );
+                              },
+                            ),
+                          );
+                        }),
+                        SizedBox(height: 0),
+                        _topLabel("College Name"),
+                        _textField(controller: masterCollege),
+                        controller.selectedMain.value == null
+                            ? SizedBox()
+                            : bcaaaa == "68cd44430402fd89b727bde0"
+                            ? SizedBox()
+                            : _label("Bachelor Degree:"),
+                        bcaaaa == "68cd44430402fd89b727bde0"
+                            ? SizedBox()
+                            : Obx(() {
+                                if (controller.selectedMain.value == null)
+                                  return SizedBox();
+
+                                return Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.grey.shade400,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: DropdownButton<EducationModel>(
+                                    isExpanded: true,
+                                    underline: SizedBox(),
+                                    hint: Text(
+                                      "Select",
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    value: controller.selectedThird.value,
+                                    icon: Icon(Icons.keyboard_arrow_down),
+
+                                    items: controller.thirdList.map((item) {
+                                      return DropdownMenuItem(
+                                        value: item,
+                                        child: Text(
+                                          item.name,
+                                          style: opensansMedium.copyWith(
+                                            color: ColorResources.blackhalka,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+
+                                    onChanged: (value) {
+                                      controller.selectedThird.value = value;
+
+                                      print(
+                                        "Third Dropdown Selected ID: ${value!.id}",
+                                      );
+                                    },
+                                  ),
+                                );
+                              }),
+                        // Highest Degree
+                        // _dropdown(
+                        //   value: highestDegree,
+                        //   items: ["M.Com", "MBA", "MCA", "MA", "MSc"],
+                        //   onChanged: (v) => setState(() => highestDegree = v),
+                        // ),
 
                         // Master College Name
-                        _topLabel("Master College Name"),
-                        _textField(controller: masterCollege),
 
-                        // Bachelor Degree
-                        _label("Bachelor Degree:"),
-                        _dropdown(
-                          value: bachelorDegree,
-                          items: ["B.Com", "BBA", "BCA", "BA", "BSc"],
-                          onChanged: (v) => setState(() => bachelorDegree = v),
-                        ),
+                        // _dropdown(
+                        //   value: bachelorDegree,
+                        //   items: ["B.Com", "BBA", "BCA", "BA", "BSc"],
+                        //   onChanged: (v) => setState(() => bachelorDegree = v),
+                        // ),
 
                         // Bachelor College Name
                         _topLabel("Bachelor College Name"),
@@ -97,25 +277,76 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
 
                         // Annual Income
                         _label("Annual Income:"),
-                        _textField(controller: annualIncome),
+                        _dropdown2(
+                          value: incomeFrom,
+                          items: buildIncomeItems(fromIncomeKeys),
+                          onChanged: (v) {
+                            setState(() {
+                              incomeFrom = v;
+                              print('$incomeFrom');
+                            });
+                          },
+                        ),
+                        // _textField(controller: annualIncome),
 
                         // Working With
                         _label("Working With:"),
-                        _dropdown(
-                          value: workingWith,
-                          items: [
-                            "Private Job",
-                            "Government Job",
-                            "Business",
-                            "Self Employed",
-                            "Not Working",
-                          ],
-                          onChanged: (v) => setState(() => workingWith = v),
-                        ),
+                        Obx(() {
+                          return _dropdown2(
+                            value: workingC.selectedWorkingId.value.isEmpty
+                                ? null
+                                : workingC.selectedWorkingId.value,
+
+                            onChanged: (v) {
+                              workingC.onSelect(v!);
+                            },
+
+                            items: workingC.workingList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
 
                         // Occupation
                         _label("Occupation:"),
-                        _textField(controller: occupation),
+                        Obx(() {
+                          return _dropdown2(
+                            value: occC.selectedOccId.value.isEmpty
+                                ? null
+                                : occC.selectedOccId.value,
+
+                            onChanged: (v) {
+                              occC.onSelect(v!);
+                            },
+
+                            items: occC.occupationList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.blackhalka,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }),
+                        // _textField(controller: occupation),
 
                         // Organization Name
                         _label("Organization Name:"),
@@ -143,6 +374,39 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
         ],
       ),
     );
+  }
+
+  String? incomeFrom;
+  List<DropdownMenuItem<String>> buildIncomeItems(List<String> keys) {
+    return keys
+        .map(
+          (key) => DropdownMenuItem(
+            value: key, // "100000-200000"
+            child: Text(
+              incomeRange[key]!,
+              style: opensansMedium.copyWith(
+                color: ColorResources.blackhalka,
+                fontSize: 14,
+              ),
+            ), // "1 Lakh - 2 Lakh"
+          ),
+        )
+        .toList();
+  }
+
+  List<String> get fromIncomeKeys => incomeRange.keys.toList();
+  List<String> filteredToIncome(String? fromIncome) {
+    if (fromIncome == null) return incomeRange.keys.toList();
+
+    // extract first number from "100000-200000"
+    int selectedMin =
+        int.tryParse(fromIncome.split("-").first.replaceAll("Above ", "")) ?? 0;
+
+    return incomeRange.keys.where((key) {
+      String minPart = key.split("-").first.replaceAll("Above ", "");
+      int minValue = int.tryParse(minPart) ?? 0;
+      return minValue >= selectedMin;
+    }).toList();
   }
 
   Widget _header() {
@@ -291,6 +555,37 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
     );
   }
 
+  Widget _dropdown2({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
   // -------------------- DROPDOWN --------------------
   Widget _dropdown({
     required String? value,
@@ -407,13 +702,75 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              Get.to(
-                UploadPhotoScreen(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
-              );
+              if (bcaaaa == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Highest Degree',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (masterCollege.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Collage Name',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (bachelorCollege.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Bachelor Collage Name',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (incomeFrom == null) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Annual Income',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (workingC.selectedWorkingId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Working',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (occC.selectedOccId.value.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Select Occupation',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else if (organizationName.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Please Enter Organization Name',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              } else {
+                stapercontroller.edcuationdetailss(
+                  formData: {
+                    "highest_degree": bcaaaa,
+                    "pg_degree": bcaaaa,
+                    "pg_college_name": masterCollege.text.trim(),
+                    "ug_degree": secoudddddd,
+                    "ug_college_name": bachelorCollege.text.trim(),
+                    "school_name": bachelorCollege.text,
+                    "other_education": otherEducationDetails.text,
+                    "annual_income": incomeFrom,
+                    "working_with": workingC.selectedWorkingId.value,
+                    "occupation": occC.selectedOccId.value,
+                    "organization_name": organizationName.text,
+                    "prev_working_detail": previousWork.text.trim(),
+                    "app_step": '10',
+                    "step": '10',
+                  },
+                );
+              }
             },
             child: Container(
               height: 45,

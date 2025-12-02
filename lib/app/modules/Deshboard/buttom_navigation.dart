@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/Deshboard/deshboard.dart';
 import 'package:vivashri/app/modules/chat/chatscreen.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
@@ -10,6 +12,7 @@ import 'package:vivashri/app/modules/match/matchscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -20,6 +23,7 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
+  final usercontroller = Get.put(UserDetailController());
 
   final List<Widget> _pages = [
     DashboardScreen(),
@@ -28,6 +32,19 @@ class _MainNavigationState extends State<MainNavigation> {
     ChatScreen(),
     MembershipPlansPage(),
   ];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    profileapi();
+  }
+
+  void profileapi() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? profileid = prefs.getString("profileid");
+    usercontroller.fetchUserDetail(profileid.toString());
+  }
 
   @override
   Widget build(BuildContext context) {

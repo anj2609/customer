@@ -5,6 +5,7 @@ import 'package:vivashri/app/modules/search/search.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/membership.dart';
 import 'package:vivashri/widgets/drawer.dart';
 
 class MembershipPlansPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class MembershipPlansPage extends StatefulWidget {
 
 class _MembershipPlansPageState extends State<MembershipPlansPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final controller = Get.put(MembershipPlanController());
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +41,26 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
                     child: Column(
                       children: [
                         Image.asset('assets/images/Frame 66.png'),
+                        Obx(() {
+                          if (controller.isLoading.value) {
+                            return Center(child: CircularProgressIndicator());
+                          }
 
-                        _buildPlanScroller(w),
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            padding: EdgeInsets.all(20),
+                            child: Row(
+                              children: controller.planList.map((p) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 20),
+                                  child: _planCard(p.name, p.price),
+                                );
+                              }).toList(),
+                            ),
+                          );
+                        }),
+                        SizedBox(height: 10),
+                        //   _buildPlanScroller(w),
                         Image.asset('assets/images/Frame 65.png'),
                         Padding(
                           padding: const EdgeInsets.all(10.0),
@@ -92,6 +112,234 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
             height: statusBarHeight,
             width: double.infinity,
             color: ColorResources.primarycolor2,
+          ),
+        ],
+      ),
+    );
+  }
+
+  final Map<String, List<Color>> planGradients = {
+    "Basic": [Color(0xFFBE3272), Color(0xFFEB4E76)],
+    "Gold": [Color(0xffEE8931), Color(0xffEEAC31)],
+    "Premium": [Color(0xff96A737), Color(0xffA3B924)],
+    "VIP": [Color(0xff2C3BE4), Color(0xff222FB8)],
+  };
+
+  final Map<String, List<Color>> buttonGradients = {
+    "Basic": [Color(0xFFBE3272), Color(0xFFEB4E76)],
+    "Gold": [Color(0xffEE8931), Color(0xffEEAC31)],
+    "Premium": [Color(0xff96A737), Color(0xffA3B924)],
+    "VIP": [Color(0xff2C3BE4), Color(0xff222FB8)],
+  };
+  final Map<String, String> planImages = {
+    "Basic": "assets/images/Frame 74.png",
+    "Gold": "assets/images/Frame 75.png",
+    "Premium": "assets/images/Frame 76.png",
+    "VIP": "assets/images/Frame 77.png",
+  };
+  final Map<String, String> planTitles = {
+    "Basic": "Create profile and set Partner preferences",
+    "Gold": "Full access of profile view",
+    "Premium": "Full Access of profile view",
+    "VIP": "Handpicked high-profile matches",
+  };
+  static const List<String> basicFeatures = [
+    "Create profile and set Partner preferences",
+    "Basic Search Access",
+    "View limited number of profiles per day",
+    "Chat only profile is interested",
+    "Limited visibility in match suggestions",
+  ];
+
+  static const List<String> goldFeatures = [
+    "Full access of profile view",
+    "Voice and Video calling feature",
+    "Send 50 messages",
+    "View 100 contacts",
+    "Profile highlight for 3 days",
+  ];
+
+  static const List<String> premiumFeatures = [
+    "Full Access of profile view",
+    "Voice and Video calling feature",
+    "Unlimited messages",
+    "View 300 contacts",
+    "Profile highlight for 7 days",
+    "Dedicated manager",
+  ];
+
+  static const List<String> vipFeatures = [
+    "Handpicked high-profile matches",
+    "Guaranteed introductions",
+    "Confidential handling",
+    "Dedicated manager",
+    "Unlimited messages",
+  ];
+
+  static const Map<String, List<String>> planFeatures = {
+    "Basic": basicFeatures,
+    "Gold": goldFeatures,
+    "Premium": premiumFeatures,
+    "VIP": vipFeatures,
+  };
+  static const Map<String, Color> tickColors = {
+    "Basic": Color(0xFFBE3272),
+    "Gold": Color(0xffEE8931),
+    "Premium": Color(0xff96A737),
+    "VIP": Color(0xff2C3BE4),
+  };
+
+  String selectedPlan = "Basic";
+  void selectPlan(String plan) {
+    setState(() {
+      selectedPlan = plan;
+    });
+  }
+
+  Widget _planCard(String name, int price) {
+    final headerColors =
+        planGradients[name] ?? [Color(0xffBE3272), Color(0xffEB4E76)];
+
+    final buttonColors =
+        buttonGradients[name] ?? [Color(0xffBE3272), Color(0xffEB4E76)];
+
+    final features = planFeatures[name] ?? const [];
+
+    final tickColor = tickColors[name] ?? Colors.grey;
+
+    return GestureDetector(
+      onTap: () => selectPlan(name), // ⭐ Card tap = select
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 300,
+            height: 430,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              color: Colors.white,
+
+              // ⭐ SELECTED BORDER LOGIC
+              border: Border.all(
+                color: selectedPlan == name
+                    ? ColorResources.primarycolor2
+                    : Colors.transparent,
+                width: selectedPlan == name ? 1 : 0,
+              ),
+
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+
+            child: Column(
+              children: [
+                // ⭐ FIXED HEADER
+                Container(
+                  height: 120,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: headerColors,
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(18),
+                      topRight: Radius.circular(18),
+                    ),
+                  ),
+                  child: Image.asset(
+                    planImages[name]!,
+                    height: 75,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+
+                // ⭐ FEATURES
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ...features.map(
+                          (f) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: tickColor,
+                                  size: 18,
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    f,
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 13,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 10),
+
+                        Center(
+                          child: Text(
+                            "₹ $price",
+                            style: TextStyle(
+                              fontSize: 34,
+                              color: ColorResources.primarycolor2,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ⭐ BUTTON SAME
+          Positioned(
+            bottom: -20,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () => selectPlan(name),
+
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: buttonColors),
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Text(
+                    name == "Basic" ? "BY DEFAULT" : "SELECT PLAN",
+                    style: opensansBold.copyWith(
+                      color: Colors.white,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -171,26 +419,6 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPlanScroller(double w) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: SizedBox(
-        height: 400,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: [
-            Image.asset('assets/images/Group 301.png'),
-            Image.asset('assets/images/plan.png'),
-            SizedBox(width: 12),
-            Image.asset('assets/images/Frame 58.png'),
-            SizedBox(width: 12),
-            Image.asset('assets/images/Frame 59.png'),
-          ],
-        ),
       ),
     );
   }

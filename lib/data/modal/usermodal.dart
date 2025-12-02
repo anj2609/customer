@@ -9,8 +9,7 @@ class UserDetailAllModel {
       status: json["status"],
       data: json["data"] == null
           ? []
-          : List<UserData>.from(
-              json["data"].map((x) => UserData.fromJson(x))),
+          : List<UserData>.from(json["data"].map((x) => UserData.fromJson(x))),
     );
   }
 }
@@ -19,6 +18,7 @@ class UserData {
   final String? id;
   final String? email;
   final String? mobile;
+  final String? name;
   final String? otp;
   final String? otpExpireAt;
   final List<dynamic>? hobbies;
@@ -40,12 +40,16 @@ class UserData {
   final dynamic interestUser;
   final dynamic totalUserView;
   final int? totalRecentUserView;
+  final dynamic receivedInvitation;
+  final dynamic acceptedinvitation;
+  final dynamic interestuser;
 
   UserData({
     this.id,
     this.email,
     this.mobile,
     this.otp,
+    this.name,
     this.otpExpireAt,
     this.hobbies,
     this.gotra,
@@ -66,6 +70,9 @@ class UserData {
     this.interestUser,
     this.totalUserView,
     this.totalRecentUserView,
+    this.receivedInvitation,
+    this.acceptedinvitation,
+    this.interestuser,
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
@@ -73,6 +80,7 @@ class UserData {
       id: json["_id"],
       email: json["email"] ?? "",
       mobile: json["mobile"] ?? "",
+      name: json['name'] ?? "",
       otp: json["otp"],
       otpExpireAt: json["otp_expire_at"],
       hobbies: json["hobbies"] ?? [],
@@ -94,6 +102,9 @@ class UserData {
       interestUser: json["interest_user"],
       totalUserView: json["total_user_view"],
       totalRecentUserView: json["totalRecentUserView"],
+      receivedInvitation: json['receivedInvitation'] ?? 0,
+      acceptedinvitation: json['accepted_invitation'] ?? 0,
+      interestuser: json['interest_user'] ?? 0,
     );
   }
 }
