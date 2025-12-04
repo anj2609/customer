@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/app/modules/notification/notification.dart';
@@ -53,7 +54,7 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
                               children: controller.planList.map((p) {
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 20),
-                                  child: _planCard(p.name, p.price),
+                                  child: _planCard(p.name, p.price, p.id),
                                 );
                               }).toList(),
                             ),
@@ -132,9 +133,9 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
     "VIP": [Color(0xff2C3BE4), Color(0xff222FB8)],
   };
   final Map<String, String> planImages = {
-    "Basic": "assets/images/Frame 74.png",
-    "Gold": "assets/images/Frame 75.png",
-    "Premium": "assets/images/Frame 76.png",
+    "Basic": "assets/images/Frame 80.png",
+    "Gold": "assets/images/Frame 81.png",
+    "Premium": "assets/images/Frame 82.png",
     "VIP": "assets/images/Frame 77.png",
   };
   final Map<String, String> planTitles = {
@@ -196,7 +197,7 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
     });
   }
 
-  Widget _planCard(String name, int price) {
+  Widget _planCard(String name, int price, String planidd) {
     final headerColors =
         planGradients[name] ?? [Color(0xffBE3272), Color(0xffEB4E76)];
 
@@ -208,7 +209,10 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
     final tickColor = tickColors[name] ?? Colors.grey;
 
     return GestureDetector(
-      onTap: () => selectPlan(name), // ⭐ Card tap = select
+      onTap: () {
+        selectPlan(name);
+        print('Id::::::::planid:::${planidd}');
+      },
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -224,7 +228,7 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
                 color: selectedPlan == name
                     ? ColorResources.primarycolor2
                     : Colors.transparent,
-                width: selectedPlan == name ? 1 : 0,
+                width: selectedPlan == name ? 2 : 0,
               ),
 
               boxShadow: [
@@ -317,12 +321,47 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
 
           // ⭐ BUTTON SAME
           Positioned(
-            bottom: -20,
+            bottom: -15,
             left: 0,
             right: 0,
             child: Center(
               child: GestureDetector(
-                onTap: () => selectPlan(name),
+                onTap: () {
+                  if (name == "Basic") {
+                  } else {
+                    showCupertinoDialog(
+                      context: context,
+                      builder: (context) {
+                        return CupertinoAlertDialog(
+                          title: Text('Confirm Purchase'),
+                          content: Text(
+                            'Are you sure you want to purchase this package for ₹$price?',
+                            style: opensansMedium.copyWith(),
+                          ),
+                          actions: [
+                            CupertinoDialogAction(
+                              isDefaultAction: false,
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('No'),
+                            ),
+                            CupertinoDialogAction(
+                              isDefaultAction: true,
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                MembershipPlanController controller =
+                                    Get.find();
+                                controller.activatePlan(planidd);
+                              },
+                              child: const Text('Yes'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
 
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),

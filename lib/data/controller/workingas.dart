@@ -8,6 +8,9 @@ class WorkingWithController extends GetxController {
   var selectedWorkingId = "".obs;
   var selectedWorkingName = RxnString();
 
+    var selectedWorkingId2 = "".obs;
+  var selectedWorkingName2 = RxnString();
+
   @override
   void onInit() {
     fetchWorkingWith();
@@ -34,6 +37,15 @@ class WorkingWithController extends GetxController {
 
     var selected = workingList.firstWhere((e) => e.id == id);
     selectedWorkingName.value = selected.name;
+
+    print("WORKING WITH ID = ${selectedWorkingId.value}");
+    print("WORKING WITH NAME = ${selectedWorkingName.value}");
+  }
+   void onSelect2(String id) {
+    selectedWorkingId2.value = id;
+
+    var selected = workingList.firstWhere((e) => e.id == id);
+    selectedWorkingName2.value = selected.name;
 
     print("WORKING WITH ID = ${selectedWorkingId.value}");
     print("WORKING WITH NAME = ${selectedWorkingName.value}");

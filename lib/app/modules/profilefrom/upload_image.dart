@@ -18,16 +18,6 @@ class UploadPhotoScreen extends StatefulWidget {
 class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
   File? pickedImage;
 
-  // Future<void> pickImage() async {
-  //   final ImagePicker picker = ImagePicker();
-  //   final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-
-  //   if (file != null) {
-  //     setState(() {
-  //       pickedImage = File(file.path);
-  //     });
-  //   }
-  // }
   final imgC = Get.put(ImageUploadController());
 
   @override
@@ -273,7 +263,7 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
               if (imgC.images.isEmpty) {
                 Get.snackbar(
                   'Error',
-                  'Please select at least 1 and at most 5 images.',
+                  'Upload a minimum of 1 image and a maximum of 5 images.',
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
@@ -419,11 +409,7 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
         dashPattern: [3, 5],
         color: Colors.grey.shade600,
       ),
-      // color: Colors.grey,
-      // strokeWidth: 1,
-      // dashPattern: [8, 6],
-      // borderType: BorderType.RRect,
-      // radius: Radius.circular(15),
+
       child: Container(
         height: 220,
         alignment: Alignment.center,
@@ -434,7 +420,16 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
             SizedBox(height: 10),
             Text(
               "Select File",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: opensansSemiBold.copyWith(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Upload a minimum of 1 image and a maximum of 5 images.',
+              textAlign: TextAlign.center,
+              style: opensansMedium.copyWith(fontSize: 12, color: Colors.red),
             ),
           ],
         ),

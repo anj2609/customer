@@ -12,4 +12,7 @@ class ApiConstants {
   static const String token = 'token';
   static const String profileid = 'profileid';
   static const String name = 'FirstName';
+
+  static const String imageurl =
+      'https://testing.akslearning.in/vivashribackend/';
 }

@@ -172,12 +172,12 @@ class _PartnerEducationCareerScreenState
                         _label("Occupation"),
                         Obx(() {
                           return _dropdown22(
-                            value: occC.selectedOccId.value.isEmpty
+                            value: occC.selectedOccId2.value.isEmpty
                                 ? null
-                                : occC.selectedOccId.value,
+                                : occC.selectedOccId2.value,
 
                             onChanged: (v) {
-                              occC.onSelect(v!);
+                              occC.onSelect2(v!);
                             },
 
                             items: occC.occupationList
@@ -200,12 +200,12 @@ class _PartnerEducationCareerScreenState
                         _label("Working With"),
                         Obx(() {
                           return _dropdown22(
-                            value: workingC.selectedWorkingId.value.isEmpty
+                            value: workingC.selectedWorkingId2.value.isEmpty
                                 ? null
-                                : workingC.selectedWorkingId.value,
+                                : workingC.selectedWorkingId2.value,
 
                             onChanged: (v) {
-                              workingC.onSelect(v!);
+                              workingC.onSelect2(v!);
                             },
 
                             items: workingC.workingList
@@ -517,8 +517,8 @@ class _PartnerEducationCareerScreenState
                     "partner_education": eduC.selectedEduId.value,
                     "partner_professional_qualification":
                         profEduC.selectedProfEduId.value,
-                    "partner_occupation": occC.selectedOccId.value,
-                    "partner_working_as": workingC.selectedWorkingId.value,
+                    "partner_occupation": occC.selectedOccId2.value,
+                    "partner_working_as": workingC.selectedWorkingId2.value,
                     "partner_income_from": incomeFrom,
                     "partner_income_to": incomeTo,
                     "app_step": '16',

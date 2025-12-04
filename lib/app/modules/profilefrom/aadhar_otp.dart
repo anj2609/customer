@@ -223,18 +223,29 @@ class _AadharOtpScreenState extends State<AadharOtpScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                ReligionDetailsScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),

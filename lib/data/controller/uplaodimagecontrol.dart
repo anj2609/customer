@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
@@ -28,9 +29,39 @@ class ImageUploadController extends GetxController {
       }
 
       for (var file in files) {
-        images.add(File(file.path));
+        File? cropped = await cropImage(File(file.path));
+
+        if (cropped != null) {
+          images.add(cropped); // ✔ cropped image only
+        }
       }
     }
+  }
+
+  Future<File?> cropImage(File imageFile) async {
+    CroppedFile? cropped = await ImageCropper().cropImage(
+      sourcePath: imageFile.path,
+      compressFormat: ImageCompressFormat.png,
+      compressQuality: 95,
+      aspectRatio: const CropAspectRatio(ratioX: 3, ratioY: 4),
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Image',
+          toolbarColor: Colors.black,
+          toolbarWidgetColor: Colors.white,
+          hideBottomControls: false,
+          lockAspectRatio: true, // 🔒 user cannot change ratio
+        ),
+        IOSUiSettings(
+          title: 'Crop Image',
+          aspectRatioLockEnabled: true, // 🔒 iOS lock
+        ),
+      ],
+    );
+
+    if (cropped == null) return null;
+
+    return File(cropped.path);
   }
 
   Future<void> uploadImages() async {

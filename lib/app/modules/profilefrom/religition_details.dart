@@ -363,48 +363,6 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
   }
 
   // ---------------------- Dropdown ------------------------
-  Widget _dropdown111({
-    required String? value,
-    required Function(String?) onChanged,
-    required List<String> items,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade400),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton(
-          value: value,
-          isExpanded: true,
-          icon: Icon(Icons.keyboard_arrow_down),
-          hint: Text(
-            "Select",
-            style: opensansMedium.copyWith(
-              color: ColorResources.blackhalka,
-              fontSize: 14,
-            ),
-          ),
-          items: items
-              .map(
-                (e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(
-                    e,
-                    style: opensansMedium.copyWith(
-                      color: ColorResources.blackhalka,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
 
   // ---------------------- Hint Box ------------------------
   Widget _hintBox(String text) {
@@ -475,24 +433,6 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
           child: GestureDetector(
             onTap: () {
               if (religionC.selectedName.value == null) {
@@ -542,10 +482,9 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                     "app_step": '5',
                     "step": '5',
                   },
+                  context: context
                 );
               }
-
-         
             },
             child: Container(
               height: 45,

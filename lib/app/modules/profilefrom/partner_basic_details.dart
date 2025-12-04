@@ -8,6 +8,7 @@ import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/complecxion.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
 import 'package:vivashri/data/controller/langunage.dart';
+import 'package:vivashri/data/controller/marital_staus.contro.dart';
 import 'package:vivashri/widgets/dropdownitems.dart';
 
 class PartnerBasicDetailsScreen extends StatefulWidget {
@@ -46,6 +47,8 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
         )
         .toList();
   }
+
+  final maritalC = Get.put(MaritalStatusController());
 
   List<String> get fromWeightKeys => weightRange.keys.toList();
   List<String> filteredToWeight(String? from) {
@@ -277,12 +280,12 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
                         Obx(() {
                           return _dropdown22(
                             value:
-                                complexionC.selectedComplexionId.value.isEmpty
+                                complexionC.selectedComplexionId2.value.isEmpty
                                 ? null
-                                : complexionC.selectedComplexionId.value,
+                                : complexionC.selectedComplexionId2.value,
 
                             onChanged: (v) {
-                              complexionC.onSelect(v!);
+                              complexionC.onSelect2222(v!);
                             },
 
                             items: complexionC.complexionList
@@ -331,35 +334,53 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
 
                         // ---------------- MARITAL STATUS ----------------
                         _label("Marital Status:"),
-                        Row(
-                          children: [
-                            _selectButton(
-                              "Married",
-                              maritalStatus == "Married",
-                              () {
-                                setState(() => maritalStatus = "Married");
-                              },
-                            ),
-                            const SizedBox(width: 12),
-                            _selectButton(
-                              "Unmarried",
-                              maritalStatus == "Unmarried",
-                              () {
-                                setState(() => maritalStatus = "Unmarried");
-                              },
-                            ),
-                          ],
-                        ),
+                        Obx(() {
+                          return _dropDown(
+                            hint: "Select",
+                            value: maritalC.selectedName.value,
+                            onChanged: (v) {
+                              maritalC.onSelect(v!);
+                              print('name::::::${maritalC.selectedName.value}');
+                              setState(() {});
+                            },
+                            items: maritalC.maritalList
+                                .map((e) => e.name)
+                                .toList(),
+                          );
+                        }),
+                        // Row(
+                        //   children: [
+                        //     _selectButton(
+                        //       "Married",
+                        //       maritalStatus == "Married",
+                        //       () {
+                        //         setState(() => maritalStatus = "Married");
+                        //       },
+                        //     ),
+                        //     const SizedBox(width: 12),
+                        //     _selectButton(
+                        //       "Unmarried",
+                        //       maritalStatus == "Unmarried",
+                        //       () {
+                        //         setState(() => maritalStatus = "Unmarried");
+                        //       },
+                        //     ),
+                        //   ],
+                        // ),
 
                         // ---------------- CHILDREN ----------------
-                        maritalStatus == "Married"
-                            ? _label("Have Children:")
-                            : SizedBox(),
-                        maritalStatus != "Married"
+                        maritalC.selectedName.value == "Unmarried"
+                            ? SizedBox()
+                            : _label("Have Children:"),
+                        maritalC.selectedName.value == "Unmarried"
                             ? SizedBox()
                             : _dropdown(
                                 value: children,
-                                items: ["No", "Yes (1)", "Yes (2)"],
+                                items: [
+                                  "No",
+                                  "Yes - Living together",
+                                  "Yes - Living separately",
+                                ],
                                 onChanged: (v) => setState(() => children = v),
                               ),
 
@@ -408,6 +429,55 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
             color: ColorResources.primarycolor2,
           ),
         ],
+      ),
+    );
+  }
+
+  BoxDecoration _boxDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: Colors.grey.shade400),
+    );
+  }
+
+  Widget _dropDown({
+    required String hint,
+    required String? value,
+    required Function(String?) onChanged,
+    required List<String> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: _boxDecoration(),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          hint: Text(
+            hint,
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          items: items
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(
+                    e,
+                    style: opensansMedium.copyWith(
+                      color: ColorResources.blackhalka,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: onChanged,
+        ),
       ),
     );
   }
@@ -752,9 +822,9 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
                     "partner_height_from": fromHeight,
                     "partner_height_to": toHeight,
                     "partner_complexion":
-                        complexionC.selectedComplexionId.value,
+                        complexionC.selectedComplexionId2.value,
                     "partner_language": languageC.selectedLanguageId.value,
-                    "partner_marital_status": maritalStatus,
+                    "partner_marital_status": maritalC.selectedId.value,
                     "partner_have_children": children,
                     "partner_mother_tongue":
                         languageC.motherselectedLanguageId.value,

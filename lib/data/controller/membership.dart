@@ -1,6 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/style.dart';
 
 class MembershipPlanController extends GetxController {
   RxBool isLoading = false.obs;
@@ -27,6 +31,62 @@ class MembershipPlanController extends GetxController {
       }
     } catch (e) {
       print("Error: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> activatePlan(String planId) async {
+    try {
+      isLoading.value = true;
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("token");
+
+      var url = Uri.parse(
+        "https://testing.akslearning.in/vivashribackend/api/user/activate-plan",
+      );
+
+      var response = await http.post(
+        url,
+        headers: {
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: {"plan_id": planId},
+      );
+
+      var data = jsonDecode(response.body);
+
+      if (data["status"] == true) {
+        Get.defaultDialog(
+          title: "Success",
+          titleStyle: opensansBold.copyWith(
+            color: Colors.green,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+
+          middleText: data["message"] ?? "Plan Activated Successfully!",
+          middleTextStyle: opensansMedium.copyWith(
+            color: Colors.black87,
+            fontSize: 16,
+          ),
+
+          textConfirm: "OK",
+          confirmTextColor: Colors.white,
+
+          buttonColor: ColorResources.primarycolor3,
+
+          onConfirm: () {
+            Get.back();
+          },
+        );
+      } else {
+        Get.snackbar("Error", data["message"] ?? "Something went wrong");
+      }
+    } catch (e) {
+      Get.snackbar("Exception", e.toString());
     } finally {
       isLoading.value = false;
     }

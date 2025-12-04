@@ -473,6 +473,7 @@ class _PartnerReligionCasteScreenState
                     "partner_dosh": doshController.text.trim(),
                     "app_step": '17',
                     "step": '17',
+                    "form_status": 'Completed',
                   },
                 );
               }

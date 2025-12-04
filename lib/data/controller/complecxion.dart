@@ -8,6 +8,9 @@ class ComplexionController extends GetxController {
   var selectedComplexionId = "".obs;
   var selectedComplexionName = RxnString();
 
+  var selectedComplexionId2 = "".obs;
+  var selectedComplexionName2 = RxnString();
+
   @override
   void onInit() {
     fetchComplexion();
@@ -37,6 +40,16 @@ class ComplexionController extends GetxController {
 
     print("COMPLEXION SELECTED ID = ${selectedComplexionId.value}");
     print("COMPLEXION NAME = ${selectedComplexionName.value}");
+  }
+
+  void onSelect2222(String id) {
+    selectedComplexionId2.value = id;
+
+    var selected = complexionList.firstWhere((e) => e.id == id);
+    selectedComplexionName2.value = selected.name;
+
+    print("COMPLEXION SELECTED ID = ${selectedComplexionId2.value}");
+    print("COMPLEXION NAME = ${selectedComplexionName2.value}");
   }
 }
 

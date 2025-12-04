@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/match/matchscreen.dart';
@@ -18,7 +19,7 @@ class CustomAppDrawer extends StatelessWidget {
     final controller = Get.put(UserDetailController());
 
     final u = controller.userData.value!;
-
+    final w = MediaQuery.of(context).size.width;
     return Drawer(
       backgroundColor: Colors.white,
       width: MediaQuery.of(context).size.width * 0.78,
@@ -43,15 +44,46 @@ class CustomAppDrawer extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      "assets/images/Ellipse2222.png",
-                      height: 100,
-                      width: 70,
-                      fit: BoxFit.cover,
+                  Container(
+                    width: w * 0.20,
+                    height: w * 0.25,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        '${ApiConstants.imageurl}${u.photo}',
+                        fit: BoxFit.fill,
+                        errorBuilder: (context, error, stackTrace) {
+                          String gender = u.gender.toString();
+
+                          if (gender == "Male") {
+                            return Image.asset(
+                              "assets/images/profilee.png",
+                              fit: BoxFit.cover,
+                            );
+                          } else if (gender == "Female") {
+                            return Image.asset(
+                              "assets/images/Rectangle 77.png",
+                              fit: BoxFit.cover,
+                            );
+                          } else {
+                            return Image.asset(
+                              "assets/images/profilee.png",
+                              fit: BoxFit.cover,
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ),
+                  // ClipRRect(
+                  //   borderRadius: BorderRadius.circular(12),
+                  //   child: Image.asset(
+                  //     "assets/images/Ellipse2222.png",
+                  //     height: 100,
+                  //     width: 70,
+                  //     fit: BoxFit.cover,
+                  //   ),
+                  // ),
                   const SizedBox(width: 10),
 
                   // Name & Plan
@@ -64,11 +96,18 @@ class CustomAppDrawer extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 4),
-                      Text(
-                        "VS0733874596",
-                        style: opensansSemiBold.copyWith(
-                          fontSize: 13,
-                          color: ColorResources.blackgrey,
+                      GestureDetector(
+                        onTap: () {
+                          Clipboard.setData(
+                            ClipboardData(text: u.profileId ?? ""),
+                          );
+                        },
+                        child: Text(
+                          "${u.profileId}",
+                          style: opensansSemiBold.copyWith(
+                            color: ColorResources.blackgrey,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
 

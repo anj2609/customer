@@ -8,6 +8,9 @@ class OccupationController extends GetxController {
   var selectedOccId = "".obs;
   var selectedOccName = RxnString();
 
+  var selectedOccId2 = "".obs;
+  var selectedOccName2 = RxnString();
+
   @override
   void onInit() {
     fetchOccupation();
@@ -23,9 +26,9 @@ class OccupationController extends GetxController {
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);
 
-      occupationList.value = List.from(jsonData["data"])
-          .map((e) => OccupationModel.fromJson(e))
-          .toList();
+      occupationList.value = List.from(
+        jsonData["data"],
+      ).map((e) => OccupationModel.fromJson(e)).toList();
     }
   }
 
@@ -39,20 +42,26 @@ class OccupationController extends GetxController {
     print("OCCUPATION ID = ${selectedOccId.value}");
     print("OCCUPATION NAME = ${selectedOccName.value}");
   }
+
+  void onSelect2(String id) {
+    selectedOccId2.value = id;
+
+    var selected = occupationList.firstWhere((e) => e.id == id);
+
+    selectedOccName2.value = selected.name;
+
+    print("OCCUPATION ID = ${selectedOccId2.value}");
+    print("OCCUPATION NAME = ${selectedOccName2.value}");
+  }
 }
+
 class OccupationModel {
   final String id;
   final String name;
 
-  OccupationModel({
-    required this.id,
-    required this.name,
-  });
+  OccupationModel({required this.id, required this.name});
 
   factory OccupationModel.fromJson(Map<String, dynamic> json) {
-    return OccupationModel(
-      id: json["_id"],
-      name: json["name"],
-    );
+    return OccupationModel(id: json["_id"], name: json["name"]);
   }
 }

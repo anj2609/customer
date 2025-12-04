@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/profilefrom/basic_details.dart';
 import 'package:vivashri/config/utils/all_images.dart';
 import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/auth_controller.dart';
 
@@ -201,9 +199,10 @@ class _OtpScreenState extends State<OtpScreen> {
                         onTap: () {
                           Get.find<AuthController>().ortverifyapi(
                             context: context,
-                            userid: widget.userid,
+                            userid: widget.userid.toString(),
                             otp: '1234',
                             devicetoken: '',
+                            mobilenu7mber: widget.mobileemail.toString(),
                           );
                           // Get.to(
                           //   BasicDetailsScreen(),

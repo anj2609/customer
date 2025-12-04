@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:vivashri/app/modules/membership/membership.dart';
+import 'package:vivashri/config/utils/app_constants.dart';
 import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/widgets/drawer.dart';
+import 'package:vivashri/widgets/image_view.dart';
 
 class MyProfielScreen extends StatefulWidget {
   const MyProfielScreen({super.key});
@@ -13,6 +19,7 @@ class MyProfielScreen extends StatefulWidget {
 class _MyProfielScreenState extends State<MyProfielScreen> {
   int tabIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final usercontroller = Get.put(UserDetailController());
 
   @override
   Widget build(BuildContext context) {
@@ -100,13 +107,25 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
     );
   }
 
-  // ---------------- PROFILE HEADER --------------------
+  List<String> photos = [];
+
+  void buildPhotoList(dynamic u) {
+    List<String?> raw = [u.photo, u.photo1, u.photo2, u.photo3, u.photo4];
+
+    photos = raw
+        .where((e) => e != null && e.isNotEmpty)
+        .map((e) => e!)
+        .toSet()
+        .toList();
+  }
+
   Widget _profileHeader(double w) {
+    final u = usercontroller.userData.value!;
+
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
         children: [
-          // const SizedBox(height: 10),
           ClipRRect(
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(10),
@@ -118,8 +137,8 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                   aspectRatio: 9 / 11,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      "assets/images/image 6.png",
+                    child: Image.network(
+                      "${ApiConstants.imageurl}${u.photo}",
                       fit: BoxFit.cover,
                       width: double.infinity,
                     ),
@@ -147,28 +166,29 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
 
                 Positioned(
                   top: 12,
-                  right: 12,
-                  child: Column(
+                  left: 20,
+                  right: 20,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      GestureDetector(
+                        onTap: () {
+                          buildPhotoList(u);
+                          showDialog(
+                            context: context,
+                            barrierDismissible: true,
+                            builder: (_) => PhotoSliderDialog(photos: photos),
+                          );
+                        },
+                        child: Image.asset(
+                          'assets/images/imagecount.png',
+                          height: 45,
+                        ),
+                      ),
                       Container(
                         decoration: BoxDecoration(shape: BoxShape.circle),
-                        child: progressRing(0.4), // <-- replace
+                        child: progressRing(0.4),
                       ),
-
-                      // Positioned(
-                      //   top: 12,
-                      //   right: 12,
-
-                      //   child: Container(
-                      //     decoration: BoxDecoration(
-                      //       borderRadius: BorderRadius.circular(10),
-                      //     ),
-                      //     child: Image.asset(
-                      //       'assets/images/imagecount.png',
-                      //       height: 40,
-                      //     ),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
@@ -183,7 +203,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                       // TAGS
                       Row(
                         children: [
-                          _darkTag("Profile managed by Self"),
+                          _darkTag("Profile managed by ${u.profileFor!.name}"),
                           const SizedBox(width: 6),
                           _darkTagonline("Online"),
                         ],
@@ -194,14 +214,14 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                       Row(
                         children: [
                           Text(
-                            "Manoj Kumar Yadav ",
+                            "${u.name} ",
                             style: opensansSemiBold.copyWith(
                               color: Colors.white,
                               fontSize: 17,
                             ),
                           ),
                           Text(
-                            "(ID: 600155)",
+                            "(ID: ${u.profileId})",
                             style: opensansSemiBold.copyWith(
                               color: ColorResources.primarycolor2,
                               fontSize: 12,
@@ -213,7 +233,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                       const SizedBox(height: 4),
 
                       Text(
-                        "• 22, 5’ 6”   • Hindu   • Agarwal   • Non Manglik  • MCA",
+                        "• ${u.weight}, ${u.height}”   • ${u.religion!.name}   • ${u.subCaste!.name}   • ${u.manglik}  • ${u.highestDegree!.name}",
                         style: opensansSemiBold.copyWith(
                           color: Colors.white,
                           fontSize: 11,
@@ -221,7 +241,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                       ),
 
                       Text(
-                        "• Teacher   • Earns ₹15 Lacs p.a   • Bihar",
+                        "• ${u.occupation!.name}   • Earns ₹${u.annualIncome} p.a ",
                         style: opensansSemiBold.copyWith(
                           color: Colors.white,
                           fontSize: 11,
@@ -242,7 +262,21 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
             children: [
               Image.asset('assets/images/Group 377.png', height: 35),
               const SizedBox(width: 10),
-              Image.asset('assets/images/viewprofile 2.png', height: 35),
+              GestureDetector(
+                onTap: () {
+                  Get.to(
+                    MembershipPlansPage(),
+                    duration: Duration(
+                      milliseconds: ApiConstants.screenTransitionTime,
+                    ),
+                    transition: Transition.rightToLeft,
+                  );
+                },
+                child: Image.asset(
+                  'assets/images/viewprofile 2.png',
+                  height: 35,
+                ),
+              ),
             ],
           ),
         ],
@@ -364,25 +398,50 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
     );
   }
 
+  String formatDob(String dob) {
+    if (dob.isEmpty) return "";
+    try {
+      DateTime date = DateTime.parse(dob);
+      return "${date.day.toString().padLeft(2, '0')}-"
+          "${date.month.toString().padLeft(2, '0')}-"
+          "${date.year}";
+    } catch (e) {
+      return "";
+    }
+  }
+
   // ------------------ ALL DETAILS SECTION -------------------
   Widget _myDetailsSection() {
+    final u = usercontroller.userData.value!;
+    String formattedDob = formatDob(u.dob.toString());
+    final hobbiesText = u.hobbies.map((e) => e.name).join(", ");
+
     return Column(
       children: [
         profileSectionCard(
           title: "Basic Details",
           fields: [
-            ["Create Profile For", "Not Mentioned", "Gender", "Not Mentioned"],
-            ["Name", "Not Mentioned", "Height Range", "Not Mentioned"],
-            ["Marital Status", "Not Mentioned", "Complexion", "Not Mentioned"],
+            [
+              "Create Profile For",
+              "${u.profileFor!.name}",
+              "Gender",
+              "${u.gender}",
+            ],
+            ["Name", "${u.name}", "Height Range", "${u.height}"],
+            [
+              "Marital Status",
+              "${u.maritalStatus!.name}",
+              "Complexion",
+              "${u.complexion!.name}",
+            ],
             [
               "Health Information",
-              "Not Mentioned",
+              "${u.healthInformation}",
               "Manglik Status",
-              "Not Mentioned",
+              "${u.manglik}",
             ],
-            ["Height", "Not Mentioned", "Weight", "Not Mentioned"],
-            ["About", "Not Mentioned", "Disability", "Not Mentioned"],
-            ["Blood Group", "Not Mentioned", "", ""],
+            ["Blood Group", "${u.bloodGroup}", "Weight", "${u.weight}"],
+            ["About", "${u.about}", "Disability", "${u.disability}"],
           ],
           onTap: () {},
         ),
@@ -390,17 +449,12 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
         profileSectionCard(
           title: "Horoscope Details",
           fields: [
-            [
-              "Date of Birth",
-              "Not Mentioned",
-              "Time of Birth",
-              "Not Mentioned",
-            ],
+            ["Date of Birth", formattedDob, "Time of Birth", "-"],
             [
               "State of Birth",
-              "Not Mentioned",
+              "${u.birthState!.name}",
               "City of Birth",
-              "Not Mentioned",
+              "${u.birthCity!.name}",
             ],
           ],
           onTap: () {},
@@ -408,28 +462,43 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
         profileSectionCard(
           title: "Education Details",
           fields: [
-            ["Highest Qualification", "Not Mentioned", "", ""],
+            ["Highest Qualification", "${u.highestDegree!.name}", "", ""],
           ],
           onTap: () {},
         ),
         profileSectionCard(
           title: "Professional Details",
           fields: [
-            ["Annual Income", "Not Mentioned", "Working With", "Not Mentioned"],
-            ["Occupation", "Not Mentioned", "Organization", "Not Mentioned"],
+            [
+              "Annual Income",
+              "${u.annualIncome}",
+              "Working With",
+              "${u.workingWith!.name}",
+            ],
+            [
+              "Occupation",
+              "${u.occupation!.name}",
+              "Organization",
+              "${u.organizationName}",
+            ],
           ],
           onTap: () {},
         ),
         profileSectionCard(
           title: "Family Details",
           fields: [
-            ["Family Type", "Not Mentioned", "Family Value", "Not Mentioned"],
-            ["Sister", "Not Mentioned", "Brother", "Not Mentioned"],
+            [
+              "Family Type",
+              "${u.familyType}",
+              "Family Value",
+              "${u.familyValue}",
+            ],
+            ["Sister", "${u.noOfSister}", "Brother", "${u.noOfBrother}"],
             [
               "Sister in Law",
-              "Not Mentioned",
+              "${u.noOfSisterInLaw}",
               "Brother in Law",
-              "Not Mentioned",
+              "${u.noOfBrotherInLaw}",
             ],
           ],
           onTap: () {},
@@ -437,39 +506,43 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
         profileSectionCard(
           title: "Location Details",
           fields: [
-            ["Nationality", "Not Mentioned", "Residence Type", "Not Mentioned"],
             [
-              "Permanent House Type",
-              "Not Mentioned",
-              "Permanent State",
-              "Not Mentioned",
+              "Nationality",
+              "${u.locNationality!.name}",
+              "Residence Type",
+              "${u.locResidenceType}",
             ],
             [
               "Permanent House Type",
-              "Not Mentioned",
+              "${u.locHouseType}",
               "Permanent State",
-              "Not Mentioned",
+              "${u.locState!.name}",
             ],
-            ["Permanent City", "Not Mentioned", "", ""],
-            ["Permanent Pin/Zip Code", "Not Mentioned", "", ""],
+            [
+              "Permanent City",
+              "${u.locCity!.name}",
+              "Permanent Pin/Zip Code",
+              "${u.locPincode}",
+            ],
+
             [
               "Temporary State",
-              "Not Mentioned",
+              "${u.locTempState!.name}",
               "Temporary City",
-              "Not Mentioned",
+              "${u.locTempCity!.name}",
             ],
-            ["Temporary Pin/Zip Code", "Not Mentioned", "", ""],
+
             [
               "References Relation",
-              "Not Mentioned",
+              "${u.locRelation}",
               "References Name",
-              "Not Mentioned",
+              "${u.locRelationName}",
             ],
             [
               "References Email Id",
-              "Not Mentioned",
+              "${u.locRelationEmail}",
               "References Mobile No.",
-              "Not Mentioned",
+              "${u.locRelationMobile}",
             ],
           ],
           onTap: () {},
@@ -479,18 +552,18 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
           fields: [
             [
               "Contact Number",
-              "Not Mentioned",
+              "${u.mobile}",
               "Contact Email",
-              "Not Mentioned",
+              "${u.contactEmail}",
             ],
-            ["Instagram Id", "Not Mentioned", "Facebook Id", "Not Mentioned"],
+            ["Instagram Id", "${u.instagram}", "Facebook Id", "${u.facebook}"],
           ],
           onTap: () {},
         ),
         profileSectionCard(
           title: "Hobbies & Interests",
           fields: [
-            ["Hobbies", "Not Mentioned", "", ""],
+            ["Hobbies", hobbiesText, "", ""],
           ],
           onTap: () {},
         ),
@@ -587,36 +660,62 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
   }
 
   Widget _partnerDetailsSection() {
+    final u = usercontroller.userData.value!;
     return Column(
       children: [
         _sectionBox(
           title: "Partner’s Basic Info",
           fields: [
-            ["Age", "Not Specified", "Body Weight", "None"],
-            ["Marital Status", "Not Specified", "Height Range", "None"],
-            ["Languages Known", "Not Specified", "Complexion", "None"],
+            [
+              "Age",
+              "${u.partnerAgeFrom}",
+              "Body Weight",
+              "${u.partnerWeightFrom}",
+            ],
+            [
+              "Marital Status",
+              "${u.partnerMaritalStatus}",
+              "Height Range",
+              "${u.partnerHeightFrom}",
+            ],
+            [
+              "Languages Known",
+              "${u.partnerLanguage!.name}",
+              "Complexion",
+              "${u.partnerComplexion!.name}",
+            ],
           ],
           onTap: () {},
         ),
         _sectionBox(
           title: "Partner’s Location Details",
           fields: [
-            ["Nationality", "Not Specified", "State", "None"],
-            ["City", "Not Specified", "", ""],
+            [
+              "Nationality",
+              "${u.partnerCountry!.name}",
+              "State",
+              "${u.partnerState!.name}",
+            ],
+            ["City", "${u.partnerCity!.name}", "", ""],
           ],
           onTap: () {},
         ),
         _sectionBox(
           title: "Partner’s Education  & Career",
           fields: [
-            ["Highest Qualification", "Not Specified", "", ""],
-            ["Professional Qualification", "Not Specified", "", ""],
-            ["Occupation", "Not Specified", "", ""],
+            ["Highest Qualification", "${u.partnerEducation!.name}", "", ""],
+            [
+              "Professional Qualification",
+              "${u.partnerProfessionalQualification!.name}",
+              "Occupation",
+              "${u.partnerOccupation!.name}",
+            ],
+
             [
               "Annual Income Range",
-              "Not Specified",
+              "${u.partnerIncomeFrom}",
               "Work As",
-              "Not Specified",
+              "${u.partnerWorkingAs!.name}",
             ],
           ],
           onTap: () {},
@@ -626,15 +725,15 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
           fields: [
             [
               "Diet Preference",
-              "Not Specified",
+              "${u.diet!.name}",
               "Drinking Habit",
-              "Not Specified",
+              "${u.partnerDrinking}",
             ],
             [
               "Smoking Habit",
-              "Not Specified",
+              "${u.partnerSmoking}",
               "Profile Managed",
-              "Not Specified",
+              "${u.partnerManagedBy}",
             ],
           ],
           onTap: () {},

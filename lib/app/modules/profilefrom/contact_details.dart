@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
-import 'package:vivashri/app/modules/profilefrom/aadhar_number.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 
 class ContactDetailsScreen extends StatefulWidget {
-  const ContactDetailsScreen({super.key});
+  String? mobileemail;
+  ContactDetailsScreen({super.key, this.mobileemail});
 
   @override
   State<ContactDetailsScreen> createState() => _ContactDetailsScreenState();
@@ -22,6 +22,27 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
   TextEditingController facebookController = TextEditingController();
   TextEditingController otherController = TextEditingController();
   StaperfromController stapercontroller = Get.put(StaperfromController());
+  final usercontroller = Get.put(UserDetailController());
+  bool deshboard = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    profileapi();
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        deshboard = false;
+      });
+    });
+  }
+
+  void profileapi() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? profileid = prefs.getString("profileid");
+    usercontroller.fetchUserDetail(profileid.toString());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,58 +57,79 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
               children: [
                 _header(),
                 Divider(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(left: 15, right: 15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _label("Contact Number:"),
-                        _readOnlyBox("+91 98739 85789"),
 
-                        _emailWithOtp(),
+                Obx(() {
+                  if (usercontroller.isLoading.value) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: ColorResources.primarycolor2,
+                      ),
+                    );
+                  }
 
-                        _label("Insagram Id:"),
-                        _inputField(controller: instgramidController),
+                  if (usercontroller.userData.value == null) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: ColorResources.primarycolor2,
+                      ),
+                    );
+                  }
 
-                        _label("Facebook Id:"),
-                        _inputField(controller: facebookController),
+                  final data = usercontroller.userData.value!;
 
-                        const SizedBox(height: 10),
-                        Text(
-                          "Reference:",
-                          style: opensansMedium.copyWith(
-                            fontSize: 16,
-                            // fontWeight: FontWeight.bold,
+                  return Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.only(left: 15, right: 15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _label("Contact Number:"),
+                          _readOnlyBox("+91 ${data.mobile ?? ""}"),
+
+                          _emailWithOtp(),
+
+                          _label("Insagram Id:"),
+                          _inputField(controller: instgramidController),
+
+                          _label("Facebook Id:"),
+                          _inputField(controller: facebookController),
+
+                          const SizedBox(height: 10),
+                          Text(
+                            "Reference:",
+                            style: opensansMedium.copyWith(
+                              fontSize: 16,
+                              // fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
 
-                        _label("Reference Details:"),
-                        _dropdownBox(
-                          hint: "Select",
-                          items: [
-                            "Google Search",
-                            "Facebook",
-                            "Instagram",
-                            "WhatsApp",
-                            "Event",
-                            "Linked In",
-                          ],
-                          value: selectedReference,
-                          onChanged: (v) =>
-                              setState(() => selectedReference = v),
-                        ),
+                          _label("Reference Details:"),
+                          _dropdownBox(
+                            hint: "Select",
+                            items: [
+                              "Google Search",
+                              "Facebook",
+                              "Instagram",
+                              "WhatsApp",
+                              "Event",
+                              "Linked In",
+                            ],
+                            value: selectedReference,
+                            onChanged: (v) =>
+                                setState(() => selectedReference = v),
+                          ),
 
-                        _label("Other"),
-                        _inputField(controller: otherController),
+                          _label("Other"),
+                          _inputField(controller: otherController),
 
-                        const SizedBox(height: 25),
-                        _bottomButtons(),
-                        const SizedBox(height: 40),
-                      ],
+                          const SizedBox(height: 25),
+                          _bottomButtons(data.mobile),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }),
               ],
             ),
           ),
@@ -281,17 +323,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _label("Contact Email Address:"),
-                  Text(
-                    "Send OTP",
-                    style: opensansMedium.copyWith(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+                children: [_label("Contact Email Address:")],
               ),
               _inputField(controller: emailController),
             ],
@@ -349,38 +381,38 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
 
   // ---------------- BOTTOM BUTTONS ----------------
 
-  Widget _bottomButtons() {
+  Widget _bottomButtons(numberemaild) {
     return Row(
       children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              Get.to(
-                MainNavigation(),
-                duration: Duration(
-                  milliseconds: ApiConstants.screenTransitionTime,
-                ),
-                transition: Transition.rightToLeft,
-              );
-            },
-            child: Container(
-              height: 45,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: ColorResources.halkapink,
-              ),
-              child: Text(
-                "SKIP",
-                style: opensansMedium.copyWith(
-                  color: ColorResources.primarycolor2,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
+        // Expanded(
+        //   child: GestureDetector(
+        //     onTap: () {
+        //       Get.to(
+        //         MainNavigation(),
+        //         duration: Duration(
+        //           milliseconds: ApiConstants.screenTransitionTime,
+        //         ),
+        //         transition: Transition.rightToLeft,
+        //       );
+        //     },
+        //     child: Container(
+        //       height: 45,
+        //       alignment: Alignment.center,
+        //       decoration: BoxDecoration(
+        //         borderRadius: BorderRadius.circular(10),
+        //         color: ColorResources.halkapink,
+        //       ),
+        //       child: Text(
+        //         "SKIP",
+        //         style: opensansMedium.copyWith(
+        //           color: ColorResources.primarycolor2,
+        //           fontSize: 18,
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(width: 12),
         Expanded(
           child: GestureDetector(
             onTap: () {
@@ -422,7 +454,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
               } else {
                 stapercontroller.conectdetailsProfile(
                   formData: {
-                    "contact_no": '9090909090',
+                    "contact_no": widget.mobileemail,
                     "contact_email": emailController.text.trim(),
                     "instagram": instgramidController.text.trim(),
                     "facebook": facebookController.text,

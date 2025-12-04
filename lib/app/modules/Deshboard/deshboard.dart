@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/app/modules/myprofile/my_profile.dart';
@@ -12,6 +13,7 @@ import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/widgets/drawer.dart';
+import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -34,6 +36,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         deshboard = false;
       });
     });
+  }
+
+  void profileapi() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? profileid = prefs.getString("profileid");
+    usercontroller.fetchUserDetail(profileid.toString());
   }
 
   @override
@@ -62,48 +71,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
             );
           }
 
-          final data = usercontroller.userData.value!;
           return Column(
             children: [
               _buildTopBar(w),
 
               Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildProfileCard(context),
-                      const SizedBox(height: 1),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(25),
-                            topRight: Radius.circular(25),
+                child: RefreshIndicator(
+                  color: Colors.white,
+                  backgroundColor: ColorResources.primarycolor2,
+                  onRefresh: () async {
+                    profileapi();
+                  },
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildProfileCard(context),
+                        const SizedBox(height: 1),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 15, bottom: 10),
+                            child: _buildInvitationStats(context),
                           ),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 15, bottom: 10),
-                          child: _buildInvitationStats(context),
+                        _buildMyPlanSection(context),
+
+                        Container(
+                          decoration: BoxDecoration(color: Colors.white),
+                          child: _buildPremiumInfoCard(context),
                         ),
-                      ),
-                      _buildMyPlanSection(context),
+                        Container(
+                          decoration: BoxDecoration(color: Colors.white),
+                          child: _buildMatchesSection(context),
+                        ),
 
-                      Container(
-                        decoration: BoxDecoration(color: Colors.white),
-                        child: _buildPremiumInfoCard(context),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(color: Colors.white),
-                        child: _buildMatchesSection(context),
-                      ),
-
-                      Container(
-                        decoration: BoxDecoration(color: Colors.white),
-                        child: _buildpremuimSection(context),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
+                        Container(
+                          decoration: BoxDecoration(color: Colors.white),
+                          child: _buildpremuimSection(context),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -207,23 +222,121 @@ class _DashboardScreenState extends State<DashboardScreen> {
             borderRadius: BorderRadius.circular(14),
             child: GestureDetector(
               onTap: () {
-                showModalBottomSheet(
+                showDialog(
                   context: context,
-                  isScrollControlled: true,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(28),
-                    ),
-                  ),
-                  builder: (context) => UploadImageBottomSheet(),
+                  barrierDismissible: true,
+                  builder: (context) {
+                    return Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      insetPadding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
+                      ),
+                      child: Stack(
+                        children: [
+                          // MAIN POPUP
+                          Container(
+                            padding: EdgeInsets.all(15),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.network(
+                                    "${ApiConstants.imageurl}${u.photo}",
+                                    height: 300,
+                                    width: double.infinity,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      String gender = u.gender.toString();
+
+                                      if (gender == "Male") {
+                                        return Image.asset(
+                                          "assets/images/profilee.png",
+                                          height: 250,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        );
+                                      } else if (gender == "Female") {
+                                        return Image.asset(
+                                          "assets/images/Rectangle 77.png",
+                                          height: 250,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        );
+                                      } else {
+                                        return Image.asset(
+                                          "assets/images/profilee.png",
+                                          height: 250,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          Positioned(
+                            right: 8,
+                            top: 8,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 );
               },
               child: Container(
                 width: w * 0.25,
                 height: w * 0.30,
-                child: Image.asset(
-                  "assets/images/profilee.png",
-                  fit: BoxFit.contain,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    "${ApiConstants.imageurl}${u.photo}",
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      String gender = u.gender.toString();
+
+                      if (gender == "Male") {
+                        return Image.asset(
+                          "assets/images/profilee.png",
+                          fit: BoxFit.cover,
+                        );
+                      } else if (gender == "Female") {
+                        return Image.asset(
+                          "assets/images/Rectangle 77.png",
+                          fit: BoxFit.cover,
+                        );
+                      } else {
+                        return Image.asset(
+                          "assets/images/profilee.png",
+                          fit: BoxFit.cover,
+                        );
+                      }
+                    },
+                  ),
                 ),
               ),
             ),
@@ -253,13 +366,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text(
-                      "VS074596",
-                      style: opensansSemiBold.copyWith(
-                        color: ColorResources.blackgrey,
-                        fontSize: 13,
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(
+                          ClipboardData(text: u.profileId ?? ""),
+                        );
+                      },
+                      child: Text(
+                        "${u.profileId}",
+                        style: opensansSemiBold.copyWith(
+                          color: ColorResources.blackgrey,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
+
                     SizedBox(width: 8),
                     GestureDetector(
                       onTap: () {
@@ -463,7 +584,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             );
           }),
           statCard(
-            "${u.interestuser}",
+            "${u.interestUser}",
             "Sent Invitations",
             Colors.deepPurple,
             () {
@@ -481,9 +602,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  String? totalmonth;
+  String? dateeee;
   Widget _buildMyPlanSection(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
+    final u = usercontroller.userData.value!;
+    if (u.planDetail != null) {
+      DateTime startDate = DateTime.parse(u.planDetail!.startDate.toString());
+      DateTime expiryDate = DateTime.parse(u.planDetail!.expiryDate.toString());
 
+      int monthDifference =
+          (expiryDate.year - startDate.year) * 12 +
+          (expiryDate.month - startDate.month);
+      totalmonth = monthDifference.toString();
+      print("Months: $monthDifference");
+
+      String formattedExpiry = DateFormat("dd MMM yyyy").format(expiryDate);
+      dateeee = formattedExpiry;
+      print("Formatted Expiry: $formattedExpiry");
+    }
     return Container(
       width: w,
       margin: const EdgeInsets.symmetric(horizontal: 0),
@@ -535,21 +672,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _planBox(
                 icon: 'assets/images/tag_svgrepo.com.png',
                 title: "Plan Name",
-                value: "Gold",
+                value: "${u.planDetail!.planId!.name}",
                 isFirst: true,
                 isLast: false,
               ),
               _planBox(
                 icon: 'assets/images/plan_svgrepo.com.png',
                 title: "Validity",
-                value: "6 Months",
+                value: "$totalmonth Months",
                 isFirst: false,
                 isLast: false,
               ),
               _planBox(
                 icon: 'assets/images/time_svgrepo.com.png',
                 title: "Due Date",
-                value: "24 June 2024",
+                value: dateeee == null ? "24 June 2024" : '$dateeee',
                 isFirst: false,
                 isLast: true,
               ),

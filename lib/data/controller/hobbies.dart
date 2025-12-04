@@ -4,7 +4,8 @@ import 'dart:convert';
 
 class HobbyController extends GetxController {
   var hobbyList = <HobbyModel>[].obs;
-  var selectedHobbyIds = <String>[].obs;   // <-- store selected IDs
+  var selectedHobbyIds = <String>[].obs;
+  var selectedHobbyIds222 = <String>[].obs;
 
   @override
   void onInit() {
@@ -21,9 +22,9 @@ class HobbyController extends GetxController {
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);
 
-      hobbyList.value = List.from(jsonData["data"])
-          .map((e) => HobbyModel.fromJson(e))
-          .toList();
+      hobbyList.value = List.from(
+        jsonData["data"],
+      ).map((e) => HobbyModel.fromJson(e)).toList();
     }
   }
 
@@ -36,20 +37,25 @@ class HobbyController extends GetxController {
 
     print("Selected Hobby IDs = $selectedHobbyIds");
   }
+
+  void toggleHobby22(String id) {
+    if (selectedHobbyIds222.contains(id)) {
+      selectedHobbyIds222.remove(id);
+    } else {
+      selectedHobbyIds222.add(id);
+    }
+
+    print("Selected Hobby IDs = $selectedHobbyIds222");
+  }
 }
+
 class HobbyModel {
   final String id;
   final String name;
 
-  HobbyModel({
-    required this.id,
-    required this.name,
-  });
+  HobbyModel({required this.id, required this.name});
 
   factory HobbyModel.fromJson(Map<String, dynamic> json) {
-    return HobbyModel(
-      id: json["_id"],
-      name: json["name"],
-    );
+    return HobbyModel(id: json["_id"], name: json["name"]);
   }
 }

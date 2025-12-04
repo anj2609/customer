@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:vivashri/app/modules/profilefrom/aadhar_number.dart';
 import 'package:vivashri/app/modules/profilefrom/aadhar_otp.dart';
 import 'package:vivashri/app/modules/profilefrom/contact_details.dart';
@@ -15,8 +17,11 @@ import 'package:vivashri/app/modules/profilefrom/partner_education.dart';
 import 'package:vivashri/app/modules/profilefrom/partner_location.dart';
 import 'package:vivashri/app/modules/profilefrom/partner_other.dart';
 import 'package:vivashri/app/modules/profilefrom/partner_relition.dart';
+import 'package:vivashri/app/modules/profilefrom/reference_details.dart';
 import 'package:vivashri/app/modules/profilefrom/upload_image.dart';
+import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
+import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/auth_controller.dart';
 
 class StaperfromController extends GetxController implements GetxService {
@@ -24,6 +29,7 @@ class StaperfromController extends GetxController implements GetxService {
 
   Future<void> submitBasicProfile({
     required Map<String, dynamic> formData,
+    String? mobilenumber,
   }) async {
     String? token = Get.find<AuthController>().getAuthToken();
 
@@ -55,7 +61,7 @@ class StaperfromController extends GetxController implements GetxService {
           EasyLoading.dismiss();
 
           Get.to(
-            ContactDetailsScreen(),
+            ContactDetailsScreen(mobileemail: mobilenumber),
             duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
             transition: Transition.rightToLeft,
           );
@@ -211,6 +217,7 @@ class StaperfromController extends GetxController implements GetxService {
   //=-==-=-=-=--=--=-=-=-= religion details=-=-=-=-=-=-=-=-=--=-=
   Future<void> religiondeytalsProfile({
     required Map<String, dynamic> formData,
+    BuildContext? context,
   }) async {
     String? token = Get.find<AuthController>().getAuthToken();
 
@@ -242,11 +249,121 @@ class StaperfromController extends GetxController implements GetxService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (jsonResponse["status"] == true) {
           EasyLoading.dismiss();
+          showDialog(
+            // ignore: use_build_context_synchronously
+            context: context!,
+            barrierDismissible: false,
+            builder: (context) {
+              return Dialog(
+                insetPadding: EdgeInsets.symmetric(horizontal: 20),
+                backgroundColor: Colors.transparent,
+                child: Align(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white,
+                    ),
 
-          Get.to(
-            AadharOtpScreen(),
-            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-            transition: Transition.rightToLeft,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
+                          child: Image.asset(
+                            "assets/images/Frame 79.png",
+                            width: double.infinity,
+                            height: 300,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+
+                        Text(
+                          "Thank you for Registration",
+                          style: opensansBold.copyWith(
+                            color: Colors.green,
+                            fontSize: 18,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          "Welcome To Vivashri",
+                          style: opensansBold.copyWith(
+                            color: ColorResources.primarycolor2,
+                            fontSize: 25,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+
+                        // BUTTON
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: GestureDetector(
+                            onTap: () {
+                              Get.offAll(
+                                ReferenceDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            },
+                            child: Container(
+                              height: 45,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFFBE266B),
+                                    Color(0xFFEB1D7B),
+                                  ],
+                                ),
+                              ),
+                              child: Text(
+                                "Continue to Complete Profile",
+                                style: opensansSemiBold.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 10),
+
+                        // SKIP
+                        GestureDetector(
+                          onTap: () {
+                            Get.offAll(
+                              MainNavigation(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 20),
+                            child: Text(
+                              "Skip",
+                              style: opensansSemiBold.copyWith(
+                                color: Colors.pink,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           );
         } else {
           EasyLoading.dismiss();
@@ -942,8 +1059,8 @@ class StaperfromController extends GetxController implements GetxService {
         if (jsonResponse["status"] == true) {
           EasyLoading.dismiss();
 
-          Get.to(
-            PartnerOtherDetailsScreen(),
+          Get.offAll(
+            MainNavigation(),
             duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
             transition: Transition.rightToLeft,
           );

@@ -2,18 +2,16 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/profilefrom/contact_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
-import 'package:vivashri/data/controller/auth_controller.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
 import 'package:vivashri/data/controller/looking_for_controller.dart';
 import 'package:vivashri/data/controller/marital_staus.contro.dart';
 import 'package:vivashri/data/controller/statecontroller.dart';
 
 class BasicDetailsScreen extends StatefulWidget {
-  const BasicDetailsScreen({super.key});
+  String? mobielemild;
+  BasicDetailsScreen({super.key, this.mobielemild});
 
   @override
   State<BasicDetailsScreen> createState() => _BasicDetailsScreenState();
@@ -252,12 +250,8 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: InkWell(
-                  onTap: () => Navigator.pop(context),
-                  child: Icon(
-                    Icons.arrow_back,
-                    color: ColorResources.blackcolor,
-                    size: 28,
-                  ),
+                  // onTap: () => Navigator.pop(context),
+                  child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
                 ),
               ),
             ),
@@ -576,16 +570,9 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
               "app_step": "1",
               "step": "1",
             },
+            mobilenumber: widget.mobielemild,
           );
         }
-        print(
-          'profile:::::::${lookingC.selectedId.value}::gender${gender}::name${nameCtrl.text}::marital:::::::${maritalC.selectedId.value}::state:::::${stateC.selectedStateId.value}:::::${selectedDay}::::${selectedMonth}:::::${selectedYear}',
-        );
-        // Get.to(
-        //   ContactDetailsScreen(),
-        //   duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-        //   transition: Transition.rightToLeft,
-        // );
       },
       child: Container(
         height: 45,

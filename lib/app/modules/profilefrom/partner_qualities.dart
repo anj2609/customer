@@ -294,11 +294,11 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
               spacing: 10,
               runSpacing: 10,
               children: hobbyC.hobbyList.map((h) {
-                bool selected = hobbyC.selectedHobbyIds.contains(h.id);
+                bool selected2 = hobbyC.selectedHobbyIds222.contains(h.id);
 
                 return InkWell(
                   onTap: () {
-                    hobbyC.toggleHobby(h.id);
+                    hobbyC.toggleHobby22(h.id);
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -307,9 +307,9 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      color: selected ? Colors.pink.shade50 : Colors.white,
+                      color: selected2 ? Colors.pink.shade50 : Colors.white,
                       border: Border.all(
-                        color: selected
+                        color: selected2
                             ? ColorResources.primarycolor3
                             : Colors.grey.shade400,
                         width: 1.3,
@@ -319,7 +319,7 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
                       h.name, // Name show
                       style: opensansSemiBold.copyWith(
                         fontSize: 13,
-                        color: selected
+                        color: selected2
                             ? ColorResources.primarycolor3
                             : Colors.black87,
                       ),
@@ -380,7 +380,7 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
                     "app_step": '12',
                     "step": '12',
                   },
-                  selected: hobbyC.selectedHobbyIds,
+                  selected: hobbyC.selectedHobbyIds222,
                 );
               }
               // Get.to(

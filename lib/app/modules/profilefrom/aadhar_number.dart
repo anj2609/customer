@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/app/modules/profilefrom/aadhar_otp.dart';
+import 'package:vivashri/app/modules/profilefrom/religition_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
@@ -223,18 +224,29 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                ReligionDetailsScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),
@@ -265,14 +277,21 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
                   colorText: Colors.white,
                 );
               } else {
-                stapercontroller.aadharnumberProfile(
-                  formData: {
-                    "aadhaar_no":
-                        '${aadhaar1.text}${aadhaar2.text}${aadhaar3.text}',
-                    "app_step": "3",
-                    "step": "3",
-                  },
+                Get.to(
+                  AadharOtpScreen(),
+                  duration: Duration(
+                    milliseconds: ApiConstants.screenTransitionTime,
+                  ),
+                  transition: Transition.rightToLeft,
                 );
+                // stapercontroller.aadharnumberProfile(
+                //   formData: {
+                //     "aadhaar_no":
+                //         '${aadhaar1.text}${aadhaar2.text}${aadhaar3.text}',
+                //     "app_step": "3",
+                //     "step": "3",
+                //   },
+                // );
               }
               print(
                 'otp::::::${aadhaar1.text}${aadhaar2.text}${aadhaar3.text}',
