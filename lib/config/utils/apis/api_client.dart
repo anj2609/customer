@@ -60,7 +60,7 @@ class ApiClient extends GetxService {
         print('====> GetX Basebodyy: $body');
         Http.Response _response = await Http.post(
           Uri.parse(
-            'https://testing.akslearning.in/vivashribackend/api/' + uri,
+            'https://vivashri.com/vivashribackend/api/' + uri,
           ),
           body: jsonEncode(body),
           headers: _mainHeaders,

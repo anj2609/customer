@@ -14,7 +14,7 @@ class CasteController extends GetxController {
     selectedCasteName.value = null;
 
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/caste/$religionId";
+        "https://vivashri.com/vivashribackend/api/front/caste/$religionId";
 
     final response = await http.get(Uri.parse(url));
 

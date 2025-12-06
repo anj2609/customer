@@ -16,7 +16,7 @@ class ReligionController extends GetxController {
 
   Future<void> fetchReligion() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/religion";
+        "https://vivashri.com/vivashribackend/api/front/religion";
 
     final response = await http.get(Uri.parse(url));
 

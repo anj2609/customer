@@ -19,7 +19,7 @@ class OccupationController extends GetxController {
 
   Future<void> fetchOccupation() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/occupation";
+        "https://vivashri.com/vivashribackend/api/front/occupation";
 
     final response = await http.get(Uri.parse(url));
 

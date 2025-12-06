@@ -19,7 +19,7 @@ class WorkingWithController extends GetxController {
 
   Future<void> fetchWorkingWith() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/working-with";
+        "https://vivashri.com/vivashribackend/api/front/working-with";
 
     final response = await http.get(Uri.parse(url));
 

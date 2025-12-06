@@ -14,7 +14,7 @@ class SubCasteController extends GetxController {
     selectedSubCasteName.value = null;
 
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/sub-caste/$casteId";
+        "https://vivashri.com/vivashribackend/api/front/sub-caste/$casteId";
 
     final response = await http.get(Uri.parse(url));
 

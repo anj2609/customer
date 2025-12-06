@@ -19,7 +19,7 @@ class LanguageController extends GetxController {
 
   Future<void> fetchLanguages() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/language";
+        "https://vivashri.com/vivashribackend/api/front/language";
 
     final response = await http.get(Uri.parse(url));
 

@@ -16,7 +16,7 @@ class CityController extends GetxController {
     selectedCityName.value = null;
 
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/city/$stateId";
+        "https://vivashri.com/vivashribackend/api/front/city/$stateId";
 
     final response = await http.get(Uri.parse(url));
 
@@ -33,7 +33,7 @@ class CityController extends GetxController {
     sameeselectedCityName.value = null;
 
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/city/$stateId";
+        "https://vivashri.com/vivashribackend/api/front/city/$stateId";
 
     final response = await http.get(Uri.parse(url));
 

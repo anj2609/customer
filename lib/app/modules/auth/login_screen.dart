@@ -197,42 +197,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 40),
 
-                      // Center(
-                      //   child: RichText(
-                      //     text: TextSpan(
-                      //       text: "New to Vivashri? ",
-                      //       style: opensansSemiBold.copyWith(
-                      //         color: ColorResources.blackgrey,
-                      //         fontSize: 15,
-                      //       ),
-                      //       children: [
-                      //         TextSpan(
-                      //           text: "Sign Up",
-                      //           style: opensansSemiBold.copyWith(
-                      //             color: ColorResources.primarycolor,
-                      //             fontWeight: FontWeight.bold,
-                      //             decoration: TextDecoration.underline,
-                      //           ),
-                      //           recognizer: TapGestureRecognizer()
-                      //             ..onTap = () {
-                      //               Get.to(
-                      //                 SignUpScreen(),
-                      //                 duration: Duration(
-                      //                   milliseconds:
-                      //                       ApiConstants.screenTransitionTime,
-                      //                 ),
-                      //                 transition: Transition.rightToLeft,
-                      //               );
-                      //             },
-                      //         ),
-                      //         TextSpan(
-                      //           text: " free.",
-                      //           style: opensansSemiBold.copyWith(),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
                       const SizedBox(height: 120),
                     ],
                   ),

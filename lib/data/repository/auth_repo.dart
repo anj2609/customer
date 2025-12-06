@@ -47,6 +47,7 @@ class AuthRepo extends GetxService {
 
   void removeUserToken() async {
     await sharedPreferences.remove(ApiConstants.token);
+     await sharedPreferences.remove(ApiConstants.profileid);
   }
 
   String? getUserToken() {

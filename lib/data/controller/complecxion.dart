@@ -19,7 +19,7 @@ class ComplexionController extends GetxController {
 
   Future<void> fetchComplexion() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/complexion";
+        "https://vivashri.com/vivashribackend/api/front/complexion";
 
     final response = await http.get(Uri.parse(url));
 

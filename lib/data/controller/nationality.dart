@@ -16,7 +16,7 @@ class CountryController extends GetxController {
 
   Future<void> fetchCountries() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/country";
+        "https://vivashri.com/vivashribackend/api/front/country";
 
     final response = await http.get(Uri.parse(url));
 

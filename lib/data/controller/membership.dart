@@ -5,17 +5,19 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 
 class MembershipPlanController extends GetxController {
   RxBool isLoading = false.obs;
   RxList<MembershipPlan> planList = <MembershipPlan>[].obs;
+  final usercontroller = Get.put(UserDetailController());
 
   Future<void> fetchPlans() async {
     try {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/front/membership-plan-list",
+        "https://vivashri.com/vivashribackend/api/front/membership-plan-list",
       );
 
       var response = await http.get(url);
@@ -44,7 +46,7 @@ class MembershipPlanController extends GetxController {
       String? token = prefs.getString("token");
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/activate-plan",
+        "https://vivashri.com/vivashribackend/api/user/activate-plan",
       );
 
       var response = await http.post(
@@ -78,8 +80,12 @@ class MembershipPlanController extends GetxController {
 
           buttonColor: ColorResources.primarycolor3,
 
-          onConfirm: () {
+          onConfirm: () async {
             Get.back();
+            final prefs = await SharedPreferences.getInstance();
+
+            String? profileid = prefs.getString("profileid");
+            usercontroller.fetchUserDetail(profileid.toString());
           },
         );
       } else {

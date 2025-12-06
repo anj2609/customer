@@ -7,6 +7,13 @@ class MaritalStatusController extends GetxController {
   var selectedName = RxnString();
   var selectedId = "".obs;
 
+  /// list of selected names
+  var selectedNames = <String>[].obs;
+
+  /// list of selected IDs → EXACT FORMAT ["id1","id2"]
+  var selectedIds = <String>[].obs;
+
+  /// Selected values list
   @override
   void onInit() {
     fetchMaritalStatus();
@@ -15,7 +22,7 @@ class MaritalStatusController extends GetxController {
 
   Future<void> fetchMaritalStatus() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/marital-status";
+        "https://vivashri.com/vivashribackend/api/front/marital-status";
 
     final response = await http.get(Uri.parse(url));
 
@@ -26,6 +33,22 @@ class MaritalStatusController extends GetxController {
         jsonData["data"],
       ).map((e) => MaritalModel.fromJson(e)).toList();
     }
+  }
+
+  void toggleSelection(MaritalModel item) {
+    if (selectedIds.contains(item.id.toString())) {
+      selectedIds.remove(item.id.toString());
+      selectedNames.remove(item.name);
+    } else {
+      selectedIds.add(item.id.toString());
+      selectedNames.add(item.name);
+    }
+
+    selectedIds.refresh();
+    selectedNames.refresh();
+
+    print("Selected IDs: ${selectedIds.toList()}"); // 👈 EXACT OUTPUT
+    print("Selected Names: ${selectedNames.toList()}");
   }
 
   void onSelect(String name) {

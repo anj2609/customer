@@ -16,7 +16,7 @@ class ProfessionalEduController extends GetxController {
 
   Future<void> fetchProfessionalEducation() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/professional-education";
+        "https://vivashri.com/vivashribackend/api/front/professional-education";
 
     final response = await http.get(Uri.parse(url));
 

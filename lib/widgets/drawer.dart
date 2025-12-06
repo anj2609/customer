@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:restart_app/restart_app.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/match/matchscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
@@ -9,7 +12,9 @@ import 'package:vivashri/app/modules/notification/notification.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/auth_controller.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
+import 'package:vivashri/widgets/setting.dart';
 
 class CustomAppDrawer extends StatelessWidget {
   const CustomAppDrawer({super.key});
@@ -57,18 +62,18 @@ class CustomAppDrawer extends StatelessWidget {
 
                           if (gender == "Male") {
                             return Image.asset(
-                              "assets/images/profilee.png",
-                              fit: BoxFit.cover,
+                              "assets/images/9159790.png",
+                              fit: BoxFit.contain,
                             );
                           } else if (gender == "Female") {
                             return Image.asset(
-                              "assets/images/Rectangle 77.png",
-                              fit: BoxFit.cover,
+                              "assets/images/3232.png",
+                              fit: BoxFit.contain,
                             );
                           } else {
                             return Image.asset(
                               "assets/images/profilee.png",
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
                             );
                           }
                         },
@@ -251,6 +256,15 @@ class CustomAppDrawer extends StatelessWidget {
                   _drawerItem(
                     image: "assets/images/setting_svgrepo.com.png",
                     title: "Settings",
+                    onTap: () {
+                      Get.to(
+                        SettingsScreen(),
+                        duration: Duration(
+                          milliseconds: ApiConstants.screenTransitionTime,
+                        ),
+                        transition: Transition.rightToLeft,
+                      );
+                    },
                   ),
 
                   // LOGOUT
@@ -258,6 +272,41 @@ class CustomAppDrawer extends StatelessWidget {
                     image: "assets/images/logout_svgrepo.com.png",
                     title: "Logout",
                     isLogout: true,
+                    onTap: () {
+                      showCupertinoDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return CupertinoAlertDialog(
+                            title: Text("Are you sure?"),
+                            content: Text(
+                              "Do you really want to Logout Your Account",
+                            ),
+                            actions: [
+                              CupertinoDialogAction(
+                                child: Text("No"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              CupertinoDialogAction(
+                                isDestructiveAction: true,
+                                child: Text("Yes"),
+                                onPressed: () async {
+                                  Get.find<AuthController>().logOut();
+
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  await prefs.setString('userID', '');
+                                  await prefs.setString('userName', '');
+
+                                  Restart.restartApp();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
                   ),
                 ],
               ),

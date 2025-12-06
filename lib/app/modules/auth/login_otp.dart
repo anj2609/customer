@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/config/utils/all_images.dart';
@@ -31,10 +32,22 @@ class _OtpScreenState extends State<OtpScreen> {
     }
   }
 
+  String? fcmToken;
+  Future<void> fibase() async {
+    try {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      fcmToken = await messaging.getToken();
+      print("FCM Token: $fcmToken");
+    } catch (e) {
+      print("Error fetching FCM token: $e");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     focusNodes[0].requestFocus();
+    fibase();
   }
 
   @override
@@ -201,16 +214,9 @@ class _OtpScreenState extends State<OtpScreen> {
                             context: context,
                             userid: widget.userid.toString(),
                             otp: '1234',
-                            devicetoken: '',
+                            devicetoken: fcmToken.toString(),
                             mobilenu7mber: widget.mobileemail.toString(),
                           );
-                          // Get.to(
-                          //   BasicDetailsScreen(),
-                          //   duration: Duration(
-                          //     milliseconds: ApiConstants.screenTransitionTime,
-                          //   ),
-                          //   transition: Transition.rightToLeft,
-                          // );
                         },
                         child: Container(
                           height: 50,

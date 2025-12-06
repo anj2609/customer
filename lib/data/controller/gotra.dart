@@ -13,7 +13,7 @@ class GotraController extends GetxController {
     selectedGotraName.value = null;
 
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/gotra-sub-caste/$subCasteId";
+        "https://vivashri.com/vivashribackend/api/front/gotra-sub-caste/$subCasteId";
 
     final res = await http.get(Uri.parse(url));
 

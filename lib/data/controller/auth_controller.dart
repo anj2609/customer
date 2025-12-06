@@ -8,6 +8,7 @@ import 'package:vivashri/app/modules/profilefrom/contact_details.dart';
 import 'package:vivashri/app/modules/profilefrom/religition_details.dart';
 import 'package:vivashri/config/route.dart';
 import 'package:vivashri/config/utils/constants.dart';
+import 'package:vivashri/data/controller/marital_staus.contro.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/data/repository/auth_repo.dart';
 
@@ -184,3 +185,4 @@ class AuthController extends GetxController implements GetxService {
     return authRepo.removeUserToken();
   }
 }
+

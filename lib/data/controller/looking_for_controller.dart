@@ -15,7 +15,7 @@ class LookingForController extends GetxController {
 
   Future<void> fetchLookingFor() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/looking-for";
+        "https://vivashri.com/vivashribackend/api/front/looking-for";
 
     final response = await http.get(Uri.parse(url));
 

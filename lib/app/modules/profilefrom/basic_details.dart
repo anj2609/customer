@@ -146,11 +146,13 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                                   setState(() {
                                     selectedMonth = v;
                                     selectedMonthNumber =
-                                        monthNumber[v]; // <-- yaha number mil jayega
+                                        monthNumber[v]; // ← yaha se number milega
                                   });
 
-                                  print("Month Name: $v");
-                                  print("Month Number: $selectedMonthNumber");
+                                  print("Selected Month: $v");
+                                  print(
+                                    "Send This Number: $selectedMonthNumber",
+                                  );
                                 },
                                 items: [
                                   "Jan",
@@ -176,8 +178,8 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                                 onChanged: (v) =>
                                     setState(() => selectedYear = v),
                                 items: List.generate(
-                                  60,
-                                  (i) => "${DateTime.now().year - 18 - i}",
+                                  (DateTime.now().year - 1948) + 1,
+                                  (i) => "${DateTime.now().year - i}",
                                 ),
                               ),
                             ),
@@ -206,6 +208,22 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
       ),
     );
   }
+
+  String? selectedMonthNumber;
+  final Map<String, String> monthNumber = {
+    "Jan": "01",
+    "Feb": "02",
+    "Mar": "03",
+    "Apr": "04",
+    "May": "05",
+    "Jun": "06",
+    "Jul": "07",
+    "Aug": "08",
+    "Sep": "09",
+    "Oct": "10",
+    "Nov": "11",
+    "Dec": "12",
+  };
 
   Widget _cityc({
     required String? value,
@@ -243,7 +261,6 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       child: Row(
         children: [
-          // LEFT BACK BUTTON
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 30),
@@ -298,31 +315,41 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
             ),
           ),
 
-          // RIGHT SIDE AUTO RESIZE TEXTS
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.snackbar(
+                  'Error',
+                  'Please complete this form after clicking Continue.',
+
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Contact Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Contact Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -376,21 +403,6 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
     );
   }
 
-  Map<String, String> monthNumber = {
-    "Jan": "1",
-    "Feb": "2",
-    "Mar": "3",
-    "Apr": "4",
-    "May": "5",
-    "Jun": "6",
-    "Jul": "7",
-    "Aug": "8",
-    "Sep": "9",
-    "Oct": "10",
-    "Nov": "11",
-    "Dec": "12",
-  };
-  String? selectedMonthNumber;
   // ---------------- DROPDOWN ----------------
 
   Widget _dropDown({
@@ -561,7 +573,6 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
               "gender": gender,
               "name": nameCtrl.text,
               "marital_status": maritalC.selectedId.value,
-
               "birth_day": selectedDay,
               "birth_month": selectedMonthNumber,
               "birth_year": selectedYear,

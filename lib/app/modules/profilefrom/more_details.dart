@@ -959,7 +959,7 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
-              } else if (weight == null) {
+              } else if (fromWeight == null) {
                 Get.snackbar(
                   'Error',
                   'Please Select Your Weight (in kg) ',

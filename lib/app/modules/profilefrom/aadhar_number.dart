@@ -255,47 +255,54 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              if (aadhaar1.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Aadhaar Number',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (aadhaar2.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Aadhaar Number',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (aadhaar3.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Aadhaar Number',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else {
-                Get.to(
-                  AadharOtpScreen(),
-                  duration: Duration(
-                    milliseconds: ApiConstants.screenTransitionTime,
-                  ),
-                  transition: Transition.rightToLeft,
-                );
-                // stapercontroller.aadharnumberProfile(
-                //   formData: {
-                //     "aadhaar_no":
-                //         '${aadhaar1.text}${aadhaar2.text}${aadhaar3.text}',
-                //     "app_step": "3",
-                //     "step": "3",
-                //   },
-                // );
-              }
-              print(
-                'otp::::::${aadhaar1.text}${aadhaar2.text}${aadhaar3.text}',
+              Get.to(
+                AadharOtpScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
               );
+              // if (aadhaar1.text.isEmpty) {
+              //   Get.snackbar(
+              //     'Error',
+              //     'Please Enter Your Aadhaar Number',
+              //     backgroundColor: Colors.red,
+              //     colorText: Colors.white,
+              //   );
+              // } else if (aadhaar2.text.isEmpty) {
+              //   Get.snackbar(
+              //     'Error',
+              //     'Please Enter Your Aadhaar Number',
+              //     backgroundColor: Colors.red,
+              //     colorText: Colors.white,
+              //   );
+              // } else if (aadhaar3.text.isEmpty) {
+              //   Get.snackbar(
+              //     'Error',
+              //     'Please Enter Your Aadhaar Number',
+              //     backgroundColor: Colors.red,
+              //     colorText: Colors.white,
+              //   );
+              // } else {
+              //   Get.to(
+              //     AadharOtpScreen(),
+              //     duration: Duration(
+              //       milliseconds: ApiConstants.screenTransitionTime,
+              //     ),
+              //     transition: Transition.rightToLeft,
+              //   );
+              //   // stapercontroller.aadharnumberProfile(
+              //   //   formData: {
+              //   //     "aadhaar_no":
+              //   //         '${aadhaar1.text}${aadhaar2.text}${aadhaar3.text}',
+              //   //     "app_step": "3",
+              //   //     "step": "3",
+              //   //   },
+              //   // );
+              // }
+              // print(
+              //   'otp::::::${aadhaar1.text}${aadhaar2.text}${aadhaar3.text}',
+              // );
             },
             child: Container(
               height: 45,

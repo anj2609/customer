@@ -37,7 +37,7 @@ class StaperfromController extends GetxController implements GetxService {
 
     try {
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/basic-profile",
+        "https://vivashri.com/vivashribackend/api/user/basic-profile",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -51,7 +51,7 @@ class StaperfromController extends GetxController implements GetxService {
         },
         body: body,
       );
-
+      print('bodyyyy${body}');
       var jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -100,7 +100,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/contact-information",
+        "https://vivashri.com/vivashribackend/api/user/contact-information",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -163,7 +163,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/aadhaar-verification",
+        "https://vivashri.com/vivashribackend/api/user/aadhaar-verification",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -227,7 +227,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/religion",
+        "https://vivashri.com/vivashribackend/api/user/religion",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -400,7 +400,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/location-detail",
+        "https://vivashri.com/vivashribackend/api/user/location-detail",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -463,7 +463,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/family-detail",
+        "https://vivashri.com/vivashribackend/api/user/family-detail",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -527,7 +527,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/basic-profile",
+        "https://vivashri.com/vivashribackend/api/user/basic-profile",
       );
 
       var body = jsonEncode({"formData": formData, "selected": selected ?? []});
@@ -591,7 +591,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/partner-qualities",
+        "https://vivashri.com/vivashribackend/api/user/partner-qualities",
       );
 
       var body = jsonEncode({"formData": formData, "selected": selected ?? []});
@@ -655,10 +655,13 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/partner-basic-detail",
+        "https://vivashri.com/vivashribackend/api/user/partner-basic-detail",
       );
 
-      var body = jsonEncode({"formData": formData, "selected": selected ?? []});
+      var body = jsonEncode({
+        "formData": formData,
+        "searchMarital_status": selected,
+      });
 
       var response = await http.post(
         url,
@@ -718,7 +721,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/partner-qualities",
+        "https://vivashri.com/vivashribackend/api/user/partner-qualities",
       );
 
       var body = jsonEncode({"formData": formData, "selected": selected ?? []});
@@ -781,7 +784,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/partner-basic-detail",
+        "https://vivashri.com/vivashribackend/api/user/partner-basic-detail",
       );
 
       var body = jsonEncode({"formData": formData, "selected": selected ?? []});
@@ -846,7 +849,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/partner-basic-detail",
+        "https://vivashri.com/vivashribackend/api/user/partner-basic-detail",
       );
 
       var body = jsonEncode({"formData": formData, "selected": selected ?? []});
@@ -910,7 +913,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/partner-basic-detail",
+        "https://vivashri.com/vivashribackend/api/user/partner-basic-detail",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -973,7 +976,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/partner-basic-detail",
+        "https://vivashri.com/vivashribackend/api/user/partner-basic-detail",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -1036,7 +1039,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/partner-basic-detail",
+        "https://vivashri.com/vivashribackend/api/user/partner-basic-detail",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -1099,7 +1102,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/location-detail",
+        "https://vivashri.com/vivashribackend/api/user/location-detail",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -1162,7 +1165,7 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = true;
 
       var url = Uri.parse(
-        "https://testing.akslearning.in/vivashribackend/api/user/education-detail",
+        "https://vivashri.com/vivashribackend/api/user/education-detail",
       );
 
       var body = jsonEncode({"formData": formData});
@@ -1189,6 +1192,381 @@ class StaperfromController extends GetxController implements GetxService {
             UploadPhotoScreen(),
             duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
             transition: Transition.rightToLeft,
+          );
+        } else {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Error",
+            jsonResponse["message"] ?? "Something went wrong",
+          );
+        }
+      } else {
+        EasyLoading.dismiss();
+        Get.snackbar(
+          "Server Error",
+          jsonResponse["message"] ?? "Something went wrong",
+        );
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      print("Exception: $e");
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  //=-=-=-=-=-==-=-=--=--=-=-=-=-=--=-=-=-=-=- Edit From Pgae Api ==-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-==-=-=-==--=-=-
+  //-=================-=-=-=-=-=-=--=-=------------------==========================-------------------------------
+  Future<void> updatepartnerreligion({
+    required Map<String, dynamic> formData,
+  }) async {
+    String? token = Get.find<AuthController>().getAuthToken();
+
+    EasyLoading.show();
+
+    try {
+      isLoading.value = true;
+
+      var url = Uri.parse(
+        "https://vivashri.com/vivashribackend/api/user/partner-basic-detail",
+      );
+
+      var body = jsonEncode({"formData": formData});
+
+      var response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: body,
+      );
+
+      var jsonResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (jsonResponse["status"] == true) {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Success",
+            "Update Successfully",
+            colorText: Colors.white,
+            backgroundColor: Colors.green,
+          );
+        } else {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Error",
+            jsonResponse["message"] ?? "Something went wrong",
+          );
+        }
+      } else {
+        EasyLoading.dismiss();
+        Get.snackbar(
+          "Server Error",
+          jsonResponse["message"] ?? "Something went wrong",
+        );
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      print("Exception: $e");
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updatepartnerotherdetails({
+    required Map<String, dynamic> formData,
+  }) async {
+    String? token = Get.find<AuthController>().getAuthToken();
+
+    EasyLoading.show();
+
+    try {
+      isLoading.value = true;
+
+      var url = Uri.parse(
+        "https://vivashri.com/vivashribackend/api/user/partner-basic-detail",
+      );
+
+      var body = jsonEncode({"formData": formData});
+
+      var response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: body,
+      );
+
+      var jsonResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (jsonResponse["status"] == true) {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Success",
+            "Update Successfully",
+            colorText: Colors.white,
+            backgroundColor: Colors.green,
+          );
+        } else {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Error",
+            jsonResponse["message"] ?? "Something went wrong",
+          );
+        }
+      } else {
+        EasyLoading.dismiss();
+        Get.snackbar(
+          "Server Error",
+          jsonResponse["message"] ?? "Something went wrong",
+        );
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      print("Exception: $e");
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updatepartnerbasicdetails({
+    required Map<String, dynamic> formData,
+    String? selected,
+  }) async {
+    String? token = Get.find<AuthController>().getAuthToken();
+
+    EasyLoading.show();
+
+    try {
+      isLoading.value = true;
+
+      var url = Uri.parse(
+        "https://vivashri.com/vivashribackend/api/user/partner-basic-detail",
+      );
+
+      var body = jsonEncode({
+        "formData": formData,
+        "searchMarital_status": selected,
+      });
+
+      var response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: body,
+      );
+
+      print("Response: ${response.body}");
+
+      var jsonResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (jsonResponse["status"] == true) {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Success",
+            "Update Successfully",
+            colorText: Colors.white,
+            backgroundColor: Colors.green,
+          );
+        } else {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Error",
+            jsonResponse["message"] ?? "Something went wrong",
+          );
+        }
+      } else {
+        EasyLoading.dismiss();
+        Get.snackbar(
+          "Server Error",
+          jsonResponse["message"] ?? "Something went wrong",
+        );
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      print("Exception: $e");
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updatehobbies({
+    required Map<String, dynamic> formData,
+    List<dynamic>? selected,
+  }) async {
+    String? token = Get.find<AuthController>().getAuthToken();
+
+    EasyLoading.show();
+
+    try {
+      isLoading.value = true;
+
+      var url = Uri.parse(
+        "https://vivashri.com/vivashribackend/api/user/basic-profile",
+      );
+
+      var body = jsonEncode({"formData": formData, "selected": selected ?? []});
+
+      var response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: body,
+      );
+
+      print("Response: ${response.body}");
+
+      var jsonResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (jsonResponse["status"] == true) {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Success",
+            "Update Successfully",
+            colorText: Colors.white,
+            backgroundColor: Colors.green,
+          );
+        } else {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Error",
+            jsonResponse["message"] ?? "Something went wrong",
+          );
+        }
+      } else {
+        EasyLoading.dismiss();
+        Get.snackbar(
+          "Server Error",
+          jsonResponse["message"] ?? "Something went wrong",
+        );
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      print("Exception: $e");
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updatelocationdeatilss({
+    required Map<String, dynamic> formData,
+  }) async {
+    String? token = Get.find<AuthController>().getAuthToken();
+
+    EasyLoading.show();
+
+    try {
+      isLoading.value = true;
+
+      var url = Uri.parse(
+        "https://vivashri.com/vivashribackend/api/user/location-detail",
+      );
+
+      var body = jsonEncode({"formData": formData});
+
+      var response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: body,
+      );
+
+      print("Response: ${body}");
+
+      var jsonResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (jsonResponse["status"] == true) {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Success",
+            "Update Successfully",
+            colorText: Colors.white,
+            backgroundColor: Colors.green,
+          );
+        } else {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Error",
+            jsonResponse["message"] ?? "Something went wrong",
+          );
+        }
+      } else {
+        EasyLoading.dismiss();
+        Get.snackbar(
+          "Server Error",
+          jsonResponse["message"] ?? "Something went wrong",
+        );
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      print("Exception: $e");
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateedcuationdetailss({
+    required Map<String, dynamic> formData,
+  }) async {
+    String? token = Get.find<AuthController>().getAuthToken();
+
+    EasyLoading.show();
+
+    try {
+      isLoading.value = true;
+
+      var url = Uri.parse(
+        "https://vivashri.com/vivashribackend/api/user/education-detail",
+      );
+
+      var body = jsonEncode({"formData": formData});
+
+      var response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: body,
+      );
+
+      print("Response: ${response.body}");
+
+      var jsonResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (jsonResponse["status"] == true) {
+          EasyLoading.dismiss();
+          Get.snackbar(
+            "Success",
+            "Update Successfully",
+            colorText: Colors.white,
+            backgroundColor: Colors.green,
           );
         } else {
           EasyLoading.dismiss();

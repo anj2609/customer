@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
-import 'package:vivashri/config/utils/app_constants.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/contactedit.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/editbasicdetails.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/editphotes.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/educationedit.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/familydetailsedit.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/hobiesedit.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/horoscopedetails.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/locationedit.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/partnereditbasic.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/partnereduedit.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/partnerlocationedit.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/partnerotheredit.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/partnerreliitonedit.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/professionaldetails.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
@@ -20,6 +34,12 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
   int tabIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final usercontroller = Get.put(UserDetailController());
+  void profileapi() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? profileid = prefs.getString("profileid");
+    usercontroller.fetchUserDetail(profileid.toString());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,16 +58,23 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
               children: [
                 _buildTopBar(),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Column(
-                      children: [
-                        _profileHeader(w),
-                        _profileTabs(),
-                        SizedBox(height: 8),
-                        if (tabIndex == 0) _myDetailsSection(),
-                        if (tabIndex == 1) _partnerDetailsSection(),
-                      ],
+                  child: RefreshIndicator(
+                    color: Colors.white,
+                    backgroundColor: ColorResources.primarycolor2,
+                    onRefresh: () async {
+                      profileapi();
+                    },
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Column(
+                        children: [
+                          _profileHeader(w),
+                          _profileTabs(),
+                          SizedBox(height: 8),
+                          if (tabIndex == 0) _myDetailsSection(),
+                          if (tabIndex == 1) _partnerDetailsSection(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -139,8 +166,29 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
                       "${ApiConstants.imageurl}${u.photo}",
-                      fit: BoxFit.cover,
+                      height: 300,
                       width: double.infinity,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        String gender = u.gender.toString();
+
+                        if (gender == "Male") {
+                          return Image.asset(
+                            "assets/images/9159790.png",
+                            fit: BoxFit.contain,
+                          );
+                        } else if (gender == "Female") {
+                          return Image.asset(
+                            "assets/images/3232.png",
+                            fit: BoxFit.contain,
+                          );
+                        } else {
+                          return Image.asset(
+                            "assets/images/profilee.png",
+                            fit: BoxFit.contain,
+                          );
+                        }
+                      },
                     ),
                   ),
                 ),
@@ -233,20 +281,26 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                       const SizedBox(height: 4),
 
                       Text(
-                        "• ${u.weight}, ${u.height}”   • ${u.religion!.name}   • ${u.subCaste!.name}   • ${u.manglik}  • ${u.highestDegree!.name}",
+                        "• ${u.weight ?? ''}, ${u.height ?? ''}   "
+                        "• ${u.religion?.name ?? ''}   "
+                        "• ${u.subCaste?.name ?? ''}   "
+                        "• ${u.manglik ?? ''}   "
+                        "• ${u.highestDegree?.name ?? ''}",
                         style: opensansSemiBold.copyWith(
                           color: Colors.white,
                           fontSize: 11,
                         ),
                       ),
 
-                      Text(
-                        "• ${u.occupation!.name}   • Earns ₹${u.annualIncome} p.a ",
-                        style: opensansSemiBold.copyWith(
-                          color: Colors.white,
-                          fontSize: 11,
-                        ),
-                      ),
+                      u.occupation == null || u.annualIncome == null
+                          ? SizedBox()
+                          : Text(
+                              "• ${u.occupation!.name}   • Earns ₹${u.annualIncome} p.a ",
+                              style: opensansSemiBold.copyWith(
+                                color: Colors.white,
+                                fontSize: 11,
+                              ),
+                            ),
                     ],
                   ),
                 ),
@@ -260,7 +314,18 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/images/Group 377.png', height: 35),
+              GestureDetector(
+                onTap: () {
+                  Get.to(
+                    EditphotoesScreen(),
+                    duration: Duration(
+                      milliseconds: ApiConstants.screenTransitionTime,
+                    ),
+                    transition: Transition.rightToLeft,
+                  );
+                },
+                child: Image.asset('assets/images/Group 377.png', height: 35),
+              ),
               const SizedBox(width: 10),
               GestureDetector(
                 onTap: () {
@@ -410,6 +475,24 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
     }
   }
 
+  String safeFormatTime(String? dob) {
+    if (dob == null || dob.isEmpty) return "";
+
+    try {
+      DateTime dt = DateTime.parse(dob); // <-- NO .toLocal()
+
+      int hour = dt.hour;
+      int minute = dt.minute;
+
+      String ampm = hour >= 12 ? "PM" : "AM";
+      int displayHour = hour % 12 == 0 ? 12 : hour % 12;
+
+      return "${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $ampm";
+    } catch (e) {
+      return "";
+    }
+  }
+
   // ------------------ ALL DETAILS SECTION -------------------
   Widget _myDetailsSection() {
     final u = usercontroller.userData.value!;
@@ -427,125 +510,281 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
               "Gender",
               "${u.gender}",
             ],
-            ["Name", "${u.name}", "Height Range", "${u.height}"],
+            [
+              "Name",
+              (u.name == null || u.name.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.name}",
+
+              "Height Range",
+              (u.height == null || u.height.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.height}",
+            ],
+
             [
               "Marital Status",
-              "${u.maritalStatus!.name}",
+              (u.maritalStatus?.name ?? 'N/A'),
               "Complexion",
-              "${u.complexion!.name}",
+              (u.complexion?.name ?? 'N/A'),
             ],
+
             [
               "Health Information",
-              "${u.healthInformation}",
+              (u.healthInformation == null ||
+                      u.healthInformation.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.healthInformation}",
+
               "Manglik Status",
-              "${u.manglik}",
+              (u.manglik == null || u.manglik.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.manglik}",
             ],
-            ["Blood Group", "${u.bloodGroup}", "Weight", "${u.weight}"],
-            ["About", "${u.about}", "Disability", "${u.disability}"],
+
+            [
+              "Blood Group",
+              (u.bloodGroup == null || u.bloodGroup.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.bloodGroup}",
+
+              "Weight",
+              (u.weight == null || u.weight.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.weight}",
+            ],
+
+            [
+              "About",
+              (u.about == null || u.about.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.about}",
+
+              "Disability",
+              (u.disability == null || u.disability.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.disability}",
+            ],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              EditBasicDetailsScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
 
         profileSectionCard(
           title: "Horoscope Details",
           fields: [
-            ["Date of Birth", formattedDob, "Time of Birth", "-"],
+            [
+              "Date of Birth",
+              formattedDob,
+              "Time of Birth",
+              (safeFormatTime(u.dob.toString())),
+            ],
             [
               "State of Birth",
-              "${u.birthState!.name}",
+              (u.birthState?.name ?? 'N/A'),
               "City of Birth",
-              "${u.birthCity!.name}",
+              (u.birthCity?.name ?? 'N/A'),
             ],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              HoroscropeEdit(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
         profileSectionCard(
           title: "Education Details",
           fields: [
-            ["Highest Qualification", "${u.highestDegree!.name}", "", ""],
+            ["Highest Qualification", (u.highestDegree?.name ?? ''), "", ""],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              EditEducationDetailsScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
+
         profileSectionCard(
           title: "Professional Details",
           fields: [
             [
               "Annual Income",
-              "${u.annualIncome}",
+              (u.annualIncome ?? 'N/A'),
               "Working With",
-              "${u.workingWith!.name}",
+              u.workingWith == null ? "N/A" : (u.workingWith!.name ?? 'N/A'),
             ],
             [
               "Occupation",
-              "${u.occupation!.name}",
+              u.occupation == null || u.occupation!.name == null
+                  ? "N/A"
+                  : "${u.occupation!.name}",
+
               "Organization",
-              "${u.organizationName}",
+              (u.organizationName == null ||
+                      u.organizationName.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.organizationName}",
             ],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              EditProfessionalDetails(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
         profileSectionCard(
           title: "Family Details",
           fields: [
             [
               "Family Type",
-              "${u.familyType}",
+              (u.familyType == null || u.familyType.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.familyType}",
+
               "Family Value",
-              "${u.familyValue}",
+              (u.familyValue == null || u.familyValue.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.familyValue}",
             ],
-            ["Sister", "${u.noOfSister}", "Brother", "${u.noOfBrother}"],
+
+            [
+              "Sister",
+              (u.noOfSister == null || u.noOfSister.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.noOfSister}",
+
+              "Brother",
+              (u.noOfBrother == null || u.noOfBrother.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.noOfBrother}",
+            ],
+
             [
               "Sister in Law",
-              "${u.noOfSisterInLaw}",
+              (u.noOfSisterInLaw == null ||
+                      u.noOfSisterInLaw.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.noOfSisterInLaw}",
+
               "Brother in Law",
-              "${u.noOfBrotherInLaw}",
+              (u.noOfBrotherInLaw == null ||
+                      u.noOfBrotherInLaw.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.noOfBrotherInLaw}",
             ],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              EditFamilyDetailsScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
         profileSectionCard(
           title: "Location Details",
           fields: [
             [
               "Nationality",
-              "${u.locNationality!.name}",
+              u.locNationality == null || u.locNationality!.name == null
+                  ? "N/A"
+                  : "${u.locNationality!.name}",
+
               "Residence Type",
-              "${u.locResidenceType}",
+              (u.locResidenceType == null ||
+                      u.locResidenceType.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.locResidenceType}",
             ],
+
             [
               "Permanent House Type",
-              "${u.locHouseType}",
+              (u.locHouseType == null || u.locHouseType.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.locHouseType}",
+
               "Permanent State",
-              "${u.locState!.name}",
+              u.locState == null || u.locState!.name == null
+                  ? "N/A"
+                  : "${u.locState!.name}",
             ],
+
             [
               "Permanent City",
-              "${u.locCity!.name}",
+              u.locCity == null || u.locCity!.name == null
+                  ? "N/A"
+                  : "${u.locCity!.name}",
+
               "Permanent Pin/Zip Code",
-              "${u.locPincode}",
+              (u.locPincode == null || u.locPincode.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.locPincode}",
             ],
 
             [
               "Temporary State",
-              "${u.locTempState!.name}",
+              u.locTempState == null ? "N/A" : "${u.locTempState!.name}",
               "Temporary City",
-              "${u.locTempCity!.name}",
+              u.locTempCity == null ? "N/A" : "${u.locTempCity!.name}",
             ],
 
             [
               "References Relation",
-              "${u.locRelation}",
+              (u.locRelation == null || u.locRelation.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.locRelation}",
+
               "References Name",
-              "${u.locRelationName}",
+              (u.locRelationName == null ||
+                      u.locRelationName.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.locRelationName}",
             ],
+
             [
               "References Email Id",
-              "${u.locRelationEmail}",
+              (u.locRelationEmail == null ||
+                      u.locRelationEmail.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.locRelationEmail}",
+
               "References Mobile No.",
-              "${u.locRelationMobile}",
+              (u.locRelationMobile == null ||
+                      u.locRelationMobile.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.locRelationMobile}",
             ],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              EditLocationScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
         profileSectionCard(
           title: "Contact Details",
@@ -558,14 +797,30 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
             ],
             ["Instagram Id", "${u.instagram}", "Facebook Id", "${u.facebook}"],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              EditContectScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
         profileSectionCard(
           title: "Hobbies & Interests",
           fields: [
             ["Hobbies", hobbiesText, "", ""],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              EditHobbies(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
       ],
     );
@@ -661,6 +916,10 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
 
   Widget _partnerDetailsSection() {
     final u = usercontroller.userData.value!;
+    final partnermatiral = u.partnerMaritalStatus
+        .map((e) => e.name) // name extract
+        .join(", ");
+
     return Column(
       children: [
         _sectionBox(
@@ -668,75 +927,177 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
           fields: [
             [
               "Age",
-              "${u.partnerAgeFrom}",
+              (u.partnerAgeFrom == null || u.partnerAgeTo == null)
+                  ? "N/A"
+                  : "${u.partnerAgeFrom}-${u.partnerAgeTo}",
+
               "Body Weight",
-              "${u.partnerWeightFrom}",
+              (u.partnerWeightFrom == null || u.partnerWeightTo == null)
+                  ? "N/A"
+                  : "${u.partnerWeightFrom}-${u.partnerWeightTo}",
             ],
+
             [
               "Marital Status",
-              "${u.partnerMaritalStatus}",
+              (partnermatiral.isEmpty) ? "N/A" : partnermatiral,
+
               "Height Range",
-              "${u.partnerHeightFrom}",
+              (u.partnerHeightFrom == null) ? "N/A" : "${u.partnerHeightFrom}",
             ],
+
             [
               "Languages Known",
-              "${u.partnerLanguage!.name}",
+              u.partnerLanguage == null ? "N/A" : "${u.partnerLanguage!.name}",
               "Complexion",
-              "${u.partnerComplexion!.name}",
+              u.partnerComplexion == null
+                  ? "N/A"
+                  : "${u.partnerComplexion!.name}",
             ],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              EditPartnerBasicDetailsScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
         _sectionBox(
           title: "Partner’s Location Details",
           fields: [
             [
               "Nationality",
-              "${u.partnerCountry!.name}",
+              u.partnerCountry == null ? "N/A" : "${u.partnerCountry!.name}",
               "State",
-              "${u.partnerState!.name}",
+              u.partnerState == null ? "N/A" : "${u.partnerState!.name}",
             ],
-            ["City", "${u.partnerCity!.name}", "", ""],
+            [
+              "City",
+              u.partnerCity == null ? "N/A" : "${u.partnerCity!.name}",
+              "",
+              "",
+            ],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              EditPartnerlocation(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
         _sectionBox(
           title: "Partner’s Education  & Career",
           fields: [
-            ["Highest Qualification", "${u.partnerEducation!.name}", "", ""],
+            [
+              "Highest Qualification",
+              u.partnerEducation == null
+                  ? "N/A"
+                  : "${u.partnerEducation!.name}",
+              "",
+              "",
+            ],
             [
               "Professional Qualification",
-              "${u.partnerProfessionalQualification!.name}",
+              u.partnerProfessionalQualification == null
+                  ? "N/A"
+                  : "${u.partnerProfessionalQualification!.name}",
               "Occupation",
-              "${u.partnerOccupation!.name}",
+              u.partnerOccupation == null
+                  ? "N/A"
+                  : "${u.partnerOccupation!.name}",
             ],
 
             [
               "Annual Income Range",
-              "${u.partnerIncomeFrom}",
+              (u.partnerIncomeFrom == null || u.partnerIncomeTo == null)
+                  ? "N/A"
+                  : "${u.partnerIncomeFrom}-${u.partnerIncomeTo}",
+
               "Work As",
-              "${u.partnerWorkingAs!.name}",
+              u.partnerWorkingAs == null || u.partnerWorkingAs!.name == null
+                  ? "N/A"
+                  : "${u.partnerWorkingAs!.name}",
             ],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              Editpartnereduction(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
         _sectionBox(
           title: "Partner’s Other Details",
           fields: [
             [
               "Diet Preference",
-              "${u.diet!.name}",
+              u.partnerDiet == null || u.partnerDiet!.name == null
+                  ? "N/A"
+                  : "${u.partnerDiet!.name}",
+
               "Drinking Habit",
-              "${u.partnerDrinking}",
+              (u.partnerDrinking == null ||
+                      u.partnerDrinking.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.partnerDrinking}",
             ],
+
             [
               "Smoking Habit",
-              "${u.partnerSmoking}",
+              (u.partnerSmoking == null || u.partnerSmoking.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.partnerSmoking}",
+
               "Profile Managed",
-              "${u.partnerManagedBy}",
+              (u.partnerManagedBy == null ||
+                      u.partnerManagedBy.toString().isEmpty)
+                  ? "N/A"
+                  : "${u.partnerManagedBy}",
             ],
           ],
-          onTap: () {},
+          onTap: () {
+            Get.to(
+              Editpartnereditother(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
+        ),
+        _sectionBox(
+          title: "Partner’s Religion & Caste",
+          fields: [
+            [
+              "Religion",
+              u.partnerReligion == null ? "N/A" : "${u.partnerReligion!.name}",
+              "Caste",
+              u.partnerCaste == null ? "N/A" : "${u.partnerCaste!.name}",
+            ],
+            [
+              "Subcaste:",
+              u.partnerSubCaste == null ? "N/A" : "${u.partnerSubCaste!.name}",
+              "Dosh",
+              u.partnerDosh == null ? "N/A" : "${u.partnerDosh}",
+            ],
+          ],
+          onTap: () {
+            Get.to(
+              EditPartnerReligionCasteScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+          },
         ),
       ],
     );

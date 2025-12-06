@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/editphotes.dart';
 import 'package:vivashri/app/modules/myprofile/my_profile.dart';
 import 'package:vivashri/app/modules/notification/notification.dart';
 import 'package:vivashri/app/modules/search/search.dart';
@@ -11,7 +12,9 @@ import 'package:vivashri/app/modules/shortisted/shortilisted.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/matchdeshboard.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
+import 'package:vivashri/data/modal/deshbaord_match_modal.dart';
 import 'package:vivashri/widgets/drawer.dart';
 import 'package:intl/intl.dart';
 
@@ -27,6 +30,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool deshboard = true;
+  final matchC = Get.put(MatchController());
+
   @override
   void initState() {
     super.initState();
@@ -254,24 +259,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                                       if (gender == "Male") {
                                         return Image.asset(
-                                          "assets/images/profilee.png",
-                                          height: 250,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
+                                          "assets/images/9159790.png",
+                                          fit: BoxFit.contain,
                                         );
                                       } else if (gender == "Female") {
                                         return Image.asset(
-                                          "assets/images/Rectangle 77.png",
-                                          height: 250,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
+                                          "assets/images/3232.png",
+                                          fit: BoxFit.contain,
                                         );
                                       } else {
                                         return Image.asset(
                                           "assets/images/profilee.png",
-                                          height: 250,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
+                                          fit: BoxFit.contain,
                                         );
                                       }
                                     },
@@ -321,18 +320,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                       if (gender == "Male") {
                         return Image.asset(
-                          "assets/images/profilee.png",
-                          fit: BoxFit.cover,
+                          "assets/images/9159790.png",
+                          fit: BoxFit.contain,
                         );
                       } else if (gender == "Female") {
                         return Image.asset(
-                          "assets/images/Rectangle 77.png",
-                          fit: BoxFit.cover,
+                          "assets/images/3232.png",
+                          fit: BoxFit.contain,
                         );
                       } else {
                         return Image.asset(
                           "assets/images/profilee.png",
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                         );
                       }
                     },
@@ -341,7 +340,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: 8),
 
           Expanded(
             child: Column(
@@ -381,7 +380,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
 
-                    SizedBox(width: 8),
+                    // SizedBox(width: 5),
                     GestureDetector(
                       onTap: () {
                         Get.to(
@@ -460,11 +459,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     Image.asset('assets/images/Vector32.png', height: 15),
                     SizedBox(width: 4),
-                    Text(
-                      "Upload Photo",
-                      style: opensansSemiBold.copyWith(
-                        color: ColorResources.primarycolor3,
-                        fontSize: 13,
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(
+                          EditphotoesScreen(),
+                          duration: Duration(
+                            milliseconds: ApiConstants.screenTransitionTime,
+                          ),
+                          transition: Transition.rightToLeft,
+                        );
+                      },
+                      child: Text(
+                        "Upload Photo",
+                        style: opensansSemiBold.copyWith(
+                          color: ColorResources.primarycolor3,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                     SizedBox(width: 14),
@@ -608,18 +618,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final w = MediaQuery.of(context).size.width;
     final u = usercontroller.userData.value!;
     if (u.planDetail != null) {
-      DateTime startDate = DateTime.parse(u.planDetail!.startDate.toString());
-      DateTime expiryDate = DateTime.parse(u.planDetail!.expiryDate.toString());
+      if (u.planDetail!.expiryDate != null) {
+        DateTime startDate = DateTime.parse(u.planDetail!.startDate.toString());
 
-      int monthDifference =
-          (expiryDate.year - startDate.year) * 12 +
-          (expiryDate.month - startDate.month);
-      totalmonth = monthDifference.toString();
-      print("Months: $monthDifference");
+        DateTime expiryDate = DateTime.parse(
+          u.planDetail!.expiryDate.toString(),
+        );
 
-      String formattedExpiry = DateFormat("dd MMM yyyy").format(expiryDate);
-      dateeee = formattedExpiry;
-      print("Formatted Expiry: $formattedExpiry");
+        int monthDifference =
+            (expiryDate.year - startDate.year) * 12 +
+            (expiryDate.month - startDate.month);
+        totalmonth = monthDifference.toString();
+        print("Months: $monthDifference");
+
+        String formattedExpiry = DateFormat("dd MMM yyyy").format(expiryDate);
+        dateeee = formattedExpiry;
+        print("Formatted Expiry: $formattedExpiry");
+      }
     }
     return Container(
       width: w,
@@ -672,21 +687,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _planBox(
                 icon: 'assets/images/tag_svgrepo.com.png',
                 title: "Plan Name",
-                value: "${u.planDetail!.planId!.name}",
+                value: u.planDetail == null
+                    ? "Free"
+                    : "${u.planDetail!.planId!.name}",
                 isFirst: true,
                 isLast: false,
               ),
               _planBox(
                 icon: 'assets/images/plan_svgrepo.com.png',
                 title: "Validity",
-                value: "$totalmonth Months",
+                value: totalmonth == null ? "Unlimited" : "$totalmonth Months",
                 isFirst: false,
                 isLast: false,
               ),
               _planBox(
                 icon: 'assets/images/time_svgrepo.com.png',
                 title: "Due Date",
-                value: dateeee == null ? "24 June 2024" : '$dateeee',
+                value: dateeee == null ? "----" : '$dateeee',
                 isFirst: false,
                 isLast: true,
               ),
@@ -858,15 +875,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         SizedBox(
           height: w * 0.81,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: 15),
-            itemCount: 3,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              return _matchCard(context);
-            },
-          ),
+          child: matchC.freeMatches.isEmpty
+              ? Center(
+                  child: Text(
+                    "No Data Found",
+                    style: opensansMedium.copyWith(fontSize: 16),
+                  ),
+                )
+              : ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(left: 15),
+                  itemCount: matchC.freeMatches.length,
+                  separatorBuilder: (_, __) => SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    return _matchCard(context, matchC.freeMatches[index]);
+                  },
+                ),
         ),
       ],
     );
@@ -898,24 +922,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         SizedBox(
-          height: w * 0.81, // responsive height
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: 15),
-            itemCount: 3,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              return _matchpremiumCard(context);
-            },
-          ),
+          height: w * 0.81,
+          child: matchC.premiumMatches.isEmpty
+              ? Center(
+                  child: Text(
+                    "No Data Found",
+                    style: opensansMedium.copyWith(fontSize: 16),
+                  ),
+                )
+              : ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.only(left: 15),
+                  itemCount: matchC.premiumMatches.length,
+                  separatorBuilder: (_, __) => SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    return _matchpremiumCard(
+                      context,
+                      matchC.premiumMatches[index],
+                    );
+                  },
+                ),
         ),
       ],
     );
   }
 
-  Widget _matchCard(BuildContext context) {
+  String calculateAgeInYears(String? dobString) {
+    if (dobString == null || dobString.isEmpty) return "N/A";
+
+    try {
+      DateTime dob = DateTime.parse(dobString).toLocal();
+      return _getYearsOnly(dob);
+    } catch (e) {
+      try {
+        String onlyDate = dobString.split("T")[0]; // e.g., "1998-01-01"
+        List<String> p = onlyDate.split("-");
+
+        DateTime dob = DateTime(
+          int.parse(p[0]),
+          int.parse(p[1]),
+          int.parse(p[2]),
+        );
+
+        return _getYearsOnly(dob);
+      } catch (e) {
+        return "N/A";
+      }
+    }
+  }
+
+  String _getYearsOnly(DateTime dob) {
+    DateTime now = DateTime.now();
+
+    int years = now.year - dob.year;
+
+    if (now.month < dob.month ||
+        (now.month == dob.month && now.day < dob.day)) {
+      years--;
+    }
+
+    return years.toString();
+  }
+
+  Widget _matchCard(BuildContext context, MatchUserModel user) {
     final w = MediaQuery.of(context).size.width;
     final cardWidth = w * 0.55;
+    String age = calculateAgeInYears(user.dob);
 
     return Container(
       width: cardWidth,
@@ -934,9 +1006,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: AspectRatio(
               aspectRatio: 1.2,
-              child: Image.asset(
-                "assets/images/imageback.png",
+              child: Image.network(
+                user.photo != null
+                    ? "${ApiConstants.imageurl}${user.photo!}"
+                    : "",
                 fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    user.gender == "Male"
+                        ? "assets/images/9159790.png"
+                        : "assets/images/3232.png",
+                    fit: BoxFit.contain,
+                  );
+                },
               ),
             ),
           ),
@@ -948,12 +1030,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Srivalli Goyal",
+                    user.name ?? '',
                     style: opensansSemiBold.copyWith(fontSize: 15),
                   ),
                   SizedBox(height: 4),
+
                   Text(
-                    "33 yrs, 5' 3\", Hindi, Mumbai",
+                    "${age} yrs, "
+                    "${user.height?.toString() ?? 'N/A'}\", "
+                    "${user.religion?.name ?? 'N/A'}, ",
+                    // user.locCity!.name ?? 'N/A',
                     style: opensansMedium.copyWith(
                       fontSize: 12.5,
                       color: ColorResources.blackcolor11,
@@ -961,7 +1047,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
 
                   Text(
-                    "Public Relations Professional",
+                    user.occupation == null
+                        ? "N/A"
+                        : user.occupation!.name ?? "N/A",
                     style: opensansMedium.copyWith(
                       fontSize: 12.5,
                       color: ColorResources.blackcolor11,
@@ -999,9 +1087,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _matchpremiumCard(BuildContext context) {
+  Widget _matchpremiumCard(BuildContext context, MatchUserModel user) {
     final w = MediaQuery.of(context).size.width;
     final cardWidth = w * 0.55;
+    String age = calculateAgeInYears(user.dob);
 
     return Container(
       width: cardWidth,
@@ -1020,9 +1109,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: AspectRatio(
               aspectRatio: 1.2,
-              child: Image.asset(
-                "assets/images/Rectangle22.png",
+              child: Image.network(
+                user.photo != null
+                    ? "${ApiConstants.imageurl}${user.photo!}"
+                    : "",
                 fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    user.gender == "Male"
+                        ? "assets/images/9159790.png"
+                        : "assets/images/3232.png",
+                    fit: BoxFit.contain,
+                  );
+                },
               ),
             ),
           ),
@@ -1034,12 +1133,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Srivalli Goyal",
+                    "${user.name}",
                     style: opensansSemiBold.copyWith(fontSize: 15),
                   ),
                   SizedBox(height: 4),
                   Text(
-                    "33 yrs, 5' 3\", Hindi, Mumbai",
+                    "${age ?? 'N/A'} yrs, "
+                    "${user.height?.toString() ?? 'N/A'}\", "
+                    "${user.religion?.name ?? 'N/A'}, ",
+                    // "${user.city ?? 'N/A'}",
                     maxLines: 1,
                     style: opensansMedium.copyWith(
                       fontSize: 12.5,
@@ -1048,7 +1150,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
 
                   Text(
-                    "Public Relations Professional",
+                    user.occupation == null
+                        ? "N/A"
+                        : user.occupation!.name ?? "N/A",
                     maxLines: 1,
                     style: opensansMedium.copyWith(
                       fontSize: 12.5,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:vivashri/data/modal/usermodal.dart';
 
 class EducationController22222 extends GetxController {
   var educationList = <EducationModel>[].obs;
@@ -8,15 +9,31 @@ class EducationController22222 extends GetxController {
 
   Rx<EducationModel?> selectedMain = Rx<EducationModel?>(null);
   Rx<EducationModel?> selectedSub = Rx<EducationModel?>(null);
-Rx<EducationModel?> selectedThird = Rx<EducationModel?>(null);
+  Rx<EducationModel?> selectedThird = Rx<EducationModel?>(null);
 
   var isLoading = false.obs;
-var thirdList = <EducationModel>[].obs;
+  var thirdList = <EducationModel>[].obs;
 
   @override
   void onInit() {
     fetchEducation();
     super.onInit();
+  }
+
+  void setSelectedMainFromApi(LookupModel highestDegree) {
+    try {
+      final id = highestDegree.id ?? "";
+
+      // EducationList me ID match karke same instance pick karo
+      final match = educationList.firstWhere(
+        (e) => e.id == id,
+        orElse: () => null!,
+      );
+
+      selectedMain.value = match;
+    } catch (e) {
+      print("Error: $e");
+    }
   }
 
   Future<void> fetchEducation() async {
@@ -25,7 +42,7 @@ var thirdList = <EducationModel>[].obs;
 
       var response = await http.get(
         Uri.parse(
-          "https://testing.akslearning.in/vivashribackend/api/front/education",
+          "https://vivashri.com/vivashribackend/api/front/education",
         ),
       );
 
@@ -44,22 +61,24 @@ var thirdList = <EducationModel>[].obs;
     }
   }
 
- void updateFilteredList() {
-  if (selectedMain.value != null) {
-    int type = selectedMain.value!.educationType;
+  void updateFilteredList() {
+    if (selectedMain.value != null) {
+      int type = selectedMain.value!.educationType;
 
-    /// Second dropdown → SAME TYPE
-    filteredList.value =
-        educationList.where((e) => e.educationType == type).toList();
+      /// Second dropdown → SAME TYPE
+      filteredList.value = educationList
+          .where((e) => e.educationType == type)
+          .toList();
 
-    /// Third dropdown → OPPOSITE TYPE
-    thirdList.value =
-        educationList.where((e) => e.educationType != type).toList();
-  } else {
-    filteredList.clear();
-    thirdList.clear();
+      /// Third dropdown → OPPOSITE TYPE
+      thirdList.value = educationList
+          .where((e) => e.educationType != type)
+          .toList();
+    } else {
+      filteredList.clear();
+      thirdList.clear();
+    }
   }
-}
 }
 
 class EducationModel {

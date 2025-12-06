@@ -12,6 +12,8 @@ import 'package:vivashri/app/modules/match/matchscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/match_list.dart';
+import 'package:vivashri/data/controller/matchdeshboard.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -32,6 +34,8 @@ class _MainNavigationState extends State<MainNavigation> {
     ChatScreen(),
     MembershipPlansPage(),
   ];
+  final matchC = Get.put(MatchController());
+
   @override
   void initState() {
     // TODO: implement initState
@@ -39,11 +43,15 @@ class _MainNavigationState extends State<MainNavigation> {
     profileapi();
   }
 
+  final searchC = Get.put(SearchmatchController());
+
   void profileapi() async {
     final prefs = await SharedPreferences.getInstance();
 
     String? profileid = prefs.getString("profileid");
     usercontroller.fetchUserDetail(profileid.toString());
+    matchC.fetchMatches();
+    searchC.fetchSearchList();
   }
 
   @override

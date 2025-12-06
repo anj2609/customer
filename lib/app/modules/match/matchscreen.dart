@@ -4,6 +4,8 @@ import 'package:vivashri/app/modules/match/userprofile.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/match_list.dart';
+import 'package:vivashri/data/modal/matchmodal.dart';
 import 'package:vivashri/widgets/drawer.dart';
 
 class MatchesScreen extends StatefulWidget {
@@ -16,6 +18,7 @@ class MatchesScreen extends StatefulWidget {
 class _MatchesScreenState extends State<MatchesScreen> {
   int selectedFilter = 1;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final searchC = Get.put(SearchmatchController());
 
   @override
   Widget build(BuildContext context) {
@@ -37,14 +40,35 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
                 _buildFilterBar(),
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: 5,
-                    itemBuilder: (context, index) {
-                      return _profileCard(w, h);
-                    },
-                  ),
+                  child: Obx(() {
+                    if (searchC.isLoading.value) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+
+                    if (searchC.users.isEmpty) {
+                      return Center(child: Text("No profiles found"));
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: searchC.users.length,
+                      itemBuilder: (context, index) {
+                        final u = searchC.users[index];
+                        return _profileCard(u);
+                      },
+                    );
+                  }),
                 ),
+
+                // Expanded(
+                //   child: ListView.builder(
+                //     padding: const EdgeInsets.all(12),
+                //     itemCount: 5,
+                //     itemBuilder: (context, index) {
+                //       return _profileCard(w, h);
+                //     },
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -186,7 +210,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
     );
   }
 
-  Widget _profileCard(double w, double h) {
+  Widget _profileCard(MatchListData u) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(

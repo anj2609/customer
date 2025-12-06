@@ -75,11 +75,6 @@ class _VivashriIntroState extends State<VivashriIntro>
       print('profileid:::::::::${profileid}');
 
       if (token != null && token.isNotEmpty) {
-        // Get.to(
-        //   UploadPhotoScreen(),
-        //   duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-        //   transition: Transition.rightToLeft,
-        // );
         checkUser(profileid);
       } else {
         Get.to(
@@ -106,7 +101,7 @@ class _VivashriIntroState extends State<VivashriIntro>
     }
 
     if (step is int) {
-      if (step == 2 || step == 3 || step == 4) {
+      if (step == 2 || step == 3) {
         Get.offAll(
           ReligionDetailsScreen(),
           duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
@@ -132,7 +127,7 @@ class _VivashriIntroState extends State<VivashriIntro>
           );
           break;
 
-        case 5:
+        case 4:
           Get.offAll(
             ReligionDetailsScreen(),
             duration: Duration(milliseconds: ApiConstants.screenTransitionTime),

@@ -7,6 +7,7 @@ import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/membership.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/widgets/drawer.dart';
 
 class MembershipPlansPage extends StatefulWidget {
@@ -197,7 +198,11 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
     });
   }
 
+  final usercontroller = Get.put(UserDetailController());
+
   Widget _planCard(String name, int price, String planidd) {
+    final u = usercontroller.userData.value!;
+
     final headerColors =
         planGradients[name] ?? [Color(0xffBE3272), Color(0xffEB4E76)];
 
@@ -207,7 +212,7 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
     final features = planFeatures[name] ?? const [];
 
     final tickColor = tickColors[name] ?? Colors.grey;
-
+    print('Id::::::::planid:::${planidd}');
     return GestureDetector(
       onTap: () {
         selectPlan(name);
@@ -244,14 +249,14 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
               children: [
                 // ⭐ FIXED HEADER
                 Container(
-                  height: 120,
+                  height: 110,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: headerColors,
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
+                    // gradient: LinearGradient(
+                    //   colors: headerColors,
+                    //   begin: Alignment.centerLeft,
+                    //   end: Alignment.centerRight,
+                    // ),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(18),
                       topRight: Radius.circular(18),
@@ -259,8 +264,8 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
                   ),
                   child: Image.asset(
                     planImages[name]!,
-                    height: 75,
-                    fit: BoxFit.contain,
+                    // height: 70,
+                    fit: BoxFit.fill,
                   ),
                 ),
 
@@ -325,59 +330,168 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
             left: 0,
             right: 0,
             child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  if (name == "Basic") {
-                  } else {
-                    showCupertinoDialog(
-                      context: context,
-                      builder: (context) {
-                        return CupertinoAlertDialog(
-                          title: Text('Confirm Purchase'),
-                          content: Text(
-                            'Are you sure you want to purchase this package for ₹$price?',
-                            style: opensansMedium.copyWith(),
-                          ),
-                          actions: [
-                            CupertinoDialogAction(
-                              isDefaultAction: false,
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('No'),
-                            ),
-                            CupertinoDialogAction(
-                              isDefaultAction: true,
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                MembershipPlanController controller =
-                                    Get.find();
-                                controller.activatePlan(planidd);
-                              },
-                              child: const Text('Yes'),
-                            ),
-                          ],
+              child: name == "Basic"
+                  ? GestureDetector(
+                      onTap: () {
+                        Get.snackbar(
+                          'Error',
+                          'You Have already ${u.planDetail!.planId!.name} Plan',
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
                         );
                       },
-                    );
-                  }
-                },
 
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: buttonColors),
-                    borderRadius: BorderRadius.circular(7),
-                  ),
-                  child: Text(
-                    name == "Basic" ? "BY DEFAULT" : "SELECT PLAN",
-                    style: opensansBold.copyWith(
-                      color: Colors.white,
-                      fontSize: 15,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey,
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: Text(
+                          name == "Basic" ? "BY DEFAULT" : "SELECT PLAN",
+                          style: opensansBold.copyWith(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    )
+                  : GestureDetector(
+                      onTap: () {
+                        final currentPlanPrice = u.planDetail?.price ?? 0;
+                        final newPlanPrice = price;
+
+                        if (u.planDetail == null) {
+                          showCupertinoDialog(
+                            context: context,
+                            builder: (context) {
+                              return CupertinoAlertDialog(
+                                title: Text('Confirm Purchase'),
+                                content: Text(
+                                  'Are you sure you want to purchase this package for ₹$newPlanPrice?',
+                                  style: opensansMedium.copyWith(),
+                                ),
+                                actions: [
+                                  CupertinoDialogAction(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('No'),
+                                  ),
+                                  CupertinoDialogAction(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      MembershipPlanController controller =
+                                          Get.find();
+                                      controller.activatePlan(planidd);
+                                    },
+                                    child: const Text('Yes'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else {
+                          if (newPlanPrice > currentPlanPrice) {
+                            showCupertinoDialog(
+                              context: context,
+                              builder: (context) {
+                                return CupertinoAlertDialog(
+                                  title: Text("Upgrade Plan"),
+                                  content: Text(
+                                    "You already have a plan. Do you want to upgrade to this higher plan for ₹$newPlanPrice?",
+                                    style: opensansMedium.copyWith(),
+                                  ),
+                                  actions: [
+                                    CupertinoDialogAction(
+                                      child: Text("Cancel"),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                    CupertinoDialogAction(
+                                      isDefaultAction: true,
+                                      child: Text("Upgrade"),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        MembershipPlanController controller =
+                                            Get.find();
+                                        controller.activatePlan(planidd);
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          } else if (newPlanPrice < currentPlanPrice) {
+                            showCupertinoDialog(
+                              context: context,
+                              builder: (context) {
+                                return CupertinoAlertDialog(
+                                  title: Text("Already Premium"),
+                                  content: Text(
+                                    "You already have a higher premium plan.",
+                                    style: opensansMedium.copyWith(),
+                                  ),
+                                  actions: [
+                                    CupertinoDialogAction(
+                                      child: Text("OK"),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          } else {
+                            showCupertinoDialog(
+                              context: context,
+                              builder: (context) {
+                                return CupertinoAlertDialog(
+                                  title: Text("Plan Already Active"),
+                                  content: Text(
+                                    "You already have this plan active.",
+                                    style: opensansMedium.copyWith(),
+                                  ),
+                                  actions: [
+                                    CupertinoDialogAction(
+                                      child: Text("OK"),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        }
+                      },
+
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: buttonColors),
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: u.planDetail == null
+                            ? Text(
+                                'SELECT PLAN',
+                                style: opensansBold.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                ),
+                              )
+                            : Text(
+                                u.planDetail!.planId!.id != planidd
+                                    ? "SELECT PLAN"
+                                    : "Active Plan",
+                                style: opensansBold.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                ),
+                              ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
             ),
           ),
         ],

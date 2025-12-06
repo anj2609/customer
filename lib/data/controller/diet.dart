@@ -15,7 +15,7 @@ class DietController extends GetxController {
   }
 
   Future<void> fetchDiet() async {
-    final url = "https://testing.akslearning.in/vivashribackend/api/front/diet";
+    final url = "https://vivashri.com/vivashribackend/api/front/diet";
 
     final response = await http.get(Uri.parse(url));
 

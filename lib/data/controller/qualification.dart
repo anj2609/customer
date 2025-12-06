@@ -16,7 +16,7 @@ class EducationController extends GetxController {
 
   Future<void> fetchEducation() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/education";
+        "https://vivashri.com/vivashribackend/api/front/education";
 
     final response = await http.get(Uri.parse(url));
 

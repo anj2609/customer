@@ -17,7 +17,7 @@ class UserDetailController extends GetxController {
       isLoading.value = true;
 
       final url =
-          "https://testing.akslearning.in/vivashribackend/api/user/user-detail-all/$userId";
+          "https://vivashri.com/vivashribackend/api/user/user-detail-all/$userId";
 
       final response = await http.get(
         Uri.parse(url),
@@ -33,6 +33,7 @@ class UserDetailController extends GetxController {
         if (result.data != null && result.data!.isNotEmpty) {
           userData.value = result.data!.first;
         }
+        update();
       } else {
         print("API Error : ${response.statusCode}");
         print("Response : ${response.body}");

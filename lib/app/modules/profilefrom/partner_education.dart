@@ -483,14 +483,14 @@ class _PartnerEducationCareerScreenState
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
-              } else if (occC.selectedOccId.value.isEmpty) {
+              } else if (occC.selectedOccId2.value.isEmpty) {
                 Get.snackbar(
                   'Error',
                   'Please Select Occupation',
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
-              } else if (workingC.selectedWorkingId.value.isEmpty) {
+              } else if (workingC.selectedWorkingId2.value.isEmpty) {
                 Get.snackbar(
                   'Error',
                   'Please Select Working With',

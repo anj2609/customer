@@ -137,6 +137,10 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
+    bool hideChildren =
+        maritalC.selectedNames.isEmpty ||
+        (maritalC.selectedNames.length == 1 &&
+            maritalC.selectedNames.contains("Unmarried"));
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -332,47 +336,35 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
                           );
                         }),
 
-                        // ---------------- MARITAL STATUS ----------------
                         _label("Marital Status:"),
                         Obx(() {
-                          return _dropDown(
-                            hint: "Select",
-                            value: maritalC.selectedName.value,
-                            onChanged: (v) {
-                              maritalC.onSelect(v!);
-                              print('name::::::${maritalC.selectedName.value}');
-                              setState(() {});
-                            },
-                            items: maritalC.maritalList
-                                .map((e) => e.name)
-                                .toList(),
+                          return GestureDetector(
+                            onTap: () => _openMultiSelectDialog(context),
+
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              decoration: _boxDecoration(),
+                              child: Text(
+                                maritalC.selectedNames.isEmpty
+                                    ? "Select"
+                                    : maritalC.selectedNames.join(", "),
+
+                                style: opensansMedium.copyWith(
+                                  color: ColorResources.blackhalka,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           );
                         }),
-                        // Row(
-                        //   children: [
-                        //     _selectButton(
-                        //       "Married",
-                        //       maritalStatus == "Married",
-                        //       () {
-                        //         setState(() => maritalStatus = "Married");
-                        //       },
-                        //     ),
-                        //     const SizedBox(width: 12),
-                        //     _selectButton(
-                        //       "Unmarried",
-                        //       maritalStatus == "Unmarried",
-                        //       () {
-                        //         setState(() => maritalStatus = "Unmarried");
-                        //       },
-                        //     ),
-                        //   ],
-                        // ),
 
-                        // ---------------- CHILDREN ----------------
-                        maritalC.selectedName.value == "Unmarried"
-                            ? SizedBox()
-                            : _label("Have Children:"),
-                        maritalC.selectedName.value == "Unmarried"
+                        hideChildren ? SizedBox() : _label("Have Children:"),
+
+                        hideChildren
                             ? SizedBox()
                             : _dropdown(
                                 value: children,
@@ -433,11 +425,79 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
     );
   }
 
+  void _openMultiSelectDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Select Marital Status"),
+          content: Obx(() {
+            return SizedBox(
+              width: double.maxFinite,
+              child: ListView(
+                shrinkWrap: true,
+                children: maritalC.maritalList.map((item) {
+                  bool isSelected = maritalC.selectedIds.contains(item.id);
+
+                  return CheckboxListTile(
+                    title: Text(item.name),
+                    value: isSelected,
+                    onChanged: (v) {
+                      maritalC.toggleSelection(item);
+                    },
+                  );
+                }).toList(),
+              ),
+            );
+          }),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Done"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   BoxDecoration _boxDecoration() {
     return BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(10),
       border: Border.all(color: Colors.grey.shade400),
+    );
+  }
+
+  Widget _dropDown3232({
+    Key? key,
+    required String hint,
+    required String? value,
+    required Function(String?) onChanged,
+    required List<String> items,
+  }) {
+    return Container(
+      key: key, // ← ADD THIS
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: _boxDecoration(),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          hint: Text(
+            hint,
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+
+          value: value, // NOW IT WILL UPDATE
+
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          items: const [],
+          onChanged: null,
+        ),
+      ),
     );
   }
 
@@ -784,7 +844,7 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
-              } else if (complexionC.selectedComplexionId.value.isEmpty) {
+              } else if (complexionC.selectedComplexionId2.value.isEmpty) {
                 Get.snackbar(
                   'Error',
                   'Please Select Your Complexion ',
@@ -798,7 +858,7 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
-              } else if (maritalStatus == "") {
+              } else if (maritalC.selectedNames.isEmpty) {
                 Get.snackbar(
                   'Error',
                   'Please Select Your Marital Status ',
@@ -824,13 +884,14 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
                     "partner_complexion":
                         complexionC.selectedComplexionId2.value,
                     "partner_language": languageC.selectedLanguageId.value,
-                    "partner_marital_status": maritalC.selectedId.value,
+                    // "partner_marital_status": maritalC.selectedId.value,
                     "partner_have_children": children,
                     "partner_mother_tongue":
                         languageC.motherselectedLanguageId.value,
                     "app_step": '13',
                     "step": '13',
                   },
+                  selected: maritalC.selectedIds,
                 );
               }
 

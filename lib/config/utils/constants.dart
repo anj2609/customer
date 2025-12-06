@@ -2,7 +2,7 @@ class ApiConstants {
   //==== base url =====
 
   static const String baseUrl =
-      'https://testing.akslearning.in/vivashribackend/api/';
+      'https://vivashri.com/vivashribackend/api/';
 
   static const String loginapi = 'front/send-otp';
   static const String otpapi = 'user/verify-otp';
@@ -14,5 +14,5 @@ class ApiConstants {
   static const String name = 'FirstName';
 
   static const String imageurl =
-      'https://testing.akslearning.in/vivashribackend/';
+      'https://vivashri.com/vivashribackend/';
 }

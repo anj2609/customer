@@ -152,29 +152,34 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Basic Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Basic Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -221,29 +226,40 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.snackbar(
+                  'Error',
+                  'Please complete this form after clicking Continue.',
+
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Aadhaar Verification",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Aadhaar Verification",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

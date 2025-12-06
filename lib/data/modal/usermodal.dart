@@ -1,116 +1,49 @@
-// class UserDetailAllModel {
-//   final bool? status;
-//   final List<UserData>? data;
 
-//   UserDetailAllModel({this.status, this.data});
 
-//   factory UserDetailAllModel.fromJson(Map<String, dynamic> json) {
-//     return UserDetailAllModel(
-//       status: json["status"],
-//       data: json["data"] == null
-//           ? []
-//           : List<UserData>.from(json["data"].map((x) => UserData.fromJson(x))),
-//     );
-//   }
-// }
+T? safeCast<T>(dynamic value) => value is T ? value : null;
 
-// class UserData {
-//   final String? id;
-//   final String? email;
-//   final String? mobile;
-//   final String? name;
-//   final String? otp;
-//   final String? otpExpireAt;
-//   final List<dynamic>? hobbies;
-//   final dynamic gotra;
-//   final dynamic ugDegree;
-//   final dynamic pgDegree;
-//   final List<dynamic>? partnerHobbies;
-//   final List<dynamic>? partnerMaritalStatus;
-//   final dynamic partnerGotra;
-//   final dynamic homeRegId;
-//   final dynamic appStep;
-//   final String? deviceToken;
-//   final String? formStatus;
-//   final String? status;
-//   final String? createdAt;
-//   final String? updatedAt;
-//   final bool? interestSent;
-//   final bool? planDetail;
-//   final dynamic interestUser;
-//   final dynamic totalUserView;
-//   final int? totalRecentUserView;
-//   final dynamic receivedInvitation;
-//   final dynamic acceptedinvitation;
-//   final dynamic interestuser;
+String? safeString(dynamic value) => value == null ? null : value.toString();
 
-//   UserData({
-//     this.id,
-//     this.email,
-//     this.mobile,
-//     this.otp,
-//     this.name,
-//     this.otpExpireAt,
-//     this.hobbies,
-//     this.gotra,
-//     this.ugDegree,
-//     this.pgDegree,
-//     this.partnerHobbies,
-//     this.partnerMaritalStatus,
-//     this.partnerGotra,
-//     this.homeRegId,
-//     this.appStep,
-//     this.deviceToken,
-//     this.formStatus,
-//     this.status,
-//     this.createdAt,
-//     this.updatedAt,
-//     this.interestSent,
-//     this.planDetail,
-//     this.interestUser,
-//     this.totalUserView,
-//     this.totalRecentUserView,
-//     this.receivedInvitation,
-//     this.acceptedinvitation,
-//     this.interestuser,
-//   });
+int? safeInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString());
+}
 
-//   factory UserData.fromJson(Map<String, dynamic> json) {
-//     return UserData(
-//       id: json["_id"],
-//       email: json["email"] ?? "",
-//       mobile: json["mobile"] ?? "",
-//       name: json['name'] ?? "",
-//       otp: json["otp"],
-//       otpExpireAt: json["otp_expire_at"],
-//       hobbies: json["hobbies"] ?? [],
-//       gotra: json["gotra"],
-//       ugDegree: json["ug_degree"],
-//       pgDegree: json["pg_degree"],
-//       partnerHobbies: json["partner_hobbies"] ?? [],
-//       partnerMaritalStatus: json["partner_marital_status"] ?? [],
-//       partnerGotra: json["partner_gotra"],
-//       homeRegId: json["home_reg_id"],
-//       appStep: json["app_step"],
-//       deviceToken: json["device_token"],
-//       formStatus: json["form_status"],
-//       status: json["status"],
-//       createdAt: json["createdAt"],
-//       updatedAt: json["updatedAt"],
-//       interestSent: json["interest_sent"],
-//       planDetail: json["plan_detail"],
-//       interestUser: json["interest_user"],
-//       totalUserView: json["total_user_view"],
-//       totalRecentUserView: json["totalRecentUserView"],
-//       receivedInvitation: json['receivedInvitation'] ?? 0,
-//       acceptedinvitation: json['accepted_invitation'] ?? 0,
-//       interestuser: json['interest_user'] ?? 0,
-//     );
-//   }
-// }
-// profile_response_model.dart
+double? safeDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
+}
 
-/// Top-level response model
+DateTime? safeDate(dynamic value) {
+  if (value == null) return null;
+  try {
+    return DateTime.parse(value.toString());
+  } catch (_) {
+    return null;
+  }
+}
+
+bool? safeBool(dynamic value) {
+  if (value == null) return null;
+  if (value is bool) return value;
+  final v = value.toString().toLowerCase();
+  return (v == "true" || v == "1");
+}
+
+LookupModel? safeLookup(dynamic value) => (value is Map)
+    ? LookupModel.fromJson(Map<String, dynamic>.from(value))
+    : null;
+
+PlanDetail? safePlan(dynamic value) => (value is Map)
+    ? PlanDetail.fromJson(Map<String, dynamic>.from(value))
+    : null;
+
+// ---------- Root Model ----------
+
 class UserDetailAllModel {
   final bool status;
   final List<UserData> data;
@@ -119,19 +52,16 @@ class UserDetailAllModel {
 
   factory UserDetailAllModel.fromJson(Map<String, dynamic> json) {
     return UserDetailAllModel(
-      status: _parseBool(json['status']) ?? false,
+      status: safeBool(json['status']) ?? false,
       data: (json['data'] as List? ?? [])
-          .map((e) => UserData.fromJson(e as Map<String, dynamic>))
+          .map((e) => UserData.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {'status': status, 'data': data.map((e) => e.toJson()).toList()};
-  }
 }
 
-/// Main profile data model
+// ---------- User Data ----------
+
 class UserData {
   String? id;
   String? profileId;
@@ -144,7 +74,7 @@ class UserData {
   String? ugDegree;
   String? pgDegree;
   List<String> partnerHobbies;
-  List<String> partnerMaritalStatus;
+  List<PartnerMaritalStatusItem> partnerMaritalStatus;
   LookupModel? partnerGotra;
   String? homeRegId;
   dynamic appStep;
@@ -202,7 +132,7 @@ class UserData {
   LookupModel? diet;
   String? disability;
   String? healthInformation;
-  double? height;
+  dynamic height;
   String? manglik;
   dynamic weight;
   String? annualIncome;
@@ -393,370 +323,168 @@ class UserData {
 
   factory UserData.fromJson(Map<String, dynamic> json) {
     return UserData(
-      id: json['_id']?.toString(),
-      profileId: json['profile_id']?.toString(),
-      email: json['email']?.toString(),
-      mobile: json['mobile']?.toString(),
-      otp: json['otp']?.toString(),
-      otpExpireAt: _parseDateTime(json['otp_expire_at']),
+      id: safeString(json['_id']) ?? "N/A",
+      profileId: safeString(json['profile_id']) ?? "N/A",
+      email: safeString(json['email']) ?? "N/A",
+      mobile: safeString(json['mobile']) ?? "N/A",
+      otp: safeString(json['otp']) ?? "N/A",
+
+      otpExpireAt: safeDate(
+        json['otp_expire_at'],
+      ), // DateTime hai, isko string me convert karte waqt N/A
+
       hobbies: (json['hobbies'] as List? ?? [])
-          .map((e) => Hobby.fromJson(e as Map<String, dynamic>))
+          .map((e) => Hobby.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
-      gotra: json['gotra'] != null
-          ? LookupModel.fromJson(json['gotra'] as Map<String, dynamic>)
-          : null,
-      ugDegree: json['ug_degree']?.toString(),
-      pgDegree: json['pg_degree']?.toString(),
+
+      gotra: safeLookup(json['gotra']),
+      ugDegree: safeString(json['ug_degree']) ?? "N/A",
+      pgDegree: safeString(json['pg_degree']) ?? "N/A",
+
       partnerHobbies: (json['partner_hobbies'] as List? ?? [])
-          .map((e) => e.toString())
+          .map((e) => e?.toString().isEmpty ?? true ? "N/A" : e.toString())
           .toList(),
+
       partnerMaritalStatus: (json['partner_marital_status'] as List? ?? [])
-          .map((e) => e.toString())
+          .map(
+            (e) =>
+                PartnerMaritalStatusItem.fromJson(Map<String, dynamic>.from(e)),
+          )
           .toList(),
-      partnerGotra: json['partner_gotra'] != null
-          ? LookupModel.fromJson(json['partner_gotra'] as Map<String, dynamic>)
-          : null,
-      homeRegId: json['home_reg_id']?.toString(),
-      appStep: _parseInt(json['app_step']),
-      deviceToken: json['device_token']?.toString(),
-      formStatus: json['form_status']?.toString(),
-      status: json['status']?.toString(),
-      createdAt: _parseDateTime(json['createdAt']),
-      updatedAt: _parseDateTime(json['updatedAt']),
-      v: _parseInt(json['__v']),
-      about: json['about']?.toString(),
-      birthState: json['birth_state'] != null
-          ? LookupModel.fromJson(json['birth_state'] as Map<String, dynamic>)
-          : null,
-      dob: _parseDateTime(json['dob']),
-      gender: json['gender']?.toString(),
-      maritalStatus: json['marital_status'] != null
-          ? LookupModel.fromJson(json['marital_status'] as Map<String, dynamic>)
-          : null,
-      name: json['name']?.toString(),
-      profileFor: json['profile_for'] != null
-          ? LookupModel.fromJson(json['profile_for'] as Map<String, dynamic>)
-          : null,
-      step: _parseInt(json['step']),
-      contactEmail: json['contact_email']?.toString(),
-      contactNo: json['contact_no']?.toString(),
-      facebook: json['facebook']?.toString(),
-      instagram: json['instagram']?.toString(),
-      reference: json['reference']?.toString(),
-      referenceOther: json['reference_other']?.toString(),
-      caste: json['caste'] != null
-          ? LookupModel.fromJson(json['caste'] as Map<String, dynamic>)
-          : null,
-      dosh: json['dosh']?.toString(),
-      gotraOther: json['gotra_other']?.toString(),
-      religion: json['religion'] != null
-          ? LookupModel.fromJson(json['religion'] as Map<String, dynamic>)
-          : null,
-      subCaste: json['sub_caste'] != null
-          ? LookupModel.fromJson(json['sub_caste'] as Map<String, dynamic>)
-          : null,
-      locRelation: json['loc_relation']?.toString(),
-      locRelationEmail: json['loc_relation_email']?.toString(),
-      locRelationMobile: json['loc_relation_mobile']?.toString(),
-      locRelationName: json['loc_relation_name']?.toString(),
-      locCity: json['loc_city'] != null
-          ? LookupModel.fromJson(json['loc_city'] as Map<String, dynamic>)
-          : null,
-      locHouseType: json['loc_house_type']?.toString(),
-      locLandmark: json['loc_landmark']?.toString(),
-      locNationality: json['loc_nationality'] != null
-          ? LookupModel.fromJson(
-              json['loc_nationality'] as Map<String, dynamic>,
-            )
-          : null,
-      locPincode: json['loc_pincode']?.toString(),
-      locResidenceType: json['loc_residence_type']?.toString(),
-      locState: json['loc_state'] != null
-          ? LookupModel.fromJson(json['loc_state'] as Map<String, dynamic>)
-          : null,
-      locTempCity: json['loc_temp_city'] != null
-          ? LookupModel.fromJson(json['loc_temp_city'] as Map<String, dynamic>)
-          : null,
-      locTempLandmark: json['loc_temp_landmark']?.toString(),
-      locTempPincode: json['loc_temp_pincode']?.toString(),
-      locTempState: json['loc_temp_state'] != null
-          ? LookupModel.fromJson(json['loc_temp_state'] as Map<String, dynamic>)
-          : null,
-      familyType: json['family_type']?.toString(),
-      familyValue: json['family_value']?.toString(),
-      marriedBrother: _parseInt(json['married_brother']),
-      marriedSister: _parseInt(json['married_sister']),
-      noOfBrother: _parseInt(json['no_of_brother']),
-      noOfBrotherInLaw: _parseInt(json['no_of_brother_in_law']),
-      noOfSister: _parseInt(json['no_of_sister']),
-      noOfSisterInLaw: _parseInt(json['no_of_sister_in_law']),
-      birthCity: json['birth_city'] != null
-          ? LookupModel.fromJson(json['birth_city'] as Map<String, dynamic>)
-          : null,
-      bloodGroup: json['blood_group']?.toString(),
-      complexion: json['complexion'] != null
-          ? LookupModel.fromJson(json['complexion'] as Map<String, dynamic>)
-          : null,
-      diet: json['diet'] != null
-          ? LookupModel.fromJson(json['diet'] as Map<String, dynamic>)
-          : null,
-      disability: json['disability']?.toString(),
-      healthInformation: json['health_information']?.toString(),
-      height: _parseDouble(json['height']),
-      manglik: json['manglik']?.toString(),
-      weight: json['weight'] is num
-          ? (json['weight'] as num)
-          : _parseInt(json['weight']),
-      annualIncome: json['annual_income']?.toString(),
-      highestDegree: json['highest_degree'] != null
-          ? LookupModel.fromJson(json['highest_degree'] as Map<String, dynamic>)
-          : null,
-      occupation: json['occupation'] != null
-          ? LookupModel.fromJson(json['occupation'] as Map<String, dynamic>)
-          : null,
-      organizationName: json['organization_name']?.toString(),
-      otherEducation: json['other_education']?.toString(),
-      pgCollegeName: json['pg_college_name']?.toString(),
-      prevWorkingDetail: json['prev_working_detail']?.toString(),
-      schoolName: json['school_name']?.toString(),
-      ugCollegeName: json['ug_college_name']?.toString(),
-      workingWith: json['working_with'] != null
-          ? LookupModel.fromJson(json['working_with'] as Map<String, dynamic>)
-          : null,
-      photo: json['photo']?.toString(),
-      photoBlur: json['photo_blur']?.toString(),
-      photo1: json['photo1']?.toString(),
-      photo1Blur: json['photo1_blur']?.toString(),
-      photo2: json['photo2']?.toString(),
-      photo3: json['photo3']?.toString(),
-      photo4: json['photo4']?.toString(),
-      photo2Blur: json['photo2_blur']?.toString(),
-      partnerQualities: json['partner_qualities']?.toString(),
-      partnerAgeFrom: _parseInt(json['partner_age_from']),
-      partnerAgeTo: _parseInt(json['partner_age_to']),
-      partnerComplexion: json['partner_complexion'] != null
-          ? LookupModel.fromJson(
-              json['partner_complexion'] as Map<String, dynamic>,
-            )
-          : null,
-      partnerHaveChildren: json['partner_have_children']?.toString(),
-      partnerHeightFrom: _parseDouble(json['partner_height_from']),
-      partnerHeightTo: _parseDouble(json['partner_height_to']),
-      partnerLanguage: json['partner_language'] != null
-          ? LookupModel.fromJson(
-              json['partner_language'] as Map<String, dynamic>,
-            )
-          : null,
-      partnerMotherTongue: json['partner_mother_tongue'] != null
-          ? LookupModel.fromJson(
-              json['partner_mother_tongue'] as Map<String, dynamic>,
-            )
-          : null,
-      partnerWeightFrom: _parseInt(json['partner_weight_from']),
-      partnerWeightTo: _parseInt(json['partner_weight_to']),
-      partnerFamilyType: json['partner_family_type']?.toString(),
-      partnerFamilyValue: json['partner_family_value']?.toString(),
-      partnerCity: json['partner_city'] != null
-          ? LookupModel.fromJson(json['partner_city'] as Map<String, dynamic>)
-          : null,
-      partnerCountry: json['partner_country'] != null
-          ? LookupModel.fromJson(
-              json['partner_country'] as Map<String, dynamic>,
-            )
-          : null,
-      partnerState: json['partner_state'] != null
-          ? LookupModel.fromJson(json['partner_state'] as Map<String, dynamic>)
-          : null,
-      partnerEducation: json['partner_education'] != null
-          ? LookupModel.fromJson(
-              json['partner_education'] as Map<String, dynamic>,
-            )
-          : null,
-      partnerIncomeFrom: json['partner_income_from']?.toString(),
-      partnerIncomeTo: json['partner_income_to']?.toString(),
-      partnerOccupation: json['partner_occupation'] != null
-          ? LookupModel.fromJson(
-              json['partner_occupation'] as Map<String, dynamic>,
-            )
-          : null,
-      partnerProfessionalQualification:
-          json['partner_professional_qualification'] != null
-          ? LookupModel.fromJson(
-              json['partner_professional_qualification']
-                  as Map<String, dynamic>,
-            )
-          : null,
-      partnerWorkingAs: json['partner_working_as'] != null
-          ? LookupModel.fromJson(
-              json['partner_working_as'] as Map<String, dynamic>,
-            )
-          : null,
-      partnerCaste: json['partner_caste'] != null
-          ? LookupModel.fromJson(json['partner_caste'] as Map<String, dynamic>)
-          : null,
-      partnerDosh: json['partner_dosh']?.toString(),
-      partnerReligion: json['partner_religion'] != null
-          ? LookupModel.fromJson(
-              json['partner_religion'] as Map<String, dynamic>,
-            )
-          : null,
-      partnerSubCaste: json['partner_sub_caste'] != null
-          ? LookupModel.fromJson(
-              json['partner_sub_caste'] as Map<String, dynamic>,
-            )
-          : null,
-      partnerDiet: json['partner_diet'] != null
-          ? LookupModel.fromJson(json['partner_diet'] as Map<String, dynamic>)
-          : null,
-      partnerDrinking: json['partner_drinking']?.toString(),
-      partnerManagedBy: json['partner_managed_by']?.toString(),
-      partnerSmoking: json['partner_smoking']?.toString(),
-      interestSent: _parseBool(json['interest_sent']),
-      planDetail: json['plan_detail'] != null
-          ? PlanDetail.fromJson(json['plan_detail'])
-          : null,
 
-      interestUser: _parseInt(json['interest_user']),
-      totalUserView: _parseInt(json['total_user_view']),
-      totalRecentUserView: _parseInt(json['totalRecentUserView']),
-      acceptedInvitation: _parseInt(json['accepted_invitation']),
-      receivedInvitation: _parseInt(json['receivedInvitation']),
+      partnerGotra: safeLookup(json['partner_gotra']),
+      homeRegId: safeString(json['home_reg_id']),
+      appStep: safeInt(json['app_step']),
+      deviceToken: safeString(json['device_token']),
+      formStatus: safeString(json['form_status']),
+      status: safeString(json['status']),
+      createdAt: safeDate(json['createdAt']),
+      updatedAt: safeDate(json['updatedAt']),
+      v: safeInt(json['__v']),
+      about: safeString(json['about']),
+
+      birthState: safeLookup(json['birth_state']),
+      dob: safeDate(json['dob']),
+      gender: safeString(json['gender']),
+      maritalStatus: safeLookup(json['marital_status']),
+      name: safeString(json['name']),
+      profileFor: safeLookup(json['profile_for']),
+      step: safeInt(json['step']),
+      contactEmail: safeString(json['contact_email']),
+      contactNo: safeString(json['contact_no']),
+      facebook: safeString(json['facebook']),
+      instagram: safeString(json['instagram']),
+      reference: safeString(json['reference']),
+      referenceOther: safeString(json['reference_other']),
+      caste: safeLookup(json['caste']),
+      dosh: safeString(json['dosh']),
+      gotraOther: safeString(json['gotra_other']),
+      religion: safeLookup(json['religion']),
+      subCaste: safeLookup(json['sub_caste']),
+
+      locRelation: safeString(json['loc_relation']),
+      locRelationEmail: safeString(json['loc_relation_email']),
+      locRelationMobile: safeString(json['loc_relation_mobile']),
+      locRelationName: safeString(json['loc_relation_name']),
+      locCity: safeLookup(json['loc_city']),
+      locHouseType: safeString(json['loc_house_type']),
+      locLandmark: safeString(json['loc_landmark']),
+      locNationality: safeLookup(json['loc_nationality']),
+      locPincode: safeString(json['loc_pincode']),
+      locResidenceType: safeString(json['loc_residence_type']),
+      locState: safeLookup(json['loc_state']),
+      locTempCity: safeLookup(json['loc_temp_city']),
+      locTempLandmark: safeString(json['loc_temp_landmark']),
+      locTempPincode: safeString(json['loc_temp_pincode']),
+      locTempState: safeLookup(json['loc_temp_state']),
+
+      familyType: safeString(json['family_type']),
+      familyValue: safeString(json['family_value']),
+
+      marriedBrother: safeInt(json['married_brother']),
+      marriedSister: safeInt(json['married_sister']),
+      noOfBrother: safeInt(json['no_of_brother']),
+      noOfBrotherInLaw: safeInt(json['no_of_brother_in_law']),
+      noOfSister: safeInt(json['no_of_sister']),
+      noOfSisterInLaw: safeInt(json['no_of_sister_in_law']),
+
+      birthCity: safeLookup(json['birth_city']),
+      bloodGroup: safeString(json['blood_group']),
+      complexion: safeLookup(json['complexion']),
+      diet: safeLookup(json['diet']),
+      disability: safeString(json['disability']),
+      healthInformation: safeString(json['health_information']),
+      height: safeDouble(json['height']),
+      manglik: safeString(json['manglik']),
+      weight: safeDouble(json['weight']),
+
+      annualIncome: safeString(json['annual_income']),
+      highestDegree: safeLookup(json['highest_degree']),
+      occupation: safeLookup(json['occupation']),
+      organizationName: safeString(json['organization_name']),
+      otherEducation: safeString(json['other_education']),
+      pgCollegeName: safeString(json['pg_college_name']),
+      prevWorkingDetail: safeString(json['prev_working_detail']),
+      schoolName: safeString(json['school_name']),
+      ugCollegeName: safeString(json['ug_college_name']),
+      workingWith: safeLookup(json['working_with']),
+
+      photo: safeString(json['photo']),
+      photoBlur: safeString(json['photo_blur']),
+      photo1: safeString(json['photo1']),
+      photo1Blur: safeString(json['photo1_blur']),
+      photo2: safeString(json['photo2']),
+      photo3: safeString(json['photo3']),
+      photo4: safeString(json['photo4']),
+      photo2Blur: safeString(json['photo2_blur']),
+
+      partnerQualities: safeString(json['partner_qualities']),
+      partnerAgeFrom: safeInt(json['partner_age_from']),
+      partnerAgeTo: safeInt(json['partner_age_to']),
+      partnerComplexion: safeLookup(json['partner_complexion']),
+      partnerHaveChildren: safeString(json['partner_have_children']),
+      partnerHeightFrom: safeDouble(json['partner_height_from']),
+      partnerHeightTo: safeDouble(json['partner_height_to']),
+      partnerLanguage: safeLookup(json['partner_language']),
+      partnerMotherTongue: safeLookup(json['partner_mother_tongue']),
+      partnerWeightFrom: safeInt(json['partner_weight_from']),
+      partnerWeightTo: safeInt(json['partner_weight_to']),
+      partnerFamilyType: safeString(json['partner_family_type']),
+      partnerFamilyValue: safeString(json['partner_family_value']),
+      partnerCity: safeLookup(json['partner_city']),
+      partnerCountry: safeLookup(json['partner_country']),
+      partnerState: safeLookup(json['partner_state']),
+      partnerEducation: safeLookup(json['partner_education']),
+      partnerIncomeFrom: safeString(json['partner_income_from']),
+      partnerIncomeTo: safeString(json['partner_income_to']),
+      partnerOccupation: safeLookup(json['partner_occupation']),
+      partnerProfessionalQualification: safeLookup(
+        json['partner_professional_qualification'],
+      ),
+      partnerWorkingAs: safeLookup(json['partner_working_as']),
+      partnerCaste: safeLookup(json['partner_caste']),
+      partnerDosh: safeString(json['partner_dosh']),
+      partnerReligion: safeLookup(json['partner_religion']),
+      partnerSubCaste: safeLookup(json['partner_sub_caste']),
+      partnerDiet: safeLookup(json['partner_diet']),
+      partnerDrinking: safeString(json['partner_drinking']),
+      partnerManagedBy: safeString(json['partner_managed_by']),
+      partnerSmoking: safeString(json['partner_smoking']),
+
+      interestSent: safeBool(json['interest_sent']),
+      planDetail: safePlan(json['plan_detail']),
+
+      interestUser: safeInt(json['interest_user']),
+      totalUserView: safeInt(json['total_user_view']),
+      totalRecentUserView: safeInt(json['totalRecentUserView']),
+      acceptedInvitation: safeInt(json['accepted_invitation']),
+      receivedInvitation: safeInt(json['receivedInvitation']),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'profile_id': profileId,
-      'email': email,
-      'mobile': mobile,
-      'otp': otp,
-      'otp_expire_at': otpExpireAt?.toIso8601String(),
-      'hobbies': hobbies.map((e) => e.toJson()).toList(),
-      'gotra': gotra?.toJson(),
-      'ug_degree': ugDegree,
-      'pg_degree': pgDegree,
-      'partner_hobbies': partnerHobbies,
-      'partner_marital_status': partnerMaritalStatus,
-      'partner_gotra': partnerGotra?.toJson(),
-      'home_reg_id': homeRegId,
-      'app_step': appStep,
-      'device_token': deviceToken,
-      'form_status': formStatus,
-      'status': status,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-      '__v': v,
-      'about': about,
-      'birth_state': birthState?.toJson(),
-      'dob': dob?.toIso8601String(),
-      'gender': gender,
-      'marital_status': maritalStatus?.toJson(),
-      'name': name,
-      'profile_for': profileFor?.toJson(),
-      'step': step,
-      'contact_email': contactEmail,
-      'contact_no': contactNo,
-      'facebook': facebook,
-      'instagram': instagram,
-      'reference': reference,
-      'reference_other': referenceOther,
-      'caste': caste?.toJson(),
-      'dosh': dosh,
-      'gotra_other': gotraOther,
-      'religion': religion?.toJson(),
-      'sub_caste': subCaste?.toJson(),
-      'loc_relation': locRelation,
-      'loc_relation_email': locRelationEmail,
-      'loc_relation_mobile': locRelationMobile,
-      'loc_relation_name': locRelationName,
-      'loc_city': locCity?.toJson(),
-      'loc_house_type': locHouseType,
-      'loc_landmark': locLandmark,
-      'loc_nationality': locNationality?.toJson(),
-      'loc_pincode': locPincode,
-      'loc_residence_type': locResidenceType,
-      'loc_state': locState?.toJson(),
-      'loc_temp_city': locTempCity?.toJson(),
-      'loc_temp_landmark': locTempLandmark,
-      'loc_temp_pincode': locTempPincode,
-      'loc_temp_state': locTempState?.toJson(),
-      'family_type': familyType,
-      'family_value': familyValue,
-      'married_brother': marriedBrother,
-      'married_sister': marriedSister,
-      'no_of_brother': noOfBrother,
-      'no_of_brother_in_law': noOfBrotherInLaw,
-      'no_of_sister': noOfSister,
-      'no_of_sister_in_law': noOfSisterInLaw,
-      'birth_city': birthCity?.toJson(),
-      'blood_group': bloodGroup,
-      'complexion': complexion?.toJson(),
-      'diet': diet?.toJson(),
-      'disability': disability,
-      'health_information': healthInformation,
-      'height': height,
-      'manglik': manglik,
-      'weight': weight,
-      'annual_income': annualIncome,
-      'highest_degree': highestDegree?.toJson(),
-      'occupation': occupation?.toJson(),
-      'organization_name': organizationName,
-      'other_education': otherEducation,
-      'pg_college_name': pgCollegeName,
-      'prev_working_detail': prevWorkingDetail,
-      'school_name': schoolName,
-      'ug_college_name': ugCollegeName,
-      'working_with': workingWith?.toJson(),
-      'photo': photo,
-      'photo_blur': photoBlur,
-      'photo1': photo1,
-      'photo1_blur': photo1Blur,
-      'photo2': photo2,
-      'photo2_blur': photo2Blur,
-      'partner_qualities': partnerQualities,
-      'partner_age_from': partnerAgeFrom,
-      'partner_age_to': partnerAgeTo,
-      'partner_complexion': partnerComplexion?.toJson(),
-      'partner_have_children': partnerHaveChildren,
-      'partner_height_from': partnerHeightFrom,
-      'partner_height_to': partnerHeightTo,
-      'partner_language': partnerLanguage?.toJson(),
-      'partner_mother_tongue': partnerMotherTongue?.toJson(),
-      'partner_weight_from': partnerWeightFrom,
-      'partner_weight_to': partnerWeightTo,
-      'partner_family_type': partnerFamilyType,
-      'partner_family_value': partnerFamilyValue,
-      'partner_city': partnerCity?.toJson(),
-      'partner_country': partnerCountry?.toJson(),
-      'partner_state': partnerState?.toJson(),
-      'partner_education': partnerEducation?.toJson(),
-      'partner_income_from': partnerIncomeFrom,
-      'partner_income_to': partnerIncomeTo,
-      'partner_occupation': partnerOccupation?.toJson(),
-      'partner_professional_qualification': partnerProfessionalQualification
-          ?.toJson(),
-      'partner_working_as': partnerWorkingAs?.toJson(),
-      'partner_caste': partnerCaste?.toJson(),
-      'partner_dosh': partnerDosh,
-      'partner_religion': partnerReligion?.toJson(),
-      'partner_sub_caste': partnerSubCaste?.toJson(),
-      'partner_diet': partnerDiet?.toJson(),
-      'partner_drinking': partnerDrinking,
-      'partner_managed_by': partnerManagedBy,
-      'partner_smoking': partnerSmoking,
-      'interest_sent': interestSent,
-      'plan_detail': planDetail,
-      'interest_user': interestUser,
-      'total_user_view': totalUserView,
-      'totalRecentUserView': totalRecentUserView,
-      'accepted_invitation': acceptedInvitation,
-      'receivedInvitation': receivedInvitation,
-    };
   }
 }
 
-/// Hobby model
+// ---------- Hobby ----------
+
 class Hobby {
   String? id;
   String? icon;
@@ -778,31 +506,19 @@ class Hobby {
 
   factory Hobby.fromJson(Map<String, dynamic> json) {
     return Hobby(
-      id: json['_id']?.toString(),
-      icon: json['icon']?.toString(),
-      name: json['name']?.toString(),
-      status: json['status']?.toString(),
-      createdAt: _parseDateTime(json['createdAt']),
-      updatedAt: _parseDateTime(json['updatedAt']),
-      v: _parseInt(json['__v']),
+      id: safeString(json['_id']),
+      icon: safeString(json['icon']),
+      name: safeString(json['name']),
+      status: safeString(json['status']),
+      createdAt: safeDate(json['createdAt']),
+      updatedAt: safeDate(json['updatedAt']),
+      v: safeInt(json['__v']),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'icon': icon,
-      'name': name,
-      'status': status,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-      '__v': v,
-    };
   }
 }
 
-/// Generic lookup model used for:
-/// gotra, religion, caste, city, state, country, education, occupation, etc.
+// ---------- LookupModel ----------
+
 class LookupModel {
   String? id;
   String? name;
@@ -832,84 +548,31 @@ class LookupModel {
 
   factory LookupModel.fromJson(Map<String, dynamic> json) {
     return LookupModel(
-      id: json['_id']?.toString(),
-      name: json['name']?.toString(),
-      religionId: json['religion_id']?.toString(),
-      casteId: json['caste_id']?.toString(),
-      countryId: json['country_id']?.toString(),
-      stateId: json['state_id']?.toString(),
-      educationType: _parseInt(json['education_type']),
-      status: json['status']?.toString(),
-      createdAt: _parseDateTime(json['createdAt']),
-      updatedAt: _parseDateTime(json['updatedAt']),
-      v: _parseInt(json['__v']),
+      id: safeString(json['_id']),
+      name: safeString(json['name']),
+      religionId: safeString(json['religion_id']),
+      casteId: safeString(json['caste_id']),
+      countryId: safeString(json['country_id']),
+      stateId: safeString(json['state_id']),
+      educationType: safeInt(json['education_type']),
+      status: safeString(json['status']),
+      createdAt: safeDate(json['createdAt']),
+      updatedAt: safeDate(json['updatedAt']),
+      v: safeInt(json['__v']),
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'name': name,
-      'religion_id': religionId,
-      'caste_id': casteId,
-      'country_id': countryId,
-      'state_id': stateId,
-      'education_type': educationType,
-      'status': status,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-      '__v': v,
-    };
-  }
 }
 
-/// ---------- Helper functions for null-safe parsing ----------
-
-bool? _parseBool(dynamic value) {
-  if (value == null) return null;
-  if (value is bool) return value;
-  if (value is num) return value != 0;
-  final s = value.toString().toLowerCase();
-  if (s == 'true' || s == '1') return true;
-  if (s == 'false' || s == '0') return false;
-  return null;
-}
-
-int? _parseInt(dynamic value) {
-  if (value == null) return null;
-  if (value is int) return value;
-  if (value is num) return value.toInt();
-  return int.tryParse(value.toString());
-}
-
-double? _parseDouble(dynamic value) {
-  if (value == null) return null;
-  if (value is double) return value;
-  if (value is num) return value.toDouble();
-  return double.tryParse(value.toString());
-}
-
-DateTime? _parseDateTime(dynamic value) {
-  if (value == null) return null;
-  if (value is DateTime) return value;
-  try {
-    return DateTime.parse(value.toString());
-  } catch (_) {
-    return null;
-  }
-}
+// ---------- PlanDetail ----------
 
 class PlanDetail {
   String? id;
   String? userId;
   PlanId? planId;
-
   int? price;
   DateTime? startDate;
   DateTime? expiryDate;
-
   String? status;
-
   String? advanceSearch;
   String? chat;
   String? matchSuggestions;
@@ -918,7 +581,6 @@ class PlanDetail {
   String? viewContact;
   String? voiceVideo;
   String? sendInterest;
-
   DateTime? createdAt;
   DateTime? updatedAt;
   int? v;
@@ -946,42 +608,40 @@ class PlanDetail {
 
   factory PlanDetail.fromJson(Map<String, dynamic> json) {
     return PlanDetail(
-      id: json['_id']?.toString(),
-      userId: json['user_id']?.toString(),
-      planId: json['plan_id'] != null ? PlanId.fromJson(json['plan_id']) : null,
-
-      price: _parseInt(json['price']),
-      startDate: _parseDateTime(json['start_date']),
-      expiryDate: _parseDateTime(json['expiry_date']),
-
-      status: json['status']?.toString(),
-
-      advanceSearch: json['advance_search']?.toString(),
-      chat: json['chat']?.toString(),
-      matchSuggestions: json['match_suggestions']?.toString(),
-      profileHighlight: json['profile_highlight']?.toString(),
-      profileView: json['profile_view']?.toString(),
-      viewContact: json['view_contact']?.toString(),
-      voiceVideo: json['voice_video']?.toString(),
-      sendInterest: json['send_interest']?.toString(),
-
-      createdAt: _parseDateTime(json['createdAt']),
-      updatedAt: _parseDateTime(json['updatedAt']),
-      v: _parseInt(json['__v']),
+      id: safeString(json['_id']),
+      userId: safeString(json['user_id']),
+      planId: (json['plan_id'] is Map)
+          ? PlanId.fromJson(json['plan_id'])
+          : null,
+      price: safeInt(json['price']),
+      startDate: safeDate(json['start_date']),
+      expiryDate: safeDate(json['expiry_date']),
+      status: safeString(json['status']),
+      advanceSearch: safeString(json['advance_search']),
+      chat: safeString(json['chat']),
+      matchSuggestions: safeString(json['match_suggestions']),
+      profileHighlight: safeString(json['profile_highlight']),
+      profileView: safeString(json['profile_view']),
+      viewContact: safeString(json['view_contact']),
+      voiceVideo: safeString(json['voice_video']),
+      sendInterest: safeString(json['send_interest']),
+      createdAt: safeDate(json['createdAt']),
+      updatedAt: safeDate(json['updatedAt']),
+      v: safeInt(json['__v']),
     );
   }
 }
+
+// ---------- PlanId ----------
 
 class PlanId {
   String? id;
   String? name;
   int? price;
   String? status;
-
   DateTime? createdAt;
   DateTime? updatedAt;
   int? v;
-
   String? advanceSearch;
   String? chat;
   String? matchSuggestions;
@@ -1011,23 +671,35 @@ class PlanId {
 
   factory PlanId.fromJson(Map<String, dynamic> json) {
     return PlanId(
-      id: json['_id']?.toString(),
-      name: json['name']?.toString(),
-      price: _parseInt(json['price']),
-      status: json['status']?.toString(),
+      id: safeString(json['_id']),
+      name: safeString(json['name']),
+      price: safeInt(json['price']),
+      status: safeString(json['status']),
+      createdAt: safeDate(json['createdAt']),
+      updatedAt: safeDate(json['updatedAt']),
+      v: safeInt(json['__v']),
+      advanceSearch: safeString(json['advance_search']),
+      chat: safeString(json['chat']),
+      matchSuggestions: safeString(json['match_suggestions']),
+      profileHighlight: safeString(json['profile_highlight']),
+      profileView: safeString(json['profile_view']),
+      viewContact: safeString(json['view_contact']),
+      voiceVideo: safeString(json['voice_video']),
+      sendInterest: safeString(json['send_interest']),
+    );
+  }
+}
 
-      createdAt: _parseDateTime(json['createdAt']),
-      updatedAt: _parseDateTime(json['updatedAt']),
-      v: _parseInt(json['__v']),
+class PartnerMaritalStatusItem {
+  final String id;
+  final String name;
 
-      advanceSearch: json['advance_search']?.toString(),
-      chat: json['chat']?.toString(),
-      matchSuggestions: json['match_suggestions']?.toString(),
-      profileHighlight: json['profile_highlight']?.toString(),
-      profileView: json['profile_view']?.toString(),
-      viewContact: json['view_contact']?.toString(),
-      voiceVideo: json['voice_video']?.toString(),
-      sendInterest: json['send_interest']?.toString(),
+  PartnerMaritalStatusItem({required this.id, required this.name});
+
+  factory PartnerMaritalStatusItem.fromJson(Map<String, dynamic> json) {
+    return PartnerMaritalStatusItem(
+      id: json['_id']?.toString() ?? "N/A",
+      name: json['name']?.toString() ?? "N/A",
     );
   }
 }

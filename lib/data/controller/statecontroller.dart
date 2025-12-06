@@ -23,7 +23,7 @@ class StateController extends GetxController {
 
   Future<void> fetchStates() async {
     final url =
-        "https://testing.akslearning.in/vivashribackend/api/front/state";
+        "https://vivashri.com/vivashribackend/api/front/state";
 
     final response = await http.get(Uri.parse(url));
 
