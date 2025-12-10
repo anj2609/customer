@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:vivashri/app/modules/profilefrom/aadhar_number.dart';
 import 'package:vivashri/app/modules/profilefrom/aadhar_otp.dart';
@@ -23,6 +24,7 @@ import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/auth_controller.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 
 class StaperfromController extends GetxController implements GetxService {
   var isLoading = false.obs;
@@ -250,21 +252,22 @@ class StaperfromController extends GetxController implements GetxService {
         if (jsonResponse["status"] == true) {
           EasyLoading.dismiss();
           showDialog(
-            // ignore: use_build_context_synchronously
             context: context!,
             barrierDismissible: false,
             builder: (context) {
               return Dialog(
-                insetPadding: EdgeInsets.symmetric(horizontal: 20),
+                insetPadding:
+                    EdgeInsets.zero, // ❗ Remove unwanted left-right gap
                 backgroundColor: Colors.transparent,
-                child: Align(
+                child: Center(
                   child: Container(
-                    width: MediaQuery.of(context).size.width,
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ), // ⭐ Controlled spacing
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       color: Colors.white,
                     ),
-
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -275,10 +278,12 @@ class StaperfromController extends GetxController implements GetxService {
                           child: Image.asset(
                             "assets/images/Frame 79.png",
                             width: double.infinity,
-                            height: 300,
-                            fit: BoxFit.cover,
+                            height: 260,
+                            fit: BoxFit.cover, // IMAGE PERFECT FULL WIDTH
                           ),
                         ),
+
+                        SizedBox(height: 15),
 
                         Text(
                           "Thank you for Registration",
@@ -287,7 +292,9 @@ class StaperfromController extends GetxController implements GetxService {
                             fontSize: 18,
                           ),
                         ),
+
                         SizedBox(height: 5),
+
                         Text(
                           "Welcome To Vivashri",
                           style: opensansBold.copyWith(
@@ -295,9 +302,9 @@ class StaperfromController extends GetxController implements GetxService {
                             fontSize: 25,
                           ),
                         ),
+
                         SizedBox(height: 20),
 
-                        // BUTTON
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 20),
                           child: GestureDetector(
@@ -316,7 +323,7 @@ class StaperfromController extends GetxController implements GetxService {
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                gradient: const LinearGradient(
+                                gradient: LinearGradient(
                                   colors: [
                                     Color(0xFFBE266B),
                                     Color(0xFFEB1D7B),
@@ -336,7 +343,6 @@ class StaperfromController extends GetxController implements GetxService {
 
                         SizedBox(height: 10),
 
-                        // SKIP
                         GestureDetector(
                           onTap: () {
                             Get.offAll(
@@ -1255,6 +1261,7 @@ class StaperfromController extends GetxController implements GetxService {
             colorText: Colors.white,
             backgroundColor: Colors.green,
           );
+          profileapi();
         } else {
           EasyLoading.dismiss();
           Get.snackbar(
@@ -1277,6 +1284,8 @@ class StaperfromController extends GetxController implements GetxService {
       isLoading.value = false;
     }
   }
+
+  final usercontroller = Get.put(UserDetailController());
 
   Future<void> updatepartnerotherdetails({
     required Map<String, dynamic> formData,
@@ -1315,6 +1324,8 @@ class StaperfromController extends GetxController implements GetxService {
             colorText: Colors.white,
             backgroundColor: Colors.green,
           );
+
+          profileapi();
         } else {
           EasyLoading.dismiss();
           Get.snackbar(
@@ -1338,9 +1349,16 @@ class StaperfromController extends GetxController implements GetxService {
     }
   }
 
+  void profileapi() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? profileid = prefs.getString("profileid");
+    usercontroller.fetchUserDetail(profileid.toString());
+  }
+
   Future<void> updatepartnerbasicdetails({
     required Map<String, dynamic> formData,
-    String? selected,
+    List<dynamic>? selected,
   }) async {
     String? token = Get.find<AuthController>().getAuthToken();
 
@@ -1381,6 +1399,7 @@ class StaperfromController extends GetxController implements GetxService {
             colorText: Colors.white,
             backgroundColor: Colors.green,
           );
+          profileapi();
         } else {
           EasyLoading.dismiss();
           Get.snackbar(
@@ -1444,6 +1463,7 @@ class StaperfromController extends GetxController implements GetxService {
             colorText: Colors.white,
             backgroundColor: Colors.green,
           );
+          profileapi();
         } else {
           EasyLoading.dismiss();
           Get.snackbar(
@@ -1506,6 +1526,7 @@ class StaperfromController extends GetxController implements GetxService {
             colorText: Colors.white,
             backgroundColor: Colors.green,
           );
+          profileapi();
         } else {
           EasyLoading.dismiss();
           Get.snackbar(
@@ -1568,6 +1589,7 @@ class StaperfromController extends GetxController implements GetxService {
             colorText: Colors.white,
             backgroundColor: Colors.green,
           );
+          profileapi();
         } else {
           EasyLoading.dismiss();
           Get.snackbar(

@@ -163,29 +163,34 @@ class _PartnerFamilyDetailsScreenState
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner’s Basic Det",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner’s Basic Det",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -232,29 +237,57 @@ class _PartnerFamilyDetailsScreenState
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (familyType == "") {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Family Type ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (familyValue == "") {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Family Value',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.partnerfamilydetauls(
+                    formData: {
+                      "partner_family_type": familyType,
+                      "partner_family_value": familyValue,
+                      "app_step": '14',
+                      "step": '14',
+                    },
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner Location",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner Location",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -322,18 +355,29 @@ class _PartnerFamilyDetailsScreenState
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                PartnerLocationDetailsScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),
@@ -366,13 +410,6 @@ class _PartnerFamilyDetailsScreenState
                   },
                 );
               }
-              // Get.to(
-              //   PartnerLocationDetailsScreen(),
-              //   duration: Duration(
-              //     milliseconds: ApiConstants.screenTransitionTime,
-              //   ),
-              //   transition: Transition.rightToLeft,
-              // );
             },
             child: Container(
               height: 45,

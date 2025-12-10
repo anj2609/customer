@@ -137,29 +137,34 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Upload Photo",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Upload Photo",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -206,29 +211,58 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (selectedChip == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Partners Qualities',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (hobbyC.selectedHobbyIds.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Partners Hobbies',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.partnerqualities(
+                    formData: {
+                      "partner_qualities": selectedChip,
+
+                      "app_step": '12',
+                      "step": '12',
+                    },
+                    selected: hobbyC.selectedHobbyIds222,
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner’s Basic Det",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner’s Basic Det",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -338,18 +372,29 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                PartnerBasicDetailsScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),
@@ -383,13 +428,6 @@ class _PartnerQualitiesScreenState extends State<PartnerQualitiesScreen> {
                   selected: hobbyC.selectedHobbyIds222,
                 );
               }
-              // Get.to(
-              //   PartnerBasicDetailsScreen(),
-              //   duration: Duration(
-              //     milliseconds: ApiConstants.screenTransitionTime,
-              //   ),
-              //   transition: Transition.rightToLeft,
-              // );
             },
             child: Container(
               height: 45,

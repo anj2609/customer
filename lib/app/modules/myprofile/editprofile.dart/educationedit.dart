@@ -63,9 +63,9 @@ class _EditEducationDetailsScreenState
     if (u.highestDegree != null) {
       controller.setSelectedMainFromApi(u.highestDegree!);
     }
-    bachelorCollege.text = u.ugCollegeName.toString();
-    otherEducationDetails.text = u.otherEducation.toString();
-    masterCollege.text = u.pgCollegeName.toString();
+    // bachelorCollege.text = u.ugCollegeName.toString();
+    // otherEducationDetails.text = u.otherEducation.toString();
+    // masterCollege.text = u.pgCollegeName.toString();
     setState(() {});
   }
 

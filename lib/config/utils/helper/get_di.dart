@@ -4,6 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/config/utils/apis/api_client.dart';
 import 'package:vivashri/data/controller/auth_controller.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
+import 'package:vivashri/data/controller/profile_delete.dart';
+import 'package:vivashri/data/controller/profile_info_contro.dart';
+import 'package:vivashri/data/controller/settingcontroller.dart';
+import 'package:vivashri/data/controller/userbyuser.dart';
 import 'package:vivashri/data/repository/auth_repo.dart';
 import 'package:vivashri/data/repository/home_repo.dart';
 
@@ -24,5 +28,9 @@ Future<Map<String, Map<String, String>>> init() async {
 
   Get.lazyPut(() => HomeRepo(apiClient: Get.find()));
   Get.lazyPut(() => StaperfromController());
+  Get.lazyPut(() => NotificationController());
+  Get.lazyPut(() => NotificationController2());
+  Get.lazyPut(() => ProfileHideController());
+  Get.lazyPut(() => UserbyUserDetailController());
   return _languages;
 }

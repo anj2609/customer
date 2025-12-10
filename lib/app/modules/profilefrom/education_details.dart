@@ -129,8 +129,8 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
                         controller.selectedMain.value == null
                             ? SizedBox()
                             : idddd == 2
-                            ? _label("Bachelor Degree::")
-                            : _label("PG Degree::"),
+                            ? _label1("Bachelor Degree::")
+                            : _label1("PG Degree::"),
 
                         SizedBox(height: 5),
                         Obx(() {
@@ -183,13 +183,13 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
                           );
                         }),
                         SizedBox(height: 0),
-                        _topLabel("College Name"),
+                        _topLabel("Master College Name"),
                         _textField(controller: masterCollege),
                         controller.selectedMain.value == null
                             ? SizedBox()
                             : bcaaaa == "68cd44430402fd89b727bde0"
                             ? SizedBox()
-                            : _label("Bachelor Degree:"),
+                            : _label1("Bachelor Degree:"),
                         bcaaaa == "68cd44430402fd89b727bde0"
                             ? SizedBox()
                             : Obx(() {
@@ -416,29 +416,34 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "More Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "More Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -485,32 +490,110 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (bcaaaa == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Highest Degree',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (incomeFrom == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Annual Income',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (workingC.selectedWorkingId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Working',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (occC.selectedOccId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Occupation',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (organizationName.text.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Enter Organization Name',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.edcuationdetailss(
+                    formData: {
+                      "highest_degree": bcaaaa,
+                      "pg_degree": bcaaaa,
+                      "pg_college_name": masterCollege.text.trim(),
+                      "ug_degree": secoudddddd,
+                      "ug_college_name": bachelorCollege.text.trim(),
+                      "school_name": bachelorCollege.text,
+                      "other_education": otherEducationDetails.text,
+                      "annual_income": incomeFrom,
+                      "working_with": workingC.selectedWorkingId.value,
+                      "occupation": occC.selectedOccId.value,
+                      "organization_name": organizationName.text,
+                      "prev_working_detail": previousWork.text.trim(),
+                      "app_step": '10',
+                      "step": '10',
+                    },
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Upload Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Upload Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _label1(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: text,
+              style: opensansMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackgrey,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -682,18 +765,29 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                UploadPhotoScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),
@@ -706,20 +800,6 @@ class _EducationDetailsScreenState extends State<EducationDetailsScreen> {
                 Get.snackbar(
                   'Error',
                   'Please Select Highest Degree',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (masterCollege.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Collage Name',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (bachelorCollege.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Bachelor Collage Name',
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );

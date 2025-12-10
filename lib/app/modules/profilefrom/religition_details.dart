@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:vivashri/app/modules/profilefrom/reference_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
@@ -109,7 +110,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                           );
                         }),
 
-                        _label("Subcaste:"),
+                        _label1("Subcaste:"),
                         Obx(() {
                           return _dropdown(
                             value: subCasteC.selectedSubCasteId.value.isEmpty
@@ -139,7 +140,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                           );
                         }),
 
-                        _label("Gotra:"),
+                        _label1("Gotra:"),
                         Obx(() {
                           return _dropdown(
                             value: gotraC.selectedGotraId.value.isEmpty
@@ -176,7 +177,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                                 "This field will come when other selected",
                               ),
 
-                        _label("Dosh:"),
+                        _label1("Dosh:"),
                         _textField(),
 
                         const SizedBox(height: 30),
@@ -206,29 +207,34 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Aadhaar Verification",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Aadhaar Verification",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -275,32 +281,84 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (religionC.selectedName.value == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Religion',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (casteC.selectedCasteName.value == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Caste',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.religiondeytalsProfile(
+                    formData: {
+                      "religion": religionC.selectedId.value,
+                      "caste": casteC.selectedCasteId.value,
+                      "sub_caste": subCasteC.selectedSubCasteId.value,
+                      "gotra": gotraC.selectedGotraId.value,
+                      "gotra_other": othergotraController.text.trim(),
+                      "dosh": dostController.text.trim(),
+                      "app_step": '5',
+                      "step": '5',
+                    },
+                    context: context,
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Reference Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Reference Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _label1(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: text,
+              style: opensansMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackgrey,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -449,27 +507,6 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
-              } else if (subCasteC.selectedSubCasteName.value == null) {
-                Get.snackbar(
-                  'Error',
-                  'Please Select Subcaste',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (gotraC.selectedGotraName.value == null) {
-                Get.snackbar(
-                  'Error',
-                  'Please Select Gotra',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (dostController.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Dosh',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
               } else {
                 stapercontroller.religiondeytalsProfile(
                   formData: {
@@ -482,7 +519,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                     "app_step": '5',
                     "step": '5',
                   },
-                  context: context
+                  context: context,
                 );
               }
             },

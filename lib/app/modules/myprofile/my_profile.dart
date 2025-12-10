@@ -39,6 +39,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
 
     String? profileid = prefs.getString("profileid");
     usercontroller.fetchUserDetail(profileid.toString());
+  
   }
 
   @override
@@ -51,43 +52,86 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
 
       drawer: CustomAppDrawer(),
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              children: [
-                _buildTopBar(),
-                Expanded(
-                  child: RefreshIndicator(
-                    color: Colors.white,
-                    backgroundColor: ColorResources.primarycolor2,
-                    onRefresh: () async {
-                      profileapi();
-                    },
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: Column(
-                        children: [
-                          _profileHeader(w),
-                          _profileTabs(),
-                          SizedBox(height: 8),
-                          if (tabIndex == 0) _myDetailsSection(),
-                          if (tabIndex == 1) _partnerDetailsSection(),
-                        ],
+      body: Obx(() {
+        return Stack(
+          children: [
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildTopBar(),
+                  Expanded(
+                    child: RefreshIndicator(
+                      color: Colors.white,
+                      backgroundColor: ColorResources.primarycolor2,
+                      onRefresh: () async {
+                        profileapi();
+                      },
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: Column(
+                          children: [
+                            _profileHeader(w),
+                            _profileTabs(),
+                            SizedBox(height: 8),
+
+                            if (tabIndex == 0) _myDetailsSection(),
+                            if (tabIndex == 1) _partnerDetailsSection(),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Container(
-            height: statusBarHeight,
-            width: double.infinity,
-            color: ColorResources.primarycolor2,
-          ),
-        ],
-      ),
+
+            /// STATUS BAR COLOR
+            Container(
+              height: statusBarHeight,
+              width: double.infinity,
+              color: ColorResources.primarycolor2,
+            ),
+          ],
+        );
+      }),
+
+      // body: Stack(
+      //   children: [
+      //     SafeArea(
+      //       child: Column(
+      //         children: [
+      //           _buildTopBar(),
+      //           Expanded(
+      //             child: RefreshIndicator(
+      //               color: Colors.white,
+      //               backgroundColor: ColorResources.primarycolor2,
+      //               onRefresh: () async {
+      //                 profileapi();
+      //               },
+      //               child: SingleChildScrollView(
+      //                 padding: const EdgeInsets.only(bottom: 20),
+      //                 child: Column(
+      //                   children: [
+      //                     _profileHeader(w),
+      //                     _profileTabs(),
+      //                     SizedBox(height: 8),
+      //                     if (tabIndex == 0) _myDetailsSection(),
+      //                     if (tabIndex == 1) _partnerDetailsSection(),
+      //                   ],
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //         ],
+      //       ),
+      //     ),
+      //     Container(
+      //       height: statusBarHeight,
+      //       width: double.infinity,
+      //       color: ColorResources.primarycolor2,
+      //     ),
+      //   ],
+      // ),
     );
   }
 
@@ -166,9 +210,8 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
                       "${ApiConstants.imageurl}${u.photo}",
-                      height: 300,
-                      width: double.infinity,
-                      fit: BoxFit.contain,
+                
+                      fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         String gender = u.gender.toString();
 

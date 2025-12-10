@@ -317,29 +317,34 @@ class _PartnerEducationCareerScreenState
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner’s Location",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner’s Location",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -386,29 +391,90 @@ class _PartnerEducationCareerScreenState
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (eduC.selectedEduId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Highest Qualification',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (profEduC.selectedProfEduId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Professional Education',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (occC.selectedOccId2.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Occupation',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (workingC.selectedWorkingId2.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Working With',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (incomeFrom == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Annual Income',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (incomeTo == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Annual Income',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.partnereductiondetauls(
+                    formData: {
+                      "partner_education": eduC.selectedEduId.value,
+                      "partner_professional_qualification":
+                          profEduC.selectedProfEduId.value,
+                      "partner_occupation": occC.selectedOccId2.value,
+                      "partner_working_as": workingC.selectedWorkingId2.value,
+                      "partner_income_from": incomeFrom,
+                      "partner_income_to": incomeTo,
+                      "app_step": '16',
+                      "step": '16',
+                    },
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner Religion & ",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner Religion & ",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -449,18 +515,29 @@ class _PartnerEducationCareerScreenState
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                PartnerReligionCasteScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),

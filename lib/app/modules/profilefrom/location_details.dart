@@ -210,7 +210,7 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
                           );
                         }),
 
-                        _label("Landmark/Remarks"),
+                        _label1("Landmark/Remarks"),
                         _textField(
                           controller: pLandmark,
                           onChanged: (v) => fillTemporaryAddress(),
@@ -389,7 +389,7 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
                                 ],
                               ),
 
-                        _label("Landmark/Remarks"),
+                        _label1("Landmark/Remarks"),
                         _textField(controller: tLandmark, enabled: !sameFill),
 
                         _label("Pin code / zip code:"),
@@ -505,29 +505,34 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Reference Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Reference Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -574,29 +579,102 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (countryC.selectedCountryId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Nationality',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (residenceType == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Residence Type',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (permanentHouse == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Permanent House Type',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (stateC.selectedStateId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select State',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (cityC.selectedCityId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select City',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (pPincode.text.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Enter Pincode',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.locationdeatilss(
+                    formData: {
+                      "loc_nationality": countryC.selectedCountryId.value,
+                      "loc_residence_type": residenceType,
+                      "loc_house_type": permanentHouse,
+                      "loc_state": stateC.selectedStateId.value,
+                      "loc_city": cityC.selectedCityId.value,
+                      "loc_landmark": pLandmark.text.trim(),
+                      "loc_pincode": pPincode.text.trim(),
+                      "loc_temp_state": sameFill == true
+                          ? stateC.selectedStateId.value
+                          : stateC.sameselectedStateId.value,
+                      "loc_temp_city": sameFill == true
+                          ? cityC.selectedCityId.value
+                          : cityC.sameselectedCityId.value,
+                      "loc_temp_landmark": sameFill == true
+                          ? pLandmark.text.trim()
+                          : tLandmark.text.trim(),
+                      "loc_temp_pincode": sameFill == true
+                          ? pPincode.text.trim()
+                          : tPincode.text.trim(),
+                      "app_step": '7',
+                      "step": '7',
+                    },
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Family Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Family Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -629,6 +707,25 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
           ),
           items: items,
           onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  Widget _label1(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: text,
+              style: opensansMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackgrey,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -772,18 +869,29 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                FamilyDetailsScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),
@@ -824,13 +932,6 @@ class _LocationDetailsScreenState extends State<LocationDetailsScreen> {
                 Get.snackbar(
                   'Error',
                   'Please Select City',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (pLandmark.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Landmark',
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );

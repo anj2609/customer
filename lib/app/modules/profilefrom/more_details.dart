@@ -1,7 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vivashri/app/modules/profilefrom/education_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/citycontroller.dart';
 import 'package:vivashri/data/controller/complecxion.dart';
@@ -549,29 +551,34 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Family Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Family Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -618,29 +625,138 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (hobbyC.selectedHobbyIds.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Hobbies ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (dietC.selectedDietId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Diet ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (selectedHour == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Time of Birth ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (selectedMin == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Time of Birth ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (cityC.selectedCityId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your City of Birth ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (manglik == "") {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Manglik Status ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (fromWeight == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Weight (in kg) ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (height == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Height',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (complexionC.selectedComplexionId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Complexion',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (healthInfo == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Health Information',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (disability == "") {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Any Disability',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (bloodGroup == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Blood Group',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.moredetailsapi(
+                    formData: {
+                      "health_information": healthInfo,
+                      "disability": disability,
+                      "blood_group": bloodGroup,
+                      "diet": dietC.selectedDietId.value,
+                      "birth_hour": selectedHour,
+                      "birth_minute": selectedMin,
+                      "birth_am": selectedAmPm,
+                      "birth_city": cityC.selectedCityId.value,
+                      "manglik": manglik,
+                      "weight": fromWeight,
+                      "height": height,
+                      "complexion": complexionC.selectedComplexionId.value,
+                      "app_step": '9',
+                      "step": '9',
+                    },
+                    selected: hobbyC.selectedHobbyIds,
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Education Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Education Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -897,18 +1013,29 @@ class _MoreDetailsScreenState extends State<MoreDetailsScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                EducationDetailsScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),

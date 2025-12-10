@@ -12,6 +12,7 @@ import 'package:vivashri/app/modules/shortisted/shortilisted.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/match_list.dart';
 import 'package:vivashri/data/controller/matchdeshboard.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/data/modal/deshbaord_match_modal.dart';
@@ -43,11 +44,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  final searchC = Get.put(SearchmatchController());
+
   void profileapi() async {
     final prefs = await SharedPreferences.getInstance();
 
     String? profileid = prefs.getString("profileid");
     usercontroller.fetchUserDetail(profileid.toString());
+    matchC.fetchMatches();
+    searchC.fetchSearchList("", "");
   }
 
   @override
@@ -178,7 +183,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               GestureDetector(
                 onTap: () {
                   Get.to(
-                    BasicSearchPage(),
+                    BasicSearchPage(hidevalue: ''),
                     duration: Duration(
                       milliseconds: ApiConstants.screenTransitionTime,
                     ),
@@ -458,39 +463,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Row(
                   children: [
                     Image.asset('assets/images/Vector32.png', height: 15),
+
                     SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: () {
-                        Get.to(
-                          EditphotoesScreen(),
-                          duration: Duration(
-                            milliseconds: ApiConstants.screenTransitionTime,
+
+                    Flexible(
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.to(
+                            EditphotoesScreen(),
+                            duration: Duration(
+                              milliseconds: ApiConstants.screenTransitionTime,
+                            ),
+                            transition: Transition.rightToLeft,
+                          );
+                        },
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            "Upload Photo",
+                            style: opensansSemiBold.copyWith(
+                              color: ColorResources.primarycolor3,
+                              fontSize: 13,
+                            ),
                           ),
-                          transition: Transition.rightToLeft,
-                        );
-                      },
-                      child: Text(
-                        "Upload Photo",
-                        style: opensansSemiBold.copyWith(
-                          color: ColorResources.primarycolor3,
-                          fontSize: 13,
                         ),
                       ),
                     ),
-                    SizedBox(width: 14),
+
+                    SizedBox(width: 10),
                     Image.asset(
                       'assets/images/upload_svgrepo.com.png',
                       height: 15,
                     ),
+
                     SizedBox(width: 4),
+
                     Expanded(
-                      child: Text(
-                        "Record Short Intro",
-                        style: opensansSemiBold.copyWith(
-                          color: ColorResources.primarycolor3,
-                          fontSize: 13,
+                      child: FittedBox(
+                        alignment: Alignment.centerLeft,
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          "Record Short Intro",
+                          style: opensansSemiBold.copyWith(
+                            color: ColorResources.primarycolor3,
+                            fontSize: 13,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -519,6 +539,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: onTap,
         child: Container(
           width: cardWidth,
+          height: 75,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: color.withOpacity(0.08),
@@ -526,6 +547,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween, // 🔥 Equal spacing
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -542,8 +565,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              Text(label, style: opensansSemiBold.copyWith(fontSize: 14)),
+
+              // 🔥 Responsive text
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  label,
+                  maxLines: 1, // prevent 2nd line
+                  overflow: TextOverflow.clip, // no wrap
+                  style: opensansSemiBold.copyWith(fontSize: 14),
+                ),
+              ),
             ],
           ),
         ),
@@ -723,7 +756,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade300),
           borderRadius: BorderRadius.only(
@@ -741,15 +774,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
               title,
               textAlign: TextAlign.center,
               style: opensansSemiBold.copyWith(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
+                fontSize: 14.5,
+                // fontWeight: FontWeight.w600,
                 color: ColorResources.primarycolor3,
               ),
             ),
             Text(
               value,
               textAlign: TextAlign.center,
-              style: opensansSemiBold.copyWith(fontSize: 13),
+              style: opensansSemiBold.copyWith(fontSize: 12.5),
             ),
           ],
         ),
@@ -873,25 +906,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
-        SizedBox(
-          height: w * 0.81,
-          child: matchC.freeMatches.isEmpty
-              ? Center(
-                  child: Text(
-                    "No Data Found",
-                    style: opensansMedium.copyWith(fontSize: 16),
-                  ),
-                )
-              : ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.only(left: 15),
-                  itemCount: matchC.freeMatches.length,
-                  separatorBuilder: (_, __) => SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    return _matchCard(context, matchC.freeMatches[index]);
-                  },
+        matchC.freeMatches.isEmpty
+            ? Center(
+                child: Text(
+                  "No Data Found!",
+                  style: opensansMedium.copyWith(fontSize: 13),
                 ),
-        ),
+              )
+            : SizedBox(
+                height: w * 0.81,
+                child: matchC.freeMatches.isEmpty
+                    ? Center(
+                        child: Text(
+                          "No Data Found!",
+                          style: opensansMedium.copyWith(fontSize: 16),
+                        ),
+                      )
+                    : ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.only(left: 15),
+                        itemCount: matchC.freeMatches.length,
+                        separatorBuilder: (_, __) => SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          return _matchCard(context, matchC.freeMatches[index]);
+                        },
+                      ),
+              ),
       ],
     );
   }
@@ -921,28 +961,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
-        SizedBox(
-          height: w * 0.81,
-          child: matchC.premiumMatches.isEmpty
-              ? Center(
-                  child: Text(
-                    "No Data Found",
-                    style: opensansMedium.copyWith(fontSize: 16),
-                  ),
-                )
-              : ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.only(left: 15),
-                  itemCount: matchC.premiumMatches.length,
-                  separatorBuilder: (_, __) => SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    return _matchpremiumCard(
-                      context,
-                      matchC.premiumMatches[index],
-                    );
-                  },
+        matchC.premiumMatches.isEmpty
+            ? Center(
+                child: Text(
+                  "No Data Found!",
+                  style: opensansMedium.copyWith(fontSize: 13),
                 ),
-        ),
+              )
+            : SizedBox(
+                height: w * 0.81,
+                child: matchC.premiumMatches.isEmpty
+                    ? Center(
+                        child: Text(
+                          "No Data Found!",
+                          style: opensansMedium.copyWith(fontSize: 16),
+                        ),
+                      )
+                    : ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.only(left: 15),
+                        itemCount: matchC.premiumMatches.length,
+                        separatorBuilder: (_, __) => SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          return _matchpremiumCard(
+                            context,
+                            matchC.premiumMatches[index],
+                          );
+                        },
+                      ),
+              ),
       ],
     );
   }

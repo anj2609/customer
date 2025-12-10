@@ -178,15 +178,28 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                                 onChanged: (v) =>
                                     setState(() => selectedYear = v),
                                 items: List.generate(
-                                  (DateTime.now().year - 1948) + 1,
-                                  (i) => "${DateTime.now().year - i}",
+                                  (2007 - 1960) + 1, // total count
+                                  (i) => "${1960 + i}", // starting from 1960
                                 ),
                               ),
                             ),
+
+                            // Expanded(
+                            //   child: _dropDown(
+                            //     hint: "Year",
+                            //     value: selectedYear,
+                            //     onChanged: (v) =>
+                            //         setState(() => selectedYear = v),
+                            //     items: List.generate(
+                            //       (DateTime.now().year - 1948) + 1,
+                            //       (i) => "${DateTime.now().year - i}",
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
 
-                        _label("About:"),
+                        _label1("About:"),
                         _textaboutField(maxLines: 4),
 
                         const SizedBox(height: 25),
@@ -318,13 +331,80 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                Get.snackbar(
-                  'Error',
-                  'Please complete this form after clicking Continue.',
-
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
+                if (lookingC.selectedName.value == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Profile',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (gender.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Gender',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (nameCtrl.text.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Enter Your Name',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (maritalC.selectedName.value == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Marital Status',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (stateC.selectedName.value == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your State',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (selectedDay == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Date',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (selectedMonth == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Month',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (selectedYear == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Year',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.submitBasicProfile(
+                    formData: {
+                      "profile_for": lookingC.selectedId.value,
+                      "gender": gender,
+                      "name": nameCtrl.text,
+                      "marital_status": maritalC.selectedId.value,
+                      "birth_day": selectedDay,
+                      "birth_month": selectedMonthNumber,
+                      "birth_year": selectedYear,
+                      "birth_state": stateC.selectedStateId.value,
+                      "about": abouttrl.text,
+                      "app_step": "1",
+                      "step": "1",
+                    },
+                    mobilenumber: widget.mobielemild,
+                  );
+                }
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -353,6 +433,25 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _label1(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: text,
+              style: opensansMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackgrey,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -556,13 +655,6 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
           Get.snackbar(
             'Error',
             'Please Select Your Year',
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
-        } else if (abouttrl.text.isEmpty) {
-          Get.snackbar(
-            'Error',
-            'Please Enter Your About',
             backgroundColor: Colors.red,
             colorText: Colors.white,
           );

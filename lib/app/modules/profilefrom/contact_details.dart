@@ -88,10 +88,10 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
 
                           _emailWithOtp(),
 
-                          _label("Insagram Id:"),
+                          _label1("Insagram Id:"),
                           _inputField(controller: instgramidController),
 
-                          _label("Facebook Id:"),
+                          _label1("Facebook Id:"),
                           _inputField(controller: facebookController),
 
                           const SizedBox(height: 10),
@@ -103,7 +103,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                             ),
                           ),
 
-                          _label("Reference Details:"),
+                          _label1("Reference Details:"),
                           _dropdownBox(
                             hint: "Select",
                             items: [
@@ -119,7 +119,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                                 setState(() => selectedReference = v),
                           ),
 
-                          _label("Other"),
+                          _label1("Other"),
                           _inputField(controller: otherController),
 
                           const SizedBox(height: 25),
@@ -228,14 +228,36 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                Get.snackbar(
-                  'Error',
-                  'Please complete this form after clicking Continue.',
-
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
+                if (emailController.text.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Enter Your Email Address',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (!emailController.text.contains("@")) {
+                  Get.snackbar(
+                    'Error',
+                    'Email must contain @',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.conectdetailsProfile(
+                    formData: {
+                      "contact_no": widget.mobileemail,
+                      "contact_email": emailController.text.trim(),
+                      "instagram": instgramidController.text.trim(),
+                      "facebook": facebookController.text,
+                      "reference": selectedReference,
+                      "reference_other": otherController.text.trim(),
+                      "app_step": '2',
+                      "step": '2',
+                    },
+                  );
+                }
               },
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -263,6 +285,25 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _label1(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: text,
+              style: opensansMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackgrey,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -400,35 +441,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
   Widget _bottomButtons(numberemaild) {
     return Row(
       children: [
-        // Expanded(
-        //   child: GestureDetector(
-        //     onTap: () {
-        //       Get.to(
-        //         MainNavigation(),
-        //         duration: Duration(
-        //           milliseconds: ApiConstants.screenTransitionTime,
-        //         ),
-        //         transition: Transition.rightToLeft,
-        //       );
-        //     },
-        //     child: Container(
-        //       height: 45,
-        //       alignment: Alignment.center,
-        //       decoration: BoxDecoration(
-        //         borderRadius: BorderRadius.circular(10),
-        //         color: ColorResources.halkapink,
-        //       ),
-        //       child: Text(
-        //         "SKIP",
-        //         style: opensansMedium.copyWith(
-        //           color: ColorResources.primarycolor2,
-        //           fontSize: 18,
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-        // ),
-        // const SizedBox(width: 12),
         Expanded(
           child: GestureDetector(
             onTap: () {
@@ -439,38 +451,17 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
-              } else if (instgramidController.text.isEmpty) {
+              } else if (!emailController.text.contains("@")) {
                 Get.snackbar(
                   'Error',
-                  'Please Enter Your Insagram Id',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (facebookController.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Facebook Id',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (selectedReference == null) {
-                Get.snackbar(
-                  'Error',
-                  'Please Select Your Reference Details',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (otherController.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Reference Other',
+                  'Email must contain @',
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
               } else {
                 stapercontroller.conectdetailsProfile(
                   formData: {
-                    "contact_no": widget.mobileemail,
+                    "contact_no": numberemaild,
                     "contact_email": emailController.text.trim(),
                     "instagram": instgramidController.text.trim(),
                     "facebook": facebookController.text,
@@ -481,13 +472,6 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   },
                 );
               }
-              // Get.to(
-              //   AadharVerificationScreen(),
-              //   duration: Duration(
-              //     milliseconds: ApiConstants.screenTransitionTime,
-              //   ),
-              //   transition: Transition.rightToLeft,
-              // );
             },
             child: Container(
               height: 45,

@@ -41,7 +41,7 @@ class _EditContectScreenState extends State<EditContectScreen> {
     emailController.text = u.email.toString();
     instgramidController.text = u.instagram.toString();
     facebookController.text = u.facebook.toString();
-
+    // emailController.text = u.email.toString();
     setState(() {});
   }
 

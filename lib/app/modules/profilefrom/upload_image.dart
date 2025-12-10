@@ -155,29 +155,34 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Education Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Education Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -224,29 +229,43 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (imgC.images.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Upload a minimum of 1 image and a maximum of 5 images.',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  imgC.uploadImages();
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner’s Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner’s Details",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -403,35 +422,48 @@ class _UploadPhotoScreenState extends State<UploadPhotoScreen> {
   }
 
   Widget _emptyBox() {
-    return DottedBorder(
-      options: RectDottedBorderOptions(
-        strokeWidth: 1,
-        dashPattern: [3, 5],
-        color: Colors.grey.shade600,
-      ),
+    return GestureDetector(
+      onTap: () {
+        imgC.pickImages();
+      },
+      child: DottedBorder(
+        options: RectDottedBorderOptions(
+          strokeWidth: 1,
+          dashPattern: [3, 5],
+          color: Colors.grey.shade600,
+        ),
 
-      child: Container(
-        height: 220,
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/imagebackk.png', height: 50),
-            SizedBox(height: 10),
-            Text(
-              "Select File",
-              style: opensansSemiBold.copyWith(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+        child: GestureDetector(
+          onTap: () {
+            imgC.pickImages();
+          },
+          child: Container(
+            height: 220,
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('assets/images/imagebackk.png', height: 50),
+                SizedBox(height: 10),
+                Text(
+                  "Select File",
+                  style: opensansSemiBold.copyWith(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Upload a minimum of 1 image and a maximum of 5 images.',
+                  textAlign: TextAlign.center,
+                  style: opensansMedium.copyWith(
+                    fontSize: 12,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 10),
-            Text(
-              'Upload a minimum of 1 image and a maximum of 5 images.',
-              textAlign: TextAlign.center,
-              style: opensansMedium.copyWith(fontSize: 12, color: Colors.red),
-            ),
-          ],
+          ),
         ),
       ),
     );

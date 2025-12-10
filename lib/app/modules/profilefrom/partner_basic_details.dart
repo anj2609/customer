@@ -579,29 +579,34 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner’s Qualities",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner’s Qualities",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -648,29 +653,125 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (fromAge == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Age Range ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (toAge == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Age Range ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (fromWeight == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Weight Range ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (toWeight == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Weight Range ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (fromHeight == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your To Height ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (toHeight == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your From Height ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (complexionC.selectedComplexionId2.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Complexion ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (languageC.selectedLanguageId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Language ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (maritalC.selectedNames.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Marital Status ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (languageC.motherselectedLanguageId.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Your Mother Language ',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.partnerbasicdetails(
+                    formData: {
+                      "partner_age_from": fromAge,
+                      "partner_age_to": toAge,
+                      "partner_weight_from": fromAge,
+                      "partner_weight_to": toAge,
+                      "partner_height_from": fromHeight,
+                      "partner_height_to": toHeight,
+                      "partner_complexion":
+                          complexionC.selectedComplexionId2.value,
+                      "partner_language": languageC.selectedLanguageId.value,
+                      // "partner_marital_status": maritalC.selectedId.value,
+                      "partner_have_children": children,
+                      "partner_mother_tongue":
+                          languageC.motherselectedLanguageId.value,
+                      "app_step": '13',
+                      "step": '13',
+                    },
+                    selected: maritalC.selectedIds,
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner’s Family Det.",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner’s Family Det.",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -782,18 +883,29 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                PartnerFamilyDetailsScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),
@@ -894,14 +1006,6 @@ class _PartnerBasicDetailsScreenState extends State<PartnerBasicDetailsScreen> {
                   selected: maritalC.selectedIds,
                 );
               }
-
-              // Get.to(
-              //   PartnerFamilyDetailsScreen(),
-              //   duration: Duration(
-              //     milliseconds: ApiConstants.screenTransitionTime,
-              //   ),
-              //   transition: Transition.rightToLeft,
-              // );
             },
             child: Container(
               height: 45,

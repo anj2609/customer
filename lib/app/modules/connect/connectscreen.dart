@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:vivashri/app/modules/search/search.dart';
 import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/widgets/drawer.dart';
 
@@ -109,10 +112,21 @@ class _ConnectScreenState extends State<ConnectScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Image.asset(
-                'assets/images/search-alt_svgrepo.com.png',
-                height: 25,
-                color: ColorResources.blackcolor11,
+              GestureDetector(
+                onTap: () {
+                  Get.to(
+                    BasicSearchPage(),
+                    duration: Duration(
+                      milliseconds: ApiConstants.screenTransitionTime,
+                    ),
+                    transition: Transition.rightToLeft,
+                  );
+                },
+                child: Image.asset(
+                  'assets/images/search-alt_svgrepo.com.png',
+                  height: 25,
+                  color: ColorResources.blackcolor11,
+                ),
               ),
               const SizedBox(width: 16),
               Image.asset('assets/images/bell.png', height: 30),

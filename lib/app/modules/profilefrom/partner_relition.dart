@@ -174,7 +174,7 @@ class _PartnerReligionCasteScreenState
                         }),
 
                         // ---------------- DOSH ----------------
-                        _topLabel("Dosh:"),
+                        _label1("Dosh:"),
                         _textfield(doshController),
 
                         const SizedBox(height: 40),
@@ -204,29 +204,34 @@ class _PartnerReligionCasteScreenState
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner’s Location",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner’s Location",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -273,32 +278,89 @@ class _PartnerReligionCasteScreenState
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (religionC.selectedName.value == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Religion',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (casteC.selectedCasteName.value == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Caste',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (subCasteC.selectedSubCasteName.value == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Subcaste',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.partnercasteedetauls(
+                    formData: {
+                      "partner_religion": religionC.selectedId.value,
+                      "partner_caste": casteC.selectedCasteId.value,
+                      "partner_sub_caste": subCasteC.selectedSubCasteId.value,
+                      "partner_dosh": doshController.text.trim(),
+                      "app_step": '17',
+                      "step": '17',
+                      "form_status": 'Completed',
+                    },
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "Next Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner Religion & ",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner Religion & ",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _label1(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: text,
+              style: opensansMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackgrey,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -416,18 +478,29 @@ class _PartnerReligionCasteScreenState
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.to(
+                PartnerOtherDetailsScreen(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),
@@ -457,13 +530,6 @@ class _PartnerReligionCasteScreenState
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
-              } else if (doshController.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Dosh',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
               } else {
                 stapercontroller.partnercasteedetauls(
                   formData: {
@@ -477,14 +543,6 @@ class _PartnerReligionCasteScreenState
                   },
                 );
               }
-
-              // Get.to(
-              //   PartnerOtherDetailsScreen(),
-              //   duration: Duration(
-              //     milliseconds: ApiConstants.screenTransitionTime,
-              //   ),
-              //   transition: Transition.rightToLeft,
-              // );
             },
             child: Container(
               height: 45,

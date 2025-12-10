@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/app/modules/match/userprofile.dart';
+import 'package:vivashri/app/modules/search/refine_search.dart';
 import 'package:vivashri/app/modules/search/search.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/match_list.dart';
-import 'package:vivashri/data/controller/userbyuser.dart';
 import 'package:vivashri/data/modal/matchmodal.dart';
 import 'package:vivashri/widgets/drawer.dart';
 import 'package:vivashri/widgets/image_view.dart';
 
-class MatchesScreen extends StatefulWidget {
-  const MatchesScreen({super.key});
+class SearchListScreen extends StatefulWidget {
+  const SearchListScreen({super.key});
 
   @override
-  State<MatchesScreen> createState() => _MatchesScreenState();
+  State<SearchListScreen> createState() => _SearchListScreenState();
 }
 
-class _MatchesScreenState extends State<MatchesScreen> {
+class _SearchListScreenState extends State<SearchListScreen> {
   int selectedFilter = 1;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final searchC = Get.put(SearchmatchController());
-  final userbyuserController = Get.put(UserbyUserDetailController());
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +40,18 @@ class _MatchesScreenState extends State<MatchesScreen> {
             child: Column(
               children: [
                 _buildTopBar(w),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, left: 12),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${searchC.searchlistdata.length} Profile',
+                        style: opensansSemiBold.copyWith(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
 
-                _buildFilterBar(),
                 Expanded(
                   child: Obx(() {
                     if (searchC.isLoading.value) {
@@ -54,30 +62,20 @@ class _MatchesScreenState extends State<MatchesScreen> {
                       );
                     }
 
-                    if (searchC.users.isEmpty) {
+                    if (searchC.searchlistdata.isEmpty) {
                       return Center(child: Text("No profiles found"));
                     }
 
                     return ListView.builder(
                       padding: const EdgeInsets.all(12),
-                      itemCount: searchC.users.length,
+                      itemCount: searchC.searchlistdata.length,
                       itemBuilder: (context, index) {
-                        final u = searchC.users[index];
+                        final u = searchC.searchlistdata[index];
                         return _profileCard(u);
                       },
                     );
                   }),
                 ),
-
-                // Expanded(
-                //   child: ListView.builder(
-                //     padding: const EdgeInsets.all(12),
-                //     itemCount: 5,
-                //     itemBuilder: (context, index) {
-                //       return _profileCard(w, h);
-                //     },
-                //   ),
-                // ),
               ],
             ),
           ),
@@ -93,7 +91,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
   Widget _buildTopBar(double width) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -103,12 +101,13 @@ class _MatchesScreenState extends State<MatchesScreen> {
             children: [
               GestureDetector(
                 onTap: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  Get.back();
+                  //   _scaffoldKey.currentState?.openDrawer();
                 },
                 child: Icon(
-                  Icons.menu,
+                  Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 28,
+                  size: 22,
                 ),
               ),
             ],
@@ -121,7 +120,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              "Matches",
+              "Search Result",
               style: opensansSemiBold.copyWith(
                 fontSize: 17,
                 color: ColorResources.blackhalkaa,
@@ -135,7 +134,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
               GestureDetector(
                 onTap: () {
                   Get.to(
-                    BasicSearchPage(),
+                    BasicSearchPage(hidevalue: 'Hide'),
                     duration: Duration(
                       milliseconds: ApiConstants.screenTransitionTime,
                     ),
@@ -143,13 +142,13 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   );
                 },
                 child: Image.asset(
-                  'assets/images/search-alt_svgrepo.com.png',
+                  'assets/images/filter_svgrepo.com.png',
                   height: 25,
                   color: ColorResources.blackcolor11,
                 ),
               ),
-              const SizedBox(width: 16),
-              Image.asset('assets/images/bell.png', height: 30),
+              // const SizedBox(width: 16),
+              // Image.asset('assets/images/bell.png', height: 30),
             ],
           ),
         ],
@@ -158,80 +157,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
   }
 
   // ---------------- FILTER BAR ----------------
-  Widget _buildFilterBar() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10),
-          child: Row(
-            children: [
-              _filterChip(Icons.tune, "Filters", 0),
-              const SizedBox(width: 10),
-              _filterChip(null, "My Match", 1),
-              const SizedBox(width: 10),
-              _filterChip(null, "Today Match", 2),
-              const SizedBox(width: 10),
-              _filterChip(null, "Near Me", 3),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _filterChip(IconData? icon, String text, int id) {
-    bool active = selectedFilter == id;
-
-    return InkWell(
-      onTap: () {
-        setState(() => selectedFilter = id);
-
-        if (id == 0) {
-          // searchC.fetchSearchList("", "");
-        } else if (id == 1) {
-          searchC.fetchSearchList("", "");
-        } else if (id == 2) {
-          searchC.fetchSearchList("1", "");
-        } else if (id == 3) {
-          searchC.fetchSearchList("", "1");
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: active ? ColorResources.primarycolor3 : Colors.grey.shade200,
-          ),
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: Row(
-          children: [
-            if (icon != null)
-              Icon(
-                icon,
-                size: 16,
-                color: active ? ColorResources.primarycolor3 : Colors.black87,
-              ),
-            if (icon != null) const SizedBox(width: 6),
-            Text(
-              text,
-              style: opensansMedium.copyWith(
-                fontSize: 13.5,
-                color: active ? ColorResources.primarycolor3 : Colors.black87,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   String calculateAgeInYears(String? dobString) {
     if (dobString == null || dobString.isEmpty) return "N/A";
@@ -322,11 +247,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
                         );
                       },
                     ),
-                    // child: Image.asset(
-                    //   "assets/images/imageback.png",
-                    //   fit: BoxFit.cover,
-                    //   width: double.infinity,
-                    // ),
                   ),
                 ),
 
@@ -431,20 +351,13 @@ class _MatchesScreenState extends State<MatchesScreen> {
                               ),
                             ),
                             const SizedBox(width: 5),
-                            GestureDetector(
-                              onTap: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: u.profileId ?? ""),
-                                );
-                              },
-                              child: Text(
-                                u.profileId == null
-                                    ? "(ID: --)"
-                                    : "(ID: ${u.profileId})",
-                                style: opensansMedium.copyWith(
-                                  color: ColorResources.primarycolor2,
-                                  fontSize: 12,
-                                ),
+                            Text(
+                              u.profileId == null
+                                  ? "(ID: --)"
+                                  : "(ID: ${u.profileId})",
+                              style: opensansMedium.copyWith(
+                                color: ColorResources.primarycolor2,
+                                fontSize: 12,
                               ),
                             ),
                           ],
@@ -495,7 +408,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      userbyuserController.fetchUserDetail(u.id.toString());
                       Get.to(
                         UserProfileDetailsPage(),
                         duration: Duration(

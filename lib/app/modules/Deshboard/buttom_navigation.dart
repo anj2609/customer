@@ -51,7 +51,7 @@ class _MainNavigationState extends State<MainNavigation> {
     String? profileid = prefs.getString("profileid");
     usercontroller.fetchUserDetail(profileid.toString());
     matchC.fetchMatches();
-    searchC.fetchSearchList();
+    searchC.fetchSearchList("", "");
   }
 
   @override

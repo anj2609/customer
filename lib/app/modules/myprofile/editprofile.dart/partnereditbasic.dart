@@ -36,6 +36,8 @@ class _EditPartnerBasicDetailsScreenState
     if (u == null) return;
     fromAge = u.partnerAgeFrom?.toString();
     toAge = u.partnerAgeTo?.toString();
+    fromWeight = u.partnerWeightFrom.toString();
+    toWeight = u.partnerWeightTo.toString();
     fromHeight = u.partnerHeightFrom?.toString();
     toHeight = u.partnerHeightTo?.toString();
     complexionC.selectedComplexionId2.value = u.partnerComplexion!.id
@@ -277,7 +279,12 @@ class _EditPartnerBasicDetailsScreenState
                         const SizedBox(width: 10),
                         Expanded(
                           child: _dropdown22(
-                            value: toHeight,
+                            value:
+                                buildHeightItems(
+                                  filteredToHeight(fromHeight),
+                                ).any((item) => item.value == toHeight)
+                                ? toHeight
+                                : null, // <-- FIX: prevent crash
                             items: buildHeightItems(
                               filteredToHeight(fromHeight),
                             ),
@@ -286,6 +293,17 @@ class _EditPartnerBasicDetailsScreenState
                             },
                           ),
                         ),
+                        // Expanded(
+                        //   child: _dropdown22(
+                        //     value: toHeight,
+                        //     items: buildHeightItems(
+                        //       filteredToHeight(fromHeight),
+                        //     ),
+                        //     onChanged: (v) {
+                        //       setState(() => toHeight = v);
+                        //     },
+                        //   ),
+                        // ),
                       ],
                     ),
 
@@ -635,7 +653,7 @@ class _EditPartnerBasicDetailsScreenState
                   "partner_mother_tongue":
                       languageC.motherselectedLanguageId.value,
                 },
-                selected: maritalC.selectedId.value,
+                selected: maritalC.selectedIds,
               );
             },
             child: Container(

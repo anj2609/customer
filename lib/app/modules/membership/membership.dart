@@ -45,7 +45,11 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
                         Image.asset('assets/images/Frame 66.png'),
                         Obx(() {
                           if (controller.isLoading.value) {
-                            return Center(child: CircularProgressIndicator());
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: ColorResources.primarycolor2,
+                              ),
+                            );
                           }
 
                           return SingleChildScrollView(
@@ -203,9 +207,6 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
   Widget _planCard(String name, int price, String planidd) {
     final u = usercontroller.userData.value!;
 
-    final headerColors =
-        planGradients[name] ?? [Color(0xffBE3272), Color(0xffEB4E76)];
-
     final buttonColors =
         buttonGradients[name] ?? [Color(0xffBE3272), Color(0xffEB4E76)];
 
@@ -326,7 +327,7 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
 
           // ⭐ BUTTON SAME
           Positioned(
-            bottom: -15,
+            bottom: -10,
             left: 0,
             right: 0,
             child: Center(
@@ -540,23 +541,23 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              GestureDetector(
-                onTap: () {
-                  Get.to(
-                    BasicSearchPage(),
-                    duration: Duration(
-                      milliseconds: ApiConstants.screenTransitionTime,
-                    ),
-                    transition: Transition.rightToLeft,
-                  );
-                },
-                child: Image.asset(
-                  'assets/images/search-alt_svgrepo.com.png',
-                  height: 25,
-                  color: ColorResources.blackcolor11,
-                ),
-              ),
-              const SizedBox(width: 16),
+              // GestureDetector(
+              //   onTap: () {
+              //     Get.to(
+              //       BasicSearchPage(),
+              //       duration: Duration(
+              //         milliseconds: ApiConstants.screenTransitionTime,
+              //       ),
+              //       transition: Transition.rightToLeft,
+              //     );
+              //   },
+              //   child: Image.asset(
+              //     'assets/images/search-alt_svgrepo.com.png',
+              //     height: 25,
+              //     color: ColorResources.blackcolor11,
+              //   ),
+              // ),
+              // const SizedBox(width: 16),
               GestureDetector(
                 onTap: () {
                   Get.to(

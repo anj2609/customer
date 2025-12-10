@@ -1,7 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/dietcontroller.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
@@ -79,12 +81,12 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
 
                         Obx(() {
                           return _dropdown22(
-                            value: dietC.selectedDietId.value.isEmpty
+                            value: dietC.selectedDietId2.value.isEmpty
                                 ? null
-                                : dietC.selectedDietId.value,
+                                : dietC.selectedDietId2.value,
 
                             onChanged: (v) {
-                              dietC.onSelect(v!);
+                              dietC.onSelec22t(v!);
                             },
 
                             items: dietC.dietList
@@ -160,29 +162,34 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
         children: [
           // LEFT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    "Prev Step:",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  "Partner’s Religion",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    "Partner’s Religion",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -229,29 +236,74 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
 
           // RIGHT
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
+            child: GestureDetector(
+              onTap: () {
+                if (dietC.selectedDietId2.value.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Diet Preference',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (drinking == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Drinking Habit',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (smoking == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Smoking Habit',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else if (profileManaged == null) {
+                  Get.snackbar(
+                    'Error',
+                    'Please Select Profile Managed by',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                } else {
+                  stapercontroller.partnerotheredetauls(
+                    formData: {
+                      "partner_diet": dietC.selectedDietId2.value,
+                      "partner_drinking": drinking,
+                      "partner_smoking": smoking,
+                      "partner_managed_by": profileManaged,
+                      "form_status": 'Completed',
+                      "app_step": '18',
+                      "step": '18',
+                    },
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AutoSizeText(
+                    "",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor,
+                    ),
                   ),
-                ),
-                AutoSizeText(
-                  " ",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
+                  AutoSizeText(
+                    " ",
+                    maxLines: 1,
+                    minFontSize: 8,
+                    maxFontSize: 14,
+                    style: opensansBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -364,18 +416,29 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 45,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: ColorResources.halkapink,
-            ),
-            child: Text(
-              "SKIP",
-              style: opensansMedium.copyWith(
-                color: ColorResources.primarycolor2,
-                fontSize: 18,
+          child: GestureDetector(
+            onTap: () {
+              Get.offAll(
+                MainNavigation(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorResources.halkapink,
+              ),
+              child: Text(
+                "SKIP",
+                style: opensansMedium.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),
@@ -384,7 +447,7 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              if (dietC.selectedDietId.value.isEmpty) {
+              if (dietC.selectedDietId2.value.isEmpty) {
                 Get.snackbar(
                   'Error',
                   'Please Select Diet Preference',
@@ -415,7 +478,7 @@ class _PartnerOtherDetailsScreenState extends State<PartnerOtherDetailsScreen> {
               } else {
                 stapercontroller.partnerotheredetauls(
                   formData: {
-                    "partner_diet": dietC.selectedDietId.value,
+                    "partner_diet": dietC.selectedDietId2.value,
                     "partner_drinking": drinking,
                     "partner_smoking": smoking,
                     "partner_managed_by": profileManaged,

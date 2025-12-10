@@ -90,11 +90,11 @@ class _ChatScreenState extends State<ChatScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Image.asset(
-                'assets/images/search-alt_svgrepo.com.png',
-                height: 25,
-                color: ColorResources.blackcolor11,
-              ),
+              // Image.asset(
+              //   'assets/images/search-alt_svgrepo.com.png',
+              //   height: 25,
+              //   color: ColorResources.blackcolor11,
+              // ),
               const SizedBox(width: 16),
               Image.asset('assets/images/bell.png', height: 30),
             ],

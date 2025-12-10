@@ -9,12 +9,13 @@ import 'package:vivashri/app/modules/match/matchscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/app/modules/myprofile/my_profile.dart';
 import 'package:vivashri/app/modules/notification/notification.dart';
+import 'package:vivashri/app/modules/search/search.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/auth_controller.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
-import 'package:vivashri/widgets/setting.dart';
+import 'package:vivashri/widgets/setting/setting.dart';
 
 class CustomAppDrawer extends StatelessWidget {
   const CustomAppDrawer({super.key});
@@ -213,6 +214,15 @@ class CustomAppDrawer extends StatelessWidget {
                   _drawerItem(
                     image: "assets/images/user-search-alt-1_svgrepo.com.png",
                     title: "Search",
+                    onTap: () {
+                      Get.to(
+                        BasicSearchPage(),
+                        duration: Duration(
+                          milliseconds: ApiConstants.screenTransitionTime,
+                        ),
+                        transition: Transition.rightToLeft,
+                      );
+                    },
                   ),
 
                   _drawerItem(
@@ -228,13 +238,22 @@ class CustomAppDrawer extends StatelessWidget {
                       );
                     },
                   ),
-                  _drawerItem(
-                    image: "assets/images/search-file_svgrepo.com.png",
-                    title: "Partner Preferences",
-                  ),
+                  // _drawerItem(
+                  //   image: "assets/images/search-file_svgrepo.com.png",
+                  //   title: "Partner Preferences",
+                  // ),
                   _drawerItem(
                     image: "assets/images/crown_svgrepo.com.png",
                     title: "Membership Plans",
+                    onTap: () {
+                      Get.to(
+                        MembershipPlansPage(),
+                        duration: Duration(
+                          milliseconds: ApiConstants.screenTransitionTime,
+                        ),
+                        transition: Transition.rightToLeft,
+                      );
+                    },
                   ),
                   _drawerItem(
                     image: "assets/images/bell_svgrepo.com.png",

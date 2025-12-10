@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/langunage.dart';
+import 'package:vivashri/data/controller/marital_staus.contro.dart';
+import 'package:vivashri/data/controller/match_list.dart';
 import 'package:vivashri/data/controller/nationality.dart';
 import 'package:vivashri/data/controller/occupation.dart';
 import 'package:vivashri/data/controller/qualification.dart';
@@ -12,7 +15,8 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:vivashri/widgets/dropdownitems.dart';
 
 class BasicSearchPage extends StatefulWidget {
-  const BasicSearchPage({super.key});
+  final String? hidevalue;
+  const BasicSearchPage({super.key, this.hidevalue});
 
   @override
   State<BasicSearchPage> createState() => _BasicSearchPageState();
@@ -23,7 +27,7 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
   int gender = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  RangeValues ageRange = const RangeValues(25, 45);
+  RangeValues ageRange = const RangeValues(18, 60);
   RangeValues heightRange = const RangeValues(120, 183);
   final searchprofileid = TextEditingController();
   final countryC = Get.put(CountryController());
@@ -41,7 +45,7 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
   final religionC = Get.put(ReligionController());
 
   List<String> maritalList = [
-    "Never Married",
+    "Unmarried",
     "Married",
     "Divorced",
     "Widow",
@@ -49,14 +53,9 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
   ];
 
   List<String> motherTongueList = ["Hindi", "English", "Gujarati", "Punjabi"];
-  List<String> religionList = ["Hindu", "Muslim", "Sikh", "Christian"];
-  List<String> countryList = ["India", "USA", "Canada", "UK"];
-  List<String> stateList = ["Delhi", "Bihar", "UP", "Maharashtra"];
-  List<String> educationList = ["B.Com", "B.Tech", "MBA", "MCA"];
-  List<String> incomeList = ["1-2 Lakh", "2-5 Lakh", "5-10 Lakh", "10+ Lakh"];
-  List<String> occupationList = ["Teacher", "Engineer", "Doctor", "Business"];
-  List<String> manglikList = ["Yes", "No", "Angshik"];
+  List<String> manglikList = ["Yes", "No", "Manglik"];
   final stateC = Get.put(StateController());
+  final maritalC = Get.put(MaritalStatusController());
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +73,8 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
             child: Column(
               children: [
                 _buildTopBar(w),
-                _buildTopTabs(),
-                Divider(),
+                widget.hidevalue == "Hide" ? SizedBox() : _buildTopTabs(),
+                widget.hidevalue == "Hide" ? SizedBox() : Divider(),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(children: [_buildSearchBox(w)]),
@@ -98,7 +97,7 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
 
   Widget _buildTopBar(double width) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -108,12 +107,13 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
             children: [
               GestureDetector(
                 onTap: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  Get.back();
+                  //  _scaffoldKey.currentState?.openDrawer();
                 },
                 child: Icon(
-                  Icons.menu,
+                  Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 28,
+                  size: 22,
                 ),
               ),
             ],
@@ -126,7 +126,7 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              "Search",
+              widget.hidevalue == "Hide" ? "Refine Search" : "Search",
               style: opensansMedium.copyWith(
                 fontSize: 17,
                 color: ColorResources.blackhalkaa,
@@ -134,6 +134,37 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _dropdown22({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
       ),
     );
   }
@@ -151,6 +182,8 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
       ),
     );
   }
+
+  final languageC = Get.put(LanguageController());
 
   Widget _tabButton(String text, int index) {
     bool isSelected = selectedTab == index;
@@ -257,19 +290,55 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
               _heightSlider(),
 
               const SizedBox(height: 5),
-              _dropDown(
-                "Marital Status",
-                maritalList,
-                maritalStatus,
-                (v) => setState(() => maritalStatus = v),
-              ),
+              _label("Marital Status:"),
+              Obx(() {
+                return _dropDown22(
+                  hint: "Select",
+                  value: maritalC.selectedName.value,
+                  onChanged: (v) => maritalC.onSelect(v!),
+                  items: maritalC.maritalList.map((e) => e.name).toList(),
+                );
+              }),
+              _label("Mother Tongue:"),
+              Obx(() {
+                return _dropdown22(
+                  value: languageC.motherselectedLanguageId.value.isEmpty
+                      ? null
+                      : languageC.motherselectedLanguageId.value,
 
-              _dropDown(
-                "Mother Tongue",
-                motherTongueList,
-                motherTongue,
-                (v) => setState(() => motherTongue = v),
-              ),
+                  onChanged: (v) {
+                    languageC.onSelect22(v!);
+                  },
+
+                  items: languageC.languageList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id, // ID based dropdown
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+
+              // _dropDown(
+              //   "Marital Status",
+              //   maritalList,
+              //   maritalStatus,
+              //   (v) => setState(() => maritalStatus = v),
+              // ),
+              // _dropDown(
+              //   "Mother Tongue",
+              //   motherTongueList,
+              //   motherTongue,
+              //   (v) => setState(() => motherTongue = v),
+              // ),
               _label("Religion:"),
               Obx(() {
                 return _dropdown(
@@ -432,6 +501,55 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
               _searchBtn(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _boxDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: Colors.grey.shade400),
+    );
+  }
+
+  Widget _dropDown22({
+    required String hint,
+    required String? value,
+    required Function(String?) onChanged,
+    required List<String> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: _boxDecoration(),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          hint: Text(
+            hint,
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          items: items
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(
+                    e,
+                    style: opensansMedium.copyWith(
+                      color: ColorResources.blackhalka,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: onChanged,
         ),
       ),
     );
@@ -648,40 +766,103 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
     );
   }
 
+  final searchC = Get.put(SearchmatchController());
+
   // ----------------------------
   // SEARCH BUTTON
   // ----------------------------
   Widget _searchBtn() {
-    return GestureDetector(
-      onTap: () {
-        print("----- SEARCH VALUES ----- ${searchprofileid.text}");
-        print("Gender: ${gender == 0 ? "Bride" : "Groom"}");
-        print("Age: ${ageRange.start} - ${ageRange.end}");
-        print("Height: ${heightRange.start} - ${heightRange.end}");
-        print("Marital: $maritalStatus");
-        print("Mother Tongue: $motherTongue");
-        print("Religion: ${religionC.selectedId.value}");
-        print("Country: ${countryC.selectedCountryId.value}");
-        print("State: ${stateC.selectedStateId.value}");
-        print("Education: ${eduC.selectedEduId.value}");
-        print("Income: ${incomeFrom}");
-        print("Occupation: ${occC.selectedOccId.value}");
-        print("Manglik: $manglik");
-      },
-      child: Container(
-        height: 45,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFBE266B), Color(0xFFEB1D7B)],
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                searchprofileid.clear();
+                motherTongue = null;
+                maritalStatus = null;
+                manglik = null;
+                incomeFrom = null;
+
+                gender = 0;
+
+                ageRange = const RangeValues(18, 60);
+                heightRange = const RangeValues(120, 183);
+
+                countryC.selectedCountryId.value = "";
+                stateC.selectedStateId.value = "";
+                eduC.selectedEduId.value = "";
+                occC.selectedOccId.value = "";
+                religionC.selectedId.value = "";
+                religionC.selectedId.value = "";
+                religionC.selectedName.value = "";
+                maritalC.selectedId.value = "";
+                maritalC.selectedName.value = null;
+                languageC.motherselectedLanguageId.value = "";
+                languageC.morherselectedLanguageName.value = null;
+              });
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey,
+              ),
+              child: Text(
+                "Clear All",
+                style: opensansMedium.copyWith(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            ),
           ),
         ),
-        child: Text(
-          "Search Now",
-          style: opensansMedium.copyWith(color: Colors.white, fontSize: 18),
+        SizedBox(width: 5),
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              if (searchprofileid.text.isEmpty) {
+                searchC.searchlist(
+                  searchgender: gender == 0 ? "Bride" : "Groom",
+                  minage: ageRange.start.toString(),
+                  maxage: ageRange.end.toString(),
+                  minheight: heightRange.start.toString(),
+                  maxheight: heightRange.end.toString(),
+                  searchLanguage: languageC.motherselectedLanguageId.value,
+                  searchMaritalstatus: maritalC.selectedId.value,
+                  manglik: manglik,
+                  searccountry: countryC.selectedCountryId.value,
+                  searcheducation: eduC.selectedEduId.value,
+                  searctate: stateC.selectedStateId.value,
+                  annualincom: incomeFrom,
+                  occupation: occC.selectedOccId.value,
+                );
+              } else {
+                searchC.searchprofileid(profileid: searchprofileid.text);
+              }
+            },
+            child: Container(
+              height: 45,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFBE266B), Color(0xFFEB1D7B)],
+                ),
+              ),
+              child: Text(
+                "Search Now",
+                style: opensansMedium.copyWith(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
