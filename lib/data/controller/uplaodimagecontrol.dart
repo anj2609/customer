@@ -145,6 +145,7 @@ class ImageUploadController extends GetxController {
   }
 
   //-=-=-=-=-=-=-=-=-= update photo-==-=-=-=-=-=-=-=-=
+  // ignore: non_constant_identifier_names
   Future<void> EdituploadImages() async {
     if (images.isEmpty) {
       Get.snackbar("Error", "Please select at least 1 photo");
@@ -171,8 +172,8 @@ class ImageUploadController extends GetxController {
         "photo2": images.length > 2 ? basename(images[2].path) : "",
         "photo3": images.length > 3 ? basename(images[3].path) : "",
         "photo4": images.length > 4 ? basename(images[4].path) : "",
-        "app_step": 11,
-        "step": 11,
+        // "app_step": 11,
+        // "step": 11,
       },
     };
 
@@ -201,6 +202,7 @@ class ImageUploadController extends GetxController {
 
       if (response.statusCode == 200) {
         EasyLoading.dismiss();
+
         Get.snackbar(
           "Success",
           "Uploaded Successfully",

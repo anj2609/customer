@@ -826,7 +826,9 @@ class _EditBasicDetailsScreenState extends State<EditBasicDetailsScreen> {
             // "step": "1",
           },
           ///////////////////// mobilenumber: widget.mobielemild,
-        );
+        );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
       },
       child: Container(
         height: 45,

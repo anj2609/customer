@@ -548,7 +548,7 @@ class StaperfromController extends GetxController implements GetxService {
         body: body,
       );
 
-      print("Response: ${response.body}");
+      print("Response: ${body}");
 
       var jsonResponse = jsonDecode(response.body);
 
@@ -1318,12 +1318,12 @@ class StaperfromController extends GetxController implements GetxService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (jsonResponse["status"] == true) {
           EasyLoading.dismiss();
-          Get.snackbar(
-            "Success",
-            "Update Successfully",
-            colorText: Colors.white,
-            backgroundColor: Colors.green,
-          );
+          // Get.snackbar(
+          //   "Success",
+          //   "Update Successfully",
+          //   colorText: Colors.white,
+          //   backgroundColor: Colors.green,
+          // );
 
           profileapi();
         } else {
@@ -1393,12 +1393,12 @@ class StaperfromController extends GetxController implements GetxService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (jsonResponse["status"] == true) {
           EasyLoading.dismiss();
-          Get.snackbar(
-            "Success",
-            "Update Successfully",
-            colorText: Colors.white,
-            backgroundColor: Colors.green,
-          );
+          // Get.snackbar(
+          //   "Success",
+          //   "Update Successfully",
+          //   colorText: Colors.white,
+          //   backgroundColor: Colors.green,
+          // );
           profileapi();
         } else {
           EasyLoading.dismiss();
@@ -1457,12 +1457,12 @@ class StaperfromController extends GetxController implements GetxService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (jsonResponse["status"] == true) {
           EasyLoading.dismiss();
-          Get.snackbar(
-            "Success",
-            "Update Successfully",
-            colorText: Colors.white,
-            backgroundColor: Colors.green,
-          );
+          // Get.snackbar(
+          //   "Success",
+          //   "Update Successfully",
+          //   colorText: Colors.white,
+          //   backgroundColor: Colors.green,
+          // );
           profileapi();
         } else {
           EasyLoading.dismiss();
@@ -1520,12 +1520,12 @@ class StaperfromController extends GetxController implements GetxService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (jsonResponse["status"] == true) {
           EasyLoading.dismiss();
-          Get.snackbar(
-            "Success",
-            "Update Successfully",
-            colorText: Colors.white,
-            backgroundColor: Colors.green,
-          );
+          // Get.snackbar(
+          //   "Success",
+          //   "Update Successfully",
+          //   colorText: Colors.white,
+          //   backgroundColor: Colors.green,
+          // );
           profileapi();
         } else {
           EasyLoading.dismiss();
@@ -1583,12 +1583,12 @@ class StaperfromController extends GetxController implements GetxService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (jsonResponse["status"] == true) {
           EasyLoading.dismiss();
-          Get.snackbar(
-            "Success",
-            "Update Successfully",
-            colorText: Colors.white,
-            backgroundColor: Colors.green,
-          );
+          // Get.snackbar(
+          //   "Success",
+          //   "Update Successfully",
+          //   colorText: Colors.white,
+          //   backgroundColor: Colors.green,
+          // );
           profileapi();
         } else {
           EasyLoading.dismiss();

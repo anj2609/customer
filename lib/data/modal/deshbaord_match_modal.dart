@@ -72,6 +72,8 @@ class MatchUserModel {
   final String? contactEmail;
   final dynamic contactNo;
   final String? reference;
+  final dynamic? interestsentstatus;
+  final dynamic? shortliststatus;
 
   final CommonNameModel? caste;
   final CommonNameModel? religion;
@@ -203,6 +205,8 @@ class MatchUserModel {
     this.photo3Blur,
     this.photo4,
     this.photo4Blur,
+    this.interestsentstatus,
+    this.shortliststatus,
 
     this.partnerAgeFrom,
     this.partnerAgeTo,
@@ -283,7 +287,8 @@ class MatchUserModel {
       contactEmail: json["contact_email"],
       contactNo: json["contact_no"],
       reference: json["reference"],
-
+      interestsentstatus: json['interest_sent_status'] ?? "",
+      shortliststatus: json['short_list_status'] ?? "",
       caste: json["caste"] != null
           ? CommonNameModel.fromJson(json["caste"])
           : null,

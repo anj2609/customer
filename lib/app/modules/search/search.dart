@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/citycontroller.dart';
+import 'package:vivashri/data/controller/complecxion.dart';
+import 'package:vivashri/data/controller/dietcontroller.dart';
+import 'package:vivashri/data/controller/hobbies.dart';
 import 'package:vivashri/data/controller/langunage.dart';
+import 'package:vivashri/data/controller/looking_for_controller.dart';
 import 'package:vivashri/data/controller/marital_staus.contro.dart';
 import 'package:vivashri/data/controller/match_list.dart';
 import 'package:vivashri/data/controller/nationality.dart';
@@ -32,6 +38,7 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
   final searchprofileid = TextEditingController();
   final countryC = Get.put(CountryController());
   final eduC = Get.put(EducationController());
+  final cityC = Get.put(CityController());
 
   String? maritalStatus;
   String? motherTongue;
@@ -56,6 +63,12 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
   List<String> manglikList = ["Yes", "No", "Manglik"];
   final stateC = Get.put(StateController());
   final maritalC = Get.put(MaritalStatusController());
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    dietC.fetchDiet();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +90,13 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
                 widget.hidevalue == "Hide" ? SizedBox() : Divider(),
                 Expanded(
                   child: SingleChildScrollView(
-                    child: Column(children: [_buildSearchBox(w)]),
+                    child: Column(
+                      children: [
+                        selectedTab == 0
+                            ? _buildbasicBox(w)
+                            : _buildadvancedBox(w),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -247,7 +266,7 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
     }).toList();
   }
 
-  Widget _buildSearchBox(double w) {
+  Widget _buildbasicBox(double w) {
     return Padding(
       padding: const EdgeInsets.only(left: 15, right: 15, top: 10),
       child: DottedBorder(
@@ -506,6 +525,535 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
     );
   }
 
+  Widget _buildadvancedBox(double w) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 15, right: 15, top: 10),
+      child: DottedBorder(
+        options: RectDottedBorderOptions(
+          color: const Color(0xffd6287f),
+          strokeWidth: 1.5,
+          dashPattern: const [5, 8],
+        ),
+        child: Container(
+          width: w,
+
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF2F9),
+            borderRadius: BorderRadius.circular(0),
+          ),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _title("Search Profile Id:"),
+              _textField("Search Profile Id", controller: searchprofileid),
+
+              _centerText("---- or ----"),
+
+              _title("Search:"),
+              SizedBox(height: 5),
+              _genderSelector(),
+
+              const SizedBox(height: 15),
+              _title(
+                "Age (${ageRange.start.toInt()} - ${ageRange.end.toInt()})",
+              ),
+              _ageSlider(),
+
+              const SizedBox(height: 10),
+              _title(
+                "Height (${heightRange.start.toInt()} cm - ${heightRange.end.toInt()} cm)",
+              ),
+              _heightSlider(),
+
+              const SizedBox(height: 5),
+              _label("Marital Status:"),
+              Obx(() {
+                return _dropDown22(
+                  hint: "Select",
+                  value: maritalC.selectedName.value,
+                  onChanged: (v) => maritalC.onSelect(v!),
+                  items: maritalC.maritalList.map((e) => e.name).toList(),
+                );
+              }),
+              _label("Mother Tongue:"),
+              Obx(() {
+                return _dropdown22(
+                  value: languageC.motherselectedLanguageId.value.isEmpty
+                      ? null
+                      : languageC.motherselectedLanguageId.value,
+
+                  onChanged: (v) {
+                    languageC.onSelect22(v!);
+                  },
+
+                  items: languageC.languageList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id, // ID based dropdown
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+
+              // _dropDown(
+              //   "Marital Status",
+              //   maritalList,
+              //   maritalStatus,
+              //   (v) => setState(() => maritalStatus = v),
+              // ),
+              // _dropDown(
+              //   "Mother Tongue",
+              //   motherTongueList,
+              //   motherTongue,
+              //   (v) => setState(() => motherTongue = v),
+              // ),
+              _label("Religion:"),
+              Obx(() {
+                return _dropdown(
+                  value: religionC.selectedId.value.isEmpty
+                      ? null
+                      : religionC.selectedId.value,
+
+                  onChanged: (v) {
+                    religionC.onSelectById(v!);
+                  },
+
+                  items: religionC.religionList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+
+              // SizedBox(height: 5),
+
+              // SizedBox(height: 5),
+
+              // SizedBox(height: 5),
+              _dropDown(
+                "Manglik Status",
+                manglikList,
+                manglik,
+                (v) => setState(() => manglik = v),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Location & Grew up in details',
+                style: opensansSemiBold.copyWith(
+                  color: ColorResources.primarycolor4,
+                  fontSize: 15,
+                ),
+              ),
+              SizedBox(height: 10),
+              _label("Country:"),
+              Obx(() {
+                return _dropdown(
+                  value: countryC.selectedCountryId.value.isEmpty
+                      ? null
+                      : countryC.selectedCountryId.value,
+
+                  onChanged: (v) {
+                    countryC.onSelect(v!);
+                  },
+
+                  items: countryC.countryList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id, // value = ID
+                          child: Text(
+                            e.name, // Show country name
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+
+              _label("State:"),
+              Obx(() {
+                return _dropdown(
+                  value: stateC.selectedStateId.value.isEmpty
+                      ? null
+                      : stateC.selectedStateId.value,
+
+                  onChanged: (v) {
+                    stateC.onSelect(v!);
+                    cityC.fetchCity(v);
+                  },
+
+                  items: stateC.stateList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+              _label("City / District:"),
+              Obx(() {
+                return _cityc(
+                  value: cityC.selectedCityId.value.isEmpty
+                      ? null
+                      : cityC.selectedCityId.value,
+
+                  onChanged: (v) {
+                    cityC.onSelect(v!);
+                  },
+
+                  items: cityC.cityList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+              SizedBox(height: 15),
+              Text(
+                'Education & Profession Details',
+                style: opensansSemiBold.copyWith(
+                  color: ColorResources.primarycolor4,
+                  fontSize: 15,
+                ),
+              ),
+              SizedBox(height: 10),
+              _label("Highest Degree"),
+              Obx(() {
+                return _dropdown(
+                  value: eduC.selectedEduId.value.isEmpty
+                      ? null
+                      : eduC.selectedEduId.value,
+
+                  onChanged: (v) {
+                    eduC.onSelect(v!);
+                  },
+
+                  items: eduC.educationList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+              _label("Occupation"),
+              Obx(() {
+                return _dropdown(
+                  value: occC.selectedOccId.value.isEmpty
+                      ? null
+                      : occC.selectedOccId.value,
+
+                  onChanged: (v) {
+                    occC.onSelect(v!);
+                  },
+
+                  items: occC.occupationList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+              _label("Annual Income"),
+              _dropdown(
+                value: incomeFrom,
+                items: buildIncomeItems(fromIncomeKeys),
+                onChanged: (v) {
+                  setState(() {
+                    incomeFrom = v;
+                    print('$incomeFrom');
+                  });
+                },
+              ),
+              SizedBox(height: 15),
+              Text(
+                'Lifestyle & Appearance',
+                style: opensansSemiBold.copyWith(
+                  color: ColorResources.primarycolor4,
+                  fontSize: 15,
+                ),
+              ),
+              SizedBox(height: 10),
+              _label("Diet"),
+              Obx(() {
+                return _dropdown22(
+                  value: dietC.selectedDietId.value.isEmpty
+                      ? null
+                      : dietC.selectedDietId.value,
+
+                  onChanged: (v) {
+                    dietC.onSelect(v!);
+                  },
+
+                  items: dietC.dietList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+              _label("Complexion"),
+              Obx(() {
+                return _dropdown22(
+                  value: complexionC.selectedComplexionId.value.isEmpty
+                      ? null
+                      : complexionC.selectedComplexionId.value,
+
+                  onChanged: (v) {
+                    complexionC.onSelect(v!);
+                  },
+
+                  items: complexionC.complexionList
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(
+                            e.name,
+                            style: opensansMedium.copyWith(
+                              color: ColorResources.blackhalka,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              }),
+              _label("Hobbies:"),
+              hobbiesScrollableBox(),
+              SizedBox(height: 15),
+              Text(
+                'Search using Keywords',
+                style: opensansSemiBold.copyWith(
+                  color: ColorResources.primarycolor4,
+                  fontSize: 15,
+                ),
+              ),
+              SizedBox(height: 10),
+              _label("Create profile for:"),
+              Obx(() {
+                return _dropDown233(
+                  hint: "Select",
+                  value: lookingC.selectedName.value,
+                  onChanged: (v) => lookingC.onSelect(v!),
+                  items: lookingC.lookingList.map((e) => e.name).toList(),
+                );
+              }),
+              const SizedBox(height: 30),
+              _searchBtn(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  final lookingC = Get.put(LookingForController());
+
+  Widget _dropDown233({
+    required String hint,
+    required String? value,
+    required Function(String?) onChanged,
+    required List<String> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: _boxDecoration(),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          hint: Text(
+            hint,
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          items: items
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(
+                    e,
+                    style: opensansMedium.copyWith(
+                      color: ColorResources.blackhalka,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  final hobbyC = Get.put(HobbyController());
+
+  Widget hobbiesScrollableBox() {
+    return Obx(() {
+      return Container(
+        height: 170,
+        width: double.infinity,
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Scrollbar(
+          thumbVisibility: true,
+          thickness: 5,
+          radius: const Radius.circular(8),
+          child: SingleChildScrollView(
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: hobbyC.hobbyList.map((h) {
+                bool selected = hobbyC.selectedHobbyIds.contains(h.id);
+
+                return InkWell(
+                  onTap: () {
+                    hobbyC.toggleHobby(h.id);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: selected ? Colors.pink.shade50 : Colors.white,
+                      border: Border.all(
+                        color: selected
+                            ? ColorResources.primarycolor3
+                            : Colors.grey.shade400,
+                        width: 1.3,
+                      ),
+                    ),
+                    child: Text(
+                      h.name, // Name show
+                      style: opensansSemiBold.copyWith(
+                        fontSize: 13,
+                        color: selected
+                            ? ColorResources.primarycolor3
+                            : Colors.black87,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  final complexionC = Get.put(ComplexionController());
+
+  final dietC = Get.put(DietController());
+
+  Widget _cityc({
+    required String? value,
+    required Function(String?) onChanged,
+    required List<DropdownMenuItem<String>> items,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down),
+          hint: Text(
+            "Select",
+            style: opensansMedium.copyWith(
+              color: ColorResources.blackhalka,
+              fontSize: 14,
+            ),
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
   BoxDecoration _boxDecoration() {
     return BoxDecoration(
       color: Colors.white,
@@ -624,6 +1172,9 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
       margin: EdgeInsets.symmetric(vertical: 10),
       child: TextField(
         controller: controller,
+        inputFormatters: [
+          UpperCaseTextFormatter(), // <-- yaha lagaya
+        ],
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: opensansMedium.copyWith(
@@ -810,7 +1361,7 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
                 color: Colors.grey,
               ),
               child: Text(
-                "Clear All",
+                "Reset",
                 style: opensansMedium.copyWith(
                   color: Colors.white,
                   fontSize: 16,
@@ -863,6 +1414,19 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return newValue.copyWith(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
     );
   }
 }

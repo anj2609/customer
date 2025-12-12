@@ -171,6 +171,9 @@ class _EditPartnerBasicDetailsScreenState
 
   @override
   Widget build(BuildContext context) {
+    if (fromWeight != null && !fromWeightKeys.contains(fromWeight)) {
+      fromWeight = null;
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: ColorResources.primarycolor2,
@@ -642,8 +645,8 @@ class _EditPartnerBasicDetailsScreenState
                 formData: {
                   "partner_age_from": fromAge,
                   "partner_age_to": toAge,
-                  "partner_weight_from": fromAge,
-                  "partner_weight_to": toAge,
+                  "partner_weight_from": fromWeight,
+                  "partner_weight_to": toWeight,
                   "partner_height_from": fromHeight,
                   "partner_height_to": toHeight,
                   "partner_complexion": complexionC.selectedComplexionId2.value,
@@ -654,7 +657,9 @@ class _EditPartnerBasicDetailsScreenState
                       languageC.motherselectedLanguageId.value,
                 },
                 selected: maritalC.selectedIds,
-              );
+              );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

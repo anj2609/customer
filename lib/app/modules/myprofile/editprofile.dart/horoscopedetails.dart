@@ -602,7 +602,9 @@ class _HoroscropeEditState extends State<HoroscropeEdit> {
                   "birth_year": selectedYear,
                   "birth_state": stateC.selectedStateId.value,
                 },
-              );
+              );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

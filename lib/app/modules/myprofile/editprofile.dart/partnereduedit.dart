@@ -352,7 +352,9 @@ class _EditpartnereductionState extends State<Editpartnereduction> {
                   // "app_step": '16',
                   // "step": '16',
                 },
-              );
+              );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

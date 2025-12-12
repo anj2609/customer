@@ -10,7 +10,7 @@ import 'package:vivashri/config/utils/apis/api_checker.dart';
 import 'package:vivashri/config/utils/constants.dart';
 
 class ApiClient extends GetxService {
-  String? appBaseUrl = ApiConstants.baseUrl;
+  String? appBaseUrl = 'https://vivashri.com/vivashribackend/api/';
   final SharedPreferences sharedPreferences;
   final String noInternetMessage =
       'Connection to API server failed due to internet connection';
@@ -47,9 +47,9 @@ class ApiClient extends GetxService {
   // }
 
   Future<Response> postData(String uri, dynamic body) async {
-    if (await ApiChecker.isVpnActive()) {
-      return Response(statusCode: -1, statusText: 'you are using vpn');
-    }
+    // if (await ApiChecker.isVpnActive()) {
+    //   return Response(statusCode: -1, statusText: 'you are using vpn');
+    // }
     {
       try {
         if (Foundation.kDebugMode) {

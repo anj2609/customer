@@ -7,6 +7,7 @@ import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/match_list.dart';
+import 'package:vivashri/data/controller/send_interest.dart';
 import 'package:vivashri/data/controller/userbyuser.dart';
 import 'package:vivashri/data/modal/matchmodal.dart';
 import 'package:vivashri/widgets/drawer.dart';
@@ -24,6 +25,13 @@ class _MatchesScreenState extends State<MatchesScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final searchC = Get.put(SearchmatchController());
   final userbyuserController = Get.put(UserbyUserDetailController());
+  final sentCtrl = Get.put(SentInterestController());
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // searchC.fetchSearchList("", "");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,43 +52,71 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 _buildTopBar(w),
 
                 _buildFilterBar(),
-                Expanded(
-                  child: Obx(() {
-                    if (searchC.isLoading.value) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: ColorResources.primarycolor2,
-                        ),
-                      );
-                    }
-
-                    if (searchC.users.isEmpty) {
-                      return Center(child: Text("No profiles found"));
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(12),
-                      itemCount: searchC.users.length,
-                      itemBuilder: (context, index) {
-                        final u = searchC.users[index];
-                        return _profileCard(u);
-                      },
-                    );
-                  }),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, left: 12),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Showing ${searchC.users.length} Profiles',
+                        style: opensansSemiBold.copyWith(fontSize: 16),
+                      ),
+                    ],
+                  ),
                 ),
 
-                // Expanded(
-                //   child: ListView.builder(
-                //     padding: const EdgeInsets.all(12),
-                //     itemCount: 5,
-                //     itemBuilder: (context, index) {
-                //       return _profileCard(w, h);
-                //     },
-                //   ),
-                // ),
+                Expanded(
+                  child: RefreshIndicator(
+                    backgroundColor: ColorResources.primarycolor2,
+                    color: Colors.white,
+                    onRefresh: () async {
+                      searchC.fetchSearchList("", "");
+                    },
+                    child: Obx(() {
+                      if (searchC.isLoading.value) {
+                        return ListView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: 300,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: ColorResources.primarycolor2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+
+                      if (searchC.users.isEmpty) {
+                        return ListView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          children: const [
+                            SizedBox(
+                              height: 300,
+                              child: Center(child: Text("No profiles found")),
+                            ),
+                          ],
+                        );
+                      }
+
+                      return ListView.builder(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(12),
+                        itemCount: searchC.users.length,
+                        itemBuilder: (context, index) {
+                          final u = searchC.users[index];
+                          return _profileCard(u);
+                        },
+                      );
+                    }),
+                  ),
+                ),
               ],
             ),
           ),
+
+          // Status bar overlay
           Container(
             height: statusBarHeight,
             width: double.infinity,
@@ -194,6 +230,11 @@ class _MatchesScreenState extends State<MatchesScreen> {
         setState(() => selectedFilter = id);
 
         if (id == 0) {
+          Get.to(
+            BasicSearchPage(),
+            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+            transition: Transition.rightToLeft,
+          );
           // searchC.fetchSearchList("", "");
         } else if (id == 1) {
           searchC.fetchSearchList("", "");
@@ -304,29 +345,36 @@ class _MatchesScreenState extends State<MatchesScreen> {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
             child: Stack(
               children: [
-                AspectRatio(
-                  aspectRatio: 9 / 11,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      u.photo != null
-                          ? "${ApiConstants.imageurl}${u.photo!}"
-                          : "",
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          u.gender == "Male"
-                              ? "assets/images/9159790.png"
-                              : "assets/images/3232.png",
-                          fit: BoxFit.contain,
-                        );
-                      },
+                GestureDetector(
+                  onTap: () {
+                    userbyuserController.fetchUserDetail(u.id.toString());
+                    Get.to(
+                      UserProfileDetailsPage(),
+                      duration: Duration(
+                        milliseconds: ApiConstants.screenTransitionTime,
+                      ),
+                      transition: Transition.rightToLeft,
+                    );
+                  },
+                  child: AspectRatio(
+                    aspectRatio: 9 / 11,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        u.photo != null
+                            ? "${ApiConstants.imageurl}${u.photo!}"
+                            : "",
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            u.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
                     ),
-                    // child: Image.asset(
-                    //   "assets/images/imageback.png",
-                    //   fit: BoxFit.cover,
-                    //   width: double.infinity,
-                    // ),
                   ),
                 ),
 
@@ -384,11 +432,16 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   ),
                 ),
 
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Image.asset('assets/images/Group 285.png', height: 25),
-                ),
+                u.aasherno == null
+                    ? SizedBox()
+                    : Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Image.asset(
+                          'assets/images/Group 285.png',
+                          height: 25,
+                        ),
+                      ),
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -423,11 +476,26 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
                         Row(
                           children: [
-                            Text(
-                              u.name ?? "",
-                              style: opensansMedium.copyWith(
-                                color: Colors.white,
-                                fontSize: 17,
+                            GestureDetector(
+                              onTap: () {
+                                userbyuserController.fetchUserDetail(
+                                  u.id.toString(),
+                                );
+                                Get.to(
+                                  UserProfileDetailsPage(),
+                                  duration: Duration(
+                                    milliseconds:
+                                        ApiConstants.screenTransitionTime,
+                                  ),
+                                  transition: Transition.rightToLeft,
+                                );
+                              },
+                              child: Text(
+                                u.name ?? "",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 5),
@@ -465,7 +533,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
                         Text(
                           "• ${u.occupation?.name ?? ''} "
-                          "Earns ₹${u.annualincome ?? '0'} Lacs p.a "
+                          "• Earns ₹${u.annualincome ?? '0'} Lacs p.a "
                           "• ${u.locState?.name ?? ''}",
                           style: opensansMedium.copyWith(
                             color: Colors.white,
@@ -476,6 +544,31 @@ class _MatchesScreenState extends State<MatchesScreen> {
                     ),
                   ),
                 ),
+                Positioned(
+                  bottom: 60,
+
+                  right: 14,
+                  child: u.shortlistsent == false
+                      ? GestureDetector(
+                          onTap: () {
+                            sentCtrl.sendshortlisted(u.id.toString());
+                          },
+                          child: Image.asset(
+                            'assets/images/shortlist (1).png',
+                            height: 50,
+                          ),
+                        )
+                      : GestureDetector(
+                          onTap: () {
+                            print('Removeid::::::${u.id}');
+                            sentCtrl.removeshortlisted(u.id.toString());
+                          },
+                          child: Image.asset(
+                            'assets/images/shortlist 2.png',
+                            height: 50,
+                          ),
+                        ),
+                ),
               ],
             ),
           ),
@@ -485,32 +578,95 @@ class _MatchesScreenState extends State<MatchesScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: Image.asset(
-                    'assets/images/Frame 63.png',
-                    height: MediaQuery.of(context).size.height * 0.05,
-                    fit: BoxFit.contain,
+                  child: Builder(
+                    builder: (_) {
+                      final status = u.interestsentstatus?.toString().trim();
+
+                      if (status == null || status.isEmpty) {
+                        return GestureDetector(
+                          onTap: () => sentCtrl.sendInterest(u.id.toString()),
+                          child: Image.asset(
+                            'assets/images/Frame 63 2.png',
+                            height: MediaQuery.of(context).size.height * 0.05,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }
+
+                      if (status == "Pending") {
+                        return GestureDetector(
+                          onTap: () {
+                            Get.snackbar(
+                              "Pending",
+                              'Your request is already pending.',
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
+                          },
+                          // onTap: () => sentCtrl.sendInterest(u.id.toString()),
+                          child: Image.asset(
+                            'assets/images/Frame 63 (1).png',
+                            height: MediaQuery.of(context).size.height * 0.05,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }
+
+                      if (status == "Accepted") {
+                        return GestureDetector(
+                          onTap: () {},
+                          child: Image.asset(
+                            'assets/images/Group 85 (1).png',
+                            height: MediaQuery.of(context).size.height * 0.04,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }
+
+                      return GestureDetector(
+                        onTap: () => print("Unknown status: $status"),
+                        child: Image.asset(
+                          'assets/images/Frame 63 2.png',
+                          height: MediaQuery.of(context).size.height * 0.05,
+                          fit: BoxFit.contain,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      userbyuserController.fetchUserDetail(u.id.toString());
-                      Get.to(
-                        UserProfileDetailsPage(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
+                u.interestsentstatus == "Accepted"
+                    ? Expanded(
+                        child: GestureDetector(
+                          onTap: () {},
+                          child: Image.asset(
+                            'assets/images/viewprofile (1).png',
+                            height: MediaQuery.of(context).size.height * 0.040,
+                            fit: BoxFit.contain,
+                          ),
                         ),
-                        transition: Transition.rightToLeft,
-                      );
-                    },
-                    child: Image.asset(
-                      'assets/images/viewprofile 3.png',
-                      height: MediaQuery.of(context).size.height * 0.040,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
+                      )
+                    : Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            userbyuserController.fetchUserDetail(
+                              u.id.toString(),
+                            );
+                            Get.to(
+                              UserProfileDetailsPage(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
+                          },
+                          child: Image.asset(
+                            'assets/images/viewprofile 3.png',
+                            height: MediaQuery.of(context).size.height * 0.040,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
               ],
             ),
           ),

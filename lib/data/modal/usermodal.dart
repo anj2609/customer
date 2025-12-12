@@ -1,5 +1,3 @@
-
-
 T? safeCast<T>(dynamic value) => value is T ? value : null;
 
 String? safeString(dynamic value) => value == null ? null : value.toString();
@@ -190,7 +188,8 @@ class UserData {
   dynamic totalRecentUserView;
   dynamic acceptedInvitation;
   dynamic receivedInvitation;
-
+  dynamic aadhaarno;
+  dynamic shortlisted;
   UserData({
     this.id,
     this.profileId,
@@ -230,6 +229,7 @@ class UserData {
     this.caste,
     this.dosh,
     this.gotraOther,
+    this.shortlisted,
     this.religion,
     this.subCaste,
     this.locRelation,
@@ -319,6 +319,7 @@ class UserData {
     this.totalRecentUserView,
     this.acceptedInvitation,
     this.receivedInvitation,
+    this.aadhaarno,
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
@@ -407,7 +408,7 @@ class UserData {
       noOfBrotherInLaw: safeInt(json['no_of_brother_in_law']),
       noOfSister: safeInt(json['no_of_sister']),
       noOfSisterInLaw: safeInt(json['no_of_sister_in_law']),
-
+      shortlisted: safeInt(json['shortlisted']),
       birthCity: safeLookup(json['birth_city']),
       bloodGroup: safeString(json['blood_group']),
       complexion: safeLookup(json['complexion']),
@@ -417,7 +418,7 @@ class UserData {
       height: safeDouble(json['height']),
       manglik: safeString(json['manglik']),
       weight: safeDouble(json['weight']),
-
+      aadhaarno: safeInt(json['aadhaar_no']),
       annualIncome: safeString(json['annual_income']),
       highestDegree: safeLookup(json['highest_degree']),
       occupation: safeLookup(json['occupation']),

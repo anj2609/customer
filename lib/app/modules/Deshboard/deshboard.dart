@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
+import 'package:vivashri/app/modules/match/matchscreen.dart';
+import 'package:vivashri/app/modules/match/userprofile.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/app/modules/myprofile/editprofile.dart/editphotes.dart';
 import 'package:vivashri/app/modules/myprofile/my_profile.dart';
@@ -12,8 +14,12 @@ import 'package:vivashri/app/modules/shortisted/shortilisted.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/check_percentage.dart';
 import 'package:vivashri/data/controller/match_list.dart';
 import 'package:vivashri/data/controller/matchdeshboard.dart';
+import 'package:vivashri/data/controller/recived_interst.dart';
+import 'package:vivashri/data/controller/send_interest.dart';
+import 'package:vivashri/data/controller/userbyuser.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/data/modal/deshbaord_match_modal.dart';
 import 'package:vivashri/widgets/drawer.dart';
@@ -28,6 +34,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final usercontroller = Get.put(UserDetailController());
+  final checkpercentagecontroller = Get.put(CheckProfileController());
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool deshboard = true;
@@ -45,6 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   final searchC = Get.put(SearchmatchController());
+  final inboxCtrl = Get.put(InboxReceivedController());
 
   void profileapi() async {
     final prefs = await SharedPreferences.getInstance();
@@ -53,6 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     usercontroller.fetchUserDetail(profileid.toString());
     matchC.fetchMatches();
     searchC.fetchSearchList("", "");
+    inboxCtrl.fetchInboxData();
   }
 
   @override
@@ -216,9 +225,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  double parsePercent(String value) {
+    value = value.replaceAll("%", "");
+
+    double number = double.tryParse(value) ?? 0;
+
+    return (number / 100).clamp(0.0, 1.0);
+  }
+
   Widget _buildProfileCard(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
     final u = usercontroller.userData.value!;
+    String apiPercent =
+        checkpercentagecontroller.profileStatus.value?.completion;
+
+    double percent = parsePercent(apiPercent);
+
+    String percentText = "${(percent * 100).toStringAsFixed(0)}%";
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -325,12 +348,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                       if (gender == "Male") {
                         return Image.asset(
-                          "assets/images/9159790.png",
+                          "assets/images/no-image-male2.jpg",
                           fit: BoxFit.contain,
                         );
                       } else if (gender == "Female") {
                         return Image.asset(
-                          "assets/images/3232.png",
+                          "assets/images/no-image-female2.jpg",
                           fit: BoxFit.contain,
                         );
                       } else {
@@ -364,7 +387,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
 
                     const SizedBox(width: 6),
-                    const Icon(Icons.verified, color: Colors.green, size: 15),
+                    u.aadhaarno == null
+                        ? Icon(Icons.verified, color: Colors.grey, size: 15)
+                        : Icon(Icons.verified, color: Colors.green, size: 15),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -403,8 +428,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
 
                     GestureDetector(
-                      onTap: () {
-                        Get.to(MyProfielScreen());
+                      onTap: () async {
+                        final prefs = await SharedPreferences.getInstance();
+
+                        String? profileid = prefs.getString("profileid");
+                        checkpercentagecontroller.checkProfileComplete(
+                          profileid.toString(),
+                        );
+                        Get.to(
+                          MyProfielScreen(),
+                          duration: Duration(
+                            milliseconds: ApiConstants.screenTransitionTime,
+                          ),
+                          transition: Transition.rightToLeft,
+                        );
                       },
                       child: Text(
                         "My Profile",
@@ -419,46 +456,82 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 10,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: LayoutBuilder(
+                Container(
+                  height: 15,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Stack(
+                    children: [
+                      LayoutBuilder(
                         builder: (context, constraints) {
-                          double percent = 0.40; // 40%
-
-                          return Stack(
-                            children: [
-                              // BACKGROUND YELLOW (100%)
-                              Container(
-                                width: constraints.maxWidth,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                              ),
-
-                              // FRONT PINK (40%)
-                              Container(
-                                width: constraints.maxWidth * percent,
-                                decoration: BoxDecoration(
-                                  color: ColorResources.primarycolor3, // pink
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                              ),
-                            ],
+                          return Container(
+                            width: constraints.maxWidth * percent,
+                            decoration: BoxDecoration(
+                              color: ColorResources.primarycolor3,
+                              borderRadius: BorderRadius.circular(50),
+                            ),
                           );
                         },
                       ),
-                    ),
 
-                    const SizedBox(height: 4),
-                  ],
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 0),
+                          child: Text(
+                            percentText,
+                            style: opensansSemiBold.copyWith(
+                              color: Colors.white,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+
+                // Column(
+                //   crossAxisAlignment: CrossAxisAlignment.start,
+                //   children: [
+                //     Container(
+                //       height: 10,
+                //       decoration: BoxDecoration(
+                //         borderRadius: BorderRadius.circular(50),
+                //       ),
+                //       child: LayoutBuilder(
+                //         builder: (context, constraints) {
+                //           double percent = 0.40; // 40%
+
+                //           return Stack(
+                //             children: [
+                //               // BACKGROUND YELLOW (100%)
+                //               Container(
+                //                 width: constraints.maxWidth,
+                //                 decoration: BoxDecoration(
+                //                   color: Colors.white,
+                //                   borderRadius: BorderRadius.circular(50),
+                //                 ),
+                //               ),
+
+                //               // FRONT PINK (40%)
+                //               Container(
+                //                 width: constraints.maxWidth * percent,
+                //                 decoration: BoxDecoration(
+                //                   color: ColorResources.primarycolor3, // pink
+                //                   borderRadius: BorderRadius.circular(50),
+                //                 ),
+                //               ),
+                //             ],
+                //           );
+                //         },
+                //       ),
+                //     ),
+
+                //     const SizedBox(height: 4),
+                //   ],
+                // ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -594,6 +667,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             "Received Invitations",
             Colors.orange,
             () {
+              inboxCtrl.fetchInboxData();
               Get.to(
                 () => ConnectScreen(initialIndex: 0),
                 duration: Duration(
@@ -604,10 +678,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
           ),
           statCard(
-            "${u.receivedInvitation}",
+            "${u.acceptedInvitation}",
             "Accepted Invitations",
             Colors.green,
             () {
+              inboxCtrl.acceptedbyme();
+              inboxCtrl.acceptedbypartner();
               Get.to(
                 () => ConnectScreen(initialIndex: 1),
                 duration: Duration(
@@ -617,7 +693,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
             },
           ),
-          statCard("02", "Shortlisted Profiles", Colors.pink, () {
+          statCard("${u.shortlisted}", "Shortlisted Profiles", Colors.pink, () {
+            inboxCtrl.shortlistedprofileinboxdata();
             Get.to(
               () => ShortlistedScreen(),
               duration: Duration(
@@ -631,6 +708,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             "Sent Invitations",
             Colors.deepPurple,
             () {
+              inboxCtrl.pendinginboxdata();
+              inboxCtrl.declinedinboxdata();
               Get.to(
                 () => ConnectScreen(initialIndex: 2),
                 duration: Duration(
@@ -896,11 +975,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: opensansSemiBold.copyWith(fontSize: 16),
               ),
               Spacer(),
-              Text(
-                "View All",
-                style: opensansSemiBold.copyWith(
-                  color: ColorResources.primarycolor3,
-                  fontSize: 14,
+              GestureDetector(
+                onTap: () {
+                  Get.to(
+                    MatchesScreen(),
+                    duration: Duration(
+                      milliseconds: ApiConstants.screenTransitionTime,
+                    ),
+                    transition: Transition.rightToLeft,
+                  );
+                },
+                child: Text(
+                  "View All",
+                  style: opensansSemiBold.copyWith(
+                    color: ColorResources.primarycolor3,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ],
@@ -951,11 +1041,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: opensansSemiBold.copyWith(fontSize: 16),
               ),
               Spacer(),
-              Text(
-                "View All",
-                style: opensansSemiBold.copyWith(
-                  color: ColorResources.primarycolor3,
-                  fontSize: 14,
+              GestureDetector(
+                onTap: () {
+                  Get.to(
+                    MatchesScreen(),
+                    duration: Duration(
+                      milliseconds: ApiConstants.screenTransitionTime,
+                    ),
+                    transition: Transition.rightToLeft,
+                  );
+                },
+                child: Text(
+                  "View All",
+                  style: opensansSemiBold.copyWith(
+                    color: ColorResources.primarycolor3,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ],
@@ -1031,6 +1132,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return years.toString();
   }
 
+  final sentCtrl = Get.put(SentInterestController());
+
+  final userbyuserController = Get.put(UserbyUserDetailController());
+
   Widget _matchCard(BuildContext context, MatchUserModel user) {
     final w = MediaQuery.of(context).size.width;
     final cardWidth = w * 0.55;
@@ -1046,26 +1151,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(5),
-              topRight: Radius.circular(5),
-            ),
-            child: AspectRatio(
-              aspectRatio: 1.2,
-              child: Image.network(
-                user.photo != null
-                    ? "${ApiConstants.imageurl}${user.photo!}"
-                    : "",
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.asset(
-                    user.gender == "Male"
-                        ? "assets/images/9159790.png"
-                        : "assets/images/3232.png",
-                    fit: BoxFit.contain,
-                  );
-                },
+          GestureDetector(
+            onTap: () {
+              print('id::::${user.id}');
+              userbyuserController.fetchUserDetail(user.id.toString());
+              Get.to(
+                UserProfileDetailsPage(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(5),
+                topRight: Radius.circular(5),
+              ),
+              child: AspectRatio(
+                aspectRatio: 1.2,
+                child: Image.network(
+                  user.photo != null
+                      ? "${ApiConstants.imageurl}${user.photo!}"
+                      : "",
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      user.gender == "Male"
+                          ? "assets/images/no-image-male2.jpg"
+                          : "assets/images/no-image-female2.jpg",
+                      fit: BoxFit.contain,
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -1119,13 +1237,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              onPressed: () {},
-              child: Text(
-                "Express Interest",
-                style: opensansMedium.copyWith(
-                  fontSize: 15,
-                  color: Colors.white,
-                ),
+              onPressed: () {
+                sentCtrl.sendInterest(user.id.toString());
+              },
+              child: Builder(
+                builder: (_) {
+                  final status = user.interestsentstatus;
+
+                  if (status == null || status.isEmpty) {
+                    return Text(
+                      "Express Interest",
+                      style: opensansMedium.copyWith(
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    );
+                  }
+
+                  if (status == "Pending") {
+                    return Text(
+                      "Already Sent",
+                      style: opensansMedium.copyWith(
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    );
+                  }
+
+                  if (status == "Accepted") {
+                    return Image.asset(
+                      'assets/images/Group 85 (1).png',
+                      height: 22,
+                      fit: BoxFit.contain,
+                    );
+                  }
+
+                  return SizedBox.shrink();
+                },
               ),
             ),
           ),
@@ -1149,26 +1297,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(5),
-              topRight: Radius.circular(5),
-            ),
-            child: AspectRatio(
-              aspectRatio: 1.2,
-              child: Image.network(
-                user.photo != null
-                    ? "${ApiConstants.imageurl}${user.photo!}"
-                    : "",
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.asset(
-                    user.gender == "Male"
-                        ? "assets/images/9159790.png"
-                        : "assets/images/3232.png",
-                    fit: BoxFit.contain,
-                  );
-                },
+          GestureDetector(
+            onTap: () {
+              print('id::::${user.id}');
+              userbyuserController.fetchUserDetail(user.id.toString());
+              Get.to(
+                UserProfileDetailsPage(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(5),
+                topRight: Radius.circular(5),
+              ),
+              child: AspectRatio(
+                aspectRatio: 1.2,
+                child: Image.network(
+                  user.photo != null
+                      ? "${ApiConstants.imageurl}${user.photo!}"
+                      : "",
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      user.gender == "Male"
+                          ? "assets/images/no-image-male2.jpg"
+                          : "assets/images/no-image-female2.jpg",
+                      fit: BoxFit.contain,
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -1211,7 +1372,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
 
-          // ⭐ Button bilkul bottom stick
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -1224,13 +1384,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              onPressed: () {},
-              child: Text(
-                "Express Interest",
-                style: opensansMedium.copyWith(
-                  fontSize: 15,
-                  color: Colors.white,
-                ),
+              onPressed: () {
+                sentCtrl.sendInterest(user.id.toString());
+              },
+              child: Builder(
+                builder: (_) {
+                  final status = user.interestsentstatus;
+
+                  if (status == null || status.isEmpty) {
+                    return Text(
+                      "Express Interest",
+                      style: opensansMedium.copyWith(
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    );
+                  }
+
+                  if (status == "Pending") {
+                    return Text(
+                      "Already Sent",
+                      style: opensansMedium.copyWith(
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    );
+                  }
+
+                  if (status == "Accepted") {
+                    return Image.asset(
+                      'assets/images/Group 85 (1).png',
+                      height: 22,
+                      fit: BoxFit.contain,
+                    );
+                  }
+
+                  return SizedBox.shrink();
+                },
               ),
             ),
           ),

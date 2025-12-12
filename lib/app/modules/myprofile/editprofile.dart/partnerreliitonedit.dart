@@ -401,7 +401,9 @@ class _EditPartnerReligionCasteScreenState
                   "partner_dosh": doshController.text.trim(),
                   "form_status": 'Completed',
                 },
-              );
+              );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

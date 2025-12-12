@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:vivashri/app/modules/search/search.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/accept_interest.dart';
+import 'package:vivashri/data/controller/recived_interst.dart';
 import 'package:vivashri/widgets/drawer.dart';
+import 'package:vivashri/widgets/image_view.dart';
 
 class ConnectScreen extends StatefulWidget {
   final int initialIndex;
@@ -22,12 +26,16 @@ class _ConnectScreenState extends State<ConnectScreen>
   @override
   void initState() {
     super.initState();
+    inboxCtrl.fetchInboxData();
     tabController = TabController(
       length: 3,
       vsync: this,
       initialIndex: widget.initialIndex,
     );
   }
+
+  final inboxCtrl = Get.put(InboxReceivedController());
+  final statusController = Get.put(StatusController());
 
   @override
   Widget build(BuildContext context) {
@@ -47,20 +55,42 @@ class _ConnectScreenState extends State<ConnectScreen>
               children: [
                 _buildTopBar(w),
                 _buildTabs(),
+
                 Expanded(
-                  child: TabBarView(
-                    physics: NeverScrollableScrollPhysics(),
-                    controller: tabController,
-                    children: [
-                      _receivedTab(w, h),
-                      _acceptedTab(w, h),
-                      _sentTab(w, h),
-                    ],
+                  child: RefreshIndicator(
+                    backgroundColor: ColorResources.primarycolor2,
+                    color: Colors.white,
+                    onRefresh: () async {
+                      inboxCtrl.acceptedbyme();
+                      inboxCtrl.acceptedbypartner();
+                      inboxCtrl.fetchInboxData();
+                      inboxCtrl.pendinginboxdata();
+                      inboxCtrl.declinedinboxdata();
+                    },
+
+                    child: CustomScrollView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        SliverFillRemaining(
+                          child: TabBarView(
+                            physics: NeverScrollableScrollPhysics(),
+                            controller: tabController,
+                            children: [
+                              _receivedTab(w, h),
+                              _acceptedTab(w, h),
+                              invitationTabs(w, h),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
+
+          // Statusbar color
           Container(
             height: statusBarHeight,
             width: double.infinity,
@@ -158,6 +188,15 @@ class _ConnectScreenState extends State<ConnectScreen>
     return GestureDetector(
       onTap: () {
         tabController.animateTo(index);
+        if (index == 0) {
+          inboxCtrl.fetchInboxData();
+        } else if (index == 1) {
+          inboxCtrl.acceptedbyme();
+          inboxCtrl.acceptedbypartner();
+        } else if (index == 2) {
+          inboxCtrl.pendinginboxdata();
+          inboxCtrl.declinedinboxdata();
+        }
         setState(() {});
       },
       child: AnimatedContainer(
@@ -184,34 +223,1298 @@ class _ConnectScreenState extends State<ConnectScreen>
     );
   }
 
+  String calculateAgeInYears(String? dobString) {
+    if (dobString == null || dobString.isEmpty) return "N/A";
+
+    try {
+      DateTime dob = DateTime.parse(dobString).toLocal();
+      return _getYearsOnly(dob);
+    } catch (e) {
+      try {
+        String onlyDate = dobString.split("T")[0]; // e.g., "1998-01-01"
+        List<String> p = onlyDate.split("-");
+
+        DateTime dob = DateTime(
+          int.parse(p[0]),
+          int.parse(p[1]),
+          int.parse(p[2]),
+        );
+
+        return _getYearsOnly(dob);
+      } catch (e) {
+        return "N/A";
+      }
+    }
+  }
+
+  String _getYearsOnly(DateTime dob) {
+    DateTime now = DateTime.now();
+
+    int years = now.year - dob.year;
+
+    if (now.month < dob.month ||
+        (now.month == dob.month && now.day < dob.day)) {
+      years--;
+    }
+
+    return years.toString();
+  }
+
+  List<String> photosmatch = [];
+
+  void buildPhotoList(dynamic u) {
+    List<String?> raw = [u.photo, u.photo1, u.photo2, u.photo3, u.photo4];
+
+    photosmatch = raw
+        .where((e) => e != null && e.isNotEmpty)
+        .map((e) => e!)
+        .toSet()
+        .toList();
+  }
+
   // ---------------- RECEIVED TAB ----------------
   Widget _receivedTab(double w, double h) {
-    return ListView(
-      padding: const EdgeInsets.all(12),
-      children: [
-        _connectCard(w, h, showActions: true),
-        _connectCard(w, h, showActions: true),
-      ],
-    );
+    return Obx(() {
+      if (inboxCtrl.isLoading.value) {
+        return Center(
+          child: CircularProgressIndicator(color: ColorResources.primarycolor2),
+        );
+      }
+
+      if (inboxCtrl.inboxList.isEmpty) {
+        return Center(
+          child: Text("No Data Found!", style: opensansSemiBold.copyWith()),
+        );
+      }
+
+      return ListView.builder(
+        itemCount: inboxCtrl.inboxList.length,
+        itemBuilder: (context, index) {
+          final item = inboxCtrl.inboxList[index];
+          final user = item.memberId;
+          String age = calculateAgeInYears(user?.dob);
+          return Container(
+            margin: const EdgeInsets.only(
+              bottom: 20,
+              left: 12,
+              right: 12,
+              top: 12,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                  child: Stack(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 9 / 11,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            user!.photo != null
+                                ? "${ApiConstants.imageurl}${user.photo!}"
+                                : "",
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                user.gender == "Male"
+                                    ? "assets/images/9159790.png"
+                                    : "assets/images/3232.png",
+                                fit: BoxFit.contain,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 110,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/Group 285.png',
+                              height: 25,
+                            ),
+                            SizedBox(height: 10),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Image.asset(
+                                'assets/images/imagecount.png',
+                                height: 40,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.9),
+                                Colors.black.withOpacity(0.6),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // TAGS
+                              Row(
+                                children: [
+                                  _darkTag("Profile managed by Self"),
+                                  const SizedBox(width: 6),
+                                  _darkTagonline("Online"),
+                                ],
+                              ),
+
+                              const SizedBox(height: 5),
+
+                              Row(
+                                children: [
+                                  Text(
+                                    "${user.name ?? ""}",
+                                    style: opensansMedium.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                    ),
+                                  ),
+                                  Text(
+                                    "(ID: ${user.profileId})",
+                                    style: opensansMedium.copyWith(
+                                      color: ColorResources.primarycolor,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+
+                              // DETAILS L2
+                              Text(
+                                "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "Invitation Received on ${formatDate(item.createdAt)}",
+                    style: opensansSemiBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            statusController.changeStatus(
+                              id: item.id.toString(),
+                              status: "Accepted",
+                            );
+                          },
+                          child: Image.asset(
+                            'assets/images/Frame 61.png',
+                            height: 40,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            statusController.changeStatus(
+                              id: item.id.toString(),
+                              status: "Declined",
+                            );
+                          },
+                          child: Image.asset(
+                            'assets/images/viewprofile.png',
+                            height: 40,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  String formatDate(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return "";
+    try {
+      DateTime date = DateTime.parse(dateString).toLocal();
+      return DateFormat("dd MMMM yyyy").format(date);
+    } catch (e) {
+      return dateString;
+    }
   }
 
   // ---------------- ACCEPTED TAB ----------------
   Widget _acceptedTab(double w, double h) {
-    return ListView(
-      padding: const EdgeInsets.all(12),
-      children: [_connectCard(w, h), _connectCard(w, h)],
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          /// ------- TAB BAR -------
+          Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: TabBar(
+              indicatorColor: ColorResources.primarycolor3,
+              labelColor: ColorResources.primarycolor2,
+              unselectedLabelColor: ColorResources.blacktext,
+              tabs: [
+                Tab(text: "Accepted By Me"),
+                Tab(text: "Accepted By Partner"),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 5),
+
+          /// ------- TAB VIEW -------
+          Expanded(
+            child: TabBarView(
+              children: [
+                /// ---------------- SENT TAB ----------------
+                _acceptedbyme(w, h),
+
+                /// ---------------- RECEIVED TAB ----------------
+                _acceptedbypartner(w, h),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget invitationTabs(double w, double h) {
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          /// ------- TAB BAR -------
+          Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: TabBar(
+              indicatorColor: ColorResources.primarycolor3,
+              labelColor: ColorResources.primarycolor2,
+              unselectedLabelColor: ColorResources.blacktext,
+              tabs: [
+                Tab(text: "Pending"),
+                Tab(text: "Declined"),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 5),
+
+          /// ------- TAB VIEW -------
+          Expanded(
+            child: TabBarView(
+              children: [
+                /// ---------------- SENT TAB ----------------
+                _pendingtab(w, h),
+
+                /// ---------------- RECEIVED TAB ----------------
+                _declinedtab(w, h),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pendingtab(double w, double h) {
+    return Obx(() {
+      if (inboxCtrl.isLoading.value) {
+        return Center(
+          child: CircularProgressIndicator(color: ColorResources.primarycolor2),
+        );
+      }
+
+      if (inboxCtrl.pendingList.isEmpty) {
+        return Center(
+          child: Text("No Data Found", style: opensansSemiBold.copyWith()),
+        );
+      }
+
+      return ListView.builder(
+        itemCount: inboxCtrl.pendingList.length,
+        itemBuilder: (context, index) {
+          final item = inboxCtrl.pendingList[index];
+          final user = item.partnerId;
+          String age = calculateAgeInYears(user?.dob);
+          return Container(
+            margin: const EdgeInsets.only(
+              bottom: 20,
+              left: 12,
+              right: 12,
+              top: 12,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                  child: Stack(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 9 / 11,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            user!.photo != null
+                                ? "${ApiConstants.imageurl}${user.photo!}"
+                                : "",
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                user.gender == "Male"
+                                    ? "assets/images/9159790.png"
+                                    : "assets/images/3232.png",
+                                fit: BoxFit.contain,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 110,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/Group 285.png',
+                              height: 25,
+                            ),
+                            SizedBox(height: 10),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Image.asset(
+                                'assets/images/imagecount.png',
+                                height: 40,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.9),
+                                Colors.black.withOpacity(0.6),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // TAGS
+                              Row(
+                                children: [
+                                  _darkTag("Profile managed by Self"),
+                                  const SizedBox(width: 6),
+                                  _darkTagonline("Online"),
+                                ],
+                              ),
+
+                              const SizedBox(height: 5),
+
+                              Row(
+                                children: [
+                                  Text(
+                                    "${user.name ?? ""}",
+                                    style: opensansMedium.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                    ),
+                                  ),
+                                  Text(
+                                    "(ID: ${user.profileId})",
+                                    style: opensansMedium.copyWith(
+                                      color: ColorResources.primarycolor,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+
+                              // DETAILS L2
+                              Text(
+                                "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "Your requested here on ${formatDate(item.createdAt)}",
+                    style: opensansSemiBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Image.asset(
+                          'assets/images/Group 85.png',
+                          height: 35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
   }
 
   // ---------------- SENT TAB ----------------
-  Widget _sentTab(double w, double h) {
-    return ListView(
-      padding: const EdgeInsets.all(12),
-      children: [_connectCard(w, h), _connectCard(w, h)],
-    );
+  Widget _acceptedbyme(double w, double h) {
+    return Obx(() {
+      if (inboxCtrl.isLoading.value) {
+        return Center(
+          child: CircularProgressIndicator(color: ColorResources.primarycolor2),
+        );
+      }
+
+      if (inboxCtrl.acceptedbymeList.isEmpty) {
+        return Center(
+          child: Text("No Data Found", style: opensansSemiBold.copyWith()),
+        );
+      }
+
+      return ListView.builder(
+        itemCount: inboxCtrl.acceptedbymeList.length,
+        itemBuilder: (context, index) {
+          final item = inboxCtrl.acceptedbymeList[index];
+          final user = item.memberId;
+          String age = calculateAgeInYears(user?.dob);
+          return Container(
+            margin: const EdgeInsets.only(
+              bottom: 20,
+              left: 12,
+              right: 12,
+              top: 12,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                  child: Stack(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 9 / 11,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            user!.photo != null
+                                ? "${ApiConstants.imageurl}${user.photo!}"
+                                : "",
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                user.gender == "Male"
+                                    ? "assets/images/no-image-male2.jpg"
+                                    : "assets/images/no-image-female2.jpg",
+                                fit: BoxFit.contain,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 110,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/Group 285.png',
+                              height: 25,
+                            ),
+                            SizedBox(height: 10),
+                            GestureDetector(
+                              onTap: () {
+                                buildPhotoList(user);
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  builder: (_) =>
+                                      PhotoSliderDialog(photos: photosmatch),
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Image.asset(
+                                  'assets/images/imagecount.png',
+                                  height: 40,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.9),
+                                Colors.black.withOpacity(0.6),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // TAGS
+                              Row(
+                                children: [
+                                  _darkTag("Profile managed by Self"),
+                                  const SizedBox(width: 6),
+                                  _darkTagonline("Online"),
+                                ],
+                              ),
+
+                              const SizedBox(height: 5),
+
+                              Row(
+                                children: [
+                                  Text(
+                                    "${user.name ?? ""}",
+                                    style: opensansMedium.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                    ),
+                                  ),
+                                  Text(
+                                    "(ID: ${user.profileId})",
+                                    style: opensansMedium.copyWith(
+                                      color: ColorResources.primarycolor,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+
+                              // DETAILS L2
+                              Text(
+                                "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "Change your mind?  Cancel Request",
+                    style: opensansSemiBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Image.asset(
+                          'assets/images/Group 85 (1).png',
+                          height: 50,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Expanded(
+                        child: Image.asset(
+                          'assets/images/viewprofile 4.png',
+                          height: 50,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Expanded(
+                        child: Image.asset(
+                          'assets/images/viewprofile (1).png',
+                          height: 50,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
   }
 
-  Widget _connectCard(double w, double h, {bool showActions = false}) {
+  Widget _acceptedbypartner(double w, double h) {
+    return Obx(() {
+      if (inboxCtrl.isLoading.value) {
+        return Center(
+          child: CircularProgressIndicator(color: ColorResources.primarycolor2),
+        );
+      }
+
+      if (inboxCtrl.acceptedbypartnerlist.isEmpty) {
+        return Center(
+          child: Text("No Data Found", style: opensansSemiBold.copyWith()),
+        );
+      }
+
+      return ListView.builder(
+        itemCount: inboxCtrl.acceptedbypartnerlist.length,
+        itemBuilder: (context, index) {
+          final item = inboxCtrl.acceptedbypartnerlist[index];
+          final user = item.memberId;
+          String age = calculateAgeInYears(user?.dob);
+          return Container(
+            margin: const EdgeInsets.only(
+              bottom: 20,
+              left: 12,
+              right: 12,
+              top: 12,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                  child: Stack(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 9 / 11,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            user!.photo != null
+                                ? "${ApiConstants.imageurl}${user.photo!}"
+                                : "",
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                user.gender == "Male"
+                                    ? "assets/images/9159790.png"
+                                    : "assets/images/3232.png",
+                                fit: BoxFit.contain,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 110,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/Group 285.png',
+                              height: 25,
+                            ),
+                            SizedBox(height: 10),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Image.asset(
+                                'assets/images/imagecount.png',
+                                height: 40,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.9),
+                                Colors.black.withOpacity(0.6),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // TAGS
+                              Row(
+                                children: [
+                                  _darkTag("Profile managed by Self"),
+                                  const SizedBox(width: 6),
+                                  _darkTagonline("Online"),
+                                ],
+                              ),
+
+                              const SizedBox(height: 5),
+
+                              Row(
+                                children: [
+                                  Text(
+                                    "${user.name ?? ""}",
+                                    style: opensansMedium.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                    ),
+                                  ),
+                                  Text(
+                                    "(ID: ${user.profileId})",
+                                    style: opensansMedium.copyWith(
+                                      color: ColorResources.primarycolor,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+
+                              // DETAILS L2
+                              Text(
+                                "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "Change your mind?  Cancel Request",
+                    style: opensansSemiBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Image.asset(
+                          'assets/images/Group 85 (1).png',
+                          height: 50,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Expanded(
+                        child: Image.asset(
+                          'assets/images/viewprofile 4.png',
+                          height: 50,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Expanded(
+                        child: Image.asset(
+                          'assets/images/viewprofile (1).png',
+                          height: 50,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  // ---------------- SENT TAB ----------------
+  Widget _declinedtab(double w, double h) {
+    return Obx(() {
+      if (inboxCtrl.isLoading.value) {
+        return Center(
+          child: CircularProgressIndicator(color: ColorResources.primarycolor2),
+        );
+      }
+
+      if (inboxCtrl.declinedList.isEmpty) {
+        return Center(
+          child: Text("No Data Found", style: opensansSemiBold.copyWith()),
+        );
+      }
+
+      return ListView.builder(
+        itemCount: inboxCtrl.declinedList.length,
+        itemBuilder: (context, index) {
+          final item = inboxCtrl.declinedList[index];
+          final user = item.partnerId;
+          String age = calculateAgeInYears(user?.dob);
+          return Container(
+            margin: const EdgeInsets.only(
+              bottom: 20,
+              left: 12,
+              right: 12,
+              top: 12,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                  child: Stack(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 9 / 11,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            user!.photo != null
+                                ? "${ApiConstants.imageurl}${user.photo!}"
+                                : "",
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                user.gender == "Male"
+                                    ? "assets/images/9159790.png"
+                                    : "assets/images/3232.png",
+                                fit: BoxFit.contain,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 110,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/Group 285.png',
+                              height: 25,
+                            ),
+                            SizedBox(height: 10),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Image.asset(
+                                'assets/images/imagecount.png',
+                                height: 40,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.9),
+                                Colors.black.withOpacity(0.6),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // TAGS
+                              Row(
+                                children: [
+                                  _darkTag("Profile managed by Self"),
+                                  const SizedBox(width: 6),
+                                  _darkTagonline("Online"),
+                                ],
+                              ),
+
+                              const SizedBox(height: 5),
+
+                              Row(
+                                children: [
+                                  Text(
+                                    "${user.name ?? ""}",
+                                    style: opensansMedium.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                    ),
+                                  ),
+                                  Text(
+                                    "(ID: ${user.profileId})",
+                                    style: opensansMedium.copyWith(
+                                      color: ColorResources.primarycolor,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+
+                              // DETAILS L2
+                              Text(
+                                "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                style: opensansMedium.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "She Declined yor invitation .\nThis member cannot be contacted .",
+                    style: opensansSemiBold.copyWith(
+                      color: ColorResources.primarycolor2,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  Widget _connectCard(double w, double h) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(

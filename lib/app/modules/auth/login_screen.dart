@@ -24,9 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (value.contains("@") &&
-        (value.endsWith("@gmail.com") || value.endsWith("@gmail.in"))) {
+        (value.endsWith(".com") || value.endsWith(".in"))) {
       setState(() => isValid = true);
-
       FocusScope.of(context).unfocus();
       return;
     }

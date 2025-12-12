@@ -7,6 +7,8 @@ import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/match_list.dart';
+import 'package:vivashri/data/controller/send_interest.dart';
+import 'package:vivashri/data/controller/userbyuser.dart';
 import 'package:vivashri/data/modal/matchmodal.dart';
 import 'package:vivashri/widgets/drawer.dart';
 import 'package:vivashri/widgets/image_view.dart';
@@ -241,8 +243,8 @@ class _SearchListScreenState extends State<SearchListScreen> {
                       errorBuilder: (context, error, stackTrace) {
                         return Image.asset(
                           u.gender == "Male"
-                              ? "assets/images/9159790.png"
-                              : "assets/images/3232.png",
+                              ? "assets/images/no-image-male2.jpg"
+                              : "assets/images/no-image-female2.jpg",
                           fit: BoxFit.contain,
                         );
                       },
@@ -303,12 +305,16 @@ class _SearchListScreenState extends State<SearchListScreen> {
                     ),
                   ),
                 ),
-
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Image.asset('assets/images/Group 285.png', height: 25),
-                ),
+                u.aasherno == null
+                    ? SizedBox()
+                    : Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Image.asset(
+                          'assets/images/Group 285.png',
+                          height: 25,
+                        ),
+                      ),
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -369,7 +375,7 @@ class _SearchListScreenState extends State<SearchListScreen> {
                           "• ${age} yrs, ${u.height ?? ''}   "
                           "• ${u.religion?.name ?? ''}   "
                           "• ${u.manglik ?? ''}   "
-                          "• ${u.highestDegree?.name ?? ''}",
+                          "• ${u.highestDegree?.name ?? ''}  • ${u.manglik}",
                           style: opensansSemiBold.copyWith(
                             color: Colors.white,
                             fontSize: 11,
@@ -398,31 +404,95 @@ class _SearchListScreenState extends State<SearchListScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: Image.asset(
-                    'assets/images/Frame 63.png',
-                    height: MediaQuery.of(context).size.height * 0.05,
-                    fit: BoxFit.contain,
+                  child: Builder(
+                    builder: (_) {
+                      final status = u.interestsentstatus?.toString().trim();
+
+                      if (status == null || status.isEmpty) {
+                        return GestureDetector(
+                          onTap: () => sentCtrl.sendInterest(u.id.toString()),
+                          child: Image.asset(
+                            'assets/images/Frame 63 2.png',
+                            height: MediaQuery.of(context).size.height * 0.05,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }
+
+                      if (status == "Pending") {
+                        return GestureDetector(
+                          onTap: () {
+                            Get.snackbar(
+                              "Pending",
+                              'Your request is already pending.',
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
+                          },
+                          // onTap: () => sentCtrl.sendInterest(u.id.toString()),
+                          child: Image.asset(
+                            'assets/images/Frame 63 (1).png',
+                            height: MediaQuery.of(context).size.height * 0.05,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }
+
+                      if (status == "Accepted") {
+                        return GestureDetector(
+                          onTap: () {},
+                          child: Image.asset(
+                            'assets/images/Group 85 (1).png',
+                            height: MediaQuery.of(context).size.height * 0.04,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }
+
+                      return GestureDetector(
+                        onTap: () => print("Unknown status: $status"),
+                        child: Image.asset(
+                          'assets/images/Frame 63 2.png',
+                          height: MediaQuery.of(context).size.height * 0.05,
+                          fit: BoxFit.contain,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      Get.to(
-                        UserProfileDetailsPage(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
+                u.interestsentstatus == "Accepted"
+                    ? Expanded(
+                        child: GestureDetector(
+                          onTap: () {},
+                          child: Image.asset(
+                            'assets/images/viewprofile (1).png',
+                            height: MediaQuery.of(context).size.height * 0.040,
+                            fit: BoxFit.contain,
+                          ),
                         ),
-                        transition: Transition.rightToLeft,
-                      );
-                    },
-                    child: Image.asset(
-                      'assets/images/viewprofile 3.png',
-                      height: MediaQuery.of(context).size.height * 0.040,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
+                      )
+                    : Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            userbyuserController.fetchUserDetail(
+                              u.id.toString(),
+                            );
+                            Get.to(
+                              UserProfileDetailsPage(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
+                          },
+                          child: Image.asset(
+                            'assets/images/viewprofile 3.png',
+                            height: MediaQuery.of(context).size.height * 0.040,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
               ],
             ),
           ),
@@ -430,6 +500,9 @@ class _SearchListScreenState extends State<SearchListScreen> {
       ),
     );
   }
+
+  final sentCtrl = Get.put(SentInterestController());
+  final userbyuserController = Get.put(UserbyUserDetailController());
 
   Widget _darkTagonline(String text) {
     return Container(

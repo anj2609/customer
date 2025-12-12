@@ -38,7 +38,7 @@ class AuthRepo extends GetxService {
 
   Future<bool> saveUserprofileid(String profileid) async {
     apiClient.profileid = profileid.toString();
-   // apiClient.updateHeader(profileid.toString());
+    // apiClient.updateHeader(profileid.toString());
     return await sharedPreferences.setString(
       ApiConstants.profileid,
       profileid.toString(),
@@ -47,7 +47,7 @@ class AuthRepo extends GetxService {
 
   void removeUserToken() async {
     await sharedPreferences.remove(ApiConstants.token);
-     await sharedPreferences.remove(ApiConstants.profileid);
+    await sharedPreferences.remove(ApiConstants.profileid);
   }
 
   String? getUserToken() {

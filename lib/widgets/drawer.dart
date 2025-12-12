@@ -63,12 +63,12 @@ class CustomAppDrawer extends StatelessWidget {
 
                           if (gender == "Male") {
                             return Image.asset(
-                              "assets/images/9159790.png",
+                              "assets/images/no-image-male2.jpg",
                               fit: BoxFit.contain,
                             );
                           } else if (gender == "Female") {
                             return Image.asset(
-                              "assets/images/3232.png",
+                              "assets/images/no-image-female2.jpg",
                               fit: BoxFit.contain,
                             );
                           } else {
@@ -81,15 +81,7 @@ class CustomAppDrawer extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // ClipRRect(
-                  //   borderRadius: BorderRadius.circular(12),
-                  //   child: Image.asset(
-                  //     "assets/images/Ellipse2222.png",
-                  //     height: 100,
-                  //     width: 70,
-                  //     fit: BoxFit.cover,
-                  //   ),
-                  // ),
+
                   const SizedBox(width: 10),
 
                   // Name & Plan
@@ -344,9 +336,6 @@ class CustomAppDrawer extends StatelessWidget {
     bool showDivider = true,
     VoidCallback? onTap,
   }) {
-    bool showArrow =
-        (title == "Search" || title == "Matches" || title == "Connect");
-
     return Column(
       children: [
         GestureDetector(

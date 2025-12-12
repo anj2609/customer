@@ -419,6 +419,13 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );
+              } else if (!refemaildCtrl.text.contains("@")) {
+                Get.snackbar(
+                  'Error',
+                  'Email must contain @',
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
               } else if (refmobileCtrl.text.isEmpty) {
                 Get.snackbar(
                   'Error',

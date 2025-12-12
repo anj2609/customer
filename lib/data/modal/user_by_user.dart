@@ -1,688 +1,3 @@
-// import 'dart:convert';
-
-// UserFullDetailResponse userFullDetailResponseFromJson(String str) =>
-//     UserFullDetailResponse.fromJson(json.decode(str));
-
-// class UserFullDetailResponse {
-//   bool? status;
-//   dynamic message;
-//   UserFullData? data;
-
-//   UserFullDetailResponse({this.status, this.message, this.data});
-
-//   factory UserFullDetailResponse.fromJson(Map<String, dynamic> json) =>
-//       UserFullDetailResponse(
-//         status: json["status"],
-//         message: json["message"],
-//         data: json["data"] == null ? null : UserFullData.fromJson(json["data"]),
-//       );
-// }
-
-// class UserFullData {
-//   MemberData? memberData;
-//   dynamic expressEntrest;
-//   dynamic contactLockStatus;
-//   PartnerPreferences? partnerPreferences;
-
-//   UserFullData({
-//     this.memberData,
-//     this.expressEntrest,
-//     this.contactLockStatus,
-//     this.partnerPreferences,
-//   });
-
-//   factory UserFullData.fromJson(Map<String, dynamic> json) => UserFullData(
-//     memberData: json["memberData"] == null
-//         ? null
-//         : MemberData.fromJson(json["memberData"]),
-//     expressEntrest: json["express_entrest"],
-//     contactLockStatus: json["contact_lock_status"],
-//     partnerPreferences: json["partnerPreferences"] == null
-//         ? null
-//         : PartnerPreferences.fromJson(json["partnerPreferences"]),
-//   );
-// }
-
-// ////////////////////////////////////////////////////////////////////////////////
-// //                                MEMBER DATA                                //
-// ////////////////////////////////////////////////////////////////////////////////
-
-// class MemberData {
-//   dynamic id;
-//   dynamic profileId;
-//   dynamic email;
-//   dynamic mobile;
-//   dynamic otp;
-//   dynamic otpExpireAt;
-
-//   List<CommonDataWithIcon>? hobbies;
-//   CommonData? gotra;
-
-//   dynamic ugDegree;
-//   dynamic pgDegree;
-
-//   List<String>? partnerHobbies;
-//   List<dynamic>? partnerMaritalStatus;
-//   CommonData? partnerGotra;
-
-//   dynamic appStep;
-//   dynamic deviceToken;
-//   dynamic formStatus;
-//   dynamic status;
-//   dynamic createdAt;
-//   dynamic updatedAt;
-
-//   dynamic about;
-
-//   CommonData? birthState;
-//   dynamic dob;
-//   dynamic gender;
-//   CommonData? maritalStatus;
-
-//   dynamic name;
-//   CommonData? profileFor;
-
-//   dynamic step;
-
-//   dynamic contactEmail;
-//   dynamic contactNo;
-//   dynamic facebook;
-//   dynamic instagram;
-
-//   dynamic reference;
-//   dynamic referenceOther;
-
-//   CommonData? caste;
-//   dynamic dosh;
-//   dynamic gotraOther;
-//   CommonData? religion;
-//   CommonData? subCaste;
-
-//   dynamic locRelation;
-//   dynamic locRelationEmail;
-//   dynamic locRelationMobile;
-//   dynamic locRelationName;
-
-//   CommonData? locCity;
-//   dynamic locHouseType;
-//   dynamic locLandmark;
-//   CommonData? locNationality;
-//   dynamic locPincode;
-//   dynamic locResidenceType;
-
-//   CommonData? locState;
-//   CommonData? locTempCity;
-//   dynamic locTempLandmark;
-//   dynamic locTempPincode;
-//   CommonData? locTempState;
-
-//   dynamic familyType;
-//   dynamic familyValue;
-
-//   dynamic marriedBrother;
-//   dynamic marriedSister;
-//   dynamic noOfBrother;
-//   dynamic noOfBrotherInLaw;
-//   dynamic noOfSister;
-//   dynamic noOfSisterInLaw;
-
-//   CommonData? birthCity;
-
-//   dynamic bloodGroup;
-//   CommonData? complexion;
-//   CommonData? diet;
-
-//   dynamic disability;
-//   dynamic healthInformation;
-
-//   double? height;
-//   dynamic manglik;
-//   dynamic weight;
-//   dynamic annualIncome;
-
-//   Education? highestDegree;
-
-//   CommonData? occupation;
-//   dynamic organizationName;
-//   dynamic otherEducation;
-//   dynamic pgCollegeName;
-//   dynamic prevWorkingDetail;
-//   dynamic schoolName;
-//   dynamic ugCollegeName;
-
-//   CommonData? workingWith;
-
-//   dynamic photo;
-//   dynamic photo1;
-//   dynamic photo2;
-//   dynamic photo3;
-//   dynamic photo4;
-//   dynamic photoBlur;
-
-//   dynamic partnerQualities;
-
-//   CommonData? partnerCaste;
-//   dynamic partnerDosh;
-
-//   CommonData? partnerReligion;
-//   CommonData? partnerSubCaste;
-
-//   dynamic partnerAgeFrom;
-//   dynamic partnerAgeTo;
-
-//   CommonData? partnerCity;
-//   CommonData? partnerComplexion;
-//   CommonData? partnerCountry;
-
-//   CommonData? partnerDiet;
-//   dynamic partnerDrinking;
-
-//   Education? partnerEducation;
-
-//   dynamic partnerHaveChildren;
-
-//   double? partnerHeightFrom;
-//   double? partnerHeightTo;
-
-//   dynamic partnerIncomeFrom;
-//   dynamic partnerIncomeTo;
-
-//   CommonData? partnerLanguage;
-
-//   dynamic partnerManagedBy;
-
-//   CommonData? partnerMotherTongue;
-
-//   CommonData? partnerOccupation;
-
-//   CommonData? partnerProfessionalQualification;
-
-//   dynamic partnerSmoking;
-
-//   CommonData? partnerState;
-
-//   dynamic partnerWeightFrom;
-//   dynamic partnerWeightTo;
-
-//   CommonData? partnerWorkingAs;
-
-//   MemberData({
-//     this.id,
-//     this.profileId,
-//     this.email,
-//     this.mobile,
-//     this.otp,
-//     this.otpExpireAt,
-//     this.hobbies,
-//     this.gotra,
-//     this.ugDegree,
-//     this.pgDegree,
-//     this.partnerHobbies,
-//     this.partnerMaritalStatus,
-//     this.partnerGotra,
-//     this.appStep,
-//     this.deviceToken,
-//     this.formStatus,
-//     this.status,
-//     this.createdAt,
-//     this.updatedAt,
-//     this.about,
-//     this.birthState,
-//     this.dob,
-//     this.gender,
-//     this.maritalStatus,
-//     this.name,
-//     this.profileFor,
-//     this.step,
-//     this.contactEmail,
-//     this.contactNo,
-//     this.facebook,
-//     this.instagram,
-//     this.reference,
-//     this.referenceOther,
-//     this.caste,
-//     this.dosh,
-//     this.gotraOther,
-//     this.religion,
-//     this.subCaste,
-//     this.locRelation,
-//     this.locRelationEmail,
-//     this.locRelationMobile,
-//     this.locRelationName,
-//     this.locCity,
-//     this.locHouseType,
-//     this.locLandmark,
-//     this.locNationality,
-//     this.locPincode,
-//     this.locResidenceType,
-//     this.locState,
-//     this.locTempCity,
-//     this.locTempLandmark,
-//     this.locTempPincode,
-//     this.locTempState,
-//     this.familyType,
-//     this.familyValue,
-//     this.marriedBrother,
-//     this.marriedSister,
-//     this.noOfBrother,
-//     this.noOfBrotherInLaw,
-//     this.noOfSister,
-//     this.noOfSisterInLaw,
-//     this.birthCity,
-//     this.bloodGroup,
-//     this.complexion,
-//     this.diet,
-//     this.disability,
-//     this.healthInformation,
-//     this.height,
-//     this.manglik,
-//     this.weight,
-//     this.annualIncome,
-//     this.highestDegree,
-//     this.occupation,
-//     this.organizationName,
-//     this.otherEducation,
-//     this.pgCollegeName,
-//     this.prevWorkingDetail,
-//     this.schoolName,
-//     this.ugCollegeName,
-//     this.workingWith,
-//     this.photo,
-//     this.photo1,
-//     this.photo2,
-//     this.photo3,
-//     this.photo4,
-//     this.photoBlur,
-//     this.partnerQualities,
-//     this.partnerCaste,
-//     this.partnerDosh,
-//     this.partnerReligion,
-//     this.partnerSubCaste,
-//     this.partnerAgeFrom,
-//     this.partnerAgeTo,
-//     this.partnerCity,
-//     this.partnerComplexion,
-//     this.partnerCountry,
-//     this.partnerDiet,
-//     this.partnerDrinking,
-//     this.partnerEducation,
-//     this.partnerHaveChildren,
-//     this.partnerHeightFrom,
-//     this.partnerHeightTo,
-//     this.partnerIncomeFrom,
-//     this.partnerIncomeTo,
-//     this.partnerLanguage,
-//     this.partnerManagedBy,
-//     this.partnerMotherTongue,
-//     this.partnerOccupation,
-//     this.partnerProfessionalQualification,
-//     this.partnerSmoking,
-//     this.partnerState,
-//     this.partnerWeightFrom,
-//     this.partnerWeightTo,
-//     this.partnerWorkingAs,
-//   });
-
-//   factory MemberData.fromJson(Map<String, dynamic> json) => MemberData(
-//     id: json["_id"],
-//     profileId: json["profile_id"],
-//     email: json["email"],
-//     mobile: json["mobile"],
-//     otp: json["otp"],
-//     otpExpireAt: json["otp_expire_at"],
-//     hobbies: json["hobbies"] == null
-//         ? []
-//         : List<CommonDataWithIcon>.from(
-//             json["hobbies"].map((x) => CommonDataWithIcon.fromJson(x)),
-//           ),
-//     gotra: json["gotra"] == null ? null : CommonData.fromJson(json["gotra"]),
-//     ugDegree: json["ug_degree"],
-//     pgDegree: json["pg_degree"],
-//     partnerHobbies: json["partner_hobbies"] == null
-//         ? []
-//         : List<String>.from(json["partner_hobbies"]),
-//     partnerMaritalStatus: json["partner_marital_status"] ?? [],
-//     partnerGotra: json["partner_gotra"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_gotra"]),
-//     appStep: json["app_step"],
-//     deviceToken: json["device_token"],
-//     formStatus: json["form_status"],
-//     status: json["status"],
-//     createdAt: json["createdAt"],
-//     updatedAt: json["updatedAt"],
-//     about: json["about"],
-//     birthState: json["birth_state"] == null
-//         ? null
-//         : CommonData.fromJson(json["birth_state"]),
-//     dob: json["dob"],
-//     gender: json["gender"],
-//     maritalStatus: json["marital_status"] == null
-//         ? null
-//         : CommonData.fromJson(json["marital_status"]),
-//     name: json["name"],
-//     profileFor: json["profile_for"] == null
-//         ? null
-//         : CommonData.fromJson(json["profile_for"]),
-//     step: json["step"],
-//     contactEmail: json["contact_email"],
-//     contactNo: json["contact_no"],
-//     facebook: json["facebook"],
-//     instagram: json["instagram"],
-//     reference: json["reference"],
-//     referenceOther: json["reference_other"],
-//     caste: json["caste"] == null ? null : CommonData.fromJson(json["caste"]),
-//     dosh: json["dosh"],
-//     gotraOther: json["gotra_other"],
-//     religion: json["religion"] == null
-//         ? null
-//         : CommonData.fromJson(json["religion"]),
-//     subCaste: json["sub_caste"] == null
-//         ? null
-//         : CommonData.fromJson(json["sub_caste"]),
-//     locRelation: json["loc_relation"],
-//     locRelationEmail: json["loc_relation_email"],
-//     locRelationMobile: json["loc_relation_mobile"],
-//     locRelationName: json["loc_relation_name"],
-//     locCity: json["loc_city"] == null
-//         ? null
-//         : CommonData.fromJson(json["loc_city"]),
-//     locHouseType: json["loc_house_type"],
-//     locLandmark: json["loc_landmark"],
-//     locNationality: json["loc_nationality"] == null
-//         ? null
-//         : CommonData.fromJson(json["loc_nationality"]),
-//     locPincode: json["loc_pincode"],
-//     locResidenceType: json["loc_residence_type"],
-//     locState: json["loc_state"] == null
-//         ? null
-//         : CommonData.fromJson(json["loc_state"]),
-//     locTempCity: json["loc_temp_city"] == null
-//         ? null
-//         : CommonData.fromJson(json["loc_temp_city"]),
-//     locTempLandmark: json["loc_temp_landmark"],
-//     locTempPincode: json["loc_temp_pincode"],
-//     locTempState: json["loc_temp_state"] == null
-//         ? null
-//         : CommonData.fromJson(json["loc_temp_state"]),
-//     familyType: json["family_type"],
-//     familyValue: json["family_value"],
-//     marriedBrother: json["married_brother"],
-//     marriedSister: json["married_sister"],
-//     noOfBrother: json["no_of_brother"],
-//     noOfBrotherInLaw: json["no_of_brother_in_law"],
-//     noOfSister: json["no_of_sister"],
-//     noOfSisterInLaw: json["no_of_sister_in_law"],
-//     birthCity: json["birth_city"] == null
-//         ? null
-//         : CommonData.fromJson(json["birth_city"]),
-//     bloodGroup: json["blood_group"],
-//     complexion: json["complexion"] == null
-//         ? null
-//         : CommonData.fromJson(json["complexion"]),
-//     diet: json["diet"] == null ? null : CommonData.fromJson(json["diet"]),
-//     disability: json["disability"],
-//     healthInformation: json["health_information"],
-//     height: (json["height"] ?? 0).toDouble(),
-//     manglik: json["manglik"],
-//     weight: json["weight"],
-//     annualIncome: json["annual_income"],
-//     highestDegree: json["highest_degree"] == null
-//         ? null
-//         : Education.fromJson(json["highest_degree"]),
-//     occupation: json["occupation"] == null
-//         ? null
-//         : CommonData.fromJson(json["occupation"]),
-//     organizationName: json["organization_name"],
-//     otherEducation: json["other_education"],
-//     pgCollegeName: json["pg_college_name"],
-//     prevWorkingDetail: json["prev_working_detail"],
-//     schoolName: json["school_name"],
-//     ugCollegeName: json["ug_college_name"],
-//     workingWith: json["working_with"] == null
-//         ? null
-//         : CommonData.fromJson(json["working_with"]),
-//     photo: json["photo"],
-//     photo1: json["photo1"],
-//     photo2: json["photo2"],
-//     photo3: json["photo3"],
-//     photo4: json["photo4"],
-//     photoBlur: json["photo_blur"],
-//     partnerQualities: json["partner_qualities"],
-//     partnerCaste: json["partner_caste"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_caste"]),
-//     partnerDosh: json["partner_dosh"],
-//     partnerReligion: json["partner_religion"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_religion"]),
-//     partnerSubCaste: json["partner_sub_caste"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_sub_caste"]),
-//     partnerAgeFrom: json["partner_age_from"],
-//     partnerAgeTo: json["partner_age_to"],
-//     partnerCity: json["partner_city"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_city"]),
-//     partnerComplexion: json["partner_complexion"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_complexion"]),
-//     partnerCountry: json["partner_country"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_country"]),
-//     partnerDiet: json["partner_diet"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_diet"]),
-//     partnerDrinking: json["partner_drinking"],
-//     partnerEducation: json["partner_education"] == null
-//         ? null
-//         : Education.fromJson(json["partner_education"]),
-//     partnerHaveChildren: json["partner_have_children"],
-//     partnerHeightFrom: (json["partner_height_from"] ?? 0).toDouble(),
-//     partnerHeightTo: (json["partner_height_to"] ?? 0).toDouble(),
-//     partnerIncomeFrom: json["partner_income_from"],
-//     partnerIncomeTo: json["partner_income_to"],
-//     partnerLanguage: json["partner_language"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_language"]),
-//     partnerManagedBy: json["partner_managed_by"],
-//     partnerMotherTongue: json["partner_mother_tongue"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_mother_tongue"]),
-//     partnerOccupation: json["partner_occupation"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_occupation"]),
-//     partnerProfessionalQualification:
-//         json["partner_professional_qualification"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_professional_qualification"]),
-//     partnerSmoking: json["partner_smoking"],
-//     partnerState: json["partner_state"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_state"]),
-//     partnerWeightFrom: json["partner_weight_from"],
-//     partnerWeightTo: json["partner_weight_to"],
-//     partnerWorkingAs: json["partner_working_as"] == null
-//         ? null
-//         : CommonData.fromJson(json["partner_working_as"]),
-//   );
-// }
-
-// ////////////////////////////////////////////////////////////////////////////////
-// //                               PARTNER PREFERENCE                           //
-// ////////////////////////////////////////////////////////////////////////////////
-
-// class PartnerPreferences {
-//   CommonValue? age;
-//   CommonValue? height;
-//   StatusWithData? maritalStatus;
-//   StatusWithData? religion;
-//   StatusWithData? caste;
-//   StatusWithData? motherTongue;
-//   StatusWithData? education;
-//   StatusWithData? occupation;
-//   StatusWithData? diet;
-//   StatusWithData? country;
-//   StatusWithData? state;
-//   StatusWithData? city;
-//   CommonValue? annualIncome;
-
-//   PartnerPreferences({
-//     this.age,
-//     this.height,
-//     this.maritalStatus,
-//     this.religion,
-//     this.caste,
-//     this.motherTongue,
-//     this.education,
-//     this.occupation,
-//     this.diet,
-//     this.country,
-//     this.state,
-//     this.city,
-//     this.annualIncome,
-//   });
-
-//   factory PartnerPreferences.fromJson(
-//     Map<String, dynamic> json,
-//   ) => PartnerPreferences(
-//     age: json["age"] == null ? null : CommonValue.fromJson(json["age"]),
-//     height: json["height"] == null
-//         ? null
-//         : CommonValue.fromJson(json["height"]),
-//     maritalStatus: json["maritalStatus"] == null
-//         ? null
-//         : StatusWithData.fromJson(json["maritalStatus"]),
-//     religion: json["religion"] == null
-//         ? null
-//         : StatusWithData.fromJson(json["religion"]),
-//     caste: json["caste"] == null
-//         ? null
-//         : StatusWithData.fromJson(json["caste"]),
-//     motherTongue: json["motherTongue"] == null
-//         ? null
-//         : StatusWithData.fromJson(json["motherTongue"]),
-//     education: json["education"] == null
-//         ? null
-//         : StatusWithData.fromJson(json["education"]),
-//     occupation: json["occupation"] == null
-//         ? null
-//         : StatusWithData.fromJson(json["occupation"]),
-//     diet: json["diet"] == null ? null : StatusWithData.fromJson(json["diet"]),
-//     country: json["country"] == null
-//         ? null
-//         : StatusWithData.fromJson(json["country"]),
-//     state: json["state"] == null
-//         ? null
-//         : StatusWithData.fromJson(json["state"]),
-//     city: json["city"] == null ? null : StatusWithData.fromJson(json["city"]),
-//     annualIncome: json["annualIncome"] == null
-//         ? null
-//         : CommonValue.fromJson(json["annualIncome"]),
-//   );
-// }
-
-// class CommonValue {
-//   dynamic age;
-//   dynamic height;
-//   dynamic annualIncome;
-
-//   CommonValue({this.age, this.height, this.annualIncome});
-
-//   factory CommonValue.fromJson(Map<String, dynamic> json) => CommonValue(
-//     age: json["age"],
-//     height: json["height"],
-//     annualIncome: json["annualIncome"],
-//   );
-// }
-
-// class StatusWithData {
-//   bool? status;
-//   dynamic maritalStatus;
-//   dynamic religion;
-//   dynamic caste;
-//   dynamic motherTongue;
-//   dynamic education;
-//   dynamic occupation;
-//   dynamic diet;
-//   dynamic country;
-//   dynamic state;
-//   dynamic city;
-
-//   StatusWithData({
-//     this.status,
-//     this.maritalStatus,
-//     this.religion,
-//     this.caste,
-//     this.motherTongue,
-//     this.education,
-//     this.occupation,
-//     this.diet,
-//     this.country,
-//     this.state,
-//     this.city,
-//   });
-
-//   factory StatusWithData.fromJson(Map<String, dynamic> json) => StatusWithData(
-//     status: json["status"],
-//     maritalStatus: json["maritalStatus"],
-//     religion: json["religion"],
-//     caste: json["caste"],
-//     motherTongue: json["motherTongue"],
-//     education: json["education"],
-//     occupation: json["occupation"],
-//     diet: json["diet"],
-//     country: json["country"],
-//     state: json["state"],
-//     city: json["city"],
-//   );
-// }
-
-// ////////////////////////////////////////////////////////////////////////////////
-// //                     COMMON MODELS (Used Everywhere)                        //
-// ////////////////////////////////////////////////////////////////////////////////
-
-// class CommonData {
-//   dynamic id;
-//   dynamic name;
-
-//   CommonData({this.id, this.name});
-
-//   factory CommonData.fromJson(Map<String, dynamic> json) =>
-//       CommonData(id: json["_id"], name: json["name"]);
-// }
-
-// class CommonDataWithIcon {
-//   dynamic id;
-//   dynamic name;
-//   dynamic icon;
-
-//   CommonDataWithIcon({this.id, this.name, this.icon});
-
-//   factory CommonDataWithIcon.fromJson(Map<String, dynamic> json) =>
-//       CommonDataWithIcon(
-//         id: json["_id"],
-//         name: json["name"],
-//         icon: json["icon"],
-//       );
-// }
-
-// class Education {
-//   dynamic id;
-//   dynamic name;
-//   dynamic educationType;
-
-//   Education({this.id, this.name, this.educationType});
-
-//   factory Education.fromJson(Map<String, dynamic> json) => Education(
-//     id: json["_id"],
-//     name: json["name"],
-//     educationType: json["education_type"],
-//   );
-// }
-// user_full_profile_model.dart
-// Auto-generated from profile JSON. Null-safe, all fields optional.
-
 import 'dart:convert';
 
 ProfileResponse profileResponseFromJson(String str) =>
@@ -693,7 +8,7 @@ String profileResponseToJson(ProfileResponse data) =>
 
 class ProfileResponse {
   bool? status;
-  String? message;
+  dynamic message;
   ProfileData? data;
 
   ProfileResponse({this.status, this.message, this.data});
@@ -701,7 +16,7 @@ class ProfileResponse {
   factory ProfileResponse.fromJson(Map<String, dynamic> json) {
     return ProfileResponse(
       status: json['status'] as bool?,
-      message: json['message'] as String?,
+      message: json['message'] as dynamic,
       data: json['data'] != null
           ? ProfileData.fromJson(json['data'] as Map<String, dynamic>)
           : null,
@@ -709,10 +24,10 @@ class ProfileResponse {
   }
 
   Map<String, dynamic> toJson() => {
-        'status': status,
-        'message': message,
-        'data': data?.toJson(),
-      };
+    'status': status,
+    'message': message,
+    'data': data?.toJson(),
+  };
 }
 
 class ProfileData {
@@ -720,12 +35,16 @@ class ProfileData {
   dynamic expressEntrest;
   dynamic contactLockStatus;
   PartnerPreferences? partnerPreferences;
+  dynamic interestsentstatus;
+  dynamic shortliststatus;
 
   ProfileData({
     this.memberData,
     this.expressEntrest,
     this.contactLockStatus,
     this.partnerPreferences,
+    this.shortliststatus,
+    this.interestsentstatus,
   });
 
   factory ProfileData.fromJson(Map<String, dynamic> json) {
@@ -735,6 +54,8 @@ class ProfileData {
           : null,
       expressEntrest: json['express_entrest'],
       contactLockStatus: json['contact_lock_status'],
+      shortliststatus: json['short_list_status'] ?? "",
+      interestsentstatus: json['interest_sent_status'] ?? "",
       partnerPreferences: json['partnerPreferences'] != null
           ? PartnerPreferences.fromJson(
               json['partnerPreferences'] as Map<String, dynamic>,
@@ -744,172 +65,181 @@ class ProfileData {
   }
 
   Map<String, dynamic> toJson() => {
-        'memberData': memberData?.toJson(),
-        'express_entrest': expressEntrest,
-        'contact_lock_status': contactLockStatus,
-        'partnerPreferences': partnerPreferences?.toJson(),
-      };
+    'memberData': memberData?.toJson(),
+    'express_entrest': expressEntrest,
+    'contact_lock_status': contactLockStatus,
+    'partnerPreferences': partnerPreferences?.toJson(),
+  };
+}
+
+Map<String, dynamic>? safeMap(dynamic json) {
+  if (json is Map<String, dynamic>) return json;
+  return null; // string or null ignore
 }
 
 class MemberData {
-  String? id;
-  String? profileId;
-  String? email;
-  String? mobile;
-  String? otp;
-  String? otpExpireAt;
+  dynamic id;
+  dynamic profileId;
+  dynamic email;
+  dynamic mobile;
+  dynamic otp;
+  dynamic otpExpireAt;
 
   List<Hobby>? hobbies;
   RefData? gotra;
 
-  String? ugDegree;
-  String? pgDegree;
+  dynamic ugDegree;
+  dynamic pgDegree;
 
   List<String>? partnerHobbies;
   List<dynamic>? partnerMaritalStatus;
 
   RefData? partnerGotra;
-  String? homeRegId;
-  int? appStep;
-  String? deviceToken;
-  String? formStatus;
-  String? status;
+  dynamic homeRegId;
+  dynamic appStep;
+  dynamic deviceToken;
+  dynamic formStatus;
+  dynamic status;
 
-  String? createdAt;
-  String? updatedAt;
+  dynamic createdAt;
+  dynamic updatedAt;
 
-  String? about;
+  dynamic about;
 
   RefData? birthState;
 
-  String? dob;
-  String? gender;
+  dynamic dob;
+  dynamic gender;
 
   RefData? maritalStatus;
-  String? name;
+  dynamic name;
 
   RefData? profileFor;
 
-  int? step;
+  dynamic step;
 
-  String? contactEmail;
-  String? contactNo;
+  dynamic contactEmail;
+  dynamic contactNo;
 
-  String? facebook;
-  String? instagram;
+  dynamic facebook;
+  dynamic instagram;
 
-  String? reference;
-  String? referenceOther;
+  dynamic reference;
+  dynamic referenceOther;
 
   RefData? caste;
-  String? dosh;
-  String? gotraOther;
+  dynamic dosh;
+  dynamic gotraOther;
 
   RefData? religion;
   RefData? subCaste;
 
-  String? locRelation;
-  String? locRelationEmail;
-  String? locRelationMobile;
-  String? locRelationName;
+  dynamic locRelation;
+  dynamic locRelationEmail;
+  dynamic locRelationMobile;
+  dynamic locRelationName;
 
   RefData? locCity;
-  String? locHouseType;
-  String? locLandmark;
+  dynamic locHouseType;
+  dynamic locLandmark;
 
   RefData? locNationality;
-  String? locPincode;
-  String? locResidenceType;
+  dynamic locPincode;
+  dynamic locResidenceType;
 
   RefData? locState;
 
   RefData? locTempCity;
-  String? locTempLandmark;
-  String? locTempPincode;
+  dynamic locTempLandmark;
+  dynamic locTempPincode;
   RefData? locTempState;
 
-  String? familyType;
-  String? familyValue;
+  dynamic familyType;
+  dynamic familyValue;
 
-  int? marriedBrother;
-  int? marriedSister;
-  int? noOfBrother;
-  int? noOfBrotherInLaw;
-  int? noOfSister;
-  int? noOfSisterInLaw;
+  dynamic marriedBrother;
+  dynamic marriedSister;
+  dynamic noOfBrother;
+  dynamic noOfBrotherInLaw;
+  dynamic noOfSister;
+  dynamic noOfSisterInLaw;
 
   RefData? birthCity;
-  String? bloodGroup;
+  dynamic bloodGroup;
 
   RefData? complexion;
   RefData? diet;
 
-  String? disability;
-  String? healthInformation;
+  dynamic disability;
+  dynamic healthInformation;
 
   double? height;
-  String? manglik;
-  int? weight;
+  dynamic manglik;
+  dynamic weight;
 
-  String? annualIncome;
+  dynamic annualIncome;
 
   RefData? highestDegree;
   RefData? occupation;
 
-  String? organizationName;
-  String? otherEducation;
+  dynamic organizationName;
+  dynamic otherEducation;
 
-  String? pgCollegeName;
-  String? prevWorkingDetail;
-  String? schoolName;
-  String? ugCollegeName;
+  dynamic pgCollegeName;
+  dynamic prevWorkingDetail;
+  dynamic schoolName;
+  dynamic ugCollegeName;
 
   RefData? workingWith;
 
-  String? photo;
-  String? photoBlur;
+  dynamic photo;
+  dynamic photo1;
+  dynamic photo2;
+  dynamic photo3;
+  dynamic photo4;
+  dynamic photoBlur;
 
-  String? partnerQualities;
+  dynamic partnerQualities;
 
   RefData? partnerCaste;
-  String? partnerDosh;
+  dynamic partnerDosh;
   RefData? partnerReligion;
   RefData? partnerSubCaste;
 
-  int? partnerAgeFrom;
-  int? partnerAgeTo;
+  dynamic partnerAgeFrom;
+  dynamic partnerAgeTo;
 
   RefData? partnerCity;
   RefData? partnerComplexion;
   RefData? partnerCountry;
 
   RefData? partnerDiet;
-  String? partnerDrinking;
+  dynamic partnerDrinking;
 
   RefData? partnerEducation;
-  String? partnerHaveChildren;
+  dynamic partnerHaveChildren;
 
   double? partnerHeightFrom;
   double? partnerHeightTo;
 
-  String? partnerIncomeFrom;
-  String? partnerIncomeTo;
+  dynamic partnerIncomeFrom;
+  dynamic partnerIncomeTo;
 
   RefData? partnerLanguage;
 
-  String? partnerManagedBy;
+  dynamic partnerManagedBy;
 
   RefData? partnerMotherTongue;
 
   RefData? partnerOccupation;
   RefData? partnerProfessionalQualification;
 
-  String? partnerSmoking;
+  dynamic partnerSmoking;
 
   RefData? partnerState;
 
-  int? partnerWeightFrom;
-  int? partnerWeightTo;
+  dynamic partnerWeightFrom;
+  dynamic partnerWeightTo;
 
   RefData? partnerWorkingAs;
 
@@ -984,6 +314,7 @@ class MemberData {
     this.healthInformation,
     this.height,
     this.manglik,
+
     this.weight,
     this.annualIncome,
     this.highestDegree,
@@ -996,6 +327,10 @@ class MemberData {
     this.ugCollegeName,
     this.workingWith,
     this.photo,
+    this.photo1,
+    this.photo2,
+    this.photo3,
+    this.photo4,
     this.photoBlur,
     this.partnerQualities,
     this.partnerCaste,
@@ -1029,321 +364,387 @@ class MemberData {
 
   factory MemberData.fromJson(Map<String, dynamic> json) {
     return MemberData(
-      id: json['_id'] as String?,
-      profileId: json['profile_id'] as String?,
-      email: json['email'] as String?,
-      mobile: json['mobile'] as String?,
-      otp: json['otp'] as String?,
-      otpExpireAt: json['otp_expire_at'] as String?,
-      hobbies: (json['hobbies'] as List<dynamic>?)
+      id: json['_id'],
+      profileId: json['profile_id'],
+      email: json['email'],
+      mobile: json['mobile'],
+      otp: json['otp'],
+      otpExpireAt: json['otp_expire_at'],
+
+      hobbies: (json['hobbies'] as List?)
           ?.map((e) => Hobby.fromJson(e as Map<String, dynamic>))
           .toList(),
-      gotra: json['gotra'] != null
-          ? RefData.fromJson(json['gotra'] as Map<String, dynamic>)
+
+      gotra: safeMap(json['gotra']) != null
+          ? RefData.fromJson(safeMap(json['gotra'])!)
           : null,
-      ugDegree: json['ug_degree'] as String?,
-      pgDegree: json['pg_degree'] as String?,
-      partnerHobbies: (json['partner_hobbies'] as List<dynamic>?)
+
+      ugDegree: json['ug_degree'],
+      pgDegree: json['pg_degree'],
+
+      partnerHobbies: (json['partner_hobbies'] as List?)
           ?.map((e) => e.toString())
           .toList(),
-      partnerMaritalStatus:
-          (json['partner_marital_status'] as List<dynamic>?) ?? <dynamic>[],
-      partnerGotra: json['partner_gotra'] != null
-          ? RefData.fromJson(json['partner_gotra'] as Map<String, dynamic>)
+
+      partnerMaritalStatus: (json['partner_marital_status'] as List?) ?? [],
+
+      partnerGotra: safeMap(json['partner_gotra']) != null
+          ? RefData.fromJson(safeMap(json['partner_gotra'])!)
           : null,
+
       homeRegId: json['home_reg_id']?.toString(),
-      appStep: json['app_step'] as int?,
+      appStep: json['app_step'],
       deviceToken: json['device_token']?.toString(),
-      formStatus: json['form_status'] as String?,
-      status: json['status'] as String?,
-      createdAt: json['createdAt'] as String?,
-      updatedAt: json['updatedAt'] as String?,
-      about: json['about'] as String?,
-      birthState: json['birth_state'] != null
-          ? RefData.fromJson(json['birth_state'] as Map<String, dynamic>)
+      formStatus: json['form_status'],
+      status: json['status'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      about: json['about'],
+
+      birthState: safeMap(json['birth_state']) != null
+          ? RefData.fromJson(safeMap(json['birth_state'])!)
           : null,
-      dob: json['dob'] as String?,
-      gender: json['gender'] as String?,
-      maritalStatus: json['marital_status'] != null
-          ? RefData.fromJson(json['marital_status'] as Map<String, dynamic>)
+
+      dob: json['dob'],
+      gender: json['gender'],
+
+      maritalStatus: safeMap(json['marital_status']) != null
+          ? RefData.fromJson(safeMap(json['marital_status'])!)
           : null,
-      name: json['name'] as String?,
-      profileFor: json['profile_for'] != null
-          ? RefData.fromJson(json['profile_for'] as Map<String, dynamic>)
+
+      name: json['name'],
+
+      profileFor: safeMap(json['profile_for']) != null
+          ? RefData.fromJson(safeMap(json['profile_for'])!)
           : null,
-      step: json['step'] as int?,
-      contactEmail: json['contact_email'] as String?,
+
+      step: json['step'],
+      contactEmail: json['contact_email'],
       contactNo: json['contact_no']?.toString(),
-      facebook: json['facebook'] as String?,
-      instagram: json['instagram'] as String?,
-      reference: json['reference'] as String?,
-      referenceOther: json['reference_other'] as String?,
-      caste: json['caste'] != null
-          ? RefData.fromJson(json['caste'] as Map<String, dynamic>)
+      facebook: json['facebook'],
+      instagram: json['instagram'],
+      reference: json['reference'],
+      referenceOther: json['reference_other'],
+
+      caste: safeMap(json['caste']) != null
+          ? RefData.fromJson(safeMap(json['caste'])!)
           : null,
-      dosh: json['dosh'] as String?,
-      gotraOther: json['gotra_other'] as String?,
-      religion: json['religion'] != null
-          ? RefData.fromJson(json['religion'] as Map<String, dynamic>)
+
+      dosh: json['dosh'],
+      gotraOther: json['gotra_other'],
+
+      religion: safeMap(json['religion']) != null
+          ? RefData.fromJson(safeMap(json['religion'])!)
           : null,
-      subCaste: json['sub_caste'] != null
-          ? RefData.fromJson(json['sub_caste'] as Map<String, dynamic>)
+
+      subCaste: safeMap(json['sub_caste']) != null
+          ? RefData.fromJson(safeMap(json['sub_caste'])!)
           : null,
-      locRelation: json['loc_relation'] as String?,
-      locRelationEmail: json['loc_relation_email'] as String?,
-      locRelationMobile: json['loc_relation_mobile'] as String?,
-      locRelationName: json['loc_relation_name'] as String?,
-      locCity: json['loc_city'] != null
-          ? RefData.fromJson(json['loc_city'] as Map<String, dynamic>)
+
+      locRelation: json['loc_relation'],
+      locRelationEmail: json['loc_relation_email'],
+      locRelationMobile: json['loc_relation_mobile'],
+      locRelationName: json['loc_relation_name'],
+
+      locCity: safeMap(json['loc_city']) != null
+          ? RefData.fromJson(safeMap(json['loc_city'])!)
           : null,
-      locHouseType: json['loc_house_type'] as String?,
-      locLandmark: json['loc_landmark'] as String?,
-      locNationality: json['loc_nationality'] != null
-          ? RefData.fromJson(json['loc_nationality'] as Map<String, dynamic>)
+
+      locHouseType: json['loc_house_type'],
+      locLandmark: json['loc_landmark'],
+
+      locNationality: safeMap(json['loc_nationality']) != null
+          ? RefData.fromJson(safeMap(json['loc_nationality'])!)
           : null,
-      locPincode: json['loc_pincode'] as String?,
-      locResidenceType: json['loc_residence_type'] as String?,
-      locState: json['loc_state'] != null
-          ? RefData.fromJson(json['loc_state'] as Map<String, dynamic>)
+
+      locPincode: json['loc_pincode'],
+      locResidenceType: json['loc_residence_type'],
+
+      locState: safeMap(json['loc_state']) != null
+          ? RefData.fromJson(safeMap(json['loc_state'])!)
           : null,
-      locTempCity: json['loc_temp_city'] != null
-          ? RefData.fromJson(json['loc_temp_city'] as Map<String, dynamic>)
+
+      locTempCity: safeMap(json['loc_temp_city']) != null
+          ? RefData.fromJson(safeMap(json['loc_temp_city'])!)
           : null,
-      locTempLandmark: json['loc_temp_landmark'] as String?,
-      locTempPincode: json['loc_temp_pincode'] as String?,
-      locTempState: json['loc_temp_state'] != null
-          ? RefData.fromJson(json['loc_temp_state'] as Map<String, dynamic>)
+
+      locTempLandmark: json['loc_temp_landmark'],
+      locTempPincode: json['loc_temp_pincode'],
+
+      locTempState: safeMap(json['loc_temp_state']) != null
+          ? RefData.fromJson(safeMap(json['loc_temp_state'])!)
           : null,
-      familyType: json['family_type'] as String?,
-      familyValue: json['family_value'] as String?,
-      marriedBrother: json['married_brother'] as int?,
-      marriedSister: json['married_sister'] as int?,
-      noOfBrother: json['no_of_brother'] as int?,
-      noOfBrotherInLaw: json['no_of_brother_in_law'] as int?,
-      noOfSister: json['no_of_sister'] as int?,
-      noOfSisterInLaw: json['no_of_sister_in_law'] as int?,
-      birthCity: json['birth_city'] != null
-          ? RefData.fromJson(json['birth_city'] as Map<String, dynamic>)
+
+      familyType: json['family_type'],
+      familyValue: json['family_value'],
+      marriedBrother: json['married_brother'],
+      marriedSister: json['married_sister'],
+      noOfBrother: json['no_of_brother'],
+      noOfBrotherInLaw: json['no_of_brother_in_law'],
+      noOfSister: json['no_of_sister'],
+      noOfSisterInLaw: json['no_of_sister_in_law'],
+
+      birthCity: safeMap(json['birth_city']) != null
+          ? RefData.fromJson(safeMap(json['birth_city'])!)
           : null,
-      bloodGroup: json['blood_group'] as String?,
-      complexion: json['complexion'] != null
-          ? RefData.fromJson(json['complexion'] as Map<String, dynamic>)
+
+      bloodGroup: json['blood_group'],
+
+      complexion: safeMap(json['complexion']) != null
+          ? RefData.fromJson(safeMap(json['complexion'])!)
           : null,
-      diet: json['diet'] != null
-          ? RefData.fromJson(json['diet'] as Map<String, dynamic>)
+
+      diet: safeMap(json['diet']) != null
+          ? RefData.fromJson(safeMap(json['diet'])!)
           : null,
-      disability: json['disability'] as String?,
-      healthInformation: json['health_information'] as String?,
+
+      disability: json['disability'],
+      healthInformation: json['health_information'],
       height: (json['height'] as num?)?.toDouble(),
-      manglik: json['manglik'] as String?,
-      weight: json['weight'] as int?,
+      manglik: json['manglik'],
+      weight: json['weight'],
+
       annualIncome: json['annual_income']?.toString(),
-      highestDegree: json['highest_degree'] != null
-          ? RefData.fromJson(json['highest_degree'] as Map<String, dynamic>)
+
+      highestDegree: safeMap(json['highest_degree']) != null
+          ? RefData.fromJson(safeMap(json['highest_degree'])!)
           : null,
-      occupation: json['occupation'] != null
-          ? RefData.fromJson(json['occupation'] as Map<String, dynamic>)
+
+      occupation: safeMap(json['occupation']) != null
+          ? RefData.fromJson(safeMap(json['occupation'])!)
           : null,
-      organizationName: json['organization_name'] as String?,
-      otherEducation: json['other_education'] as String?,
-      pgCollegeName: json['pg_college_name'] as String?,
-      prevWorkingDetail: json['prev_working_detail'] as String?,
-      schoolName: json['school_name'] as String?,
-      ugCollegeName: json['ug_college_name'] as String?,
-      workingWith: json['working_with'] != null
-          ? RefData.fromJson(json['working_with'] as Map<String, dynamic>)
+
+      organizationName: json['organization_name'],
+      otherEducation: json['other_education'],
+      pgCollegeName: json['pg_college_name'],
+      prevWorkingDetail: json['prev_working_detail'],
+      schoolName: json['school_name'],
+      ugCollegeName: json['ug_college_name'],
+
+      workingWith: safeMap(json['working_with']) != null
+          ? RefData.fromJson(safeMap(json['working_with'])!)
           : null,
-      photo: json['photo'] as String?,
-      photoBlur: json['photo_blur'] as String?,
-      partnerQualities: json['partner_qualities'] as String?,
-      partnerCaste: json['partner_caste'] != null
-          ? RefData.fromJson(json['partner_caste'] as Map<String, dynamic>)
+
+      photo: json['photo'],
+      photo1: json['photo1'],
+      photo2: json['photo2'],
+      photo3: json['photo3'],
+      photo4: json['photo4'],
+      photoBlur: json['photo_blur'],
+
+      partnerQualities: json['partner_qualities'],
+
+      partnerCaste: safeMap(json['partner_caste']) != null
+          ? RefData.fromJson(safeMap(json['partner_caste'])!)
           : null,
-      partnerDosh: json['partner_dosh'] as String?,
-      partnerReligion: json['partner_religion'] != null
-          ? RefData.fromJson(json['partner_religion'] as Map<String, dynamic>)
+
+      partnerDosh: json['partner_dosh'],
+
+      partnerReligion: safeMap(json['partner_religion']) != null
+          ? RefData.fromJson(safeMap(json['partner_religion'])!)
           : null,
-      partnerSubCaste: json['partner_sub_caste'] != null
-          ? RefData.fromJson(json['partner_sub_caste'] as Map<String, dynamic>)
+
+      partnerSubCaste: safeMap(json['partner_sub_caste']) != null
+          ? RefData.fromJson(safeMap(json['partner_sub_caste'])!)
           : null,
-      partnerAgeFrom: json['partner_age_from'] as int?,
-      partnerAgeTo: json['partner_age_to'] as int?,
-      partnerCity: json['partner_city'] != null
-          ? RefData.fromJson(json['partner_city'] as Map<String, dynamic>)
+
+      partnerAgeFrom: json['partner_age_from'],
+      partnerAgeTo: json['partner_age_to'],
+
+      partnerCity: safeMap(json['partner_city']) != null
+          ? RefData.fromJson(safeMap(json['partner_city'])!)
           : null,
-      partnerComplexion: json['partner_complexion'] != null
-          ? RefData.fromJson(json['partner_complexion'] as Map<String, dynamic>)
+
+      partnerComplexion: safeMap(json['partner_complexion']) != null
+          ? RefData.fromJson(safeMap(json['partner_complexion'])!)
           : null,
-      partnerCountry: json['partner_country'] != null
-          ? RefData.fromJson(json['partner_country'] as Map<String, dynamic>)
+
+      partnerCountry: safeMap(json['partner_country']) != null
+          ? RefData.fromJson(safeMap(json['partner_country'])!)
           : null,
-      partnerDiet: json['partner_diet'] != null
-          ? RefData.fromJson(json['partner_diet'] as Map<String, dynamic>)
+
+      partnerDiet: safeMap(json['partner_diet']) != null
+          ? RefData.fromJson(safeMap(json['partner_diet'])!)
           : null,
-      partnerDrinking: json['partner_drinking'] as String?,
-      partnerEducation: json['partner_education'] != null
-          ? RefData.fromJson(json['partner_education'] as Map<String, dynamic>)
+
+      partnerDrinking: json['partner_drinking'],
+
+      partnerEducation: safeMap(json['partner_education']) != null
+          ? RefData.fromJson(safeMap(json['partner_education'])!)
           : null,
+
       partnerHaveChildren: json['partner_have_children']?.toString(),
+
       partnerHeightFrom: (json['partner_height_from'] as num?)?.toDouble(),
       partnerHeightTo: (json['partner_height_to'] as num?)?.toDouble(),
+
       partnerIncomeFrom: json['partner_income_from']?.toString(),
       partnerIncomeTo: json['partner_income_to']?.toString(),
-      partnerLanguage: json['partner_language'] != null
-          ? RefData.fromJson(json['partner_language'] as Map<String, dynamic>)
+
+      partnerLanguage: safeMap(json['partner_language']) != null
+          ? RefData.fromJson(safeMap(json['partner_language'])!)
           : null,
-      partnerManagedBy: json['partner_managed_by'] as String?,
-      partnerMotherTongue: json['partner_mother_tongue'] != null
+
+      partnerManagedBy: json['partner_managed_by'],
+
+      partnerMotherTongue: safeMap(json['partner_mother_tongue']) != null
+          ? RefData.fromJson(safeMap(json['partner_mother_tongue'])!)
+          : null,
+
+      partnerOccupation: safeMap(json['partner_occupation']) != null
+          ? RefData.fromJson(safeMap(json['partner_occupation'])!)
+          : null,
+
+      partnerProfessionalQualification:
+          safeMap(json['partner_professional_qualification']) != null
           ? RefData.fromJson(
-              json['partner_mother_tongue'] as Map<String, dynamic>,
+              safeMap(json['partner_professional_qualification'])!,
             )
           : null,
-      partnerOccupation: json['partner_occupation'] != null
-          ? RefData.fromJson(json['partner_occupation'] as Map<String, dynamic>)
+
+      partnerSmoking: json['partner_smoking'],
+
+      partnerState: safeMap(json['partner_state']) != null
+          ? RefData.fromJson(safeMap(json['partner_state'])!)
           : null,
-      partnerProfessionalQualification:
-          json['partner_professional_qualification'] != null
-              ? RefData.fromJson(
-                  json['partner_professional_qualification']
-                      as Map<String, dynamic>,
-                )
-              : null,
-      partnerSmoking: json['partner_smoking'] as String?,
-      partnerState: json['partner_state'] != null
-          ? RefData.fromJson(json['partner_state'] as Map<String, dynamic>)
-          : null,
-      partnerWeightFrom: json['partner_weight_from'] as int?,
-      partnerWeightTo: json['partner_weight_to'] as int?,
-      partnerWorkingAs: json['partner_working_as'] != null
-          ? RefData.fromJson(json['partner_working_as'] as Map<String, dynamic>)
+
+      partnerWeightFrom: json['partner_weight_from'],
+      partnerWeightTo: json['partner_weight_to'],
+
+      partnerWorkingAs: safeMap(json['partner_working_as']) != null
+          ? RefData.fromJson(safeMap(json['partner_working_as'])!)
           : null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        '_id': id,
-        'profile_id': profileId,
-        'email': email,
-        'mobile': mobile,
-        'otp': otp,
-        'otp_expire_at': otpExpireAt,
-        'hobbies': hobbies?.map((e) => e.toJson()).toList(),
-        'gotra': gotra?.toJson(),
-        'ug_degree': ugDegree,
-        'pg_degree': pgDegree,
-        'partner_hobbies': partnerHobbies,
-        'partner_marital_status': partnerMaritalStatus,
-        'partner_gotra': partnerGotra?.toJson(),
-        'home_reg_id': homeRegId,
-        'app_step': appStep,
-        'device_token': deviceToken,
-        'form_status': formStatus,
-        'status': status,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
-        'about': about,
-        'birth_state': birthState?.toJson(),
-        'dob': dob,
-        'gender': gender,
-        'marital_status': maritalStatus?.toJson(),
-        'name': name,
-        'profile_for': profileFor?.toJson(),
-        'step': step,
-        'contact_email': contactEmail,
-        'contact_no': contactNo,
-        'facebook': facebook,
-        'instagram': instagram,
-        'reference': reference,
-        'reference_other': referenceOther,
-        'caste': caste?.toJson(),
-        'dosh': dosh,
-        'gotra_other': gotraOther,
-        'religion': religion?.toJson(),
-        'sub_caste': subCaste?.toJson(),
-        'loc_relation': locRelation,
-        'loc_relation_email': locRelationEmail,
-        'loc_relation_mobile': locRelationMobile,
-        'loc_relation_name': locRelationName,
-        'loc_city': locCity?.toJson(),
-        'loc_house_type': locHouseType,
-        'loc_landmark': locLandmark,
-        'loc_nationality': locNationality?.toJson(),
-        'loc_pincode': locPincode,
-        'loc_residence_type': locResidenceType,
-        'loc_state': locState?.toJson(),
-        'loc_temp_city': locTempCity?.toJson(),
-        'loc_temp_landmark': locTempLandmark,
-        'loc_temp_pincode': locTempPincode,
-        'loc_temp_state': locTempState?.toJson(),
-        'family_type': familyType,
-        'family_value': familyValue,
-        'married_brother': marriedBrother,
-        'married_sister': marriedSister,
-        'no_of_brother': noOfBrother,
-        'no_of_brother_in_law': noOfBrotherInLaw,
-        'no_of_sister': noOfSister,
-        'no_of_sister_in_law': noOfSisterInLaw,
-        'birth_city': birthCity?.toJson(),
-        'blood_group': bloodGroup,
-        'complexion': complexion?.toJson(),
-        'diet': diet?.toJson(),
-        'disability': disability,
-        'health_information': healthInformation,
-        'height': height,
-        'manglik': manglik,
-        'weight': weight,
-        'annual_income': annualIncome,
-        'highest_degree': highestDegree?.toJson(),
-        'occupation': occupation?.toJson(),
-        'organization_name': organizationName,
-        'other_education': otherEducation,
-        'pg_college_name': pgCollegeName,
-        'prev_working_detail': prevWorkingDetail,
-        'school_name': schoolName,
-        'ug_college_name': ugCollegeName,
-        'working_with': workingWith?.toJson(),
-        'photo': photo,
-        'photo_blur': photoBlur,
-        'partner_qualities': partnerQualities,
-        'partner_caste': partnerCaste?.toJson(),
-        'partner_dosh': partnerDosh,
-        'partner_religion': partnerReligion?.toJson(),
-        'partner_sub_caste': partnerSubCaste?.toJson(),
-        'partner_age_from': partnerAgeFrom,
-        'partner_age_to': partnerAgeTo,
-        'partner_city': partnerCity?.toJson(),
-        'partner_complexion': partnerComplexion?.toJson(),
-        'partner_country': partnerCountry?.toJson(),
-        'partner_diet': partnerDiet?.toJson(),
-        'partner_drinking': partnerDrinking,
-        'partner_education': partnerEducation?.toJson(),
-        'partner_have_children': partnerHaveChildren,
-        'partner_height_from': partnerHeightFrom,
-        'partner_height_to': partnerHeightTo,
-        'partner_income_from': partnerIncomeFrom,
-        'partner_income_to': partnerIncomeTo,
-        'partner_language': partnerLanguage?.toJson(),
-        'partner_managed_by': partnerManagedBy,
-        'partner_mother_tongue': partnerMotherTongue?.toJson(),
-        'partner_occupation': partnerOccupation?.toJson(),
-        'partner_professional_qualification':
-            partnerProfessionalQualification?.toJson(),
-        'partner_smoking': partnerSmoking,
-        'partner_state': partnerState?.toJson(),
-        'partner_weight_from': partnerWeightFrom,
-        'partner_weight_to': partnerWeightTo,
-        'partner_working_as': partnerWorkingAs?.toJson(),
-      };
+    '_id': id,
+    'profile_id': profileId,
+    'email': email,
+    'mobile': mobile,
+    'otp': otp,
+    'otp_expire_at': otpExpireAt,
+    'hobbies': hobbies?.map((e) => e.toJson()).toList(),
+    'gotra': gotra?.toJson(),
+    'ug_degree': ugDegree,
+    'pg_degree': pgDegree,
+    'partner_hobbies': partnerHobbies,
+    'partner_marital_status': partnerMaritalStatus,
+    'partner_gotra': partnerGotra?.toJson(),
+    'home_reg_id': homeRegId,
+    'app_step': appStep,
+    'device_token': deviceToken,
+    'form_status': formStatus,
+    'status': status,
+    'createdAt': createdAt,
+    'updatedAt': updatedAt,
+    'about': about,
+    'birth_state': birthState?.toJson(),
+    'dob': dob,
+    'gender': gender,
+    'marital_status': maritalStatus?.toJson(),
+    'name': name,
+    'profile_for': profileFor?.toJson(),
+    'step': step,
+    'contact_email': contactEmail,
+    'contact_no': contactNo,
+    'facebook': facebook,
+    'instagram': instagram,
+    'reference': reference,
+    'reference_other': referenceOther,
+    'caste': caste?.toJson(),
+    'dosh': dosh,
+    'gotra_other': gotraOther,
+    'religion': religion?.toJson(),
+    'sub_caste': subCaste?.toJson(),
+    'loc_relation': locRelation,
+    'loc_relation_email': locRelationEmail,
+    'loc_relation_mobile': locRelationMobile,
+    'loc_relation_name': locRelationName,
+    'loc_city': locCity?.toJson(),
+    'loc_house_type': locHouseType,
+    'loc_landmark': locLandmark,
+    'loc_nationality': locNationality?.toJson(),
+    'loc_pincode': locPincode,
+    'loc_residence_type': locResidenceType,
+    'loc_state': locState?.toJson(),
+    'loc_temp_city': locTempCity?.toJson(),
+    'loc_temp_landmark': locTempLandmark,
+    'loc_temp_pincode': locTempPincode,
+    'loc_temp_state': locTempState?.toJson(),
+    'family_type': familyType,
+    'family_value': familyValue,
+    'married_brother': marriedBrother,
+    'married_sister': marriedSister,
+    'no_of_brother': noOfBrother,
+    'no_of_brother_in_law': noOfBrotherInLaw,
+    'no_of_sister': noOfSister,
+    'no_of_sister_in_law': noOfSisterInLaw,
+    'birth_city': birthCity?.toJson(),
+    'blood_group': bloodGroup,
+    'complexion': complexion?.toJson(),
+    'diet': diet?.toJson(),
+    'disability': disability,
+    'health_information': healthInformation,
+    'height': height,
+    'manglik': manglik,
+    'weight': weight,
+    'annual_income': annualIncome,
+    'highest_degree': highestDegree?.toJson(),
+    'occupation': occupation?.toJson(),
+    'organization_name': organizationName,
+    'other_education': otherEducation,
+    'pg_college_name': pgCollegeName,
+    'prev_working_detail': prevWorkingDetail,
+    'school_name': schoolName,
+    'ug_college_name': ugCollegeName,
+    'working_with': workingWith?.toJson(),
+    'photo': photo,
+    'photo1': photo1,
+    'photo2': photo2,
+    'photo3': photo3,
+    'photo4': photo4,
+    'photo_blur': photoBlur,
+    'partner_qualities': partnerQualities,
+    'partner_caste': partnerCaste?.toJson(),
+    'partner_dosh': partnerDosh,
+    'partner_religion': partnerReligion?.toJson(),
+    'partner_sub_caste': partnerSubCaste?.toJson(),
+    'partner_age_from': partnerAgeFrom,
+    'partner_age_to': partnerAgeTo,
+    'partner_city': partnerCity?.toJson(),
+    'partner_complexion': partnerComplexion?.toJson(),
+    'partner_country': partnerCountry?.toJson(),
+    'partner_diet': partnerDiet?.toJson(),
+    'partner_drinking': partnerDrinking,
+    'partner_education': partnerEducation?.toJson(),
+    'partner_have_children': partnerHaveChildren,
+    'partner_height_from': partnerHeightFrom,
+    'partner_height_to': partnerHeightTo,
+    'partner_income_from': partnerIncomeFrom,
+    'partner_income_to': partnerIncomeTo,
+    'partner_language': partnerLanguage?.toJson(),
+    'partner_managed_by': partnerManagedBy,
+    'partner_mother_tongue': partnerMotherTongue?.toJson(),
+    'partner_occupation': partnerOccupation?.toJson(),
+    'partner_professional_qualification': partnerProfessionalQualification
+        ?.toJson(),
+    'partner_smoking': partnerSmoking,
+    'partner_state': partnerState?.toJson(),
+    'partner_weight_from': partnerWeightFrom,
+    'partner_weight_to': partnerWeightTo,
+    'partner_working_as': partnerWorkingAs?.toJson(),
+  };
 }
 
 class Hobby {
-  String? icon;
-  String? id;
-  String? name;
-  String? status;
-  String? createdAt;
-  String? updatedAt;
-  int? v;
+  dynamic icon;
+  dynamic id;
+  dynamic name;
+  dynamic status;
+  dynamic createdAt;
+  dynamic updatedAt;
+  dynamic v;
 
   Hobby({
     this.icon,
@@ -1357,39 +758,39 @@ class Hobby {
 
   factory Hobby.fromJson(Map<String, dynamic> json) {
     return Hobby(
-      icon: json['icon'] as String?,
-      id: json['_id'] as String?,
-      name: json['name'] as String?,
-      status: json['status'] as String?,
-      createdAt: json['createdAt'] as String?,
-      updatedAt: json['updatedAt'] as String?,
-      v: json['__v'] as int?,
+      icon: json['icon'] as dynamic,
+      id: json['_id'] as dynamic,
+      name: json['name'] as dynamic,
+      status: json['status'] as dynamic,
+      createdAt: json['createdAt'] as dynamic,
+      updatedAt: json['updatedAt'] as dynamic,
+      v: json['__v'] as dynamic,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'icon': icon,
-        '_id': id,
-        'name': name,
-        'status': status,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
-        '__v': v,
-      };
+    'icon': icon,
+    '_id': id,
+    'name': name,
+    'status': status,
+    'createdAt': createdAt,
+    'updatedAt': updatedAt,
+    '__v': v,
+  };
 }
 
 /// Generic reference model used for religion, caste, city, state, etc.
 class RefData {
-  String? id;
-  String? name;
-  String? religionId;
-  String? countryId;
-  String? stateId;
-  String? casteId;
-  String? status;
-  String? createdAt;
-  String? updatedAt;
-  int? v;
+  dynamic id;
+  dynamic name;
+  dynamic religionId;
+  dynamic countryId;
+  dynamic stateId;
+  dynamic casteId;
+  dynamic status;
+  dynamic createdAt;
+  dynamic updatedAt;
+  dynamic v;
 
   RefData({
     this.id,
@@ -1404,33 +805,40 @@ class RefData {
     this.v,
   });
 
-  factory RefData.fromJson(Map<String, dynamic> json) {
+  factory RefData.fromJson(dynamic json) {
+    final map = safeMap(json);
+
+    if (map == null) {
+      // If json is String/null, return empty safe object
+      return RefData(id: null, name: json?.toString());
+    }
+
     return RefData(
-      id: json['_id']?.toString(),
-      name: json['name']?.toString(),
-      religionId: json['religion_id']?.toString(),
-      countryId: json['country_id']?.toString(),
-      stateId: json['state_id']?.toString(),
-      casteId: json['caste_id']?.toString(),
-      status: json['status']?.toString(),
-      createdAt: json['createdAt']?.toString(),
-      updatedAt: json['updatedAt']?.toString(),
-      v: json['__v'] as int?,
+      id: map['_id']?.toString(),
+      name: map['name']?.toString(),
+      religionId: map['religion_id']?.toString(),
+      countryId: map['country_id']?.toString(),
+      stateId: map['state_id']?.toString(),
+      casteId: map['caste_id']?.toString(),
+      status: map['status']?.toString(),
+      createdAt: map['createdAt']?.toString(),
+      updatedAt: map['updatedAt']?.toString(),
+      v: map['__v'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        '_id': id,
-        'name': name,
-        'religion_id': religionId,
-        'country_id': countryId,
-        'state_id': stateId,
-        'caste_id': casteId,
-        'status': status,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
-        '__v': v,
-      };
+    '_id': id,
+    'name': name,
+    'religion_id': religionId,
+    'country_id': countryId,
+    'state_id': stateId,
+    'caste_id': casteId,
+    'status': status,
+    'createdAt': createdAt,
+    'updatedAt': updatedAt,
+    '__v': v,
+  };
 }
 
 // ---------------- Partner Preferences ----------------
@@ -1449,6 +857,8 @@ class PartnerPreferences {
   StatePreference? state;
   CityPreference? city;
   AnnualIncomePreference? annualIncome;
+  DisabilityPreferences? disability;
+  GotraPreferences? gotra;
 
   PartnerPreferences({
     this.age,
@@ -1464,129 +874,229 @@ class PartnerPreferences {
     this.state,
     this.city,
     this.annualIncome,
+    this.disability,
+    this.gotra,
   });
 
   factory PartnerPreferences.fromJson(Map<String, dynamic> json) {
     return PartnerPreferences(
-      age: json['age'] != null
-          ? AgePreference.fromJson(json['age'] as Map<String, dynamic>)
+      age: safeMap(json['age']) != null
+          ? AgePreference.fromJson(safeMap(json['age'])!)
           : null,
-      height: json['height'] != null
-          ? HeightPreference.fromJson(json['height'] as Map<String, dynamic>)
+
+      height: safeMap(json['height']) != null
+          ? HeightPreference.fromJson(safeMap(json['height'])!)
           : null,
-      maritalStatus: json['maritalStatus'] != null
-          ? MaritalStatusPreference.fromJson(
-              json['maritalStatus'] as Map<String, dynamic>,
-            )
+
+      maritalStatus: safeMap(json['maritalStatus']) != null
+          ? MaritalStatusPreference.fromJson(safeMap(json['maritalStatus'])!)
           : null,
-      religion: json['religion'] != null
-          ? ReligionPreference.fromJson(
-              json['religion'] as Map<String, dynamic>,
-            )
+
+      religion: safeMap(json['religion']) != null
+          ? ReligionPreference.fromJson(safeMap(json['religion'])!)
           : null,
-      caste: json['caste'] != null
-          ? CastePreference.fromJson(json['caste'] as Map<String, dynamic>)
+
+      caste: safeMap(json['caste']) != null
+          ? CastePreference.fromJson(safeMap(json['caste'])!)
           : null,
-      motherTongue: json['motherTongue'] != null
-          ? MotherTonguePreference.fromJson(
-              json['motherTongue'] as Map<String, dynamic>,
-            )
+
+      // motherTongue may come as ""
+      motherTongue: safeMap(json['motherTongue']) != null
+          ? MotherTonguePreference.fromJson(safeMap(json['motherTongue'])!)
+          : MotherTonguePreference(
+              status: false,
+              motherTongue: json['motherTongue']?.toString() ?? "",
+            ),
+
+      // education sometimes ""
+      education: safeMap(json['education']) != null
+          ? EducationPreference.fromJson(safeMap(json['education'])!)
+          : EducationPreference(
+              status: false,
+              education: json['education']?.toString() ?? "",
+            ),
+
+      occupation: safeMap(json['occupation']) != null
+          ? OccupationPreference.fromJson(safeMap(json['occupation'])!)
+          : OccupationPreference(
+              status: false,
+              occupation: RefData(name: json['occupation']?.toString()),
+            ),
+
+      diet: safeMap(json['diet']) != null
+          ? DietPreference.fromJson(safeMap(json['diet'])!)
           : null,
-      education: json['education'] != null
-          ? EducationPreference.fromJson(
-              json['education'] as Map<String, dynamic>,
-            )
+
+      country: safeMap(json['country']) != null
+          ? CountryPreference.fromJson(safeMap(json['country'])!)
           : null,
-      occupation: json['occupation'] != null
-          ? OccupationPreference.fromJson(
-              json['occupation'] as Map<String, dynamic>,
-            )
+
+      // state was coming as "Bihar"
+      state: safeMap(json['state']) != null
+          ? StatePreference.fromJson(safeMap(json['state'])!)
+          : StatePreference(status: false, state: json['state']?.toString()),
+
+      city: safeMap(json['city']) != null
+          ? CityPreference.fromJson(safeMap(json['city'])!)
           : null,
-      diet: json['diet'] != null
-          ? DietPreference.fromJson(json['diet'] as Map<String, dynamic>)
-          : null,
-      country: json['country'] != null
-          ? CountryPreference.fromJson(
-              json['country'] as Map<String, dynamic>,
-            )
-          : null,
-      state: json['state'] != null
-          ? StatePreference.fromJson(json['state'] as Map<String, dynamic>)
-          : null,
-      city: json['city'] != null
-          ? CityPreference.fromJson(json['city'] as Map<String, dynamic>)
-          : null,
-      annualIncome: json['annualIncome'] != null
-          ? AnnualIncomePreference.fromJson(
-              json['annualIncome'] as Map<String, dynamic>,
-            )
-          : null,
+
+      // annualIncome sometimes ""
+      annualIncome: safeMap(json['annualIncome']) != null
+          ? AnnualIncomePreference.fromJson(safeMap(json['annualIncome'])!)
+          : AnnualIncomePreference(
+              status: false,
+              annualIncome: json['annualIncome']?.toString() ?? "",
+            ),
+
+      // disability sometimes ""
+      disability: safeMap(json['disability']) != null
+          ? DisabilityPreferences.fromJson(safeMap(json['disability'])!)
+          : DisabilityPreferences(
+              status: false,
+              disibility: json['disability']?.toString() ?? "",
+            ),
+
+      // gotra sometimes ""
+      gotra: safeMap(json['gotra']) != null
+          ? GotraPreferences.fromJson(safeMap(json['gotra'])!)
+          : GotraPreferences(
+              status: false,
+              gotra: json['gotra']?.toString() ?? "",
+            ),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'age': age?.toJson(),
-        'height': height?.toJson(),
-        'maritalStatus': maritalStatus?.toJson(),
-        'religion': religion?.toJson(),
-        'caste': caste?.toJson(),
-        'motherTongue': motherTongue?.toJson(),
-        'education': education?.toJson(),
-        'occupation': occupation?.toJson(),
-        'diet': diet?.toJson(),
-        'country': country?.toJson(),
-        'state': state?.toJson(),
-        'city': city?.toJson(),
-        'annualIncome': annualIncome?.toJson(),
-      };
+    'age': age?.toJson(),
+    'height': height?.toJson(),
+    'maritalStatus': maritalStatus?.toJson(),
+    'religion': religion?.toJson(),
+    'caste': caste?.toJson(),
+    'motherTongue': motherTongue?.toJson(),
+    'education': education?.toJson(),
+    'occupation': occupation?.toJson(),
+    'diet': diet?.toJson(),
+    'country': country?.toJson(),
+    'state': state?.toJson(),
+    'city': city?.toJson(),
+    'annualIncome': annualIncome?.toJson(),
+    'disibility': disability?.toJson(),
+    'gotra': gotra?.toJson(),
+  };
 }
 
 class AgePreference {
-  String? age;
+  dynamic age;
+  bool? status;
 
-  AgePreference({this.age});
+  AgePreference({this.age, this.status});
 
-  factory AgePreference.fromJson(Map<String, dynamic> json) {
+  factory AgePreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return AgePreference(age: json?.toString(), status: false);
+    }
+
     return AgePreference(
-      age: json['age']?.toString(),
+      age: map['age']?.toString(),
+      status: map['status'] as bool?,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'age': age,
-      };
+  Map<String, dynamic> toJson() => {'age': age, 'status': status};
 }
 
 class HeightPreference {
   double? height;
+  bool? status;
 
-  HeightPreference({this.height});
+  HeightPreference({this.height, this.status});
 
-  factory HeightPreference.fromJson(Map<String, dynamic> json) {
+  factory HeightPreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return HeightPreference(
+        height: double.tryParse(json?.toString() ?? ''),
+        status: false,
+      );
+    }
+
     return HeightPreference(
-      height: (json['height'] as num?)?.toDouble(),
+      height: (map['height'] as num?)?.toDouble(),
+      status: map['status'] as bool?,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'height': height,
-      };
+  Map<String, dynamic> toJson() => {'height': height, 'status': status};
 }
 
 class AnnualIncomePreference {
-  String? annualIncome;
+  dynamic annualIncome;
+  bool? status;
 
-  AnnualIncomePreference({this.annualIncome});
+  AnnualIncomePreference({this.annualIncome, this.status});
 
-  factory AnnualIncomePreference.fromJson(Map<String, dynamic> json) {
+  factory AnnualIncomePreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return AnnualIncomePreference(
+        annualIncome: json?.toString(),
+        status: false,
+      );
+    }
+
     return AnnualIncomePreference(
-      annualIncome: json['annualIncome']?.toString(),
+      annualIncome: map['annualIncome']?.toString(),
+      status: map['status'] as bool?,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'annualIncome': annualIncome,
-      };
+    'annualIncome': annualIncome,
+    'status': status,
+  };
+}
+
+class DisabilityPreferences {
+  dynamic disibility;
+  bool? status;
+
+  DisabilityPreferences({this.disibility, this.status});
+
+  factory DisabilityPreferences.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return DisabilityPreferences(disibility: json?.toString(), status: false);
+    }
+
+    return DisabilityPreferences(
+      disibility: map['disibility']?.toString(),
+      status: map['status'] as bool?,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {'disibility': disibility, 'status': status};
+}
+
+class GotraPreferences {
+  dynamic gotra;
+  bool? status;
+
+  GotraPreferences({this.gotra, this.status});
+
+  factory GotraPreferences.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return GotraPreferences(gotra: json?.toString(), status: false);
+    }
+
+    return GotraPreferences(
+      gotra: map['gotra']?.toString(),
+      status: map['status'] as bool?,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {'gotra': gotra, 'status': status};
 }
 
 class MaritalStatusPreference {
@@ -1595,19 +1105,27 @@ class MaritalStatusPreference {
 
   MaritalStatusPreference({this.status, this.maritalStatus});
 
-  factory MaritalStatusPreference.fromJson(Map<String, dynamic> json) {
+  factory MaritalStatusPreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return MaritalStatusPreference(
+        status: false,
+        maritalStatus: RefData(name: json?.toString()),
+      );
+    }
+
     return MaritalStatusPreference(
-      status: json['status'] as bool?,
-      maritalStatus: json['maritalStatus'] != null
-          ? RefData.fromJson(json['maritalStatus'] as Map<String, dynamic>)
-          : null,
+      status: map['status'] as bool?,
+      maritalStatus: safeMap(map['maritalStatus']) != null
+          ? RefData.fromJson(map['maritalStatus'])
+          : RefData(name: map['maritalStatus']?.toString()),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'status': status,
-        'maritalStatus': maritalStatus?.toJson(),
-      };
+    'status': status,
+    'maritalStatus': maritalStatus?.toJson(),
+  };
 }
 
 class ReligionPreference {
@@ -1616,19 +1134,27 @@ class ReligionPreference {
 
   ReligionPreference({this.status, this.religion});
 
-  factory ReligionPreference.fromJson(Map<String, dynamic> json) {
+  factory ReligionPreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return ReligionPreference(
+        status: false,
+        religion: RefData(name: json?.toString()),
+      );
+    }
+
     return ReligionPreference(
-      status: json['status'] as bool?,
-      religion: json['religion'] != null
-          ? RefData.fromJson(json['religion'] as Map<String, dynamic>)
-          : null,
+      status: map['status'] as bool?,
+      religion: safeMap(map['religion']) != null
+          ? RefData.fromJson(map['religion'])
+          : RefData(name: map['religion']?.toString()),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'status': status,
-        'religion': religion?.toJson(),
-      };
+    'status': status,
+    'religion': religion?.toJson(),
+  };
 }
 
 class CastePreference {
@@ -1637,57 +1163,72 @@ class CastePreference {
 
   CastePreference({this.status, this.caste});
 
-  factory CastePreference.fromJson(Map<String, dynamic> json) {
+  factory CastePreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return CastePreference(
+        status: false,
+        caste: RefData(name: json?.toString()),
+      );
+    }
+
     return CastePreference(
-      status: json['status'] as bool?,
-      caste: json['caste'] != null
-          ? RefData.fromJson(json['caste'] as Map<String, dynamic>)
-          : null,
+      status: map['status'] as bool?,
+      caste: safeMap(map['caste']) != null
+          ? RefData.fromJson(map['caste'])
+          : RefData(name: map['caste']?.toString()),
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'status': status,
-        'caste': caste?.toJson(),
-      };
+  Map<String, dynamic> toJson() => {'status': status, 'caste': caste?.toJson()};
 }
 
 class MotherTonguePreference {
   bool? status;
-  String? motherTongue;
+  dynamic motherTongue;
 
   MotherTonguePreference({this.status, this.motherTongue});
 
-  factory MotherTonguePreference.fromJson(Map<String, dynamic> json) {
+  factory MotherTonguePreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return MotherTonguePreference(
+        status: false,
+        motherTongue: json?.toString(),
+      );
+    }
+
     return MotherTonguePreference(
-      status: json['status'] as bool?,
-      motherTongue: json['motherTongue']?.toString(),
+      status: map['status'] as bool?,
+      motherTongue: map['motherTongue']?.toString(),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'status': status,
-        'motherTongue': motherTongue,
-      };
+    'status': status,
+    'motherTongue': motherTongue,
+  };
 }
 
 class EducationPreference {
   bool? status;
-  String? education;
+  dynamic education;
 
   EducationPreference({this.status, this.education});
 
-  factory EducationPreference.fromJson(Map<String, dynamic> json) {
+  factory EducationPreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return EducationPreference(status: false, education: json?.toString());
+    }
+
     return EducationPreference(
-      status: json['status'] as bool?,
-      education: json['education']?.toString(),
+      status: map['status'] as bool?,
+      education: map['education']?.toString(),
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'status': status,
-        'education': education,
-      };
+  Map<String, dynamic> toJson() => {'status': status, 'education': education};
 }
 
 class OccupationPreference {
@@ -1696,19 +1237,27 @@ class OccupationPreference {
 
   OccupationPreference({this.status, this.occupation});
 
-  factory OccupationPreference.fromJson(Map<String, dynamic> json) {
+  factory OccupationPreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return OccupationPreference(
+        status: false,
+        occupation: RefData(name: json?.toString()),
+      );
+    }
+
     return OccupationPreference(
-      status: json['status'] as bool?,
-      occupation: json['occupation'] != null
-          ? RefData.fromJson(json['occupation'] as Map<String, dynamic>)
-          : null,
+      status: map['status'] as bool?,
+      occupation: safeMap(map['occupation']) != null
+          ? RefData.fromJson(map['occupation'])
+          : RefData(name: map['occupation']?.toString()),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'status': status,
-        'occupation': occupation?.toJson(),
-      };
+    'status': status,
+    'occupation': occupation?.toJson(),
+  };
 }
 
 class DietPreference {
@@ -1717,19 +1266,24 @@ class DietPreference {
 
   DietPreference({this.status, this.diet});
 
-  factory DietPreference.fromJson(Map<String, dynamic> json) {
+  factory DietPreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return DietPreference(
+        status: false,
+        diet: RefData(name: json?.toString()),
+      );
+    }
+
     return DietPreference(
-      status: json['status'] as bool?,
-      diet: json['diet'] != null
-          ? RefData.fromJson(json['diet'] as Map<String, dynamic>)
-          : null,
+      status: map['status'] as bool?,
+      diet: safeMap(map['diet']) != null
+          ? RefData.fromJson(map['diet'])
+          : RefData(name: map['diet']?.toString()),
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'status': status,
-        'diet': diet?.toJson(),
-      };
+  Map<String, dynamic> toJson() => {'status': status, 'diet': diet?.toJson()};
 }
 
 class CountryPreference {
@@ -1738,38 +1292,48 @@ class CountryPreference {
 
   CountryPreference({this.status, this.country});
 
-  factory CountryPreference.fromJson(Map<String, dynamic> json) {
+  factory CountryPreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return CountryPreference(
+        status: false,
+        country: RefData(name: json?.toString()),
+      );
+    }
+
     return CountryPreference(
-      status: json['status'] as bool?,
-      country: json['country'] != null
-          ? RefData.fromJson(json['country'] as Map<String, dynamic>)
-          : null,
+      status: map['status'] as bool?,
+      country: safeMap(map['country']) != null
+          ? RefData.fromJson(map['country'])
+          : RefData(name: map['country']?.toString()),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'status': status,
-        'country': country?.toJson(),
-      };
+    'status': status,
+    'country': country?.toJson(),
+  };
 }
 
 class StatePreference {
   bool? status;
-  String? state;
+  dynamic state;
 
   StatePreference({this.status, this.state});
 
-  factory StatePreference.fromJson(Map<String, dynamic> json) {
+  factory StatePreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return StatePreference(status: false, state: json?.toString());
+    }
+
     return StatePreference(
-      status: json['status'] as bool?,
-      state: json['state']?.toString(),
+      status: map['status'] as bool?,
+      state: map['state']?.toString(),
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'status': status,
-        'state': state,
-      };
+  Map<String, dynamic> toJson() => {'status': status, 'state': state};
 }
 
 class CityPreference {
@@ -1778,17 +1342,22 @@ class CityPreference {
 
   CityPreference({this.status, this.city});
 
-  factory CityPreference.fromJson(Map<String, dynamic> json) {
+  factory CityPreference.fromJson(dynamic json) {
+    final map = safeMap(json);
+    if (map == null) {
+      return CityPreference(
+        status: false,
+        city: RefData(name: json?.toString()),
+      );
+    }
+
     return CityPreference(
-      status: json['status'] as bool?,
-      city: json['city'] != null
-          ? RefData.fromJson(json['city'] as Map<String, dynamic>)
-          : null,
+      status: map['status'] as bool?,
+      city: safeMap(map['city']) != null
+          ? RefData.fromJson(map['city'])
+          : RefData(name: map['city']?.toString()),
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'status': status,
-        'city': city?.toJson(),
-      };
+  Map<String, dynamic> toJson() => {'status': status, 'city': city?.toJson()};
 }

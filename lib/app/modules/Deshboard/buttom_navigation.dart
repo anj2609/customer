@@ -12,8 +12,10 @@ import 'package:vivashri/app/modules/match/matchscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/check_percentage.dart';
 import 'package:vivashri/data/controller/match_list.dart';
 import 'package:vivashri/data/controller/matchdeshboard.dart';
+import 'package:vivashri/data/controller/recived_interst.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -35,15 +37,16 @@ class _MainNavigationState extends State<MainNavigation> {
     MembershipPlansPage(),
   ];
   final matchC = Get.put(MatchController());
+  final checkcontroller = Get.put(CheckProfileController());
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     profileapi();
   }
 
   final searchC = Get.put(SearchmatchController());
+  final inboxCtrl = Get.put(InboxReceivedController());
 
   void profileapi() async {
     final prefs = await SharedPreferences.getInstance();
@@ -52,6 +55,8 @@ class _MainNavigationState extends State<MainNavigation> {
     usercontroller.fetchUserDetail(profileid.toString());
     matchC.fetchMatches();
     searchC.fetchSearchList("", "");
+    checkcontroller.checkProfileComplete(profileid.toString());
+    inboxCtrl.fetchInboxData();
   }
 
   @override

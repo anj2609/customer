@@ -4,7 +4,12 @@ import 'package:vivashri/app/modules/match/userprofile.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/recived_interst.dart';
+import 'package:vivashri/data/controller/send_interest.dart';
+import 'package:vivashri/data/controller/userbyuser.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/widgets/drawer.dart';
+import 'package:vivashri/widgets/image_view.dart';
 
 class ShortlistedScreen extends StatefulWidget {
   const ShortlistedScreen({super.key});
@@ -16,12 +21,67 @@ class ShortlistedScreen extends StatefulWidget {
 class _ShortlistedScreenState extends State<ShortlistedScreen> {
   int selectedFilter = 1;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final inboxCtrl = Get.put(InboxReceivedController());
+  String calculateAgeInYears(String? dobString) {
+    if (dobString == null || dobString.isEmpty) return "N/A";
+
+    try {
+      DateTime dob = DateTime.parse(dobString).toLocal();
+      return _getYearsOnly(dob);
+    } catch (e) {
+      try {
+        String onlyDate = dobString.split("T")[0]; // e.g., "1998-01-01"
+        List<String> p = onlyDate.split("-");
+
+        DateTime dob = DateTime(
+          int.parse(p[0]),
+          int.parse(p[1]),
+          int.parse(p[2]),
+        );
+
+        return _getYearsOnly(dob);
+      } catch (e) {
+        return "N/A";
+      }
+    }
+  }
+
+  final userbyuserController = Get.put(UserbyUserDetailController());
+  final sentCtrl = Get.put(SentInterestController());
+
+  String _getYearsOnly(DateTime dob) {
+    DateTime now = DateTime.now();
+
+    int years = now.year - dob.year;
+
+    if (now.month < dob.month ||
+        (now.month == dob.month && now.day < dob.day)) {
+      years--;
+    }
+
+    return years.toString();
+  }
+
+  List<String> photosmatch = [];
+
+  void buildPhotoList(dynamic u) {
+    List<String?> raw = [u.photo, u.photo1, u.photo2, u.photo3, u.photo4];
+
+    photosmatch = raw
+        .where((e) => e != null && e.isNotEmpty)
+        .map((e) => e!)
+        .toSet()
+        .toList();
+  }
+
+  final usercontroller = Get.put(UserDetailController());
 
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
     final h = MediaQuery.of(context).size.height;
     final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final u = usercontroller.userData.value!;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -34,15 +94,391 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
             child: Column(
               children: [
                 _buildTopBar(w),
-
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: 5,
-                    itemBuilder: (context, index) {
-                      return _profileCard(w, h);
-                    },
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, left: 12),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${u.shortlisted} Profile',
+                        style: opensansSemiBold.copyWith(fontSize: 16),
+                      ),
+                    ],
                   ),
+                ),
+                Expanded(
+                  child: Obx(() {
+                    if (inboxCtrl.isLoading.value) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: ColorResources.primarycolor2,
+                        ),
+                      );
+                    }
+
+                    if (inboxCtrl.shotlisttedList.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No Data Found!",
+                          style: opensansSemiBold.copyWith(),
+                        ),
+                      );
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: inboxCtrl.shotlisttedList.length,
+                      itemBuilder: (context, index) {
+                        final item = inboxCtrl.shotlisttedList[index];
+                        final user = item.partnerId;
+                        String age = calculateAgeInYears(user?.dob);
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(10),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    AspectRatio(
+                                      aspectRatio: 9 / 11,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.network(
+                                          user!.photo != null
+                                              ? "${ApiConstants.imageurl}${user.photo!}"
+                                              : "",
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return Image.asset(
+                                                  user.gender == "Male"
+                                                      ? "assets/images/9159790.png"
+                                                      : "assets/images/3232.png",
+                                                  fit: BoxFit.contain,
+                                                );
+                                              },
+                                        ),
+                                      ),
+                                    ),
+
+                                    Positioned(
+                                      bottom: 0,
+                                      left: 0,
+                                      right: 0,
+                                      child: Container(
+                                        height: 110,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [
+                                              Colors.transparent,
+                                              Colors.black.withOpacity(0.7),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // LEFT PHOTOS BADGE
+                                    Positioned(
+                                      top: 12,
+                                      left: 12,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          // color: Colors.white.withOpacity(0.85),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                buildPhotoList(user);
+                                                showDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  builder: (_) =>
+                                                      PhotoSliderDialog(
+                                                        photos: photosmatch,
+                                                      ),
+                                                );
+                                              },
+                                              child: Image.asset(
+                                                'assets/images/imagecount.png',
+                                                height: 40,
+                                              ),
+                                            ),
+                                            // Icon(Icons.image, size: 16, color: Colors.black87),
+                                            SizedBox(width: 4),
+                                            //  Text("1", style: TextStyle(color: Colors.black)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+
+                                    // VERIFIED BADGE
+                                    Positioned(
+                                      top: 12,
+                                      right: 12,
+                                      child: Image.asset(
+                                        'assets/images/Group 285.png',
+                                        height: 25,
+                                      ),
+                                    ),
+
+                                    // BOTTOM TEXT CONTENT (ON IMAGE)
+                                    Positioned(
+                                      bottom: 14,
+                                      left: 14,
+                                      right: 14,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // TAGS
+                                          Row(
+                                            children: [
+                                              _darkTag(
+                                                "Profile managed by Self",
+                                              ),
+                                              const SizedBox(width: 6),
+                                              _darkTagonline("Online"),
+                                            ],
+                                          ),
+
+                                          const SizedBox(height: 5),
+
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "${user.name ?? ""}",
+                                                style: opensansMedium.copyWith(
+                                                  color: Colors.white,
+                                                  fontSize: 17,
+                                                ),
+                                              ),
+                                              SizedBox(width: 5),
+                                              Text(
+                                                "(ID: ${user.profileId ?? ""})",
+                                                style: opensansMedium.copyWith(
+                                                  color: ColorResources
+                                                      .primarycolor2,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+                                          const SizedBox(height: 4),
+
+                                          // DETAILS L1
+                                          Text(
+                                            "• $age, ${user.height}” • ${user.religion?.name ?? ""} • ${user.subCaste?.name ?? ""} • ${user.manglik ?? ""}",
+                                            style: opensansMedium.copyWith(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+
+                                          // DETAILS L2
+                                          Text(
+                                            "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome ?? ""} Lacs p.a • ${user.locState?.name ?? ""}",
+                                            style: opensansMedium.copyWith(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 60,
+
+                                      right: 14,
+                                      child: user.shortlistsent == false
+                                          ? GestureDetector(
+                                              onTap: () {
+                                                sentCtrl.sendshortlisted(
+                                                  user.id.toString(),
+                                                );
+                                              },
+                                              child: Image.asset(
+                                                'assets/images/shortlist (1).png',
+                                                height: 50,
+                                              ),
+                                            )
+                                          : GestureDetector(
+                                              onTap: () {
+                                                sentCtrl.removeshortlisted(
+                                                  user.id.toString(),
+                                                );
+                                              },
+                                              child: Image.asset(
+                                                'assets/images/shortlist 2.png',
+                                                height: 50,
+                                              ),
+                                            ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // ----------------- BOTTOM BUTTONS -----------------
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 14,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Builder(
+                                        builder: (_) {
+                                          final status = user.interestsentstatus
+                                              ?.toString()
+                                              .trim();
+
+                                          if (status == null ||
+                                              status.isEmpty) {
+                                            return GestureDetector(
+                                              onTap: () =>
+                                                  sentCtrl.sendInterest(
+                                                    user.id.toString(),
+                                                  ),
+                                              child: Image.asset(
+                                                'assets/images/Frame 63 2.png',
+                                                height:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.height *
+                                                    0.05,
+                                                fit: BoxFit.contain,
+                                              ),
+                                            );
+                                          }
+
+                                          if (status == "Pending") {
+                                            return GestureDetector(
+                                              onTap: () {
+                                                Get.snackbar(
+                                                  "Pending",
+                                                  'Your request is already pending.',
+                                                  backgroundColor: Colors.red,
+                                                  colorText: Colors.white,
+                                                );
+                                              },
+                                              // onTap: () => sentCtrl.sendInterest(u.id.toString()),
+                                              child: Image.asset(
+                                                'assets/images/Frame 63 (1).png',
+                                                height:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.height *
+                                                    0.05,
+                                                fit: BoxFit.contain,
+                                              ),
+                                            );
+                                          }
+
+                                          if (status == "Accepted") {
+                                            return GestureDetector(
+                                              onTap: () {},
+                                              child: Image.asset(
+                                                'assets/images/Group 85 (1).png',
+                                                height:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.height *
+                                                    0.04,
+                                                fit: BoxFit.contain,
+                                              ),
+                                            );
+                                          }
+
+                                          return GestureDetector(
+                                            onTap: () => print(
+                                              "Unknown status: $status",
+                                            ),
+                                            child: Image.asset(
+                                              'assets/images/Frame 63 2.png',
+                                              height:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.height *
+                                                  0.05,
+                                              fit: BoxFit.contain,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    user.interestsentstatus == "Accepted"
+                                        ? Expanded(
+                                            child: GestureDetector(
+                                              onTap: () {},
+                                              child: Image.asset(
+                                                'assets/images/viewprofile (1).png',
+                                                height:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.height *
+                                                    0.040,
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          )
+                                        : Expanded(
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                userbyuserController
+                                                    .fetchUserDetail(
+                                                      user.id.toString(),
+                                                    );
+                                                Get.to(
+                                                  UserProfileDetailsPage(),
+                                                  duration: Duration(
+                                                    milliseconds: ApiConstants
+                                                        .screenTransitionTime,
+                                                  ),
+                                                  transition:
+                                                      Transition.rightToLeft,
+                                                );
+                                              },
+                                              child: Image.asset(
+                                                'assets/images/viewprofile 3.png',
+                                                height: 34,
+                                              ),
+                                            ),
+                                          ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                        // _profileCard(w, h);
+                      },
+                    );
+                  }),
                 ),
               ],
             ),
@@ -113,266 +549,6 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
   }
 
   // ---------------- FILTER BAR ----------------
-  Widget _buildFilterBar() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10),
-          child: Row(
-            children: [
-              _filterChip(Icons.tune, "Filters", 0),
-              const SizedBox(width: 10),
-              _filterChip(null, "My Match", 1),
-              const SizedBox(width: 10),
-              _filterChip(null, "Today Match", 2),
-              const SizedBox(width: 10),
-              _filterChip(null, "Near Me", 3),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _filterChip(IconData? icon, String text, int id) {
-    bool active = selectedFilter == id;
-
-    return InkWell(
-      onTap: () {
-        setState(() => selectedFilter = id);
-
-        if (id == 0) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const FilterPage()),
-          );
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: active ? ColorResources.primarycolor3 : Colors.grey.shade200,
-          ),
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: Row(
-          children: [
-            if (icon != null)
-              Icon(
-                icon,
-                size: 16,
-                color: active ? ColorResources.primarycolor3 : Colors.black87,
-              ),
-            if (icon != null) const SizedBox(width: 6),
-            Text(
-              text,
-              style: opensansMedium.copyWith(
-                fontSize: 13.5,
-                color: active ? ColorResources.primarycolor3 : Colors.black87,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _profileCard(double w, double h) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-            child: Stack(
-              children: [
-                AspectRatio(
-                  aspectRatio: 9 / 11,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      "assets/images/Rectangle 77.png",
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 110,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.7),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // LEFT PHOTOS BADGE
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      // color: Colors.white.withOpacity(0.85),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        Image.asset('assets/images/imagecount.png', height: 40),
-                        // Icon(Icons.image, size: 16, color: Colors.black87),
-                        SizedBox(width: 4),
-                        //  Text("1", style: TextStyle(color: Colors.black)),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // VERIFIED BADGE
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Image.asset('assets/images/Group 285.png', height: 25),
-                ),
-
-                // BOTTOM TEXT CONTENT (ON IMAGE)
-                Positioned(
-                  bottom: 14,
-                  left: 14,
-                  right: 14,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // TAGS
-                      Row(
-                        children: [
-                          _darkTag("Profile managed by Self"),
-                          const SizedBox(width: 6),
-                          _darkTagonline("Online"),
-                        ],
-                      ),
-
-                      const SizedBox(height: 5),
-
-                      Row(
-                        children: [
-                          Text(
-                            "Rupali Jha ",
-                            style: opensansMedium.copyWith(
-                              color: Colors.white,
-                              fontSize: 17,
-                            ),
-                          ),
-                          Text(
-                            "(ID: 600155)",
-                            style: opensansMedium.copyWith(
-                              color: ColorResources.primarycolor,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      // DETAILS L1
-                      Text(
-                        "• 22, 5’ 6” • Hindu • Agarwal • Non Manglik",
-                        style: opensansMedium.copyWith(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-
-                      // DETAILS L2
-                      Text(
-                        "• Teacher • Earns ₹15 Lacs p.a • Bihar",
-                        style: opensansMedium.copyWith(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  bottom: 50,
-
-                  right: 14,
-                  child: Image.asset(
-                    'assets/images/shortlist 2.png',
-                    height: 50,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ----------------- BOTTOM BUTTONS -----------------
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Image.asset('assets/images/Frame 63.png', height: 40),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      Get.to(
-                        UserProfileDetailsPage(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    },
-                    child: Image.asset(
-                      'assets/images/viewprofile 3.png',
-                      height: 34,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _darkTagonline(String text) {
     return Container(
@@ -411,50 +587,6 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
       child: Text(
         text,
         style: opensansMedium.copyWith(color: Colors.white, fontSize: 11),
-      ),
-    );
-  }
-
-  Widget _pinkButton(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        color: Color(0xFF6C1A2F),
-        borderRadius: BorderRadius.circular(25),
-      ),
-      alignment: Alignment.center,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset('assets/images/heart_svgrepo.com.png', height: 20),
-          SizedBox(width: 5),
-          Text(
-            text,
-            style: opensansMedium.copyWith(color: Colors.white, fontSize: 13),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _lightPinkButton(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        color: ColorResources.primarycolor2,
-        borderRadius: BorderRadius.circular(25),
-      ),
-      alignment: Alignment.center,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset('assets/images/view_svgrepo.com.png', height: 20),
-          SizedBox(width: 5),
-          Text(
-            text,
-            style: opensansMedium.copyWith(color: Colors.white, fontSize: 13),
-          ),
-        ],
       ),
     );
   }

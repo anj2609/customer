@@ -311,6 +311,9 @@ class _EditProfessionalDetailsState extends State<EditProfessionalDetails> {
                   "organization_name": organizationName.text,
                 },
               );
+              Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

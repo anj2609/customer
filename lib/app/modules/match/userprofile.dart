@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/send_interest.dart';
 import 'package:vivashri/data/controller/userbyuser.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/data/modal/user_by_user.dart';
@@ -16,46 +18,58 @@ class UserProfileDetailsPage extends StatefulWidget {
 }
 
 class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
-  final hobbies = [
-    {"icon": "assets/images/Vector 2.png", "title": "Dancing"},
-    {
-      "icon": "assets/images/yoga_svgrepo.com.png",
-      "title": "Yoga & Meditation",
-    },
-    {"icon": "assets/images/food_svgrepo.com.png", "title": "Foodie"},
-    {
-      "icon": "assets/images/carry-bag-7_svgrepo.com.png",
-      "title": "Travelling",
-    },
-  ];
   final userbyuserController = Get.put(UserbyUserDetailController());
-  String calculateAgeInYears(String? dobString) {
-    if (dobString == null || dobString.isEmpty) return "N/A";
+  String calculateAgeInYears(dynamic dobString) {
+    if (dobString == null) return "N/A";
 
-    try {
-      DateTime dob = DateTime.parse(dobString).toLocal();
-      return _getYearsOnly(dob);
-    } catch (e) {
+    if (dobString is int) {
       try {
-        String onlyDate = dobString.split("T")[0]; // e.g., "1998-01-01"
-        List<String> p = onlyDate.split("-");
-
-        DateTime dob = DateTime(
-          int.parse(p[0]),
-          int.parse(p[1]),
-          int.parse(p[2]),
-        );
+        DateTime dob = (dobString.toString().length > 10)
+            ? DateTime.fromMillisecondsSinceEpoch(dobString)
+            : DateTime.fromMillisecondsSinceEpoch(dobString * 1000);
 
         return _getYearsOnly(dob);
       } catch (e) {
         return "N/A";
       }
     }
+
+    // If DOB is already DateTime
+    if (dobString is DateTime) {
+      return _getYearsOnly(dobString);
+    }
+
+    // If DOB is String
+    if (dobString is String) {
+      if (dobString.trim().isEmpty) return "N/A";
+
+      try {
+        // First try normal parse
+        DateTime dob = DateTime.parse(dobString);
+        return _getYearsOnly(dob);
+      } catch (e) {
+        try {
+          // Try manual split
+          String onlyDate = dobString.split("T")[0];
+          List<String> p = onlyDate.split("-");
+
+          DateTime dob = DateTime(
+            int.parse(p[0]),
+            int.parse(p[1]),
+            int.parse(p[2]),
+          );
+          return _getYearsOnly(dob);
+        } catch (e) {
+          return "N/A";
+        }
+      }
+    }
+
+    return "N/A";
   }
 
   String _getYearsOnly(DateTime dob) {
     DateTime now = DateTime.now();
-
     int years = now.year - dob.year;
 
     if (now.month < dob.month ||
@@ -78,7 +92,18 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
         .toList();
   }
 
+  bool deshboard = true;
   final usercontroller = Get.put(UserDetailController());
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Future.delayed(Duration(seconds: 1), () {
+      setState(() {
+        deshboard = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,736 +135,778 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
             final pp = userbyuserController.partnerPreferences.value;
             //}
 
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTopImageSection(w, h),
-                  _buildNameSection(),
-                  Divider(),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, right: 15, top: 5),
+            return deshboard
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: ColorResources.primarycolor2,
+                    ),
+                  )
+                : SingleChildScrollView(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                text: "Age: ",
-                                style: opensansBold.copyWith(
-                                  fontSize: 14,
-                                  color: ColorResources.blacktext,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: age,
-                                    style: opensansSemiBold.copyWith(
-                                      fontSize: 13,
-                                      color: ColorResources.blacktext,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            RichText(
-                              text: TextSpan(
-                                text: "Height: ",
-                                style: opensansBold.copyWith(
-                                  fontSize: 14,
-                                  color: ColorResources.blacktext,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: "${user.height ?? ""}",
-                                    style: opensansSemiBold.copyWith(
-                                      fontSize: 13,
-                                      color: ColorResources.blacktext,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                text: "Religion: ",
-                                style: opensansBold.copyWith(
-                                  fontSize: 14,
-                                  color: ColorResources.blacktext,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: user.religion?.name ?? "",
-                                    style: opensansSemiBold.copyWith(
-                                      fontSize: 13,
-                                      color: ColorResources.blacktext,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            RichText(
-                              text: TextSpan(
-                                text: "Gender: ",
-                                style: opensansBold.copyWith(
-                                  fontSize: 14,
-                                  color: ColorResources.blacktext,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: user.gender ?? "",
-                                    style: opensansSemiBold.copyWith(
-                                      fontSize: 13,
-                                      color: ColorResources.blacktext,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-
-                        // -------- Row 3 --------
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                text: "Marital Status: ",
-                                style: opensansBold.copyWith(
-                                  fontSize: 14,
-                                  color: ColorResources.blacktext,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: user.maritalStatus!.name ?? "",
-                                    style: opensansSemiBold.copyWith(
-                                      fontSize: 13,
-                                      color: ColorResources.blacktext,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                text: "Manglik Status: ",
-                                style: opensansBold.copyWith(
-                                  fontSize: 14,
-                                  color: ColorResources.blacktext,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: user.manglik ?? "",
-                                    style: opensansSemiBold.copyWith(
-                                      fontSize: 13,
-                                      color: ColorResources.blacktext,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-
-                        Row(
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                text: "Location: ",
-                                style: opensansBold.copyWith(
-                                  fontSize: 14,
-                                  color: ColorResources.blacktext,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text:
-                                        "${user.locState?.name ?? ""}, ${user.locCity?.name ?? ""}",
-                                    style: opensansSemiBold.copyWith(
-                                      fontSize: 13,
-                                      color: ColorResources.blacktext,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: 20),
-
-                        Text(
-                          "It is a pleasure introducing myself. My perspective towards life is being optimistic yet realistic. I am looking for a life partner who would be my friend and stand by me in every phase of life. Please feel free to connect and know more.",
-                          style: opensansSemiBold.copyWith(
-                            fontSize: 14,
-                            color: ColorResources.blacktext,
+                        _buildTopImageSection(w, h),
+                        _buildNameSection(),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 15,
+                            right: 15,
+                            top: 5,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 15,
-                      right: 15,
-                      top: 15,
-                    ),
-                    child: Column(
-                      children: [
-                        // ---------------- CONTACT DETAILS ----------------
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/call-191_svgrepo.com.png',
-                              height: 16,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              "Contact Details",
-                              style: opensansSemiBold.copyWith(
-                                fontSize: 15,
-                                color: ColorResources.primarycolor3,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        rowSingle(
-                          "Contact No.",
-                          "+91-${user.contactNo ?? "N/A"}",
-                        ),
-                        rowSingle("Email ID", user.email ?? "N/A"),
-
-                        SizedBox(height: 15),
-
-                        // ---------------- BASIC INFO ----------------
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/info_svgrepo.com.png',
-                              height: 16,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              "Basic Info",
-                              style: opensansSemiBold.copyWith(
-                                fontSize: 15,
-                                color: ColorResources.primarycolor3,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 0),
-                        rowTopBottom(
-                          "Age / Height",
-                          "${age ?? ""} Yrs / ${user.height ?? ""}",
-                          "Date of Birth",
-                          (() {
-                            if (user.dob == null || user.dob!.isEmpty)
-                              return "";
-
-                            try {
-                              DateTime d = DateTime.parse(user.dob!);
-                              return "${d.day.toString().padLeft(2, '0')}-"
-                                  "${d.month.toString().padLeft(2, '0')}-"
-                                  "${d.year}";
-                            } catch (e) {
-                              return "";
-                            }
-                          })(),
-                        ),
-                        rowTopBottom(
-                          "Caste",
-                          user.caste?.name ?? "N/A",
-                          "Have Children",
-                          "No",
-                        ),
-
-                        rowTopBottom(
-                          "Sub Caste",
-                          user.subCaste?.name ?? "N/A",
-                          "Gothra / Gothram",
-                          user.gotra?.name ?? "N/A",
-                        ),
-
-                        rowTopBottom(
-                          "Mother Tongue",
-                          user.partnerMotherTongue?.name ?? "",
-                          "Complexion",
-                          "${user.complexion!.name}",
-                        ),
-
-                        rowTopBottom(
-                          "Blood Group",
-                          user.bloodGroup ?? "N/A",
-                          "",
-                          "",
-                        ),
-                        rowTopBottom(
-                          "Body Weight",
-                          "${user.weight}kg",
-                          "Location",
-                          user.locState?.name ?? "N/A",
-                        ),
-
-                        SizedBox(height: 15),
-
-                        // ---------------- BACKGROUND & RELIGIOUS DETAILS ----------------
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/temple_svgrepo.com.png',
-                              height: 17,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              "Background and Religious Details",
-                              style: opensansSemiBold.copyWith(
-                                fontSize: 15,
-                                color: ColorResources.primarycolor3,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 0),
-
-                        rowTopBottom(
-                          "Birth Time",
-                          (() {
-                            DateTime d = DateTime.parse(user.dob ?? "");
-                            return "${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}";
-                          })(),
-                          "Place of Birth",
-                          user.birthCity?.name ?? "",
-                        ),
-
-                        // rowTopBottom(
-                        //   "Country of Birth",
-                        //   "India",
-                        //   "Sun Sign",
-                        //   "Virgo/Kanya",
-                        // ),
-                        // rowTopBottom(
-                        //   "Nakshatra",
-                        //   "No Information Available",
-                        //   "",
-                        //   "",
-                        // ),
-                        SizedBox(height: 15),
-
-                        // ---------------- LOCATION ----------------
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/location_svgrepo.com.png',
-                              height: 16,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              "Location",
-                              style: opensansSemiBold.copyWith(
-                                fontSize: 15,
-                                color: ColorResources.primarycolor3,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 0),
-
-                        rowTopBottom(
-                          "Country Residence",
-                          "India",
-                          "City",
-                          user.locCity?.name ?? "N/A",
-                        ),
-
-                        SizedBox(height: 15),
-
-                        // ---------------- EDUCATION & PROFESSION ----------------
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/degree-hat_svgrepo.com.png',
-                              height: 16,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              "Education and Profession",
-                              style: opensansSemiBold.copyWith(
-                                fontSize: 15,
-                                color: ColorResources.primarycolor3,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 0),
-
-                        rowTopBottom(
-                          "Education",
-                          user.highestDegree?.name ?? "N/A",
-                          "Job Details",
-                          user.occupation?.name ?? "N/A",
-                        ),
-                        rowTopBottom(
-                          "Working Status",
-                          "None",
-                          "Working With",
-                          user.workingWith?.name ?? "N/A",
-                        ),
-                        rowTopBottom(
-                          "Annual Income",
-                          user.annualIncome ?? "N/A",
-                          "Specific Degree",
-                          user.highestDegree?.name ?? "N/A",
-                        ),
-
-                        SizedBox(height: 15),
-
-                        // ---------------- FAMILY DETAILS ----------------
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/team_svgrepo.com.png',
-                              height: 16,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              "Family Details",
-                              style: opensansSemiBold.copyWith(
-                                fontSize: 15,
-                                color: ColorResources.primarycolor3,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 0),
-
-                        rowTopBottom(
-                          "Family Status",
-                          "Active",
-                          "Family Values",
-                          user.familyValue ?? "N/A",
-                        ),
-                        // rowTopBottom(
-                        //   "Father",
-                        //   "Retired",
-                        //   "Mother",
-                        //   "Housewife",
-                        // ),
-                        rowTopBottom(
-                          "Family Type",
-                          user.familyType ?? "N/A",
-                          "",
-                          "",
-                        ),
-                        rowTopBottom(
-                          "No of Brothers",
-                          "${user.noOfBrother ?? "N/A"}",
-                          "No of Sisters",
-                          "${user.noOfSister ?? "N/A"}",
-                        ),
-
-                        SizedBox(height: 15),
-
-                        // ---------------- LIFESTYLE ----------------
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/party-horn_svgrepo.com.png',
-                              height: 16,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              "Lifestyle, Interests and more",
-                              style: opensansSemiBold.copyWith(
-                                fontSize: 15,
-                                color: ColorResources.primarycolor3,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 0),
-
-                        rowTopBottom(
-                          "Smoking",
-                          user.partnerSmoking ?? "N/A",
-                          "Health Information",
-                          user.healthInformation ?? "N/A",
-                        ),
-                        rowTopBottom("Diet", user.diet?.name ?? "N/A", "", ""),
-                      ],
-                    ),
-                  ),
-                  buildHobbiesSection(),
-                  SizedBox(height: 15),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, right: 15, top: 5),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/user-search-alt-1_svgrepo.com.png',
-                              height: 17,
-                            ),
-                            SizedBox(width: 6),
-                            Text(
-                              "Partner Preference",
-                              style: opensansSemiBold.copyWith(
-                                fontSize: 15,
-                                color: ColorResources.primarycolor3,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Her Expectations",
-                              style: opensansSemiBold.copyWith(fontSize: 14),
-                            ),
-                            Text(
-                              "Your Match",
-                              style: opensansSemiBold.copyWith(fontSize: 14),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-
-                        Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Column(
                             children: [
-                              SizedBox(
-                                height: 45,
-                                width: 45,
-                                child: ClipOval(
-                                  child: Image.network(
-                                    "${ApiConstants.imageurl}${user.photo}",
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      String gender = user.gender.toString();
-
-                                      if (gender == "Male") {
-                                        return Image.asset(
-                                          "assets/images/9159790.png",
-                                          fit: BoxFit.cover,
-                                        );
-                                      } else if (gender == "Female") {
-                                        return Image.asset(
-                                          "assets/images/3232.png",
-                                          fit: BoxFit.cover,
-                                        );
-                                      } else {
-                                        return Image.asset(
-                                          "assets/images/profilee.png",
-                                          fit: BoxFit.cover,
-                                        );
-                                      }
-                                    },
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  RichText(
+                                    text: TextSpan(
+                                      text: "Age: ",
+                                      style: opensansBold.copyWith(
+                                        fontSize: 14,
+                                        color: ColorResources.blacktext,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: age,
+                                          style: opensansSemiBold.copyWith(
+                                            fontSize: 13,
+                                            color: ColorResources.blacktext,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
+                                  RichText(
+                                    text: TextSpan(
+                                      text: "Height: ",
+                                      style: opensansBold.copyWith(
+                                        fontSize: 14,
+                                        color: ColorResources.blacktext,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: "${user.height ?? ""}",
+                                          style: opensansSemiBold.copyWith(
+                                            fontSize: 13,
+                                            color: ColorResources.blacktext,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
+                              SizedBox(height: 10),
+
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  RichText(
+                                    text: TextSpan(
+                                      text: "Religion: ",
+                                      style: opensansBold.copyWith(
+                                        fontSize: 14,
+                                        color: ColorResources.blacktext,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: user.religion?.name ?? "",
+                                          style: opensansSemiBold.copyWith(
+                                            fontSize: 13,
+                                            color: ColorResources.blacktext,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  RichText(
+                                    text: TextSpan(
+                                      text: "Gender: ",
+                                      style: opensansBold.copyWith(
+                                        fontSize: 14,
+                                        color: ColorResources.blacktext,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: user.gender ?? "",
+                                          style: opensansSemiBold.copyWith(
+                                            fontSize: 13,
+                                            color: ColorResources.blacktext,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+
+                              // -------- Row 3 --------
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  RichText(
+                                    text: TextSpan(
+                                      text: "Marital Status: ",
+                                      style: opensansBold.copyWith(
+                                        fontSize: 14,
+                                        color: ColorResources.blacktext,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: user.maritalStatus!.name ?? "",
+                                          style: opensansSemiBold.copyWith(
+                                            fontSize: 13,
+                                            color: ColorResources.blacktext,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  RichText(
+                                    text: TextSpan(
+                                      text: "Manglik Status: ",
+                                      style: opensansBold.copyWith(
+                                        fontSize: 14,
+                                        color: ColorResources.blacktext,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: user.manglik ?? "",
+                                          style: opensansSemiBold.copyWith(
+                                            fontSize: 13,
+                                            color: ColorResources.blacktext,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+
+                              Row(
+                                children: [
+                                  RichText(
+                                    text: TextSpan(
+                                      text: "Location: ",
+                                      style: opensansBold.copyWith(
+                                        fontSize: 14,
+                                        color: ColorResources.blacktext,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                              "${user.locState?.name ?? ""}, ${user.locCity?.name ?? ""}",
+                                          style: opensansSemiBold.copyWith(
+                                            fontSize: 13,
+                                            color: ColorResources.blacktext,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 20),
+
                               Text(
-                                "Match: 10,  Unmatched: 10",
+                                "It is a pleasure introducing myself. My perspective towards life is being optimistic yet realistic. I am looking for a life partner who would be my friend and stand by me in every phase of life. Please feel free to connect and know more.",
                                 style: opensansSemiBold.copyWith(
-                                  color: ColorResources.primarycolor3,
                                   fontSize: 14,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 45,
-                                width: 45,
-                                child: ClipOval(
-                                  child: Image.network(
-                                    "${ApiConstants.imageurl}${my.photo}",
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      String gender = my.gender.toString();
-
-                                      if (gender == "Male") {
-                                        return Image.asset(
-                                          "assets/images/9159790.png",
-                                          fit: BoxFit.cover,
-                                        );
-                                      } else if (gender == "Female") {
-                                        return Image.asset(
-                                          "assets/images/3232.png",
-                                          fit: BoxFit.cover,
-                                        );
-                                      } else {
-                                        return Image.asset(
-                                          "assets/images/profilee.png",
-                                          fit: BoxFit.cover,
-                                        );
-                                      }
-                                    },
-                                  ),
+                                  color: ColorResources.blacktext,
                                 ),
                               ),
                             ],
                           ),
                         ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 15,
+                            right: 15,
+                            top: 15,
+                          ),
+                          child: Column(
+                            children: [
+                              // ---------------- CONTACT DETAILS ----------------
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/call-191_svgrepo.com.png',
+                                    height: 16,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Contact Details",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 15,
+                                      color: ColorResources.primarycolor3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              rowSingle(
+                                "Contact No.",
+                                "+91-${user.contactNo ?? "N/A"}",
+                              ),
+                              rowSingle("Email ID", user.email ?? "N/A"),
+
+                              SizedBox(height: 15),
+
+                              // ---------------- BASIC INFO ----------------
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/info_svgrepo.com.png',
+                                    height: 16,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Basic Info",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 15,
+                                      color: ColorResources.primarycolor3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 0),
+                              rowTopBottom(
+                                "Age / Height",
+                                "${age ?? ""} Yrs / ${user.height ?? ""}",
+                                "Date of Birth",
+                                (() {
+                                  if (user.dob == null || user.dob!.isEmpty)
+                                    return "";
+
+                                  try {
+                                    DateTime d = DateTime.parse(user.dob!);
+                                    return "${d.day.toString().padLeft(2, '0')}-"
+                                        "${d.month.toString().padLeft(2, '0')}-"
+                                        "${d.year}";
+                                  } catch (e) {
+                                    return "";
+                                  }
+                                })(),
+                              ),
+                              rowTopBottom(
+                                "Caste",
+                                user.caste?.name ?? "N/A",
+                                "Have Children",
+                                "No",
+                              ),
+
+                              rowTopBottom(
+                                "Sub Caste",
+                                user.subCaste?.name ?? "N/A",
+                                "Gothra / Gothram",
+                                user.gotra?.name ?? "N/A",
+                              ),
+
+                              rowTopBottom(
+                                "Mother Tongue",
+                                user.partnerMotherTongue?.name ?? "",
+                                "Complexion",
+                                "${user.complexion!.name}",
+                              ),
+
+                              rowTopBottom(
+                                "Blood Group",
+                                user.bloodGroup ?? "N/A",
+                                "",
+                                "",
+                              ),
+                              rowTopBottom(
+                                "Body Weight",
+                                "${user.weight}kg",
+                                "Location",
+                                user.locState?.name ?? "N/A",
+                              ),
+
+                              SizedBox(height: 15),
+
+                              // ---------------- BACKGROUND & RELIGIOUS DETAILS ----------------
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/temple_svgrepo.com.png',
+                                    height: 17,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Background and Religious Details",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 15,
+                                      color: ColorResources.primarycolor3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 0),
+
+                              rowTopBottom(
+                                "Birth Time",
+                                (() {
+                                  DateTime d = DateTime.parse(user.dob ?? "");
+                                  return "${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}";
+                                })(),
+                                "Place of Birth",
+                                user.birthCity?.name ?? "",
+                              ),
+
+                              // rowTopBottom(
+                              //   "Country of Birth",
+                              //   "India",
+                              //   "Sun Sign",
+                              //   "Virgo/Kanya",
+                              // ),
+                              // rowTopBottom(
+                              //   "Nakshatra",
+                              //   "No Information Available",
+                              //   "",
+                              //   "",
+                              // ),
+                              SizedBox(height: 15),
+
+                              // ---------------- LOCATION ----------------
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/location_svgrepo.com.png',
+                                    height: 16,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Location",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 15,
+                                      color: ColorResources.primarycolor3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 0),
+
+                              rowTopBottom(
+                                "Country Residence",
+                                "India",
+                                "City",
+                                user.locCity?.name ?? "N/A",
+                              ),
+
+                              SizedBox(height: 15),
+
+                              // ---------------- EDUCATION & PROFESSION ----------------
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/degree-hat_svgrepo.com.png',
+                                    height: 16,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Education and Profession",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 15,
+                                      color: ColorResources.primarycolor3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 0),
+
+                              rowTopBottom(
+                                "Education",
+                                user.highestDegree?.name ?? "N/A",
+                                "Job Details",
+                                user.occupation?.name ?? "N/A",
+                              ),
+                              rowTopBottom(
+                                "Working Status",
+                                "None",
+                                "Working With",
+                                user.workingWith?.name ?? "N/A",
+                              ),
+                              rowTopBottom(
+                                "Annual Income",
+                                user.annualIncome ?? "N/A",
+                                "Specific Degree",
+                                user.highestDegree?.name ?? "N/A",
+                              ),
+
+                              SizedBox(height: 15),
+
+                              // ---------------- FAMILY DETAILS ----------------
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/team_svgrepo.com.png',
+                                    height: 16,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Family Details",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 15,
+                                      color: ColorResources.primarycolor3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 0),
+
+                              rowTopBottom(
+                                "Family Status",
+                                "Active",
+                                "Family Values",
+                                user.familyValue ?? "N/A",
+                              ),
+                              // rowTopBottom(
+                              //   "Father",
+                              //   "Retired",
+                              //   "Mother",
+                              //   "Housewife",
+                              // ),
+                              rowTopBottom(
+                                "Family Type",
+                                user.familyType ?? "N/A",
+                                "",
+                                "",
+                              ),
+                              rowTopBottom(
+                                "No of Brothers",
+                                "${user.noOfBrother ?? "N/A"}",
+                                "No of Sisters",
+                                "${user.noOfSister ?? "N/A"}",
+                              ),
+
+                              SizedBox(height: 15),
+
+                              // ---------------- LIFESTYLE ----------------
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/party-horn_svgrepo.com.png',
+                                    height: 16,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Lifestyle, Interests and more",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 15,
+                                      color: ColorResources.primarycolor3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 0),
+
+                              rowTopBottom(
+                                "Smoking",
+                                user.partnerSmoking ?? "N/A",
+                                "Health Information",
+                                user.healthInformation ?? "N/A",
+                              ),
+                              rowTopBottom(
+                                "Diet",
+                                user.diet?.name ?? "N/A",
+                                "",
+                                "",
+                              ),
+                            ],
+                          ),
+                        ),
+                        buildHobbiesSection(),
+                        SizedBox(height: 15),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 15,
+                            right: 15,
+                            top: 5,
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/user-search-alt-1_svgrepo.com.png',
+                                    height: 17,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    "Partner Preference",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 15,
+                                      color: ColorResources.primarycolor3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Her Expectations",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Your Match",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+
+                              Center(
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SizedBox(
+                                      height: 45,
+                                      width: 45,
+                                      child: ClipOval(
+                                        child: Image.network(
+                                          "${ApiConstants.imageurl}${user.photo}",
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                String gender = user.gender
+                                                    .toString();
+
+                                                if (gender == "Male") {
+                                                  return Image.asset(
+                                                    "assets/images/9159790.png",
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                } else if (gender == "Female") {
+                                                  return Image.asset(
+                                                    "assets/images/3232.png",
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                } else {
+                                                  return Image.asset(
+                                                    "assets/images/profilee.png",
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                }
+                                              },
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      "Match: 10,  Unmatched: 10",
+                                      style: opensansSemiBold.copyWith(
+                                        color: ColorResources.primarycolor3,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 45,
+                                      width: 45,
+                                      child: ClipOval(
+                                        child: Image.network(
+                                          "${ApiConstants.imageurl}${my.photo}",
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                String gender = my.gender
+                                                    .toString();
+
+                                                if (gender == "Male") {
+                                                  return Image.asset(
+                                                    "assets/images/9159790.png",
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                } else if (gender == "Female") {
+                                                  return Image.asset(
+                                                    "assets/images/3232.png",
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                } else {
+                                                  return Image.asset(
+                                                    "assets/images/profilee.png",
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                }
+                                              },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Text('${pp?.age?.status}'),
+                        SizedBox(height: 12),
+                        preferenceRow(
+                          leftKey: "Age",
+                          leftValue:
+                              '${user.partnerAgeFrom ?? ""} to ${user.partnerAgeTo ?? ""}',
+                          rightKey: "Age",
+                          rightValue: myage,
+                          isMatch: pp!.age!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "Height",
+                          leftValue:
+                              "${user.partnerHeightFrom ?? ""} to ${user.partnerHeightTo ?? ""}",
+                          rightKey: "Height",
+                          rightValue: "${my.height ?? ""}",
+                          isMatch: pp.height!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "Marital Status",
+                          leftValue:
+                              (user.partnerMaritalStatus != null &&
+                                  user.partnerMaritalStatus is List &&
+                                  user.partnerMaritalStatus!.isNotEmpty)
+                              ? user.partnerMaritalStatus!
+                                    .map((e) => (e?['name'] ?? '').toString())
+                                    .where((name) => name.isNotEmpty)
+                                    .join(", ")
+                              : "N/A",
+                          rightKey: "Marital Status",
+                          rightValue: my.maritalStatus?.name ?? "N/A",
+                          isMatch: pp?.maritalStatus?.status ?? false,
+                        ),
+                        preferenceRow(
+                          leftKey: "Disability",
+                          leftValue: user.disability ?? "",
+                          rightKey: "Disability",
+                          rightValue: my.disability ?? "",
+                          isMatch: pp.disability!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "Religion/Commu",
+                          leftValue: user.partnerReligion?.name ?? "",
+                          rightKey: "Religion/Commu",
+                          rightValue: my.religion?.name ?? "",
+                          isMatch: pp.religion!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "Cast",
+                          leftValue: user.partnerCaste?.name ?? "",
+                          rightKey: "Cast",
+                          rightValue: my.caste?.name ?? "",
+                          isMatch: pp.caste!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "Mother Tongue",
+                          leftValue: user.partnerMotherTongue?.name ?? "",
+                          rightKey: "Mother Tongue",
+                          rightValue: my.partnerMotherTongue?.name ?? "",
+                          isMatch: pp.motherTongue!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "Education",
+                          leftValue: user.partnerEducation?.name ?? "",
+                          rightKey: "Education",
+                          rightValue: my.highestDegree?.name ?? "",
+                          isMatch: pp.education!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "Occupation",
+                          leftValue: user.partnerOccupation?.name ?? "",
+                          rightKey: "Occupation",
+                          rightValue: my.occupation?.name ?? "",
+                          isMatch: pp.occupation!.status ?? false,
+                        ),
+
+                        // preferenceRow(
+                        //   leftKey: "Drink",
+                        //   leftValue: user.partnerDrinking ?? "",
+                        //   rightKey: "Drink",
+                        //   rightValue: my.partnerDrinking ?? "",
+                        //   isMatch: pp!.d!.status ?? false,
+                        // ),
+                        preferenceRow(
+                          leftKey: "Gotra",
+                          leftValue: user.partnerGotra?.name ?? "",
+                          rightKey: "Gotra",
+                          rightValue: my.gotra?.name ?? "",
+                          isMatch: pp.gotra!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "Country",
+                          leftValue: user.partnerCountry?.name ?? "",
+                          rightKey: "Country",
+                          rightValue: my.locNationality?.name ?? "",
+                          isMatch: pp.country!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "State Living In",
+                          leftValue: user.partnerState?.name ?? "",
+                          rightKey: "State Living In",
+                          rightValue: my.locState?.name ?? "",
+                          isMatch: pp.state!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "City Living In",
+                          leftValue: user.partnerCity?.name ?? "",
+                          rightKey: "City Living In",
+                          rightValue: my.locCity?.name ?? "",
+                          isMatch: pp.city!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "Annual Income",
+                          leftValue:
+                              "${user.partnerIncomeFrom ?? ""} to ${user.partnerIncomeTo ?? ""}",
+                          rightKey: "Annual Income",
+                          rightValue: "₹ ${my.annualIncome ?? ""}",
+                          isMatch: pp.annualIncome!.status ?? false,
+                        ),
+
+                        preferenceRow(
+                          leftKey: "Diet",
+                          leftValue: user.partnerDiet?.name ?? "",
+                          rightKey: "Diet",
+                          rightValue: my.diet?.name ?? "",
+                          isMatch: pp.diet!.status ?? false,
+                        ),
+
+                        // preferenceRow(
+                        //   leftKey: "Family Background",
+                        //   leftValue: user.familyType ?? "",
+                        //   rightKey: "Family Background",
+                        //   rightValue: my.familyType ?? "",
+                        //   isMatch: true,
+                        // ),
+                        SizedBox(height: 20),
                       ],
                     ),
-                  ),
-                  SizedBox(height: 12),
-                  preferenceRow(
-                    leftKey: "Age",
-                    leftValue: age,
-                    rightKey: "Age",
-                    rightValue: myage,
-                    isMatch: true,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Height",
-                    leftValue: "${user.height ?? ""}",
-                    rightKey: "Height",
-                    rightValue: "${my.height ?? ""}",
-                    isMatch: true,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Marital Status",
-                    leftValue: user.maritalStatus?.name ?? "",
-                    rightKey: "Marital Status",
-                    rightValue: my.maritalStatus?.name ?? "",
-                    isMatch: pp!.maritalStatus!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Disability",
-                    leftValue: user.disability ?? "",
-                    rightKey: "Disability",
-                    rightValue: my.disability ?? "",
-                    isMatch: pp.maritalStatus!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Religion/Commu",
-                    leftValue: user.religion?.name ?? "",
-                    rightKey: "Religion/Commu",
-                    rightValue: my.religion?.name ?? "",
-                    isMatch: pp.religion!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Cast",
-                    leftValue: user.caste?.name ?? "",
-                    rightKey: "Cast",
-                    rightValue: my.caste?.name ?? "",
-                    isMatch: pp.caste!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Mother Tongue",
-                    leftValue: user.partnerMotherTongue?.name ?? "",
-                    rightKey: "Mother Tongue",
-                    rightValue: my.partnerMotherTongue?.name ?? "",
-                    isMatch: pp.motherTongue!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Education",
-                    leftValue: user.highestDegree?.name ?? "",
-                    rightKey: "Education",
-                    rightValue: my.highestDegree?.name ?? "",
-                    isMatch: pp.education!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Occupation",
-                    leftValue: user.occupation?.name ?? "",
-                    rightKey: "Occupation",
-                    rightValue: my.occupation?.name ?? "",
-                    isMatch: pp.occupation!.status ?? false,
-                  ),
-
-                  // preferenceRow(
-                  //   leftKey: "Drink",
-                  //   leftValue: user.partnerDrinking ?? "",
-                  //   rightKey: "Drink",
-                  //   rightValue: my.partnerDrinking ?? "",
-                  //   isMatch: pp!.d!.status ?? false,
-                  // ),
-                  preferenceRow(
-                    leftKey: "Gotra",
-                    leftValue: user.gotra?.name ?? "",
-                    rightKey: "Gotra",
-                    rightValue: my.gotra?.name ?? "",
-                    isMatch: pp.maritalStatus!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Country",
-                    leftValue: user.locNationality?.name ?? "",
-                    rightKey: "Country",
-                    rightValue: my.locNationality?.name ?? "",
-                    isMatch: pp.country!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "State Living In",
-                    leftValue: user.locState?.name ?? "",
-                    rightKey: "State Living In",
-                    rightValue: my.locState?.name ?? "",
-                    isMatch: pp.state!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "City Living In",
-                    leftValue: user.locCity?.name ?? "",
-                    rightKey: "City Living In",
-                    rightValue: my.locCity?.name ?? "",
-                    isMatch: pp.city!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Annual Income",
-                    leftValue: "₹ ${user.annualIncome ?? ""}",
-                    rightKey: "Annual Income",
-                    rightValue: "₹ ${my.annualIncome ?? ""}",
-                    isMatch: pp.maritalStatus!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Diet",
-                    leftValue: user.diet?.name ?? "",
-                    rightKey: "Diet",
-                    rightValue: my.diet?.name ?? "",
-                    isMatch: pp.diet!.status ?? false,
-                  ),
-
-                  preferenceRow(
-                    leftKey: "Family Background",
-                    leftValue: user.familyType ?? "",
-                    rightKey: "Family Background",
-                    rightValue: my.familyType ?? "",
-                    isMatch: true,
-                  ),
-
-                  SizedBox(height: 20),
-                ],
-              ),
-            );
+                  );
           }),
           Container(
             height: statusBarHeight,
@@ -881,6 +948,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                       fontSize: 13,
                       color: ColorResources.blacktext,
                     ),
+                    maxLines: 1,
                   ),
                   SizedBox(height: 3),
                   Text(
@@ -889,6 +957,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                       fontSize: 12,
                       color: ColorResources.blacktext,
                     ),
+                    maxLines: 1,
                   ),
                 ],
               ),
@@ -931,6 +1000,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                       fontSize: 13,
                       color: ColorResources.blacktext,
                     ),
+                    maxLines: 1,
                   ),
                   SizedBox(height: 3),
                   Text(
@@ -939,6 +1009,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                       fontSize: 12,
                       color: ColorResources.blacktext,
                     ),
+                    maxLines: 1,
                   ),
                 ],
               ),
@@ -1084,6 +1155,8 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
     );
   }
 
+  final sentCtrl = Get.put(SentInterestController());
+
   List<String> photos = [];
 
   Widget _buildTopImageSection(double w, double h) {
@@ -1102,12 +1175,12 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
 
                 if (gender == "Male") {
                   return Image.asset(
-                    "assets/images/9159790.png",
+                    "assets/images/no-image-male2.jpg",
                     fit: BoxFit.contain,
                   );
                 } else if (gender == "Female") {
                   return Image.asset(
-                    "assets/images/3232.png",
+                    "assets/images/no-image-female2.jpg",
                     fit: BoxFit.contain,
                   );
                 } else {
@@ -1149,7 +1222,15 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                 child: Image.asset('assets/images/imagecount.png', height: 40),
               ),
               SizedBox(width: 20),
-              Image.asset('assets/images/toggle-button.png', height: 35),
+              GestureDetector(
+                onTap: () {
+                  showFirstPopup(context);
+                },
+                child: Image.asset(
+                  'assets/images/toggle-button.png',
+                  height: 35,
+                ),
+              ),
             ],
           ),
         ),
@@ -1161,14 +1242,212 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/images/Frame 63.png', height: 40),
+              Builder(
+                builder: (_) {
+                  final status = userbyuserController
+                      .fullResponse
+                      .value
+                      ?.data
+                      ?.interestsentstatus
+                      .toString()
+                      .trim();
 
-              const SizedBox(width: 16),
-              Image.asset('assets/images/shortlist.png', height: 45),
+                  if (status == null || status.isEmpty) {
+                    return GestureDetector(
+                      onTap: () {
+                        sentCtrl.sendInterest(user.id.toString());
+                        Future.delayed(const Duration(microseconds: 500), () {
+                          userbyuserController.fetchUserDetail(
+                            user.id.toString(),
+                          );
+                        });
+                      },
+                      child: Image.asset(
+                        'assets/images/Frame 63 2.png',
+                        height: MediaQuery.of(context).size.height * 0.05,
+                        fit: BoxFit.contain,
+                      ),
+                    );
+                  }
+
+                  if (status == "Pending") {
+                    return GestureDetector(
+                      onTap: () {
+                        Get.snackbar(
+                          "Pending",
+                          'Your request is already pending.',
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+                      },
+                      // onTap: () => sentCtrl.sendInterest(u.id.toString()),
+                      child: Image.asset(
+                        'assets/images/Frame 63 (1).png',
+                        height: MediaQuery.of(context).size.height * 0.05,
+                        fit: BoxFit.contain,
+                      ),
+                    );
+                  }
+
+                  if (status == "Accepted") {
+                    return GestureDetector(
+                      onTap: () {},
+                      // child: Image.asset(
+                      //   'assets/images/Group 85 (1).png',
+                      //   height: MediaQuery.of(context).size.height * 0.04,
+                      //   fit: BoxFit.contain,
+                      // ),
+                    );
+                  }
+
+                  return GestureDetector(
+                    onTap: () => print("Unknown status: $status"),
+                    child: Image.asset(
+                      'assets/images/Frame 63 2.png',
+                      height: MediaQuery.of(context).size.height * 0.05,
+                      fit: BoxFit.contain,
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(width: 12),
+              userbyuserController.fullResponse.value?.data?.shortliststatus ==
+                      false
+                  ? GestureDetector(
+                      onTap: () {
+                        sentCtrl.sendshortlisted(user.id.toString());
+                        Future.delayed(const Duration(seconds: 1), () {
+                          userbyuserController.fetchUserDetail(
+                            user.id.toString(),
+                          );
+                        });
+                      },
+                      child: Image.asset(
+                        'assets/images/shortlist.png',
+                        height: 45,
+                      ),
+                    )
+                  : GestureDetector(
+                      onTap: () {},
+                      child: Image.asset(
+                        'assets/images/Property 1=Variant2.png',
+                        height: 45,
+                      ),
+                    ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  void showFirstPopup(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) {
+        return CupertinoActionSheet(
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(Icons.close, size: 20),
+                  SizedBox(width: 10),
+                  Text(
+                    "Decline",
+                    style: opensansSemiBold.copyWith(
+                      fontSize: 16,
+                      color: ColorResources.blacktext,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+                showSecondPopup(context); // second popup call
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(Icons.block, size: 20),
+                  SizedBox(width: 10),
+                  Text(
+                    "Block this person",
+                    style: opensansSemiBold.copyWith(
+                      fontSize: 16,
+                      color: ColorResources.blacktext,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "Close",
+              style: opensansSemiBold.copyWith(
+                fontSize: 17,
+                color: ColorResources.blacktext,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showSecondPopup(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: Text(
+            "Are you sure you want to Block her?",
+            style: opensansSemiBold.copyWith(
+              fontSize: 16,
+              color: ColorResources.blacktext,
+            ),
+          ),
+          content: Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              "Blocked member will not be able to view your Profile or contact you.",
+              style: opensansSemiBold.copyWith(
+                fontSize: 13,
+                color: ColorResources.blacktext,
+              ),
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(context),
+              isDefaultAction: false,
+              child: Text(
+                "CANCEL",
+                style: opensansSemiBold.copyWith(color: Color(0xffd81b60)),
+              ),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+                print("Blocked");
+              },
+              isDestructiveAction: true,
+              child: Text(
+                "OK",
+                style: opensansSemiBold.copyWith(color: Color(0xffd81b60)),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

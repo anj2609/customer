@@ -665,7 +665,6 @@ class _EditLocationScreenState extends State<EditLocationScreen> {
                 color: ColorResources.blackgrey,
               ),
             ),
-          
           ],
         ),
       ),
@@ -825,7 +824,9 @@ class _EditLocationScreenState extends State<EditLocationScreen> {
                       ? pPincode.text.trim()
                       : tPincode.text.trim(),
                 },
-              );
+              );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

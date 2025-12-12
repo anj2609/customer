@@ -30,7 +30,9 @@ class MatchController extends GetxController {
         var free = data["data"]["usersFree"] as List;
         var premium = data["data"]["usersPremium"] as List;
 
-        freeMatches.value = free.map((e) => MatchUserModel.fromJson(e)).toList();
+        freeMatches.value = free
+            .map((e) => MatchUserModel.fromJson(e))
+            .toList();
 
         premiumMatches.value = premium
             .map((e) => MatchUserModel.fromJson(e))

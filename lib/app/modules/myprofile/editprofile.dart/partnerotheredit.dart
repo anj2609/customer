@@ -247,7 +247,9 @@ class _EditpartnereditotherState extends State<Editpartnereditother> {
                   "partner_smoking": smoking,
                   "partner_managed_by": profileManaged,
                 },
-              );
+              );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

@@ -508,7 +508,9 @@ class _EditEducationDetailsScreenState
                   // "school_name": bachelorCollege.text,
                   // "other_education": otherEducationDetails.text,
                 },
-              );
+              );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

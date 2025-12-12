@@ -233,6 +233,9 @@ class _EditContectScreenState extends State<EditContectScreen> {
                   // "reference_other": otherController.text.trim(),
                 },
               );
+              Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

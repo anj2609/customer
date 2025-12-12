@@ -184,7 +184,9 @@ class _EditHobbiesState extends State<EditHobbies> {
               stapercontroller.updatehobbies(
                 formData: {},
                 selected: hobbyC.selectedHobbyIds,
-              );
+              );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

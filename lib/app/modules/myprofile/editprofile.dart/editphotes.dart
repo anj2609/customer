@@ -136,112 +136,6 @@ class _EditphotoesScreenState extends State<EditphotoesScreen> {
     );
   }
 
-  Widget _header() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-      child: Row(
-        children: [
-          // LEFT
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(
-                  "Prev Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
-                  ),
-                ),
-                AutoSizeText(
-                  "Education Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // CENTER
-          Center(
-            child: Column(
-              children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: CircularProgressIndicator(
-                        value: 0.56,
-                        strokeWidth: 5,
-                        color: ColorResources.primarycolor2,
-                        backgroundColor: Colors.grey.shade300,
-                      ),
-                    ),
-                    Text(
-                      "11 of 18",
-                      style: opensansMedium.copyWith(
-                        color: ColorResources.blackgrey,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-
-                Text(
-                  "Upload Photo",
-                  style: opensansMedium.copyWith(
-                    color: ColorResources.blackcolor,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // RIGHT
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AutoSizeText(
-                  "Next Step:",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor,
-                  ),
-                ),
-                AutoSizeText(
-                  "Partner’s Details",
-                  maxLines: 1,
-                  minFontSize: 8,
-                  maxFontSize: 14,
-                  style: opensansBold.copyWith(
-                    color: ColorResources.primarycolor2,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buttons() {
     return Row(
       children: [
@@ -467,6 +361,7 @@ class _EditphotoesScreenState extends State<EditphotoesScreen> {
   //         ),
   //       ),
   //     ),
+
   //   );
   // }
 

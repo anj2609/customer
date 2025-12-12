@@ -4,20 +4,34 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/data/modal/user_by_user.dart';
 import 'dart:convert';
 
-// IMPORT YOUR FULL MODEL
-
 class UserbyUserDetailController extends GetxController implements GetxService {
   var isLoading = false.obs;
 
-  /// Member Data (inside data.memberData)
   Rx<MemberData?> memberData = Rx<MemberData?>(null);
+  Rx<ProfileResponse?> fullResponse = Rx<ProfileResponse?>(null);
 
-  /// Partner Preferences (inside data.partnerPreferences)
   Rx<PartnerPreferences?> partnerPreferences = Rx<PartnerPreferences?>(null);
+  void debugJson(dynamic json, [String prefix = ""]) {
+    if (json is Map) {
+      json.forEach((key, value) {
+        final newPrefix = prefix.isEmpty ? key : "$prefix.$key";
+
+        if (value is Map) {
+          debugJson(value, newPrefix);
+        } else if (value is List) {
+          for (var i = 0; i < value.length; i++) {
+            debugJson(value[i], "$newPrefix[$i]");
+          }
+        } else if (value is String) {
+          print("⚠ String FOUND at: $newPrefix => '$value'");
+        }
+      });
+    }
+  }
 
   Future<void> fetchUserDetail(String memberId) async {
     isLoading.value = true;
-
+    print('Memberid::::::${memberId}');
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString("token");
 
@@ -40,13 +54,11 @@ class UserbyUserDetailController extends GetxController implements GetxService {
       print("USER PROFILE RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
-        /// Parse full model
         final data = profileResponseFromJson(response.body);
+        fullResponse.value = data;
 
-        /// Assign memberData
         memberData.value = data.data?.memberData;
 
-        /// Assign partnerPreferences
         partnerPreferences.value = data.data?.partnerPreferences;
       } else {
         print("API ERROR: ${response.body}");
@@ -56,11 +68,5 @@ class UserbyUserDetailController extends GetxController implements GetxService {
     }
 
     isLoading.value = false;
-  }
-
-  @override
-  void onInit() {
-    fetchUserDetail("6936652a84657cc55c8540e5");
-    super.onInit();
   }
 }

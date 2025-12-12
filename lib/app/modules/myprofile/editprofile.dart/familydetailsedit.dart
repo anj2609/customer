@@ -344,7 +344,9 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
                   "no_of_brother_in_law": noOfBrotherInLaw,
                   // "total_family": totalFamilyMember,
                 },
-              );
+              );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,

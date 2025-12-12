@@ -19,6 +19,7 @@ import 'package:vivashri/app/modules/myprofile/editprofile.dart/professionaldeta
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/check_percentage.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/widgets/drawer.dart';
 import 'package:vivashri/widgets/image_view.dart';
@@ -32,14 +33,23 @@ class MyProfielScreen extends StatefulWidget {
 
 class _MyProfielScreenState extends State<MyProfielScreen> {
   int tabIndex = 0;
+  String? profileid;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final usercontroller = Get.put(UserDetailController());
   void profileapi() async {
     final prefs = await SharedPreferences.getInstance();
 
-    String? profileid = prefs.getString("profileid");
+    profileid = prefs.getString("profileid");
     usercontroller.fetchUserDetail(profileid.toString());
-  
+    // checkcontroller.checkProfileComplete(profileid.toString());
+  }
+
+  final checkcontroller = Get.put(CheckProfileController());
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    profileapi();
   }
 
   @override
@@ -65,6 +75,9 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                       backgroundColor: ColorResources.primarycolor2,
                       onRefresh: () async {
                         profileapi();
+                        checkcontroller.checkProfileComplete(
+                          profileid.toString(),
+                        );
                       },
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.only(bottom: 20),
@@ -192,6 +205,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
 
   Widget _profileHeader(double w) {
     final u = usercontroller.userData.value!;
+    String myage = calculateAgeInYears(u.dob.toString());
 
     return Padding(
       padding: const EdgeInsets.all(10.0),
@@ -210,19 +224,19 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
                       "${ApiConstants.imageurl}${u.photo}",
-                
+
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         String gender = u.gender.toString();
 
                         if (gender == "Male") {
                           return Image.asset(
-                            "assets/images/9159790.png",
+                            "assets/images/no-image-male2.jpg",
                             fit: BoxFit.contain,
                           );
                         } else if (gender == "Female") {
                           return Image.asset(
-                            "assets/images/3232.png",
+                            "assets/images/no-image-female2.jpg",
                             fit: BoxFit.contain,
                           );
                         } else {
@@ -324,7 +338,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                       const SizedBox(height: 4),
 
                       Text(
-                        "• ${u.weight ?? ''}, ${u.height ?? ''}   "
+                        "• $myage, ${u.height ?? ''}   "
                         "• ${u.religion?.name ?? ''}   "
                         "• ${u.subCaste?.name ?? ''}   "
                         "• ${u.manglik ?? ''}   "
@@ -392,6 +406,67 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
     );
   }
 
+  String calculateAgeInYears(dynamic dobString) {
+    if (dobString == null) return "N/A";
+
+    if (dobString is int) {
+      try {
+        DateTime dob = (dobString.toString().length > 10)
+            ? DateTime.fromMillisecondsSinceEpoch(dobString)
+            : DateTime.fromMillisecondsSinceEpoch(dobString * 1000);
+
+        return _getYearsOnly(dob);
+      } catch (e) {
+        return "N/A";
+      }
+    }
+
+    // If DOB is already DateTime
+    if (dobString is DateTime) {
+      return _getYearsOnly(dobString);
+    }
+
+    // If DOB is String
+    if (dobString is String) {
+      if (dobString.trim().isEmpty) return "N/A";
+
+      try {
+        // First try normal parse
+        DateTime dob = DateTime.parse(dobString);
+        return _getYearsOnly(dob);
+      } catch (e) {
+        try {
+          // Try manual split
+          String onlyDate = dobString.split("T")[0];
+          List<String> p = onlyDate.split("-");
+
+          DateTime dob = DateTime(
+            int.parse(p[0]),
+            int.parse(p[1]),
+            int.parse(p[2]),
+          );
+          return _getYearsOnly(dob);
+        } catch (e) {
+          return "N/A";
+        }
+      }
+    }
+
+    return "N/A";
+  }
+
+  String _getYearsOnly(DateTime dob) {
+    DateTime now = DateTime.now();
+    int years = now.year - dob.year;
+
+    if (now.month < dob.month ||
+        (now.month == dob.month && now.day < dob.day)) {
+      years--;
+    }
+
+    return years.toString();
+  }
+
   Widget progressRing(double progress) {
     return Container(
       padding: const EdgeInsets.all(5),
@@ -415,10 +490,10 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
 
           // Center Text
           Text(
-            "${(progress * 100).toInt()}%",
-            style: opensansMedium.copyWith(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
+            (checkcontroller.profileStatus.value!.completion),
+            style: opensansBold.copyWith(
+              fontSize: 9,
+              // fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
           ),

@@ -263,7 +263,9 @@ class _EditPartnerlocationState extends State<EditPartnerlocation> {
                   "partner_state": stateC.selectedStateId.value,
                   "partner_city": cityC.selectedCityId.value,
                 },
-              );
+              );  Future.delayed(const Duration(microseconds: 1000), () {
+                Get.back();
+              });
             },
             child: Container(
               height: 45,
