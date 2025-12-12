@@ -1,11 +1,16 @@
+import 'dart:io';
+import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:vivashri/config/route.dart';
 import 'package:vivashri/config/utils/app_constants.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/helper/get_di.dart' as di;
+import 'package:vivashri/config/utils/style.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +51,99 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late StreamSubscription connectivityStream;
+
+  @override
+  void initState() {
+    super.initState();
+
+    connectivityStream = Connectivity().onConnectivityChanged.listen((
+      List<ConnectivityResult> result,
+    ) {
+      if (result.contains(ConnectivityResult.none)) {
+        _showNoInternetDialog();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    connectivityStream.cancel();
+    super.dispose();
+  }
+
+  void _showNoInternetDialog() {
+    Get.dialog(
+      WillPopScope(
+        onWillPop: () async {
+          exit(0);
+        },
+        child: CupertinoAlertDialog(
+          title: Column(
+            children: [
+              Icon(
+                CupertinoIcons.wifi_exclamationmark,
+                size: 60,
+                color: CupertinoColors.destructiveRed,
+              ),
+              SizedBox(height: 10),
+              Text(
+                "No Internet Connection",
+                style: opensansSemiBold.copyWith(fontSize: 20),
+              ),
+            ],
+          ),
+          content: Padding(
+            padding: EdgeInsets.only(top: 10),
+            child: Text(
+              "Please check your network.\nTap refresh to try again.",
+              style: opensansSemiBold.copyWith(
+                fontSize: 15,
+                color: CupertinoColors.systemGrey,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () async {
+                var res = await Connectivity().checkConnectivity();
+
+                if (res.contains(ConnectivityResult.mobile) ||
+                    res.contains(ConnectivityResult.wifi)) {
+                  Get.back();
+                }
+              },
+              child: Text(
+                "Refresh",
+                style: opensansSemiBold.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                exit(0);
+              },
+              child: Text(
+                "Close App",
+                style: opensansSemiBold.copyWith(
+                  color: ColorResources.primarycolor2,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -61,7 +159,6 @@ class _MyAppState extends State<MyApp> {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
             statusBarColor: ColorResources.primarycolor,
-
             statusBarIconBrightness: Brightness.light,
             statusBarBrightness: Brightness.dark,
           ),

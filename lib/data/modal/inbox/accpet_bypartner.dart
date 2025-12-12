@@ -92,6 +92,9 @@ class AcceptedbypartnerUserModel {
   dynamic occupation;
 
   dynamic photo;
+  dynamic photo2;
+  dynamic photo3;
+  dynamic photo4;
   dynamic photoBlur;
   dynamic photo1;
   dynamic photo1Blur;
@@ -134,7 +137,9 @@ class AcceptedbypartnerUserModel {
     this.annualIncome,
     this.highestDegree,
     this.occupation,
-
+    this.photo2,
+    this.photo3,
+    this.photo4,
     this.photo,
     this.photoBlur,
     this.photo1,
@@ -197,6 +202,9 @@ class AcceptedbypartnerUserModel {
       photo1: json["photo1"] ?? "",
       photo1Blur: json["photo1_blur"] ?? "",
 
+      photo2: json["photo2"] ?? "",
+      photo3: json["photo3"] ?? "",
+      photo4: json["photo4"] ?? "",
       planDetail: json["plan_detail"] != null
           ? PlanDetail.fromJson(json["plan_detail"])
           : null,

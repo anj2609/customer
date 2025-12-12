@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/match/matchscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
@@ -174,7 +175,14 @@ class CustomAppDrawer extends StatelessWidget {
                     image: "assets/images/Vector.png",
                     title: "My Vivashri",
                     onTap: () {
-                      Get.back();
+                      Get.offAll(
+                        MainNavigation(),
+                        duration: Duration(
+                          milliseconds: ApiConstants.screenTransitionTime,
+                        ),
+                        transition: Transition.rightToLeft,
+                      );
+                      // Get.back();
                     },
                   ),
                   _drawerItem(

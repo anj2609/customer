@@ -82,7 +82,9 @@ class DeclinedUserModel {
   dynamic locNationality;
 
   StateModel? locState;
-
+  dynamic photo2;
+  dynamic photo3;
+  dynamic photo4;
   double? height;
   dynamic manglik;
   dynamic weight;
@@ -120,7 +122,9 @@ class DeclinedUserModel {
     this.religion,
 
     this.locRelation,
-
+    this.photo2,
+    this.photo3,
+    this.photo4,
     this.locCity,
     this.locHouseType,
     this.locLandmark,
@@ -179,6 +183,9 @@ class DeclinedUserModel {
           ? StateModel.fromJson(json["loc_state"])
           : null,
 
+      photo2: json["photo2"] ?? "",
+      photo3: json["photo3"] ?? "",
+      photo4: json["photo4"] ?? "",
       height: (json["height"] ?? 0).toDouble(),
       manglik: json["manglik"] ?? "",
       weight: json["weight"] ?? 0,

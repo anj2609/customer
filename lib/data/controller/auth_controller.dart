@@ -109,64 +109,64 @@ class AuthController extends GetxController implements GetxService {
 
     final step = userC.userData.value?.appStep;
 
-    if (step is String) {
+    if (userC.userData.value?.formStatus == "Completed") {
       Get.offAll(
         MainNavigation(),
         duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
         transition: Transition.rightToLeft,
       );
+    } else {
+      if (step is String) {
+        Get.offAll(
+          MainNavigation(),
+          duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+          transition: Transition.rightToLeft,
+        );
 
-      return;
-    }
+        return;
+      }
 
-    // 0 to 18 but skip 4
-    if (step is int) {
-      switch (step) {
-        case 0:
-          Get.offAll(
-            BasicDetailsScreen(),
-            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-            transition: Transition.rightToLeft,
-          );
-          break;
-        case 1:
-          Get.offAll(
-            ContactDetailsScreen(mobileemail: mobileemail),
-            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-            transition: Transition.rightToLeft,
-          );
-          break;
-        // case 2:
-        //   Get.offAll(
-        //     AadharVerificationScreen(),
-        //     duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-        //     transition: Transition.rightToLeft,
-        //   );
-        //   break;
-        // case 3:
-        //   Get.offAll(
-        //     AadharOtpScreen(),
-        //     duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-        //     transition: Transition.rightToLeft,
-        //   );
-        //   break;
+      // 0 to 18 but skip 4
+      if (step is int) {
+        switch (step) {
+          case 0:
+            Get.offAll(
+              BasicDetailsScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+            break;
+          case 1:
+            Get.offAll(
+              ContactDetailsScreen(mobileemail: mobileemail),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+            break;
 
-        // 4 skip
+          case 4:
+            Get.offAll(
+              ReligionDetailsScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+            break;
 
-        case 4:
-          Get.offAll(
-            ReligionDetailsScreen(),
-            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-            transition: Transition.rightToLeft,
-          );
-          break;
-
-        default:
-          Get.offAll(
-            MainNavigation(),
-            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-            transition: Transition.rightToLeft,
-          );
+          default:
+            Get.offAll(
+              MainNavigation(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+        }
       }
     }
   }

@@ -231,23 +231,35 @@ class _SearchListScreenState extends State<SearchListScreen> {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
             child: Stack(
               children: [
-                AspectRatio(
-                  aspectRatio: 9 / 11,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      u.photo != null
-                          ? "${ApiConstants.imageurl}${u.photo!}"
-                          : "",
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          u.gender == "Male"
-                              ? "assets/images/no-image-male2.jpg"
-                              : "assets/images/no-image-female2.jpg",
-                          fit: BoxFit.contain,
-                        );
-                      },
+                GestureDetector(
+                  onTap: () {
+                    userbyuserController.fetchUserDetail(u.id.toString());
+                    Get.to(
+                      UserProfileDetailsPage(),
+                      duration: Duration(
+                        milliseconds: ApiConstants.screenTransitionTime,
+                      ),
+                      transition: Transition.rightToLeft,
+                    );
+                  },
+                  child: AspectRatio(
+                    aspectRatio: 9 / 11,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        u.photo != null
+                            ? "${ApiConstants.imageurl}${u.photo!}"
+                            : "",
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            u.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -374,8 +386,8 @@ class _SearchListScreenState extends State<SearchListScreen> {
                         Text(
                           "• ${age} yrs, ${u.height ?? ''}   "
                           "• ${u.religion?.name ?? ''}   "
-                          "• ${u.manglik ?? ''}   "
-                          "• ${u.highestDegree?.name ?? ''}  • ${u.manglik}",
+                          //  "• ${u. ?? ''}   "
+                          "• ${u.highestDegree?.name ?? ''}${u.manglik}",
                           style: opensansSemiBold.copyWith(
                             color: Colors.white,
                             fontSize: 11,
@@ -385,7 +397,8 @@ class _SearchListScreenState extends State<SearchListScreen> {
                         Text(
                           "• ${u.occupation?.name ?? ''} "
                           "Earns ₹${u.annualincome ?? '0'} Lacs p.a "
-                          "• ${u.locState?.name ?? ''}",
+                          "• ${u.locState?.name ?? ''}  ${u.locCity?.name ?? ""}",
+
                           style: opensansMedium.copyWith(
                             color: Colors.white,
                             fontSize: 12,

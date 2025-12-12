@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:vivashri/app/modules/match/userprofile.dart';
 import 'package:vivashri/app/modules/search/search.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/accept_interest.dart';
 import 'package:vivashri/data/controller/recived_interst.dart';
+import 'package:vivashri/data/controller/send_interest.dart';
+import 'package:vivashri/data/controller/userbyuser.dart';
 import 'package:vivashri/widgets/drawer.dart';
 import 'package:vivashri/widgets/image_view.dart';
 
@@ -272,6 +275,8 @@ class _ConnectScreenState extends State<ConnectScreen>
         .toList();
   }
 
+  final userbyuserController = Get.put(UserbyUserDetailController());
+
   // ---------------- RECEIVED TAB ----------------
   Widget _receivedTab(double w, double h) {
     return Obx(() {
@@ -293,221 +298,233 @@ class _ConnectScreenState extends State<ConnectScreen>
           final item = inboxCtrl.inboxList[index];
           final user = item.memberId;
           String age = calculateAgeInYears(user?.dob);
-          return Container(
-            margin: const EdgeInsets.only(
-              bottom: 20,
-              left: 12,
-              right: 12,
-              top: 12,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
+          return GestureDetector(
+            onTap: () {
+              userbyuserController.fetchUserDetail(user.id.toString());
+              Get.to(
+                UserProfileDetailsPage(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(
+                bottom: 20,
+                left: 12,
+                right: 12,
+                top: 12,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
-                  child: Stack(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 9 / 11,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            user!.photo != null
-                                ? "${ApiConstants.imageurl}${user.photo!}"
-                                : "",
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                user.gender == "Male"
-                                    ? "assets/images/9159790.png"
-                                    : "assets/images/3232.png",
-                                fit: BoxFit.contain,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 110,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.7),
-                              ],
+                ],
+              ),
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
+                    child: Stack(
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 9 / 11,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              user!.photo != null
+                                  ? "${ApiConstants.imageurl}${user.photo!}"
+                                  : "",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  user.gender == "Male"
+                                      ? "assets/images/9159790.png"
+                                      : "assets/images/3232.png",
+                                  fit: BoxFit.contain,
+                                );
+                              },
                             ),
                           ),
                         ),
-                      ),
 
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              'assets/images/Group 285.png',
-                              height: 25,
-                            ),
-                            SizedBox(height: 10),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Image.asset(
-                                'assets/images/imagecount.png',
-                                height: 40,
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: 110,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.7),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.9),
-                                Colors.black.withOpacity(0.6),
-                                Colors.transparent,
-                              ],
-                            ),
                           ),
+                        ),
+
+                        Positioned(
+                          top: 12,
+                          right: 12,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // TAGS
-                              Row(
-                                children: [
-                                  _darkTag("Profile managed by Self"),
-                                  const SizedBox(width: 6),
-                                  _darkTagonline("Online"),
-                                ],
+                              Image.asset(
+                                'assets/images/Group 285.png',
+                                height: 25,
                               ),
-
-                              const SizedBox(height: 5),
-
-                              Row(
-                                children: [
-                                  Text(
-                                    "${user.name ?? ""}",
-                                    style: opensansMedium.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                    ),
-                                  ),
-                                  Text(
-                                    "(ID: ${user.profileId})",
-                                    style: opensansMedium.copyWith(
-                                      color: ColorResources.primarycolor,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 4),
-
-                              Text(
-                                "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
-                                style: opensansMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
+                              SizedBox(height: 10),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                              ),
-
-                              // DETAILS L2
-                              Text(
-                                "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
-                                style: opensansMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
+                                child: Image.asset(
+                                  'assets/images/imagecount.png',
+                                  height: 40,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Invitation Received on ${formatDate(item.createdAt)}",
-                    style: opensansSemiBold.copyWith(
-                      color: ColorResources.primarycolor2,
-                      fontSize: 14,
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.9),
+                                  Colors.black.withOpacity(0.6),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // TAGS
+                                Row(
+                                  children: [
+                                    _darkTag("Profile managed by Self"),
+                                    const SizedBox(width: 6),
+                                    _darkTagonline("Online"),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 5),
+
+                                Row(
+                                  children: [
+                                    Text(
+                                      "${user.name ?? ""}",
+                                      style: opensansMedium.copyWith(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                                    Text(
+                                      "(ID: ${user.profileId})",
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.primarycolor,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 4),
+
+                                Text(
+                                  "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                  style: opensansMedium.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+
+                                // DETAILS L2
+                                Text(
+                                  "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                  style: opensansMedium.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
+
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "Invitation Received on ${formatDate(item.createdAt)}",
+                      style: opensansSemiBold.copyWith(
+                        color: ColorResources.primarycolor2,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            statusController.changeStatus(
-                              id: item.id.toString(),
-                              status: "Accepted",
-                            );
-                          },
-                          child: Image.asset(
-                            'assets/images/Frame 61.png',
-                            height: 40,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              statusController.changeStatus(
+                                id: item.id.toString(),
+                                status: "Accepted",
+                              );
+                            },
+                            child: Image.asset(
+                              'assets/images/Frame 61.png',
+                              height: 40,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            statusController.changeStatus(
-                              id: item.id.toString(),
-                              status: "Declined",
-                            );
-                          },
-                          child: Image.asset(
-                            'assets/images/viewprofile.png',
-                            height: 40,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              statusController.changeStatus(
+                                id: item.id.toString(),
+                                status: "Declined",
+                              );
+                            },
+                            child: Image.asset(
+                              'assets/images/viewprofile.png',
+                              height: 40,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -554,6 +571,7 @@ class _ConnectScreenState extends State<ConnectScreen>
           /// ------- TAB VIEW -------
           Expanded(
             child: TabBarView(
+              physics: NeverScrollableScrollPhysics(),
               children: [
                 /// ---------------- SENT TAB ----------------
                 _acceptedbyme(w, h),
@@ -596,6 +614,7 @@ class _ConnectScreenState extends State<ConnectScreen>
           /// ------- TAB VIEW -------
           Expanded(
             child: TabBarView(
+              physics: NeverScrollableScrollPhysics(),
               children: [
                 /// ---------------- SENT TAB ----------------
                 _pendingtab(w, h),
@@ -630,204 +649,228 @@ class _ConnectScreenState extends State<ConnectScreen>
           final item = inboxCtrl.pendingList[index];
           final user = item.partnerId;
           String age = calculateAgeInYears(user?.dob);
-          return Container(
-            margin: const EdgeInsets.only(
-              bottom: 20,
-              left: 12,
-              right: 12,
-              top: 12,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
+          return GestureDetector(
+            onTap: () {
+              userbyuserController.fetchUserDetail(user.id.toString());
+              Get.to(
+                UserProfileDetailsPage(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(
+                bottom: 20,
+                left: 12,
+                right: 12,
+                top: 12,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
-                  child: Stack(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 9 / 11,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            user!.photo != null
-                                ? "${ApiConstants.imageurl}${user.photo!}"
-                                : "",
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                user.gender == "Male"
-                                    ? "assets/images/9159790.png"
-                                    : "assets/images/3232.png",
-                                fit: BoxFit.contain,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 110,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.7),
-                              ],
+                ],
+              ),
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
+                    child: Stack(
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 9 / 11,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              user!.photo != null
+                                  ? "${ApiConstants.imageurl}${user.photo!}"
+                                  : "",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  user.gender == "Male"
+                                      ? "assets/images/no-image-male2.jpg"
+                                      : "assets/images/no-image-female2.jpg",
+                                  fit: BoxFit.contain,
+                                );
+                              },
                             ),
                           ),
                         ),
-                      ),
 
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              'assets/images/Group 285.png',
-                              height: 25,
-                            ),
-                            SizedBox(height: 10),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Image.asset(
-                                'assets/images/imagecount.png',
-                                height: 40,
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: 110,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.7),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.9),
-                                Colors.black.withOpacity(0.6),
-                                Colors.transparent,
-                              ],
-                            ),
                           ),
+                        ),
+
+                        Positioned(
+                          top: 12,
+                          right: 12,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // TAGS
-                              Row(
-                                children: [
-                                  _darkTag("Profile managed by Self"),
-                                  const SizedBox(width: 6),
-                                  _darkTagonline("Online"),
-                                ],
+                              Image.asset(
+                                'assets/images/Group 285.png',
+                                height: 25,
                               ),
-
-                              const SizedBox(height: 5),
-
-                              Row(
-                                children: [
-                                  Text(
-                                    "${user.name ?? ""}",
-                                    style: opensansMedium.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                    ),
+                              SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () {
+                                  buildPhotoList(user);
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: true,
+                                    builder: (_) =>
+                                        PhotoSliderDialog(photos: photosmatch),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  Text(
-                                    "(ID: ${user.profileId})",
-                                    style: opensansMedium.copyWith(
-                                      color: ColorResources.primarycolor,
-                                      fontSize: 12,
-                                    ),
+                                  child: Image.asset(
+                                    'assets/images/imagecount.png',
+                                    height: 40,
                                   ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 4),
-
-                              Text(
-                                "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
-                                style: opensansMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-
-                              // DETAILS L2
-                              Text(
-                                "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
-                                style: opensansMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Your requested here on ${formatDate(item.createdAt)}",
-                    style: opensansSemiBold.copyWith(
-                      color: ColorResources.primarycolor2,
-                      fontSize: 14,
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.9),
+                                  Colors.black.withOpacity(0.6),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // TAGS
+                                Row(
+                                  children: [
+                                    _darkTag("Profile managed by Self"),
+                                    const SizedBox(width: 6),
+                                    _darkTagonline("Online"),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 5),
+
+                                Row(
+                                  children: [
+                                    Text(
+                                      "${user.name ?? ""}",
+                                      style: opensansMedium.copyWith(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                                    Text(
+                                      "(ID: ${user.profileId})",
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.primarycolor,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 4),
+
+                                Text(
+                                  "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                  style: opensansMedium.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+
+                                // DETAILS L2
+                                Text(
+                                  "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                  style: opensansMedium.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Image.asset(
-                          'assets/images/Group 85.png',
-                          height: 35,
-                        ),
+
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "Your requested here on ${formatDate(item.createdAt)}",
+                      style: opensansSemiBold.copyWith(
+                        color: ColorResources.primarycolor2,
+                        fontSize: 14,
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        sentCtrl.cancelrequest(user.id.toString());
+                      },
+                      child: Image.asset(
+                        'assets/images/Group 85.png',
+                        height: 35,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
       );
     });
   }
+
+  final sentCtrl = Get.put(SentInterestController());
 
   // ---------------- SENT TAB ----------------
   Widget _acceptedbyme(double w, double h) {
@@ -850,224 +893,236 @@ class _ConnectScreenState extends State<ConnectScreen>
           final item = inboxCtrl.acceptedbymeList[index];
           final user = item.memberId;
           String age = calculateAgeInYears(user?.dob);
-          return Container(
-            margin: const EdgeInsets.only(
-              bottom: 20,
-              left: 12,
-              right: 12,
-              top: 12,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
+          return GestureDetector(
+            onTap: () {
+              userbyuserController.fetchUserDetail(user.id.toString());
+              Get.to(
+                UserProfileDetailsPage(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(
+                bottom: 20,
+                left: 12,
+                right: 12,
+                top: 12,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
-                  child: Stack(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 9 / 11,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            user!.photo != null
-                                ? "${ApiConstants.imageurl}${user.photo!}"
-                                : "",
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                user.gender == "Male"
-                                    ? "assets/images/no-image-male2.jpg"
-                                    : "assets/images/no-image-female2.jpg",
-                                fit: BoxFit.contain,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 110,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.7),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              'assets/images/Group 285.png',
-                              height: 25,
-                            ),
-                            SizedBox(height: 10),
-                            GestureDetector(
-                              onTap: () {
-                                buildPhotoList(user);
-                                showDialog(
-                                  context: context,
-                                  barrierDismissible: true,
-                                  builder: (_) =>
-                                      PhotoSliderDialog(photos: photosmatch),
+                ],
+              ),
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
+                    child: Stack(
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 9 / 11,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              user!.photo != null
+                                  ? "${ApiConstants.imageurl}${user.photo!}"
+                                  : "",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  user.gender == "Male"
+                                      ? "assets/images/no-image-male2.jpg"
+                                      : "assets/images/no-image-female2.jpg",
+                                  fit: BoxFit.contain,
                                 );
                               },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Image.asset(
-                                  'assets/images/imagecount.png',
-                                  height: 40,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.9),
-                                Colors.black.withOpacity(0.6),
-                                Colors.transparent,
-                              ],
                             ),
                           ),
+                        ),
+
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: 110,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.7),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        Positioned(
+                          top: 12,
+                          right: 12,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // TAGS
-                              Row(
-                                children: [
-                                  _darkTag("Profile managed by Self"),
-                                  const SizedBox(width: 6),
-                                  _darkTagonline("Online"),
-                                ],
+                              Image.asset(
+                                'assets/images/Group 285.png',
+                                height: 25,
                               ),
-
-                              const SizedBox(height: 5),
-
-                              Row(
-                                children: [
-                                  Text(
-                                    "${user.name ?? ""}",
-                                    style: opensansMedium.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                    ),
+                              SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () {
+                                  buildPhotoList(user);
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: true,
+                                    builder: (_) =>
+                                        PhotoSliderDialog(photos: photosmatch),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  Text(
-                                    "(ID: ${user.profileId})",
-                                    style: opensansMedium.copyWith(
-                                      color: ColorResources.primarycolor,
-                                      fontSize: 12,
-                                    ),
+                                  child: Image.asset(
+                                    'assets/images/imagecount.png',
+                                    height: 40,
                                   ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 4),
-
-                              Text(
-                                "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
-                                style: opensansMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-
-                              // DETAILS L2
-                              Text(
-                                "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
-                                style: opensansMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Change your mind?  Cancel Request",
-                    style: opensansSemiBold.copyWith(
-                      color: ColorResources.primarycolor2,
-                      fontSize: 14,
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.9),
+                                  Colors.black.withOpacity(0.6),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // TAGS
+                                Row(
+                                  children: [
+                                    _darkTag("Profile managed by Self"),
+                                    const SizedBox(width: 6),
+                                    _darkTagonline("Online"),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 5),
+
+                                Row(
+                                  children: [
+                                    Text(
+                                      "${user.name ?? ""}",
+                                      style: opensansMedium.copyWith(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                                    Text(
+                                      "(ID: ${user.profileId})",
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.primarycolor,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 4),
+
+                                Text(
+                                  "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                  style: opensansMedium.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+
+                                // DETAILS L2
+                                Text(
+                                  "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                  style: opensansMedium.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 0,
+
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "Change your mind?  Cancel Request",
+                      style: opensansSemiBold.copyWith(
+                        color: ColorResources.primarycolor2,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Image.asset(
-                          'assets/images/Group 85 (1).png',
-                          height: 50,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Image.asset(
+                            'assets/images/Group 85 (1).png',
+                            height: 50,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: Image.asset(
-                          'assets/images/viewprofile 4.png',
-                          height: 50,
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: Image.asset(
+                            'assets/images/viewprofile 4.png',
+                            height: 50,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: Image.asset(
-                          'assets/images/viewprofile (1).png',
-                          height: 50,
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: Image.asset(
+                            'assets/images/viewprofile (1).png',
+                            height: 50,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -1095,213 +1150,236 @@ class _ConnectScreenState extends State<ConnectScreen>
           final item = inboxCtrl.acceptedbypartnerlist[index];
           final user = item.memberId;
           String age = calculateAgeInYears(user?.dob);
-          return Container(
-            margin: const EdgeInsets.only(
-              bottom: 20,
-              left: 12,
-              right: 12,
-              top: 12,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
+          return GestureDetector(
+            onTap: () {
+              userbyuserController.fetchUserDetail(user.id.toString());
+              Get.to(
+                UserProfileDetailsPage(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(
+                bottom: 20,
+                left: 12,
+                right: 12,
+                top: 12,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
-                  child: Stack(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 9 / 11,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            user!.photo != null
-                                ? "${ApiConstants.imageurl}${user.photo!}"
-                                : "",
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                user.gender == "Male"
-                                    ? "assets/images/9159790.png"
-                                    : "assets/images/3232.png",
-                                fit: BoxFit.contain,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 110,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.7),
-                              ],
+                ],
+              ),
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
+                    child: Stack(
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 9 / 11,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              user!.photo != null
+                                  ? "${ApiConstants.imageurl}${user.photo!}"
+                                  : "",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  user.gender == "Male"
+                                      ? "assets/images/9159790.png"
+                                      : "assets/images/3232.png",
+                                  fit: BoxFit.contain,
+                                );
+                              },
                             ),
                           ),
                         ),
-                      ),
 
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              'assets/images/Group 285.png',
-                              height: 25,
-                            ),
-                            SizedBox(height: 10),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Image.asset(
-                                'assets/images/imagecount.png',
-                                height: 40,
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: 110,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.7),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.9),
-                                Colors.black.withOpacity(0.6),
-                                Colors.transparent,
-                              ],
-                            ),
                           ),
+                        ),
+
+                        Positioned(
+                          top: 12,
+                          right: 12,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // TAGS
-                              Row(
-                                children: [
-                                  _darkTag("Profile managed by Self"),
-                                  const SizedBox(width: 6),
-                                  _darkTagonline("Online"),
-                                ],
+                              Image.asset(
+                                'assets/images/Group 285.png',
+                                height: 25,
                               ),
-
-                              const SizedBox(height: 5),
-
-                              Row(
-                                children: [
-                                  Text(
-                                    "${user.name ?? ""}",
-                                    style: opensansMedium.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                    ),
+                              SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () {
+                                  buildPhotoList(user);
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: true,
+                                    builder: (_) =>
+                                        PhotoSliderDialog(photos: photosmatch),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  Text(
-                                    "(ID: ${user.profileId})",
-                                    style: opensansMedium.copyWith(
-                                      color: ColorResources.primarycolor,
-                                      fontSize: 12,
-                                    ),
+                                  child: Image.asset(
+                                    'assets/images/imagecount.png',
+                                    height: 40,
                                   ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 4),
-
-                              Text(
-                                "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
-                                style: opensansMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-
-                              // DETAILS L2
-                              Text(
-                                "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
-                                style: opensansMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Change your mind?  Cancel Request",
-                    style: opensansSemiBold.copyWith(
-                      color: ColorResources.primarycolor2,
-                      fontSize: 14,
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.9),
+                                  Colors.black.withOpacity(0.6),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // TAGS
+                                Row(
+                                  children: [
+                                    _darkTag("Profile managed by Self"),
+                                    const SizedBox(width: 6),
+                                    _darkTagonline("Online"),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 5),
+
+                                Row(
+                                  children: [
+                                    Text(
+                                      "${user.name ?? ""}",
+                                      style: opensansMedium.copyWith(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                                    Text(
+                                      "(ID: ${user.profileId})",
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.primarycolor,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 4),
+
+                                Text(
+                                  "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                  style: opensansMedium.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+
+                                // DETAILS L2
+                                Text(
+                                  "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                  style: opensansMedium.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 0,
+
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "Change your mind?  Cancel Request",
+                      style: opensansSemiBold.copyWith(
+                        color: ColorResources.primarycolor2,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Image.asset(
-                          'assets/images/Group 85 (1).png',
-                          height: 50,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Image.asset(
+                            'assets/images/Group 85 (1).png',
+                            height: 50,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: Image.asset(
-                          'assets/images/viewprofile 4.png',
-                          height: 50,
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: Image.asset(
+                            'assets/images/viewprofile 4.png',
+                            height: 50,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: Image.asset(
-                          'assets/images/viewprofile (1).png',
-                          height: 50,
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: Image.asset(
+                            'assets/images/viewprofile (1).png',
+                            height: 50,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -1330,183 +1408,206 @@ class _ConnectScreenState extends State<ConnectScreen>
           final item = inboxCtrl.declinedList[index];
           final user = item.partnerId;
           String age = calculateAgeInYears(user?.dob);
-          return Container(
-            margin: const EdgeInsets.only(
-              bottom: 20,
-              left: 12,
-              right: 12,
-              top: 12,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
+          return GestureDetector(
+            onTap: () {
+              userbyuserController.fetchUserDetail(user.id.toString());
+              Get.to(
+                UserProfileDetailsPage(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(
+                bottom: 20,
+                left: 12,
+                right: 12,
+                top: 12,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
-                  child: Stack(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 9 / 11,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            user!.photo != null
-                                ? "${ApiConstants.imageurl}${user.photo!}"
-                                : "",
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                user.gender == "Male"
-                                    ? "assets/images/9159790.png"
-                                    : "assets/images/3232.png",
-                                fit: BoxFit.contain,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 110,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.7),
-                              ],
+                ],
+              ),
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
+                    child: Stack(
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 9 / 11,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              user!.photo != null
+                                  ? "${ApiConstants.imageurl}${user.photo!}"
+                                  : "",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  user.gender == "Male"
+                                      ? "assets/images/9159790.png"
+                                      : "assets/images/3232.png",
+                                  fit: BoxFit.contain,
+                                );
+                              },
                             ),
                           ),
                         ),
-                      ),
 
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Column(
-                          children: [
-                            Image.asset(
-                              'assets/images/Group 285.png',
-                              height: 25,
-                            ),
-                            SizedBox(height: 10),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Image.asset(
-                                'assets/images/imagecount.png',
-                                height: 40,
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: 110,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.7),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.9),
-                                Colors.black.withOpacity(0.6),
-                                Colors.transparent,
-                              ],
-                            ),
                           ),
+                        ),
+
+                        Positioned(
+                          top: 12,
+                          right: 12,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // TAGS
-                              Row(
-                                children: [
-                                  _darkTag("Profile managed by Self"),
-                                  const SizedBox(width: 6),
-                                  _darkTagonline("Online"),
-                                ],
+                              Image.asset(
+                                'assets/images/Group 285.png',
+                                height: 25,
                               ),
-
-                              const SizedBox(height: 5),
-
-                              Row(
-                                children: [
-                                  Text(
-                                    "${user.name ?? ""}",
-                                    style: opensansMedium.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                    ),
+                              SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () {
+                                  buildPhotoList(user);
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: true,
+                                    builder: (_) =>
+                                        PhotoSliderDialog(photos: photosmatch),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  Text(
-                                    "(ID: ${user.profileId})",
-                                    style: opensansMedium.copyWith(
-                                      color: ColorResources.primarycolor,
-                                      fontSize: 12,
-                                    ),
+                                  child: Image.asset(
+                                    'assets/images/imagecount.png',
+                                    height: 40,
                                   ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 4),
-
-                              Text(
-                                "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
-                                style: opensansMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-
-                              // DETAILS L2
-                              Text(
-                                "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
-                                style: opensansMedium.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "She Declined yor invitation .\nThis member cannot be contacted .",
-                    style: opensansSemiBold.copyWith(
-                      color: ColorResources.primarycolor2,
-                      fontSize: 14,
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(14, 40, 14, 14),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.9),
+                                  Colors.black.withOpacity(0.6),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // TAGS
+                                Row(
+                                  children: [
+                                    _darkTag("Profile managed by Self"),
+                                    const SizedBox(width: 6),
+                                    _darkTagonline("Online"),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 5),
+
+                                Row(
+                                  children: [
+                                    Text(
+                                      "${user.name ?? ""}",
+                                      style: opensansMedium.copyWith(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                                    Text(
+                                      "(ID: ${user.profileId})",
+                                      style: opensansMedium.copyWith(
+                                        color: ColorResources.primarycolor,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 4),
+
+                                Text(
+                                  "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                  style: opensansMedium.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+
+                                // DETAILS L2
+                                Text(
+                                  "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                  style: opensansMedium.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                ),
-              ],
+
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "She Declined yor invitation .\nThis member cannot be contacted .",
+                      style: opensansSemiBold.copyWith(
+                        color: ColorResources.primarycolor2,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },

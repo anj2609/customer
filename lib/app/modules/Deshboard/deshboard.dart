@@ -73,29 +73,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: Color.fromARGB(255, 244, 229, 214),
       drawer: CustomAppDrawer(),
       body: SafeArea(
-        child: Obx(() {
-          if (usercontroller.isLoading.value) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: ColorResources.primarycolor2,
-              ),
-            );
-          }
+        child: Column(
+          children: [
+            _buildTopBar(w),
 
-          if (usercontroller.userData.value == null) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: ColorResources.primarycolor2,
-              ),
-            );
-          }
+            Expanded(
+              child: Obx(() {
+                if (usercontroller.isLoading.value) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: ColorResources.primarycolor2,
+                    ),
+                  );
+                }
 
-          return Column(
-            children: [
-              _buildTopBar(w),
+                if (usercontroller.userData.value == null) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: ColorResources.primarycolor2,
+                    ),
+                  );
+                }
 
-              Expanded(
-                child: RefreshIndicator(
+                return RefreshIndicator(
                   color: Colors.white,
                   backgroundColor: ColorResources.primarycolor2,
                   onRefresh: () async {
@@ -107,6 +107,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       children: [
                         _buildProfileCard(context),
                         const SizedBox(height: 1),
+
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -120,30 +121,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: _buildInvitationStats(context),
                           ),
                         ),
+
                         _buildMyPlanSection(context),
 
                         Container(
-                          decoration: BoxDecoration(color: Colors.white),
+                          color: Colors.white,
                           child: _buildPremiumInfoCard(context),
                         ),
+
                         Container(
-                          decoration: BoxDecoration(color: Colors.white),
+                          color: Colors.white,
                           child: _buildMatchesSection(context),
                         ),
 
                         Container(
-                          decoration: BoxDecoration(color: Colors.white),
+                          color: Colors.white,
                           child: _buildpremuimSection(context),
                         ),
+
                         const SizedBox(height: 24),
                       ],
                     ),
                   ),
-                ),
-              ),
-            ],
-          );
-        }),
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -907,11 +911,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Image.asset(
                               'assets/images/mobile_svgrepo.com.png',
-                              height: 18,
+                              height: 16,
                             ),
                             SizedBox(width: 5),
                             Text(
-                              '03',
+                              usercontroller.userData.value?.totalViewContact ==
+                                      null
+                                  ? "0"
+                                  : '${usercontroller.userData.value?.totalViewContact}',
                               style: opensansBold.copyWith(
                                 color: ColorResources.primarycolor3,
                                 fontSize: 16,
@@ -932,7 +939,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Image.asset(
                               'assets/images/chat-dots_svgrepo.com.png',
-                              height: 18,
+                              height: 16,
                             ),
                             SizedBox(width: 5),
                             Text(

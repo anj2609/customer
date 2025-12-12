@@ -500,7 +500,8 @@ class MemberData {
 
       disability: json['disability'],
       healthInformation: json['health_information'],
-      height: (json['height'] as num?)?.toDouble(),
+      height: parseDouble(json['height']),
+
       manglik: json['manglik'],
       weight: json['weight'],
 
@@ -575,8 +576,8 @@ class MemberData {
 
       partnerHaveChildren: json['partner_have_children']?.toString(),
 
-      partnerHeightFrom: (json['partner_height_from'] as num?)?.toDouble(),
-      partnerHeightTo: (json['partner_height_to'] as num?)?.toDouble(),
+      partnerHeightFrom: parseDouble(json['partner_height_from']),
+      partnerHeightTo: parseDouble(json['partner_height_to']),
 
       partnerIncomeFrom: json['partner_income_from']?.toString(),
       partnerIncomeTo: json['partner_income_to']?.toString(),
@@ -735,6 +736,21 @@ class MemberData {
     'partner_weight_to': partnerWeightTo,
     'partner_working_as': partnerWorkingAs?.toJson(),
   };
+}
+
+double? parseDouble(dynamic value) {
+  if (value == null) return null;
+
+  if (value is double) return value;
+
+  if (value is int) return value.toDouble();
+
+  if (value is String) {
+    if (value.trim().isEmpty) return null;
+    return double.tryParse(value);
+  }
+
+  return null;
 }
 
 class Hobby {
@@ -1022,7 +1038,7 @@ class HeightPreference {
     }
 
     return HeightPreference(
-      height: (map['height'] as num?)?.toDouble(),
+      height: parseDouble(map['height']),
       status: map['status'] as bool?,
     );
   }

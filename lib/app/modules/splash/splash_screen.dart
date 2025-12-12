@@ -91,56 +91,72 @@ class _VivashriIntroState extends State<VivashriIntro>
 
     final step = userC.userData.value?.appStep;
 
-    if (step is String) {
+    if (userC.userData.value?.formStatus == "Completed") {
       Get.offAll(
         MainNavigation(),
         duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
         transition: Transition.rightToLeft,
       );
-      return;
-    }
-
-    if (step is int) {
-      if (step == 2 || step == 3) {
+    } else {
+      if (step is String) {
         Get.offAll(
-          ReligionDetailsScreen(),
+          MainNavigation(),
           duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
           transition: Transition.rightToLeft,
         );
         return;
       }
 
-      switch (step) {
-        case 0:
-          Get.offAll(
-            BasicDetailsScreen(),
-            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-            transition: Transition.rightToLeft,
-          );
-          break;
-
-        case 1:
-          Get.offAll(
-            ContactDetailsScreen(),
-            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-            transition: Transition.rightToLeft,
-          );
-          break;
-
-        case 4:
+      if (step is int) {
+        if (step == 2 || step == 3) {
           Get.offAll(
             ReligionDetailsScreen(),
             duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
             transition: Transition.rightToLeft,
           );
-          break;
+          return;
+        }
 
-        default:
-          Get.offAll(
-            MainNavigation(),
-            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-            transition: Transition.rightToLeft,
-          );
+        switch (step) {
+          case 0:
+            Get.offAll(
+              BasicDetailsScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+            break;
+
+          case 1:
+            Get.offAll(
+              ContactDetailsScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+            break;
+
+          case 4:
+            Get.offAll(
+              ReligionDetailsScreen(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+            break;
+
+          default:
+            Get.offAll(
+              MainNavigation(),
+              duration: Duration(
+                milliseconds: ApiConstants.screenTransitionTime,
+              ),
+              transition: Transition.rightToLeft,
+            );
+        }
       }
     }
   }

@@ -107,13 +107,13 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
                 ),
                 Expanded(
                   child: Obx(() {
-                    if (inboxCtrl.isLoading.value) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: ColorResources.primarycolor2,
-                        ),
-                      );
-                    }
+                    // if (inboxCtrl.isLoading.value) {
+                    //   return Center(
+                    //     child: CircularProgressIndicator(
+                    //       color: ColorResources.primarycolor2,
+                    //     ),
+                    //   );
+                    // }
 
                     if (inboxCtrl.shotlisttedList.isEmpty) {
                       return Center(
@@ -130,239 +130,311 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
                         final item = inboxCtrl.shotlisttedList[index];
                         final user = item.partnerId;
                         String age = calculateAgeInYears(user?.dob);
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
+                        return GestureDetector(
+                          onTap: () {
+                            userbyuserController.fetchUserDetail(
+                              user.id.toString(),
+                            );
+                            Get.to(
+                              UserProfileDetailsPage(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
                               ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(10),
+                              transition: Transition.rightToLeft,
+                            );
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
                                 ),
-                                child: Stack(
-                                  children: [
-                                    AspectRatio(
-                                      aspectRatio: 9 / 11,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Image.network(
-                                          user!.photo != null
-                                              ? "${ApiConstants.imageurl}${user.photo!}"
-                                              : "",
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                                return Image.asset(
-                                                  user.gender == "Male"
-                                                      ? "assets/images/9159790.png"
-                                                      : "assets/images/3232.png",
-                                                  fit: BoxFit.contain,
-                                                );
-                                              },
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(10),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      AspectRatio(
+                                        aspectRatio: 9 / 11,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          child: Image.network(
+                                            user!.photo != null
+                                                ? "${ApiConstants.imageurl}${user.photo!}"
+                                                : "",
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return Image.asset(
+                                                    user.gender == "Male"
+                                                        ? "assets/images/9159790.png"
+                                                        : "assets/images/3232.png",
+                                                    fit: BoxFit.contain,
+                                                  );
+                                                },
+                                          ),
                                         ),
                                       ),
-                                    ),
 
-                                    Positioned(
-                                      bottom: 0,
-                                      left: 0,
-                                      right: 0,
-                                      child: Container(
-                                        height: 110,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Colors.transparent,
-                                              Colors.black.withOpacity(0.7),
+                                      Positioned(
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        child: Container(
+                                          height: 110,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [
+                                                Colors.transparent,
+                                                Colors.black.withOpacity(0.7),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      // LEFT PHOTOS BADGE
+                                      Positioned(
+                                        top: 12,
+                                        left: 12,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            // color: Colors.white.withOpacity(0.85),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  buildPhotoList(user);
+                                                  showDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    builder: (_) =>
+                                                        PhotoSliderDialog(
+                                                          photos: photosmatch,
+                                                        ),
+                                                  );
+                                                },
+                                                child: Image.asset(
+                                                  'assets/images/imagecount.png',
+                                                  height: 40,
+                                                ),
+                                              ),
+                                              // Icon(Icons.image, size: 16, color: Colors.black87),
+                                              SizedBox(width: 4),
+                                              //  Text("1", style: TextStyle(color: Colors.black)),
                                             ],
                                           ),
                                         ),
                                       ),
-                                    ),
 
-                                    // LEFT PHOTOS BADGE
-                                    Positioned(
-                                      top: 12,
-                                      left: 12,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 4,
+                                      // VERIFIED BADGE
+                                      Positioned(
+                                        top: 12,
+                                        right: 12,
+                                        child: Image.asset(
+                                          'assets/images/Group 285.png',
+                                          height: 25,
                                         ),
-                                        decoration: BoxDecoration(
-                                          // color: Colors.white.withOpacity(0.85),
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        child: Row(
+                                      ),
+
+                                      // BOTTOM TEXT CONTENT (ON IMAGE)
+                                      Positioned(
+                                        bottom: 14,
+                                        left: 14,
+                                        right: 14,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            GestureDetector(
-                                              onTap: () {
-                                                buildPhotoList(user);
-                                                showDialog(
-                                                  context: context,
-                                                  barrierDismissible: true,
-                                                  builder: (_) =>
-                                                      PhotoSliderDialog(
-                                                        photos: photosmatch,
+                                            // TAGS
+                                            Row(
+                                              children: [
+                                                _darkTag(
+                                                  "Profile managed by Self",
+                                                ),
+                                                const SizedBox(width: 6),
+                                                _darkTagonline("Online"),
+                                              ],
+                                            ),
+
+                                            const SizedBox(height: 5),
+
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  "${user.name ?? ""}",
+                                                  style: opensansMedium
+                                                      .copyWith(
+                                                        color: Colors.white,
+                                                        fontSize: 17,
                                                       ),
-                                                );
-                                              },
-                                              child: Image.asset(
-                                                'assets/images/imagecount.png',
-                                                height: 40,
+                                                ),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                  "(ID: ${user.profileId ?? ""})",
+                                                  style: opensansMedium
+                                                      .copyWith(
+                                                        color: ColorResources
+                                                            .primarycolor2,
+                                                        fontSize: 12,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+
+                                            const SizedBox(height: 4),
+
+                                            // DETAILS L1
+                                            Text(
+                                              "• $age, ${user.height}” • ${user.religion?.name ?? ""} • ${user.subCaste?.name ?? ""} • ${user.manglik ?? ""}",
+                                              style: opensansMedium.copyWith(
+                                                color: Colors.white,
+                                                fontSize: 12,
                                               ),
                                             ),
-                                            // Icon(Icons.image, size: 16, color: Colors.black87),
-                                            SizedBox(width: 4),
-                                            //  Text("1", style: TextStyle(color: Colors.black)),
+
+                                            // DETAILS L2
+                                            Text(
+                                              "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome ?? ""} Lacs p.a • ${user.locState?.name ?? ""}",
+                                              style: opensansMedium.copyWith(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
-                                    ),
+                                      Positioned(
+                                        bottom: 60,
 
-                                    // VERIFIED BADGE
-                                    Positioned(
-                                      top: 12,
-                                      right: 12,
-                                      child: Image.asset(
-                                        'assets/images/Group 285.png',
-                                        height: 25,
-                                      ),
-                                    ),
-
-                                    // BOTTOM TEXT CONTENT (ON IMAGE)
-                                    Positioned(
-                                      bottom: 14,
-                                      left: 14,
-                                      right: 14,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          // TAGS
-                                          Row(
-                                            children: [
-                                              _darkTag(
-                                                "Profile managed by Self",
-                                              ),
-                                              const SizedBox(width: 6),
-                                              _darkTagonline("Online"),
-                                            ],
-                                          ),
-
-                                          const SizedBox(height: 5),
-
-                                          Row(
-                                            children: [
-                                              Text(
-                                                "${user.name ?? ""}",
-                                                style: opensansMedium.copyWith(
-                                                  color: Colors.white,
-                                                  fontSize: 17,
-                                                ),
-                                              ),
-                                              SizedBox(width: 5),
-                                              Text(
-                                                "(ID: ${user.profileId ?? ""})",
-                                                style: opensansMedium.copyWith(
-                                                  color: ColorResources
-                                                      .primarycolor2,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-
-                                          const SizedBox(height: 4),
-
-                                          // DETAILS L1
-                                          Text(
-                                            "• $age, ${user.height}” • ${user.religion?.name ?? ""} • ${user.subCaste?.name ?? ""} • ${user.manglik ?? ""}",
-                                            style: opensansMedium.copyWith(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-
-                                          // DETAILS L2
-                                          Text(
-                                            "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome ?? ""} Lacs p.a • ${user.locState?.name ?? ""}",
-                                            style: opensansMedium.copyWith(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom: 60,
-
-                                      right: 14,
-                                      child: user.shortlistsent == false
-                                          ? GestureDetector(
-                                              onTap: () {
-                                                sentCtrl.sendshortlisted(
-                                                  user.id.toString(),
-                                                );
-                                              },
-                                              child: Image.asset(
-                                                'assets/images/shortlist (1).png',
-                                                height: 50,
-                                              ),
-                                            )
-                                          : GestureDetector(
-                                              onTap: () {
-                                                sentCtrl.removeshortlisted(
-                                                  user.id.toString(),
-                                                );
-                                              },
-                                              child: Image.asset(
-                                                'assets/images/shortlist 2.png',
-                                                height: 50,
-                                              ),
-                                            ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // ----------------- BOTTOM BUTTONS -----------------
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 14,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Builder(
-                                        builder: (_) {
-                                          final status = user.interestsentstatus
-                                              ?.toString()
-                                              .trim();
-
-                                          if (status == null ||
-                                              status.isEmpty) {
-                                            return GestureDetector(
-                                              onTap: () =>
-                                                  sentCtrl.sendInterest(
+                                        right: 14,
+                                        child: user.shortlistsent == false
+                                            ? GestureDetector(
+                                                onTap: () {
+                                                  sentCtrl.sendshortlisted(
                                                     user.id.toString(),
-                                                  ),
+                                                  );
+                                                },
+                                                child: Image.asset(
+                                                  'assets/images/shortlist (1).png',
+                                                  height: 50,
+                                                ),
+                                              )
+                                            : GestureDetector(
+                                                onTap: () {
+                                                  sentCtrl.removeshortlisted(
+                                                    user.id.toString(),
+                                                  );
+                                                },
+                                                child: Image.asset(
+                                                  'assets/images/shortlist 2.png',
+                                                  height: 50,
+                                                ),
+                                              ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // ----------------- BOTTOM BUTTONS -----------------
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 14,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Builder(
+                                          builder: (_) {
+                                            final status = user
+                                                .interestsentstatus
+                                                ?.toString()
+                                                .trim();
+
+                                            if (status == null ||
+                                                status.isEmpty) {
+                                              return GestureDetector(
+                                                onTap: () =>
+                                                    sentCtrl.sendInterest(
+                                                      user.id.toString(),
+                                                    ),
+                                                child: Image.asset(
+                                                  'assets/images/Frame 63 2.png',
+                                                  height:
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.height *
+                                                      0.05,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              );
+                                            }
+
+                                            if (status == "Pending") {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  Get.snackbar(
+                                                    "Pending",
+                                                    'Your request is already pending.',
+                                                    backgroundColor: Colors.red,
+                                                    colorText: Colors.white,
+                                                  );
+                                                },
+                                                // onTap: () => sentCtrl.sendInterest(u.id.toString()),
+                                                child: Image.asset(
+                                                  'assets/images/Frame 63 (1).png',
+                                                  height:
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.height *
+                                                      0.05,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              );
+                                            }
+
+                                            if (status == "Accepted") {
+                                              return GestureDetector(
+                                                onTap: () {},
+                                                child: Image.asset(
+                                                  'assets/images/Group 85 (1).png',
+                                                  height:
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.height *
+                                                      0.04,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              );
+                                            }
+
+                                            return GestureDetector(
+                                              onTap: () => print(
+                                                "Unknown status: $status",
+                                              ),
                                               child: Image.asset(
                                                 'assets/images/Frame 63 2.png',
                                                 height:
@@ -373,106 +445,53 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
                                                 fit: BoxFit.contain,
                                               ),
                                             );
-                                          }
-
-                                          if (status == "Pending") {
-                                            return GestureDetector(
-                                              onTap: () {
-                                                Get.snackbar(
-                                                  "Pending",
-                                                  'Your request is already pending.',
-                                                  backgroundColor: Colors.red,
-                                                  colorText: Colors.white,
-                                                );
-                                              },
-                                              // onTap: () => sentCtrl.sendInterest(u.id.toString()),
-                                              child: Image.asset(
-                                                'assets/images/Frame 63 (1).png',
-                                                height:
-                                                    MediaQuery.of(
-                                                      context,
-                                                    ).size.height *
-                                                    0.05,
-                                                fit: BoxFit.contain,
-                                              ),
-                                            );
-                                          }
-
-                                          if (status == "Accepted") {
-                                            return GestureDetector(
-                                              onTap: () {},
-                                              child: Image.asset(
-                                                'assets/images/Group 85 (1).png',
-                                                height:
-                                                    MediaQuery.of(
-                                                      context,
-                                                    ).size.height *
-                                                    0.04,
-                                                fit: BoxFit.contain,
-                                              ),
-                                            );
-                                          }
-
-                                          return GestureDetector(
-                                            onTap: () => print(
-                                              "Unknown status: $status",
-                                            ),
-                                            child: Image.asset(
-                                              'assets/images/Frame 63 2.png',
-                                              height:
-                                                  MediaQuery.of(
-                                                    context,
-                                                  ).size.height *
-                                                  0.05,
-                                              fit: BoxFit.contain,
-                                            ),
-                                          );
-                                        },
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    user.interestsentstatus == "Accepted"
-                                        ? Expanded(
-                                            child: GestureDetector(
-                                              onTap: () {},
-                                              child: Image.asset(
-                                                'assets/images/viewprofile (1).png',
-                                                height:
-                                                    MediaQuery.of(
-                                                      context,
-                                                    ).size.height *
-                                                    0.040,
-                                                fit: BoxFit.contain,
+                                      const SizedBox(width: 12),
+                                      user.interestsentstatus == "Accepted"
+                                          ? Expanded(
+                                              child: GestureDetector(
+                                                onTap: () {},
+                                                child: Image.asset(
+                                                  'assets/images/viewprofile (1).png',
+                                                  height:
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.height *
+                                                      0.040,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            )
+                                          : Expanded(
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  userbyuserController
+                                                      .fetchUserDetail(
+                                                        user.id.toString(),
+                                                      );
+                                                  Get.to(
+                                                    UserProfileDetailsPage(),
+                                                    duration: Duration(
+                                                      milliseconds: ApiConstants
+                                                          .screenTransitionTime,
+                                                    ),
+                                                    transition:
+                                                        Transition.rightToLeft,
+                                                  );
+                                                },
+                                                child: Image.asset(
+                                                  'assets/images/viewprofile 3.png',
+                                                  height: 34,
+                                                ),
                                               ),
                                             ),
-                                          )
-                                        : Expanded(
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                userbyuserController
-                                                    .fetchUserDetail(
-                                                      user.id.toString(),
-                                                    );
-                                                Get.to(
-                                                  UserProfileDetailsPage(),
-                                                  duration: Duration(
-                                                    milliseconds: ApiConstants
-                                                        .screenTransitionTime,
-                                                  ),
-                                                  transition:
-                                                      Transition.rightToLeft,
-                                                );
-                                              },
-                                              child: Image.asset(
-                                                'assets/images/viewprofile 3.png',
-                                                height: 34,
-                                              ),
-                                            ),
-                                          ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         );
                         // _profileCard(w, h);

@@ -72,21 +72,21 @@ class _MatchesScreenState extends State<MatchesScreen> {
                       searchC.fetchSearchList("", "");
                     },
                     child: Obx(() {
-                      if (searchC.isLoading.value) {
-                        return ListView(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                              height: 300,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: ColorResources.primarycolor2,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      }
+                      // if (searchC.isLoading.value) {
+                      //   return ListView(
+                      //     physics: AlwaysScrollableScrollPhysics(),
+                      //     children: [
+                      //       SizedBox(
+                      //         height: 300,
+                      //         child: Center(
+                      //           child: CircularProgressIndicator(
+                      //             color: ColorResources.primarycolor2,
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   );
+                      // }
 
                       if (searchC.users.isEmpty) {
                         return ListView(

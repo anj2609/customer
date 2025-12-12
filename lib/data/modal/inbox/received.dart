@@ -73,7 +73,9 @@ class UserModel {
   Religion? religion;
 
   dynamic locRelation;
-
+  dynamic photo2;
+  dynamic photo3;
+  dynamic photo4;
   City? locCity;
   dynamic locHouseType;
   dynamic locLandmark;
@@ -125,7 +127,9 @@ class UserModel {
     this.locNationality,
 
     this.locState,
-
+    this.photo2,
+    this.photo3,
+    this.photo4,
     this.height,
     this.manglik,
     this.weight,
@@ -193,7 +197,9 @@ class UserModel {
       photoBlur: json["photo_blur"] ?? "",
       photo1: json["photo1"] ?? "",
       photo1Blur: json["photo1_blur"] ?? "",
-
+    photo2: json["photo2"] ?? "",
+      photo3: json["photo3"] ?? "",
+      photo4: json["photo4"] ?? "",
       planDetail: json["plan_detail"] != null
           ? PlanDetail.fromJson(json["plan_detail"])
           : null,

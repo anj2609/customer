@@ -318,14 +318,23 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                                 ],
                               ),
 
-                              SizedBox(height: 20),
-
-                              Text(
-                                "It is a pleasure introducing myself. My perspective towards life is being optimistic yet realistic. I am looking for a life partner who would be my friend and stand by me in every phase of life. Please feel free to connect and know more.",
-                                style: opensansSemiBold.copyWith(
-                                  fontSize: 14,
-                                  color: ColorResources.blacktext,
-                                ),
+                              SizedBox(height: 10),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      user.about ?? "",
+                                      style: opensansMedium.copyWith(
+                                        fontSize: 13,
+                                        color: ColorResources.blacktext,
+                                      ),
+                                      textAlign: TextAlign.start,
+                                      maxLines: 5,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -1301,7 +1310,6 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                   }
 
                   return GestureDetector(
-                    onTap: () => print("Unknown status: $status"),
                     child: Image.asset(
                       'assets/images/Frame 63 2.png',
                       height: MediaQuery.of(context).size.height * 0.05,

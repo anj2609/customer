@@ -73,7 +73,9 @@ class PendingUserModel {
   Caste? caste;
 
   Religion? religion;
-
+  dynamic photo2;
+  dynamic photo3;
+  dynamic photo4;
   dynamic locRelation;
 
   City? locCity;
@@ -125,7 +127,9 @@ class PendingUserModel {
     this.locHouseType,
     this.locLandmark,
     this.locNationality,
-
+    this.photo2,
+    this.photo3,
+    this.photo4,
     this.locState,
 
     this.height,
@@ -179,6 +183,9 @@ class PendingUserModel {
           ? StateModel.fromJson(json["loc_state"])
           : null,
 
+      photo2: json["photo2"] ?? "",
+      photo3: json["photo3"] ?? "",
+      photo4: json["photo4"] ?? "",
       height: (json["height"] ?? 0).toDouble(),
       manglik: json["manglik"] ?? "",
       weight: json["weight"] ?? 0,

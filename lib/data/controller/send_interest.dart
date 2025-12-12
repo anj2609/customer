@@ -72,7 +72,7 @@ class SentInterestController extends GetxController implements GetxService {
   //
   Future<void> sendshortlisted(String partnerId) async {
     try {
-     // EasyLoading.show();
+      // EasyLoading.show();
       // isLoading.value = true;
 
       final prefs = await SharedPreferences.getInstance();
@@ -130,7 +130,7 @@ class SentInterestController extends GetxController implements GetxService {
 
   Future<void> removeshortlisted(String partnerId) async {
     try {
-     // EasyLoading.show();
+      // EasyLoading.show();
       // isLoading.value = true;
 
       final prefs = await SharedPreferences.getInstance();
@@ -157,6 +157,63 @@ class SentInterestController extends GetxController implements GetxService {
         EasyLoading.dismiss();
         searchC.fetchSearchList("", "");
         inboxCtrl.shortlistedprofileinboxdata();
+        // Get.snackbar(
+        //   "Success",
+        //   res["message"] ?? "Success",
+        //   backgroundColor: Colors.green,
+        //   colorText: Colors.white,
+        // );
+      } else {
+        EasyLoading.dismiss();
+        Get.snackbar(
+          "Error",
+          res["message"] ?? "Something went wrong",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar(
+        "Error",
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      EasyLoading.dismiss();
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> cancelrequest(String partnerId) async {
+    try {
+      // EasyLoading.show();
+      // isLoading.value = true;
+
+      final prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("token");
+
+      var headers = {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      };
+
+      var body = jsonEncode({"partner_id": partnerId});
+
+      var response = await http.post(
+        Uri.parse(
+          "https://vivashri.com/vivashribackend/api/user/cancel-request",
+        ),
+        headers: headers,
+        body: body,
+      );
+
+      var res = jsonDecode(response.body);
+
+      if (res["status"] == true) {
+        EasyLoading.dismiss();
+        inboxCtrl.pendinginboxdata();
         // Get.snackbar(
         //   "Success",
         //   res["message"] ?? "Success",
