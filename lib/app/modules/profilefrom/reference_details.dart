@@ -1,12 +1,14 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/profilefrom/location_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
 import 'package:vivashri/data/controller/looking_for_controller.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 
 class ReferenceDetailsScreen extends StatefulWidget {
   const ReferenceDetailsScreen({super.key});
@@ -21,8 +23,22 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
   TextEditingController refnameCtrl = TextEditingController();
   TextEditingController refemaildCtrl = TextEditingController();
   StaperfromController stapercontroller = Get.put(StaperfromController());
+  final usercontroller = Get.put(UserDetailController());
 
   TextEditingController refmobileCtrl = TextEditingController();
+  void profileapi() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? profileid = prefs.getString("profileid");
+    usercontroller.fetchUserDetail(profileid.toString());
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    profileapi();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,18 +64,21 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
                           return _dropdown(
                             //  hint: "Select",
                             value: lookingC.selectedName.value,
-                            onChanged: (v) => lookingC.onSelect(v!),
+                            onChanged: (v) {
+                              lookingC.onSelect(v!);
+                              final data = usercontroller.userData.value!;
+                              if (lookingC.selectedName == "Self") {
+                                refnameCtrl.text = data.name.toString();
+                                refmobileCtrl.text = data.mobile.toString();
+                                refemaildCtrl.text = data.email.toString();
+                              }
+                            },
                             items: lookingC.lookingList
                                 .map((e) => e.name)
                                 .toList(),
                           );
                         }),
 
-                        // _dropdown(
-                        //   value: relation,
-                        //   onChanged: (v) => setState(() => relation = v),
-                        //   items: ["Father", "Mother", "Friend", "Sibling", "Other"],
-                        // ),
                         _label("Name:"),
                         _textField(controller: refnameCtrl),
 
@@ -179,27 +198,6 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
                     backgroundColor: Colors.red,
                     colorText: Colors.white,
                   );
-                } else if (refnameCtrl.text.isEmpty) {
-                  Get.snackbar(
-                    'Error',
-                    'Please Enter Your Reference Name',
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
-                  );
-                } else if (refemaildCtrl.text.isEmpty) {
-                  Get.snackbar(
-                    'Error',
-                    'Please Enter Your Reference EmailId',
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
-                  );
-                } else if (refmobileCtrl.text.isEmpty) {
-                  Get.snackbar(
-                    'Error',
-                    'Please Enter Your Reference Mobile No.',
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
-                  );
                 } else {
                   stapercontroller.referencedProfile(
                     formData: {
@@ -258,7 +256,7 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
               ),
             ),
             const TextSpan(
-              text: " *",
+              text: " ",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -402,34 +400,6 @@ class _ReferenceDetailsScreenState extends State<ReferenceDetailsScreen> {
                 Get.snackbar(
                   'Error',
                   'Please Select Relation',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (refnameCtrl.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Reference Name',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (refemaildCtrl.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Reference EmailId',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (!refemaildCtrl.text.contains("@")) {
-                Get.snackbar(
-                  'Error',
-                  'Email must contain @',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (refmobileCtrl.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Reference Mobile No.',
                   backgroundColor: Colors.red,
                   colorText: Colors.white,
                 );

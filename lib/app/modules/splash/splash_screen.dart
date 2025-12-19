@@ -75,6 +75,7 @@ class _VivashriIntroState extends State<VivashriIntro>
       print('profileid:::::::::${profileid}');
 
       if (token != null && token.isNotEmpty) {
+        //  Get.to(ReferenceDetailsScreen());
         checkUser(profileid);
       } else {
         Get.to(
@@ -173,7 +174,11 @@ class _VivashriIntroState extends State<VivashriIntro>
     return Scaffold(
       backgroundColor: const Color(0xFFFFEBEE),
       body: SizedBox.expand(
-        child: Image.asset(Images.splashimage, fit: BoxFit.cover),
+        child: GestureDetector(
+          onTap: () {
+            
+          },
+          child: Image.asset(Images.splashimage, fit: BoxFit.cover)),
       ),
     );
   }

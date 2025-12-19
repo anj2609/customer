@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -9,6 +11,7 @@ import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/match_list.dart';
 import 'package:vivashri/data/controller/send_interest.dart';
 import 'package:vivashri/data/controller/userbyuser.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/data/modal/matchmodal.dart';
 import 'package:vivashri/widgets/drawer.dart';
 import 'package:vivashri/widgets/image_view.dart';
@@ -311,6 +314,18 @@ class _MatchesScreenState extends State<MatchesScreen> {
     return years.toString();
   }
 
+  List<String> photosblur = [];
+
+  void buildPhotoList22(dynamic u) {
+    List<String?> raw = [u.photoBlur];
+
+    photosblur = raw
+        .where((e) => e != null && e.isNotEmpty)
+        .map((e) => e!)
+        .toSet()
+        .toList();
+  }
+
   List<String> photosmatch = [];
 
   void buildPhotoList(dynamic u) {
@@ -323,8 +338,11 @@ class _MatchesScreenState extends State<MatchesScreen> {
         .toList();
   }
 
+  final usercontroller = Get.put(UserDetailController());
+
   Widget _profileCard(MatchListData u) {
     String age = calculateAgeInYears(u.dob);
+    final user = usercontroller.userData.value!;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -358,22 +376,146 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   },
                   child: AspectRatio(
                     aspectRatio: 9 / 11,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        u.photo != null
-                            ? "${ApiConstants.imageurl}${u.photo!}"
-                            : "",
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.asset(
-                            u.gender == "Male"
-                                ? "assets/images/no-image-male2.jpg"
-                                : "assets/images/no-image-female2.jpg",
-                            fit: BoxFit.contain,
-                          );
-                        },
-                      ),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (u.profilesetting == null)
+                          SizedBox(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.network(
+                              "${ApiConstants.imageurl}${u.photo}",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  u.gender == "Male"
+                                      ? "assets/images/no-image-male2.jpg"
+                                      : "assets/images/no-image-female2.jpg",
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                            ),
+                          ),
+
+                        if (u.profilesetting?.photoShow == 2)
+                          SizedBox(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.network(
+                              "${ApiConstants.imageurl}${u.photo}",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  u.gender == "Male"
+                                      ? "assets/images/no-image-male2.jpg"
+                                      : "assets/images/no-image-female2.jpg",
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                            ),
+                          ),
+
+                        if (u.profilesetting?.photoShow == 1 &&
+                            u.photorequeststatus == null &&
+                            u.photorequestcheck == false)
+                          SizedBox(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.network(
+                              "${ApiConstants.imageurl}${u.photoBlur}",
+
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  u.gender == "Male"
+                                      ? "assets/images/no-image-male2.jpg"
+                                      : "assets/images/no-image-female2.jpg",
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                            ),
+                          ),
+
+                        if (u.profilesetting?.photoShow == 1 &&
+                            u.photorequeststatus == null &&
+                            u.photorequestcheck == true)
+                          SizedBox(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.network(
+                              "${ApiConstants.imageurl}${u.photoBlur}",
+
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  u.gender == "Male"
+                                      ? "assets/images/no-image-male2.jpg"
+                                      : "assets/images/no-image-female2.jpg",
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                            ),
+                          ),
+
+                        if (u.profilesetting?.photoShow == 1 &&
+                            u.photorequeststatus == 1 &&
+                            u.photorequestcheck == true)
+                          SizedBox(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.network(
+                              "${ApiConstants.imageurl}${u.photo}",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  u.gender == "Male"
+                                      ? "assets/images/no-image-male2.jpg"
+                                      : "assets/images/no-image-female2.jpg",
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                            ),
+                          ),
+                        /////
+                        if (u.profilesetting?.photoShow == 2) SizedBox(),
+
+                        if (u.profilesetting?.photoShow == 1 &&
+                            u.photorequeststatus == null &&
+                            u.photorequestcheck == false)
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Image.asset('assets/images/locked-icon.png'),
+                                const SizedBox(height: 20),
+                                GestureDetector(
+                                  onTap: () {
+                                    sentCtrl.sendphotorequest(u.id.toString());
+                                  },
+                                  child: Text(
+                                    "Request a Photo",
+                                    style: opensansSemiBold.copyWith(
+                                      color: ColorResources.primarycolor2,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        if (u.profilesetting?.photoShow == 1 &&
+                            u.photorequeststatus == null &&
+                            u.photorequestcheck == true)
+                          SizedBox(),
+
+                        if (u.profilesetting?.photoShow == 1 &&
+                            u.photorequeststatus == 1 &&
+                            u.photorequestcheck == true)
+                          SizedBox(),
+                      ],
                     ),
                   ),
                 ),
@@ -397,40 +539,188 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   ),
                 ),
 
-                // LEFT PHOTOS BADGE
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            buildPhotoList(u);
-                            showDialog(
-                              context: context,
-                              barrierDismissible: true,
-                              builder: (_) =>
-                                  PhotoSliderDialog(photos: photosmatch),
-                            );
-                          },
-                          child: Image.asset(
-                            'assets/images/imagecount.png',
-                            height: 40,
+                ///
+                if (u.profilesetting == null)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              buildPhotoList(u);
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (_) =>
+                                    PhotoSliderDialog(photos: photosmatch),
+                              );
+                            },
+                            child: Image.asset(
+                              'assets/images/imagecount.png',
+                              height: 40,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 4),
-                      ],
+                          SizedBox(width: 4),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                if (u.profilesetting?.photoShow == 2)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              buildPhotoList(u);
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (_) =>
+                                    PhotoSliderDialog(photos: photosmatch),
+                              );
+                            },
+                            child: Image.asset(
+                              'assets/images/imagecount.png',
+                              height: 40,
+                            ),
+                          ),
+                          SizedBox(width: 4),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                if (u.profilesetting?.photoShow == 1 &&
+                    u.photorequeststatus == null &&
+                    u.photorequestcheck == false)
+                  //blur photo
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              buildPhotoList22(u);
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (_) =>
+                                    PhotoSliderDialog(photos: photosblur),
+                              );
+                            },
+                            child: Image.asset(
+                              'assets/images/imagecount.png',
+                              height: 40,
+                            ),
+                          ),
+                          SizedBox(width: 4),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                if (u.profilesetting?.photoShow == 1 &&
+                    u.photorequeststatus == null &&
+                    u.photorequestcheck == true)
+                  //photo blur
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              buildPhotoList22(u);
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (_) =>
+                                    PhotoSliderDialog(photos: photosblur),
+                              );
+                            },
+                            child: Image.asset(
+                              'assets/images/imagecount.png',
+                              height: 40,
+                            ),
+                          ),
+                          SizedBox(width: 4),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                if (u.profilesetting?.photoShow == 1 &&
+                    u.photorequeststatus == 1 &&
+                    u.photorequestcheck == true)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              buildPhotoList(u);
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (_) =>
+                                    PhotoSliderDialog(photos: photosmatch),
+                              );
+                            },
+                            child: Image.asset(
+                              'assets/images/imagecount.png',
+                              height: 40,
+                            ),
+                          ),
+                          SizedBox(width: 4),
+                        ],
+                      ),
+                    ),
+                  ),
 
                 u.aasherno == null
                     ? SizedBox()
@@ -491,7 +781,44 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                 );
                               },
                               child: Text(
-                                u.name ?? "",
+                                (() {
+                                  String name = u.name ?? "";
+                                  int showType =
+                                      u.profilesetting?.nameShow ?? 1;
+
+                                  bool isPremium = false;
+                                  if (user.planDetail != null) {
+                                    if (user.planDetail is Map &&
+                                        user.planDetail == null) {
+                                      isPremium = true;
+                                    } else if (user.planDetail is List &&
+                                        user.planDetail == null) {
+                                      isPremium = true;
+                                    }
+                                  }
+
+                                  if (name.isEmpty) return "";
+
+                                  String maskName(String n) {
+                                    if (n.length <= 2) return n[0] + "*";
+                                    return n.substring(0, 2) +
+                                        ("*" * (n.length - 2));
+                                  }
+
+                                  if (showType == 1) {
+                                    return name;
+                                  }
+
+                                  if (showType == 2) {
+                                    return isPremium ? name : maskName(name);
+                                  }
+
+                                  if (showType == 3) {
+                                    return maskName(name);
+                                  }
+
+                                  return name;
+                                })(),
                                 style: opensansMedium.copyWith(
                                   color: Colors.white,
                                   fontSize: 17,
@@ -506,9 +833,22 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                 );
                               },
                               child: Text(
-                                u.profileId == null
-                                    ? "(ID: --)"
-                                    : "(ID: ${u.profileId})",
+                                (() {
+                                  int idShow =
+                                      u.profilesetting?.customerIdShow ?? 2;
+
+                                  if (idShow == 1) {
+                                    return "(ID: --)";
+                                  }
+
+                                  if (idShow == 2) {
+                                    return u.profileId == null
+                                        ? "(ID: --)"
+                                        : "(ID: ${u.profileId})";
+                                  }
+
+                                  return "(ID: --)";
+                                })(),
                                 style: opensansMedium.copyWith(
                                   color: ColorResources.primarycolor2,
                                   fontSize: 12,
@@ -532,9 +872,26 @@ class _MatchesScreenState extends State<MatchesScreen> {
                         ),
 
                         Text(
-                          "• ${u.occupation?.name ?? ''} "
-                          "• Earns ₹${u.annualincome ?? '0'} Lacs p.a "
-                          "• ${u.locState?.name ?? ''}",
+                          (() {
+                            int incomeShow = u.profilesetting?.incomeShow ?? 2;
+                            int workShow = u.profilesetting?.workWithShow ?? 2;
+
+                            String occ = workShow == 1
+                                ? ""
+                                : (u.occupation?.name ?? "");
+                            String income = incomeShow == 1
+                                ? ""
+                                : "Earns ₹${u.annualincome ?? '0'} Lacs p.a";
+                            String state = u.locState?.name ?? "";
+
+                            List<String> parts = [];
+
+                            if (occ.isNotEmpty) parts.add("• $occ");
+                            if (income.isNotEmpty) parts.add("• $income");
+                            if (state.isNotEmpty) parts.add("• $state");
+
+                            return parts.join(" ");
+                          })(),
                           style: opensansMedium.copyWith(
                             color: Colors.white,
                             fontSize: 12,

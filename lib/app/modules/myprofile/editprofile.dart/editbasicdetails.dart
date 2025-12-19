@@ -36,7 +36,7 @@ class _EditBasicDetailsScreenState extends State<EditBasicDetailsScreen> {
   TextEditingController nameCtrl = TextEditingController();
   TextEditingController abouttrl = TextEditingController();
   StaperfromController stapercontroller = Get.put(StaperfromController());
-  String? healthInfo;
+  String? healthInfo = "";
   List<DropdownMenuItem<String>> buildWeightItems(List<String> keys) {
     return keys
         .map(
@@ -176,7 +176,7 @@ class _EditBasicDetailsScreenState extends State<EditBasicDetailsScreen> {
 
   String? height;
   String manglik = "";
-  String? bloodGroup;
+  String? bloodGroup = "";
   final Map<String, String> monthNumber = {
     "Jan": "01",
     "Feb": "02",
@@ -191,7 +191,27 @@ class _EditBasicDetailsScreenState extends State<EditBasicDetailsScreen> {
     "Nov": "11",
     "Dec": "12",
   };
-
+  final List<String> healthItems = [
+    "No Health Problems",
+    "Average",
+    "Weak",
+    "Diabetes",
+    "HIV Positive",
+    "Low BP",
+    "High BP",
+    "Heart Ailments",
+    "Others",
+  ];
+  final List<String> bloodGroupItems = [
+    "A+",
+    "A-",
+    "B+",
+    "B-",
+    "O+",
+    "O-",
+    "AB+",
+    "AB-",
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -230,41 +250,41 @@ class _EditBasicDetailsScreenState extends State<EditBasicDetailsScreen> {
                     _genderButtons(),
                     _label("Name:"),
                     _textField(),
-                    _label("Height:"),
-                    _dropdown22(
-                      value: height,
-                      items: heights
-                          .map(
-                            (h) => DropdownMenuItem(
-                              value: h["value"], // value = 8.6
-                              child: Text(
-                                h["label"]!,
-                                style: opensansMedium.copyWith(
-                                  color: ColorResources.blackhalka,
-                                  fontSize: 14,
-                                ),
-                              ), // label = 8 ft 6 in
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (v) {
-                        setState(() => height = v);
-                        print(
-                          "Selected Height Value: $v",
-                        ); // yaha 8.6 print hoga
-                      },
-                    ),
-                    _label("Weight (in Kg):"),
-                    _dropdown22(
-                      value: fromWeight,
-                      items: buildWeightItems(fromWeightKeys),
-                      onChanged: (v) {
-                        setState(() {
-                          fromWeight = v;
-                        });
-                      },
-                    ),
 
+                    // _label("Height:"),
+                    // _dropdown22(
+                    //   value: height,
+                    //   items: heights
+                    //       .map(
+                    //         (h) => DropdownMenuItem(
+                    //           value: h["value"], // value = 8.6
+                    //           child: Text(
+                    //             h["label"]!,
+                    //             style: opensansMedium.copyWith(
+                    //               color: ColorResources.blackhalka,
+                    //               fontSize: 14,
+                    //             ),
+                    //           ), // label = 8 ft 6 in
+                    //         ),
+                    //       )
+                    //       .toList(),
+                    //   onChanged: (v) {
+                    //     setState(() => height = v);
+                    //     print(
+                    //       "Selected Height Value: $v",
+                    //     ); // yaha 8.6 print hoga
+                    //   },
+                    // ),
+                    // _label("Weight (in Kg):"),
+                    // _dropdown22(
+                    //   value: fromWeight,
+                    //   items: buildWeightItems(fromWeightKeys),
+                    //   onChanged: (v) {
+                    //     setState(() {
+                    //       fromWeight = v;
+                    //     });
+                    //   },
+                    // ),
                     _label("Marital Status:"),
                     Obx(() {
                       return _dropDown(
@@ -301,22 +321,70 @@ class _EditBasicDetailsScreenState extends State<EditBasicDetailsScreen> {
                             .toList(),
                       );
                     }),
+                    // ---------------- Weight ----------------
+                    _label("Weight (in Kg):"),
+                    _dropdown22(
+                      value: fromWeight,
+                      items: buildWeightItems(fromWeightKeys),
+                      onChanged: (v) {
+                        setState(() {
+                          fromWeight = v;
+                        });
+                      },
+                    ),
+
+                    // ---------------- Height ----------------
+                    _label("Height:"),
+                    _dropdown22(
+                      value: height,
+                      items: heights
+                          .map(
+                            (h) => DropdownMenuItem(
+                              value: h["value"], // value = 8.6
+                              child: Text(
+                                h["label"]!,
+                                style: opensansMedium.copyWith(
+                                  color: ColorResources.blackhalka,
+                                  fontSize: 14,
+                                ),
+                              ), // label = 8 ft 6 in
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) {
+                        setState(() => height = v);
+                        print(
+                          "Selected Height Value: $v",
+                        ); // yaha 8.6 print hoga
+                      },
+                    ),
                     _label("Health Information:"),
                     _dropdown(
-                      value: healthInfo,
-                      items: [
-                        "No Health Problems",
-                        "Average",
-                        "Weak",
-                        "Diabetes",
-                        "HIV Positive",
-                        "Low BP",
-                        "High BP",
-                        "Heart Ailments",
-                        "Others",
-                      ],
-                      onChanged: (v) => setState(() => healthInfo = v),
+                      value: healthItems.contains(healthInfo)
+                          ? healthInfo
+                          : null,
+                      items: healthItems,
+                      onChanged: (v) {
+                        setState(() {
+                          healthInfo = v;
+                        });
+                      },
                     ),
+                    // _dropdown(
+                    //   value: healthInfo,
+                    //   items: [
+                    //     "No Health Problems",
+                    //     "Average",
+                    //     "Weak",
+                    //     "Diabetes",
+                    //     "HIV Positive",
+                    //     "Low BP",
+                    //     "High BP",
+                    //     "Heart Ailments",
+                    //     "Others",
+                    //   ],
+                    //   onChanged: (v) => setState(() => healthInfo = v),
+                    // ),
                     _label("Manglik Status:"),
                     _manglikButtons(),
 
@@ -428,11 +496,21 @@ class _EditBasicDetailsScreenState extends State<EditBasicDetailsScreen> {
                     _disabilityButtons(),
                     _label("Blood Group:"),
                     _dropdown(
-                      value: bloodGroup,
-                      items: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"],
-                      onChanged: (v) => setState(() => bloodGroup = v),
+                      value: bloodGroupItems.contains(bloodGroup)
+                          ? bloodGroup
+                          : null,
+                      items: bloodGroupItems,
+                      onChanged: (v) {
+                        setState(() {
+                          bloodGroup = v;
+                        });
+                      },
                     ),
-
+                    // _dropdown(
+                    //   value: bloodGroup,
+                    //   items: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"],
+                    //   onChanged: (v) => setState(() => bloodGroup = v),
+                    // ),
                     const SizedBox(height: 25),
                     _continueButton(),
                     const SizedBox(height: 40),
@@ -826,9 +904,10 @@ class _EditBasicDetailsScreenState extends State<EditBasicDetailsScreen> {
             // "step": "1",
           },
           ///////////////////// mobilenumber: widget.mobielemild,
-        );  Future.delayed(const Duration(microseconds: 1000), () {
-                Get.back();
-              });
+        );
+        Future.delayed(const Duration(microseconds: 1000), () {
+          Get.back();
+        });
       },
       child: Container(
         height: 45,

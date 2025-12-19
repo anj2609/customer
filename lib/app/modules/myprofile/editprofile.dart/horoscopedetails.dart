@@ -62,6 +62,7 @@ class _HoroscropeEditState extends State<HoroscropeEdit> {
   void initState() {
     super.initState();
     getdata();
+    // cityC.fetchCity();
   }
 
   void getdata() async {
@@ -349,8 +350,8 @@ class _HoroscropeEditState extends State<HoroscropeEdit> {
                             value: selectedYear,
                             onChanged: (v) => setState(() => selectedYear = v),
                             items: List.generate(
-                              (DateTime.now().year - 1948) + 1,
-                              (i) => "${DateTime.now().year - i}",
+                              (2007 - 1950) + 1,
+                              (i) => "${2007 - i}",
                             ),
                           ),
                         ),
@@ -593,16 +594,18 @@ class _HoroscropeEditState extends State<HoroscropeEdit> {
             onTap: () {
               stapercontroller.updatehobbies(
                 formData: {
-                  "birth_hour": selectedHour,
-                  "birth_minute": selectedMin,
-                  "birth_am": selectedAmPm,
+                  "birth_hour": selectedHour ?? "",
+                  "birth_minute": selectedMin ?? "",
+                  "birth_am": selectedAmPm ?? "",
                   "birth_city": cityC.selectedCityId.value,
-                  "birth_day": selectedDay,
-                  "birth_month": selectedMonthNumber,
-                  "birth_year": selectedYear,
+                  "birth_day": selectedDay ?? "",
+                  "birth_month": selectedMonthNumber ?? "",
+                  "birth_year": selectedYear ?? "",
                   "birth_state": stateC.selectedStateId.value,
                 },
-              );  Future.delayed(const Duration(microseconds: 1000), () {
+              );
+
+              Future.delayed(const Duration(microseconds: 1000), () {
                 Get.back();
               });
             },

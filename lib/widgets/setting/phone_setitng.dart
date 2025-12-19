@@ -345,7 +345,9 @@ class _PrivacyDialogState extends State<_PrivacyDialog> {
                   onPressed: () {
                     Navigator.pop(context);
                     nc.phonesetting(privacysetting: indexvalue!);
-
+                    Future.delayed(const Duration(microseconds: 1000), () {
+                      Get.back();
+                    });
                     print("Selected: $selected");
                   },
                   child: Text(

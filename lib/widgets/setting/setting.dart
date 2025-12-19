@@ -7,10 +7,13 @@ import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/auth_controller.dart';
+import 'package:vivashri/data/controller/recived_interst.dart';
 import 'package:vivashri/data/controller/settingcontroller.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
+import 'package:vivashri/widgets/setting/dob_request.dart';
 import 'package:vivashri/widgets/setting/hide_delete.dart';
 import 'package:vivashri/widgets/setting/phone_setitng.dart';
+import 'package:vivashri/widgets/setting/photo_request_screen.dart';
 import 'package:vivashri/widgets/setting/profile_info_setting.dart';
 import 'package:vivashri/widgets/setting/push_notification.dart';
 
@@ -24,6 +27,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   NotificationController nc = Get.find();
   final usercontroller = Get.put(UserDetailController());
+  final inboxCtrl = Get.put(InboxReceivedController());
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +105,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: () {
                           Get.to(
                             HideDeelteProfile(),
+                            duration: Duration(
+                              milliseconds: ApiConstants.screenTransitionTime,
+                            ),
+                            transition: Transition.rightToLeft,
+                          );
+                        },
+                      ),
+
+                      divider(),
+                      settingsTile(
+                        "Photo Request",
+                        onTap: () {
+                          inboxCtrl.photorecived();
+
+                          Get.to(
+                            PhotoRequestScreen(),
+                            duration: Duration(
+                              milliseconds: ApiConstants.screenTransitionTime,
+                            ),
+                            transition: Transition.rightToLeft,
+                          );
+                        },
+                      ),
+
+                      divider(),
+                      settingsTile(
+                        "DOB Request",
+                        onTap: () {
+                          inboxCtrl.dobrequest();
+                          Get.to(
+                            DobRequestScreen(),
                             duration: Duration(
                               milliseconds: ApiConstants.screenTransitionTime,
                             ),

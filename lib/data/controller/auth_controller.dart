@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -60,7 +61,6 @@ class AuthController extends GetxController implements GetxService {
     update();
     return response;
   }
-  //=-=--=-=-=-=--=-=-otp-verify-=-=-=-=-=-=-=-=-=-==-=
 
   Future<Response> ortverifyapi({
     required BuildContext context,
@@ -78,6 +78,114 @@ class AuthController extends GetxController implements GetxService {
       devicetoken: devicetoken,
     );
 
+    EasyLoading.dismiss();
+
+    final body = response.body;
+
+    if (response.statusCode == 409 && body['status'] == "ALREADY_LOGGED_IN") {
+      Get.dialog(
+        CupertinoAlertDialog(
+          title: const Text('Session Alert'),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(body['message'] ?? ''),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Get.back(),
+              child: const Text('No'),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () {
+                Get.back();
+                secoundortverifyapi(
+                  context: Get.context!,
+                  userid: userid.toString(),
+                  otp: otp.toString(),
+                  devicetoken: devicetoken,
+                  mobilenu7mber: mobilenu7mber,
+                );
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        ),
+        barrierDismissible: false,
+      );
+    } else if (response.statusCode == 200 && body['status'] == true) {
+      authRepo.saveUserToken(body['token'].toString());
+      authRepo.saveUserprofileid(userid);
+
+      await checkUser(userid, mobilenu7mber);
+    } else if (response.statusCode == 422) {
+      Get.snackbar(
+        'Error',
+        body['message'] ?? 'Something went wrong',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+
+    update();
+    return response;
+  }
+
+  void showAlreadyLoggedInIOSDialog({
+    required BuildContext context,
+    required String message,
+    VoidCallback? onYes,
+    VoidCallback? onNo,
+  }) {
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: const Text('Session Alert'),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(message),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () {
+                Get.back();
+                onNo?.call();
+              },
+              child: const Text('No'),
+            ),
+
+            CupertinoDialogAction(
+              onPressed: () {
+                Get.back();
+                onYes?.call();
+              },
+              isDefaultAction: true,
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<Response> secoundortverifyapi({
+    required BuildContext context,
+    required String userid,
+    required String otp,
+    required String devicetoken,
+    required String mobilenu7mber,
+  }) async {
+    EasyLoading.show();
+    update();
+
+    Response response = await authRepo.secoundotpverifyapi(
+      useridd: userid,
+      otp: otp,
+      devicetoken: devicetoken,
+    );
+
     if (response.statusCode == 200) {
       print(':::::::::${response.body['user_id']}');
 
@@ -86,7 +194,6 @@ class AuthController extends GetxController implements GetxService {
 
       EasyLoading.dismiss();
 
-      /// ✔ step navigation call
       await checkUser(userid, mobilenu7mber);
     } else if (response.statusCode == 422) {
       EasyLoading.dismiss();

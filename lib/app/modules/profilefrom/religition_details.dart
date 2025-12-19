@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:vivashri/app/modules/profilefrom/reference_details.dart';
 import 'package:vivashri/config/utils/colors.dart';
@@ -11,6 +12,7 @@ import 'package:vivashri/data/controller/fromcontroller.dart';
 import 'package:vivashri/data/controller/gotra.dart';
 import 'package:vivashri/data/controller/religion.dart';
 import 'package:vivashri/data/controller/subcaste.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 
 class ReligionDetailsScreen extends StatefulWidget {
   const ReligionDetailsScreen({super.key});
@@ -31,6 +33,19 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
   final gotraC = Get.put(GotraController());
   TextEditingController othergotraController = TextEditingController();
   StaperfromController stapercontroller = Get.put(StaperfromController());
+  void profileapi() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? profileid = prefs.getString("profileid");
+    usercontroller.fetchUserDetail(profileid.toString());
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    profileapi();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -486,6 +501,8 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
     );
   }
 
+  final usercontroller = Get.put(UserDetailController());
+
   // ---------------------- Buttons ------------------------
   Widget _buttons() {
     return Row(
@@ -493,6 +510,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
+              final data = usercontroller.userData.value!;
               if (religionC.selectedName.value == null) {
                 Get.snackbar(
                   'Error',
@@ -520,6 +538,7 @@ class _ReligionDetailsScreenState extends State<ReligionDetailsScreen> {
                     "step": '5',
                   },
                   context: context,
+                  username: data.name.toString(),
                 );
               }
             },

@@ -220,6 +220,7 @@ class StaperfromController extends GetxController implements GetxService {
   Future<void> religiondeytalsProfile({
     required Map<String, dynamic> formData,
     BuildContext? context,
+    String? username,
   }) async {
     String? token = Get.find<AuthController>().getAuthToken();
 
@@ -256,117 +257,12 @@ class StaperfromController extends GetxController implements GetxService {
             barrierDismissible: false,
             builder: (context) {
               return Dialog(
-                insetPadding:
-                    EdgeInsets.zero, // ❗ Remove unwanted left-right gap
+                insetPadding: EdgeInsets.zero,
                 backgroundColor: Colors.transparent,
                 child: Center(
-                  child: Container(
-                    margin: EdgeInsets.symmetric(
-                      horizontal: 20,
-                    ), // ⭐ Controlled spacing
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
-                          child: Image.asset(
-                            "assets/images/Frame 79.png",
-                            width: double.infinity,
-                            height: 260,
-                            fit: BoxFit.cover, // IMAGE PERFECT FULL WIDTH
-                          ),
-                        ),
-
-                        SizedBox(height: 15),
-
-                        Text(
-                          "Thank you for Registration",
-                          style: opensansBold.copyWith(
-                            color: Colors.green,
-                            fontSize: 18,
-                          ),
-                        ),
-
-                        SizedBox(height: 5),
-
-                        Text(
-                          "Welcome To Vivashri",
-                          style: opensansBold.copyWith(
-                            color: ColorResources.primarycolor2,
-                            fontSize: 25,
-                          ),
-                        ),
-
-                        SizedBox(height: 20),
-
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.offAll(
-                                ReferenceDetailsScreen(),
-                                duration: Duration(
-                                  milliseconds:
-                                      ApiConstants.screenTransitionTime,
-                                ),
-                                transition: Transition.rightToLeft,
-                              );
-                            },
-                            child: Container(
-                              height: 45,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xFFBE266B),
-                                    Color(0xFFEB1D7B),
-                                  ],
-                                ),
-                              ),
-                              child: Text(
-                                "Continue to Complete Profile",
-                                style: opensansSemiBold.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        SizedBox(height: 10),
-
-                        GestureDetector(
-                          onTap: () {
-                            Get.offAll(
-                              MainNavigation(),
-                              duration: Duration(
-                                milliseconds: ApiConstants.screenTransitionTime,
-                              ),
-                              transition: Transition.rightToLeft,
-                            );
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: 20),
-                            child: Text(
-                              "Skip",
-                              style: opensansSemiBold.copyWith(
-                                color: Colors.pink,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  child: _AnimatedThankYouDialog(
+                    username: username,
+                  ), // 👈 NEW WIDGET for animation
                 ),
               );
             },
@@ -1611,5 +1507,171 @@ class StaperfromController extends GetxController implements GetxService {
     } finally {
       isLoading.value = false;
     }
+  }
+}
+
+class _AnimatedThankYouDialog extends StatefulWidget {
+  final String? username;
+  _AnimatedThankYouDialog({super.key, this.username});
+  @override
+  State<_AnimatedThankYouDialog> createState() =>
+      _AnimatedThankYouDialogState();
+}
+
+class _AnimatedThankYouDialogState extends State<_AnimatedThankYouDialog>
+    with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+  late Animation<double> shakeAnim;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    shakeAnim = Tween<double>(
+      begin: -3,
+      end: 3,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                child: Image.asset(
+                  "assets/images/Frame 79 2.png",
+                  width: double.infinity,
+                  height: 300, // 🔥 INCREASED IMAGE SIZE
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 50),
+                  child: Center(
+                    child: Image.asset(
+                      "assets/images/check-animation.gif",
+                      width: 140, // little bigger GIF
+                      height: 140,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          _animatedText(
+            "Thank you for Registration",
+            style: opensansBold.copyWith(color: Colors.green, fontSize: 18),
+          ),
+
+          _animatedText(
+            "${widget.username}",
+            style: opensansBold.copyWith(color: Colors.green, fontSize: 25),
+          ),
+          _animatedText(
+            "Welcome To Vivashri",
+            style: opensansBold.copyWith(
+              color: ColorResources.primarycolor2,
+              fontSize: 25,
+            ),
+          ),
+
+          SizedBox(height: 20),
+
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: GestureDetector(
+              onTap: () {
+                Get.offAll(
+                  ReferenceDetailsScreen(),
+                  duration: Duration(
+                    milliseconds: ApiConstants.screenTransitionTime,
+                  ),
+                  transition: Transition.rightToLeft,
+                );
+              },
+              child: Container(
+                height: 45,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFBE266B), Color(0xFFEB1D7B)],
+                  ),
+                ),
+                child: Text(
+                  "Continue to Complete Profile",
+                  style: opensansSemiBold.copyWith(
+                    color: Colors.white,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          SizedBox(height: 10),
+
+          GestureDetector(
+            onTap: () {
+              Get.offAll(
+                MainNavigation(),
+                duration: Duration(
+                  milliseconds: ApiConstants.screenTransitionTime,
+                ),
+                transition: Transition.rightToLeft,
+              );
+            },
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 20),
+              child: _animatedText(
+                "Skip",
+                style: opensansSemiBold.copyWith(
+                  color: Colors.pink,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 🔥 Small Wiggle Animation for all text
+  Widget _animatedText(String text, {required TextStyle style}) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(shakeAnim.value, 0),
+          child: child,
+        );
+      },
+      child: Text(text, style: style),
+    );
   }
 }

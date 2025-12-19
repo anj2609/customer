@@ -16,6 +16,7 @@ import 'package:vivashri/data/controller/occupation.dart';
 import 'package:vivashri/data/controller/qualification.dart';
 import 'package:vivashri/data/controller/religion.dart';
 import 'package:vivashri/data/controller/statecontroller.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/widgets/drawer.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:vivashri/widgets/dropdownitems.dart';
@@ -292,11 +293,10 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
 
               _centerText("---- or ----"),
 
-              _title("Search:"),
-              SizedBox(height: 5),
-              _genderSelector(),
-
-              const SizedBox(height: 15),
+              // _title("Search:"),
+              // SizedBox(height: 5),
+              // _genderSelector(),
+              const SizedBox(height: 5),
               _title(
                 "Age (${ageRange.start.toInt()} - ${ageRange.end.toInt()})",
               ),
@@ -551,11 +551,10 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
 
               _centerText("---- or ----"),
 
-              _title("Search:"),
-              SizedBox(height: 5),
-              _genderSelector(),
-
-              const SizedBox(height: 15),
+              // _title("Search:"),
+              // SizedBox(height: 5),
+              // _genderSelector(),
+              const SizedBox(height: 5),
               _title(
                 "Age (${ageRange.start.toInt()} - ${ageRange.end.toInt()})",
               ),
@@ -1374,9 +1373,11 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
         Expanded(
           child: GestureDetector(
             onTap: () {
+              final u = usercontroller.userData.value!;
+              print('gender:::${u.gender}');
               if (searchprofileid.text.isEmpty) {
                 searchC.searchlist(
-                  searchgender: gender == 0 ? "Bride" : "Groom",
+                  searchgender: u.gender == "Male" ? "Bride" : "Groom",
                   minage: ageRange.start.toString(),
                   maxage: ageRange.end.toString(),
                   minheight: heightRange.start.toString(),
@@ -1416,6 +1417,8 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
       ],
     );
   }
+
+  final usercontroller = Get.put(UserDetailController());
 }
 
 class UpperCaseTextFormatter extends TextInputFormatter {

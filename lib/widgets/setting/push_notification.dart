@@ -105,6 +105,12 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
                               newMatches: newMatches == true ? 1 : 0,
                               newOffers: newOffers == true ? 1 : 0,
                             );
+                            Future.delayed(
+                              const Duration(microseconds: 1000),
+                              () {
+                                Get.back();
+                              },
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorResources.primarycolor2,

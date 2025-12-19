@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/match/userprofile.dart';
 import 'package:vivashri/app/modules/search/search.dart';
+import 'package:vivashri/call_parent/chat/api/apis.dart';
+import 'package:vivashri/call_parent/chat/widgets/Snackbar.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
@@ -10,6 +13,7 @@ import 'package:vivashri/data/controller/accept_interest.dart';
 import 'package:vivashri/data/controller/recived_interst.dart';
 import 'package:vivashri/data/controller/send_interest.dart';
 import 'package:vivashri/data/controller/userbyuser.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/widgets/drawer.dart';
 import 'package:vivashri/widgets/image_view.dart';
 
@@ -25,6 +29,8 @@ class _ConnectScreenState extends State<ConnectScreen>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String? profileid;
+  final usercontroller = Get.put(UserDetailController());
 
   @override
   void initState() {
@@ -35,6 +41,14 @@ class _ConnectScreenState extends State<ConnectScreen>
       vsync: this,
       initialIndex: widget.initialIndex,
     );
+  }
+
+  void profileapi() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    profileid = prefs.getString("profileid");
+    usercontroller.fetchUserDetail(profileid.toString());
+    // checkcontroller.checkProfileComplete(profileid.toString());
   }
 
   final inboxCtrl = Get.put(InboxReceivedController());
@@ -300,7 +314,7 @@ class _ConnectScreenState extends State<ConnectScreen>
           String age = calculateAgeInYears(user?.dob);
           return GestureDetector(
             onTap: () {
-              userbyuserController.fetchUserDetail(user.id.toString());
+              userbyuserController.fetchUserDetail(user!.id.toString());
               Get.to(
                 UserProfileDetailsPage(),
                 duration: Duration(
@@ -339,23 +353,156 @@ class _ConnectScreenState extends State<ConnectScreen>
                           aspectRatio: 9 / 11,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              user!.photo != null
-                                  ? "${ApiConstants.imageurl}${user.photo!}"
-                                  : "",
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  user.gender == "Male"
-                                      ? "assets/images/9159790.png"
-                                      : "assets/images/3232.png",
-                                  fit: BoxFit.contain,
-                                );
-                              },
+                            child: Column(
+                              children: [
+                                if (user?.profilesetting == null)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photo}",
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
+                                if (user?.profilesetting?.photoShow == 2)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photo}",
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == false)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photoBlur}",
+
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.contain,
+                                      );
+                                    },
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == true)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photoBlur}",
+
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.contain,
+                                      );
+                                    },
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == 1 &&
+                                    user?.photorequestcheck == true)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photo}",
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
+                                /////
+                                if (user?.profilesetting?.photoShow == 2)
+                                  SizedBox(),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == false)
+                                  Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/locked-icon.png',
+                                        ),
+                                        const SizedBox(height: 20),
+                                        GestureDetector(
+                                          onTap: () {
+                                            sentCtrl.sendphotorequest(
+                                              user!.id.toString(),
+                                            );
+                                          },
+                                          child: Text(
+                                            "Request a Photo",
+                                            style: opensansSemiBold.copyWith(
+                                              color:
+                                                  ColorResources.primarycolor2,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == true)
+                                  SizedBox(),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == 1 &&
+                                    user?.photorequestcheck == true)
+                                  SizedBox(),
+                              ],
                             ),
                           ),
                         ),
 
+                        // AspectRatio(
+                        //   aspectRatio: 9 / 11,
+                        //   child: ClipRRect(
+                        //     borderRadius: BorderRadius.circular(12),
+                        //     child: Image.network(
+                        //       user!.photo != null
+                        //           ? "${ApiConstants.imageurl}${user.photo!}"
+                        //           : "",
+                        //       fit: BoxFit.cover,
+                        //       errorBuilder: (context, error, stackTrace) {
+                        //         return Image.asset(
+                        //           user.gender == "Male"
+                        //               ? "assets/images/9159790.png"
+                        //               : "assets/images/3232.png",
+                        //           fit: BoxFit.contain,
+                        //         );
+                        //       },
+                        //     ),
+                        //   ),
+                        // ),
                         Positioned(
                           bottom: 0,
                           left: 0,
@@ -432,14 +579,14 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 Row(
                                   children: [
                                     Text(
-                                      "${user.name ?? ""}",
+                                      "${user?.name ?? ""}",
                                       style: opensansMedium.copyWith(
                                         color: Colors.white,
                                         fontSize: 17,
                                       ),
                                     ),
                                     Text(
-                                      "(ID: ${user.profileId})",
+                                      "(ID: ${user?.profileId})",
                                       style: opensansMedium.copyWith(
                                         color: ColorResources.primarycolor,
                                         fontSize: 12,
@@ -451,7 +598,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 const SizedBox(height: 4),
 
                                 Text(
-                                  "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                  "• $age, ${user?.height ?? ""}” • ${user?.religion?.name ?? ""}  • ${user?.subCaste?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -460,7 +607,7 @@ class _ConnectScreenState extends State<ConnectScreen>
 
                                 // DETAILS L2
                                 Text(
-                                  "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                  "• ${user?.occupation?.name ?? ""} • Earns ₹${user?.annualIncome} Lacs p.a • ${user?.locState?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -498,6 +645,10 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 id: item.id.toString(),
                                 status: "Accepted",
                               );
+                              tabController.animateTo(1);
+                              inboxCtrl.acceptedbyme();
+                              inboxCtrl.acceptedbypartner();
+                              setState(() {});
                             },
                             child: Image.asset(
                               'assets/images/Frame 61.png',
@@ -871,9 +1022,22 @@ class _ConnectScreenState extends State<ConnectScreen>
   }
 
   final sentCtrl = Get.put(SentInterestController());
+  List<String> photosblur = [];
+
+  void buildPhotoList22(dynamic u) {
+    List<String?> raw = [u.photoBlur];
+
+    photosblur = raw
+        .where((e) => e != null && e.isNotEmpty)
+        .map((e) => e!)
+        .toSet()
+        .toList();
+  }
 
   // ---------------- SENT TAB ----------------
   Widget _acceptedbyme(double w, double h) {
+    final u = usercontroller.userData.value!;
+
     return Obx(() {
       if (inboxCtrl.isLoading.value) {
         return Center(
@@ -895,7 +1059,7 @@ class _ConnectScreenState extends State<ConnectScreen>
           String age = calculateAgeInYears(user?.dob);
           return GestureDetector(
             onTap: () {
-              userbyuserController.fetchUserDetail(user.id.toString());
+              userbyuserController.fetchUserDetail(user!.id.toString());
               Get.to(
                 UserProfileDetailsPage(),
                 duration: Duration(
@@ -925,7 +1089,7 @@ class _ConnectScreenState extends State<ConnectScreen>
               child: Column(
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
+                    borderRadius: BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
                     child: Stack(
@@ -934,19 +1098,132 @@ class _ConnectScreenState extends State<ConnectScreen>
                           aspectRatio: 9 / 11,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              user!.photo != null
-                                  ? "${ApiConstants.imageurl}${user.photo!}"
-                                  : "",
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  user.gender == "Male"
-                                      ? "assets/images/no-image-male2.jpg"
-                                      : "assets/images/no-image-female2.jpg",
-                                  fit: BoxFit.contain,
-                                );
-                              },
+                            child: Column(
+                              children: [
+                                if (user?.profilesetting == null)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photo}",
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
+                                if (user?.profilesetting?.photoShow == 2)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photo}",
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == false)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photoBlur}",
+
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.contain,
+                                      );
+                                    },
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == true)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photoBlur}",
+
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.contain,
+                                      );
+                                    },
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == 1 &&
+                                    user?.photorequestcheck == true)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photo}",
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
+                                /////
+                                if (user?.profilesetting?.photoShow == 2)
+                                  SizedBox(),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == false)
+                                  Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/locked-icon.png',
+                                        ),
+                                        const SizedBox(height: 20),
+                                        GestureDetector(
+                                          onTap: () {
+                                            sentCtrl.sendphotorequest(
+                                              user!.id.toString(),
+                                            );
+                                          },
+                                          child: Text(
+                                            "Request a Photo",
+                                            style: opensansSemiBold.copyWith(
+                                              color:
+                                                  ColorResources.primarycolor2,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == true)
+                                  SizedBox(),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == 1 &&
+                                    user?.photorequestcheck == true)
+                                  SizedBox(),
+                              ],
                             ),
                           ),
                         ),
@@ -969,40 +1246,191 @@ class _ConnectScreenState extends State<ConnectScreen>
                             ),
                           ),
                         ),
-
-                        Positioned(
-                          top: 12,
-                          right: 12,
-                          child: Column(
-                            children: [
-                              Image.asset(
-                                'assets/images/Group 285.png',
-                                height: 25,
+                        if (user?.profilesetting == null)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
                               ),
-                              SizedBox(height: 10),
-                              GestureDetector(
-                                onTap: () {
-                                  buildPhotoList(user);
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: true,
-                                    builder: (_) =>
-                                        PhotoSliderDialog(photos: photosmatch),
-                                  );
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Image.asset(
-                                    'assets/images/imagecount.png',
-                                    height: 40,
-                                  ),
-                                ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                            ],
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      buildPhotoList(user);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (_) => PhotoSliderDialog(
+                                          photos: photosmatch,
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/imagecount.png',
+                                      height: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                        if (user?.profilesetting?.photoShow == 2)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      buildPhotoList(user);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (_) => PhotoSliderDialog(
+                                          photos: photosmatch,
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/imagecount.png',
+                                      height: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                        if (user?.profilesetting?.photoShow == 1 &&
+                            user?.photorequeststatus == null &&
+                            user?.photorequestcheck == false)
+                          //blur photo
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      buildPhotoList22(user);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (_) => PhotoSliderDialog(
+                                          photos: photosblur,
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/imagecount.png',
+                                      height: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                        if (user?.profilesetting?.photoShow == 1 &&
+                            user?.photorequeststatus == null &&
+                            user?.photorequestcheck == true)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      buildPhotoList22(user);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (_) => PhotoSliderDialog(
+                                          photos: photosblur,
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/imagecount.png',
+                                      height: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                        if (user?.profilesetting?.photoShow == 1 &&
+                            user?.photorequeststatus == 1 &&
+                            user?.photorequestcheck == true)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      buildPhotoList(user);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (_) => PhotoSliderDialog(
+                                          photos: photosmatch,
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/imagecount.png',
+                                      height: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
+                          ),
 
                         Positioned(
                           bottom: 0,
@@ -1038,14 +1466,53 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 Row(
                                   children: [
                                     Text(
-                                      "${user.name ?? ""}",
+                                      (() {
+                                        String name = user?.name ?? "";
+                                        int showType =
+                                            user?.profilesetting?.nameShow ?? 1;
+
+                                        bool isPremium = false;
+                                        if (u.planDetail != null) {
+                                          if (u.planDetail is Map &&
+                                              u.planDetail == null) {
+                                            isPremium = true;
+                                          } else if (u.planDetail is List &&
+                                              u.planDetail == null) {
+                                            isPremium = true;
+                                          }
+                                        }
+
+                                        if (name.isEmpty) return "";
+
+                                        String maskName(String n) {
+                                          if (n.length <= 2) return n[0] + "*";
+                                          return n.substring(0, 2) +
+                                              ("*" * (n.length - 2));
+                                        }
+
+                                        if (showType == 1) {
+                                          return name;
+                                        }
+
+                                        if (showType == 2) {
+                                          return isPremium
+                                              ? name
+                                              : maskName(name);
+                                        }
+
+                                        if (showType == 3) {
+                                          return maskName(name);
+                                        }
+
+                                        return name;
+                                      })(),
                                       style: opensansMedium.copyWith(
                                         color: Colors.white,
                                         fontSize: 17,
                                       ),
                                     ),
                                     Text(
-                                      "(ID: ${user.profileId})",
+                                      "(ID: ${user?.profileId})",
                                       style: opensansMedium.copyWith(
                                         color: ColorResources.primarycolor,
                                         fontSize: 12,
@@ -1057,7 +1524,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 const SizedBox(height: 4),
 
                                 Text(
-                                  "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                  "• $age, ${user?.height ?? ""}” • ${user?.religion?.name ?? ""}  • ${user?.subCaste?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -1066,7 +1533,7 @@ class _ConnectScreenState extends State<ConnectScreen>
 
                                 // DETAILS L2
                                 Text(
-                                  "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                  "• ${user?.occupation?.name ?? ""} • Earns ₹${user?.annualIncome} Lacs p.a • ${user?.locState?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -1113,9 +1580,27 @@ class _ConnectScreenState extends State<ConnectScreen>
                         ),
                         SizedBox(width: 5),
                         Expanded(
-                          child: Image.asset(
-                            'assets/images/viewprofile (1).png',
-                            height: 50,
+                          child: GestureDetector(
+                            onTap: () async {
+                              print('user id ====> ${user?.profileId}');
+
+                              if (user?.profileId!.trim().isNotEmpty &&
+                                  user?.profileId != null) {
+                                await APIs.fetchUser(
+                                  context,
+                                  user!.profileId.toString().trim(),
+                                );
+                              } else {
+                                Dialogs.showSnackbar(
+                                  context,
+                                  'Something went wrong while Chat. Please try again later!',
+                                );
+                              }
+                            },
+                            child: Image.asset(
+                              'assets/images/viewprofile (1).png',
+                              height: 50,
+                            ),
                           ),
                         ),
                       ],
@@ -1131,6 +1616,7 @@ class _ConnectScreenState extends State<ConnectScreen>
   }
 
   Widget _acceptedbypartner(double w, double h) {
+    final u = usercontroller.userData.value!;
     return Obx(() {
       if (inboxCtrl.isLoading.value) {
         return Center(
@@ -1152,7 +1638,7 @@ class _ConnectScreenState extends State<ConnectScreen>
           String age = calculateAgeInYears(user?.dob);
           return GestureDetector(
             onTap: () {
-              userbyuserController.fetchUserDetail(user.id.toString());
+              userbyuserController.fetchUserDetail(user!.id.toString());
               Get.to(
                 UserProfileDetailsPage(),
                 duration: Duration(
@@ -1191,23 +1677,160 @@ class _ConnectScreenState extends State<ConnectScreen>
                           aspectRatio: 9 / 11,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              user!.photo != null
-                                  ? "${ApiConstants.imageurl}${user.photo!}"
-                                  : "",
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  user.gender == "Male"
-                                      ? "assets/images/9159790.png"
-                                      : "assets/images/3232.png",
-                                  fit: BoxFit.contain,
-                                );
-                              },
+                            child: Stack(
+                              children: [
+                                if (user?.profilesetting == null)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    child: Image.network(
+                                      "${ApiConstants.imageurl}${user?.photo}",
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Image.asset(
+                                          user?.gender == "Male"
+                                              ? "assets/images/no-image-male2.jpg"
+                                              : "assets/images/no-image-female2.jpg",
+                                          fit: BoxFit.contain,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                if (user?.profilesetting?.photoShow == 2)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photo}",
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == false)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photoBlur}",
+
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.contain,
+                                      );
+                                    },
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == true)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photoBlur}",
+
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.contain,
+                                      );
+                                    },
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == 1 &&
+                                    user?.photorequestcheck == true)
+                                  Image.network(
+                                    "${ApiConstants.imageurl}${user?.photo}",
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        user?.gender == "Male"
+                                            ? "assets/images/no-image-male2.jpg"
+                                            : "assets/images/no-image-female2.jpg",
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
+                                /////
+                                if (user?.profilesetting?.photoShow == 2)
+                                  SizedBox(),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == false)
+                                  Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/locked-icon.png',
+                                        ),
+                                        const SizedBox(height: 20),
+                                        GestureDetector(
+                                          onTap: () {
+                                            sentCtrl.sendphotorequest(
+                                              user!.id.toString(),
+                                            );
+                                          },
+                                          child: Text(
+                                            "Request a Photo",
+                                            style: opensansSemiBold.copyWith(
+                                              color:
+                                                  ColorResources.primarycolor2,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == null &&
+                                    user?.photorequestcheck == true)
+                                  SizedBox(),
+
+                                if (user?.profilesetting?.photoShow == 1 &&
+                                    user?.photorequeststatus == 1 &&
+                                    user?.photorequestcheck == true)
+                                  SizedBox(),
+                              ],
                             ),
                           ),
                         ),
 
+                        // AspectRatio(
+                        //   aspectRatio: 9 / 11,
+                        //   child: ClipRRect(
+                        //     borderRadius: BorderRadius.circular(12),
+                        //     child: Image.network(
+                        //       user!.photo != null
+                        //           ? "${ApiConstants.imageurl}${user.photo!}"
+                        //           : "",
+                        //       fit: BoxFit.cover,
+                        //       errorBuilder: (context, error, stackTrace) {
+                        //         return Image.asset(
+                        //           user.gender == "Male"
+                        //               ? "assets/images/9159790.png"
+                        //               : "assets/images/3232.png",
+                        //           fit: BoxFit.contain,
+                        //         );
+                        //       },
+                        //     ),
+                        //   ),
+                        // ),
                         Positioned(
                           bottom: 0,
                           left: 0,
@@ -1226,41 +1849,225 @@ class _ConnectScreenState extends State<ConnectScreen>
                             ),
                           ),
                         ),
-
-                        Positioned(
-                          top: 12,
-                          right: 12,
-                          child: Column(
-                            children: [
-                              Image.asset(
-                                'assets/images/Group 285.png',
-                                height: 25,
+                        if (user?.profilesetting == null)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
                               ),
-                              SizedBox(height: 10),
-                              GestureDetector(
-                                onTap: () {
-                                  buildPhotoList(user);
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: true,
-                                    builder: (_) =>
-                                        PhotoSliderDialog(photos: photosmatch),
-                                  );
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Image.asset(
-                                    'assets/images/imagecount.png',
-                                    height: 40,
-                                  ),
-                                ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                            ],
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      buildPhotoList(user);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (_) => PhotoSliderDialog(
+                                          photos: photosmatch,
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/imagecount.png',
+                                      height: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                        if (user?.profilesetting?.photoShow == 2)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      buildPhotoList(user);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (_) => PhotoSliderDialog(
+                                          photos: photosmatch,
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/imagecount.png',
+                                      height: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
+                          ),
 
+                        if (user?.profilesetting?.photoShow == 1 &&
+                            user?.photorequeststatus == null &&
+                            user?.photorequestcheck == false)
+                          //blur photo
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      buildPhotoList22(user);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (_) => PhotoSliderDialog(
+                                          photos: photosblur,
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/imagecount.png',
+                                      height: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                        if (user?.profilesetting?.photoShow == 1 &&
+                            user?.photorequeststatus == null &&
+                            user?.photorequestcheck == true)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      buildPhotoList22(user);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (_) => PhotoSliderDialog(
+                                          photos: photosblur,
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/imagecount.png',
+                                      height: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                        if (user?.profilesetting?.photoShow == 1 &&
+                            user?.photorequeststatus == 1 &&
+                            user?.photorequestcheck == true)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      buildPhotoList(user);
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        builder: (_) => PhotoSliderDialog(
+                                          photos: photosmatch,
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/imagecount.png',
+                                      height: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                        // Positioned(
+                        //   top: 12,
+                        //   right: 12,
+                        //   child: Column(
+                        //     children: [
+                        //       Image.asset(
+                        //         'assets/images/Group 285.png',
+                        //         height: 25,
+                        //       ),
+                        //       SizedBox(height: 10),
+                        //       GestureDetector(
+                        //         onTap: () {
+                        //           buildPhotoList(user);
+                        //           showDialog(
+                        //             context: context,
+                        //             barrierDismissible: true,
+                        //             builder: (_) =>
+                        //                 PhotoSliderDialog(photos: photosmatch),
+                        //           );
+                        //         },
+                        //         child: Container(
+                        //           decoration: BoxDecoration(
+                        //             borderRadius: BorderRadius.circular(10),
+                        //           ),
+                        //           child: Image.asset(
+                        //             'assets/images/imagecount.png',
+                        //             height: 40,
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
                         Positioned(
                           bottom: 0,
                           left: 0,
@@ -1295,14 +2102,53 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 Row(
                                   children: [
                                     Text(
-                                      "${user.name ?? ""}",
+                                      (() {
+                                        String name = user?.name ?? "";
+                                        int showType =
+                                            user?.profilesetting?.nameShow ?? 1;
+
+                                        bool isPremium = false;
+                                        if (u.planDetail != null) {
+                                          if (u.planDetail is Map &&
+                                              u.planDetail == null) {
+                                            isPremium = true;
+                                          } else if (u.planDetail is List &&
+                                              u.planDetail == null) {
+                                            isPremium = true;
+                                          }
+                                        }
+
+                                        if (name.isEmpty) return "";
+
+                                        String maskName(String n) {
+                                          if (n.length <= 2) return n[0] + "*";
+                                          return n.substring(0, 2) +
+                                              ("*" * (n.length - 2));
+                                        }
+
+                                        if (showType == 1) {
+                                          return name;
+                                        }
+
+                                        if (showType == 2) {
+                                          return isPremium
+                                              ? name
+                                              : maskName(name);
+                                        }
+
+                                        if (showType == 3) {
+                                          return maskName(name);
+                                        }
+
+                                        return name;
+                                      })(),
                                       style: opensansMedium.copyWith(
                                         color: Colors.white,
                                         fontSize: 17,
                                       ),
                                     ),
                                     Text(
-                                      "(ID: ${user.profileId})",
+                                      "(ID: ${user?.profileId})",
                                       style: opensansMedium.copyWith(
                                         color: ColorResources.primarycolor,
                                         fontSize: 12,
@@ -1314,7 +2160,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 const SizedBox(height: 4),
 
                                 Text(
-                                  "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                  "• $age, ${user?.height ?? ""}” • ${user?.religion?.name ?? ""}  • ${user?.subCaste?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -1323,7 +2169,7 @@ class _ConnectScreenState extends State<ConnectScreen>
 
                                 // DETAILS L2
                                 Text(
-                                  "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                  "• ${user?.occupation?.name ?? ""} • Earns ₹${user?.annualIncome} Lacs p.a • ${user?.locState?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,

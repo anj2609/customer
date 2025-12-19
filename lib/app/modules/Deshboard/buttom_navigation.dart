@@ -10,6 +10,8 @@ import 'package:vivashri/app/modules/chat/chatscreen.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/match/matchscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
+import 'package:vivashri/call_parent/chat/api/apis.dart';
+import 'package:vivashri/call_parent/chat/screens/chat_home_screen.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/check_percentage.dart';
@@ -33,7 +35,8 @@ class _MainNavigationState extends State<MainNavigation> {
     DashboardScreen(),
     MatchesScreen(),
     ConnectScreen(),
-    ChatScreen(),
+    HomeScreen(),
+    // ChatScreen(),
     MembershipPlansPage(),
   ];
   final matchC = Get.put(MatchController());
@@ -45,6 +48,15 @@ class _MainNavigationState extends State<MainNavigation> {
     profileapi();
   }
 
+  void login() async {
+    if (usercontroller.userData.value?.profileId != null) {
+      if (await APIs.userExists() && mounted) {
+      } else {
+        await APIs.createUser().then((value) {});
+      }
+    } else {}
+  }
+
   final searchC = Get.put(SearchmatchController());
   final inboxCtrl = Get.put(InboxReceivedController());
 
@@ -52,7 +64,10 @@ class _MainNavigationState extends State<MainNavigation> {
     final prefs = await SharedPreferences.getInstance();
 
     String? profileid = prefs.getString("profileid");
-    usercontroller.fetchUserDetail(profileid.toString());
+
+    usercontroller.fetchUserDetail(profileid.toString()).then((_) {
+      login();
+    });
     matchC.fetchMatches();
     searchC.fetchSearchList("", "");
     checkcontroller.checkProfileComplete(profileid.toString());
@@ -166,7 +181,11 @@ class _MainNavigationState extends State<MainNavigation> {
 
             if (index == 4) {
               return GestureDetector(
-                onTap: () => setState(() => _currentIndex = index),
+                onTap: () => {
+                  setState(() => _currentIndex = index),
+                  usercontroller.fetchUserDetail(''),
+                },
+
                 child: Container(
                   child: Image.asset(
                     item.img,
@@ -182,7 +201,10 @@ class _MainNavigationState extends State<MainNavigation> {
             // ---------------- OTHER BOTTOM ITEMS ----------------
             return Expanded(
               child: InkWell(
-                onTap: () => setState(() => _currentIndex = index),
+                onTap: () => {
+                  setState(() => _currentIndex = index),
+                  usercontroller.fetchUserDetail(''),
+                },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Column(

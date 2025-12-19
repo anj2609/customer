@@ -27,6 +27,20 @@ class AuthRepo extends GetxService {
     });
   }
 
+  Future<Response> secoundotpverifyapi({
+    String? useridd,
+    String? otp,
+    String? devicetoken,
+  }) async {
+    return apiClient.postData(ApiConstants.otpapi, {
+      "application": 'true',
+      "userId": useridd,
+      "otp": otp,
+      "device_token": devicetoken,
+      "forceLogin": true,
+    });
+  }
+
   Future<bool> saveUserToken(String token) async {
     apiClient.token = token.toString();
     apiClient.updateHeader(token.toString());

@@ -198,8 +198,12 @@ class MemberData {
   dynamic photo3;
   dynamic photo4;
   dynamic photoBlur;
-
+  ProfileSettings? profilesetting;
+  bool? photorequestcheck;
   dynamic partnerQualities;
+  dynamic photorequeststatus;
+  dynamic dobrequesttatus;
+  dynamic dobrequestcheck;
 
   RefData? partnerCaste;
   dynamic partnerDosh;
@@ -260,6 +264,8 @@ class MemberData {
     this.homeRegId,
     this.appStep,
     this.deviceToken,
+    this.dobrequestcheck,
+    this.dobrequesttatus,
     this.formStatus,
     this.status,
     this.createdAt,
@@ -280,6 +286,7 @@ class MemberData {
     this.referenceOther,
     this.caste,
     this.dosh,
+    this.photorequestcheck,
     this.gotraOther,
     this.religion,
     this.subCaste,
@@ -288,12 +295,14 @@ class MemberData {
     this.locRelationMobile,
     this.locRelationName,
     this.locCity,
+    this.photorequeststatus,
     this.locHouseType,
     this.locLandmark,
     this.locNationality,
     this.locPincode,
     this.locResidenceType,
     this.locState,
+    this.profilesetting,
     this.locTempCity,
     this.locTempLandmark,
     this.locTempPincode,
@@ -387,11 +396,11 @@ class MemberData {
           .toList(),
 
       partnerMaritalStatus: (json['partner_marital_status'] as List?) ?? [],
-
+      photorequeststatus: json['photo_request_status'],
       partnerGotra: safeMap(json['partner_gotra']) != null
           ? RefData.fromJson(safeMap(json['partner_gotra'])!)
           : null,
-
+      photorequestcheck: json['photo_request_check'],
       homeRegId: json['home_reg_id']?.toString(),
       appStep: json['app_step'],
       deviceToken: json['device_token']?.toString(),
@@ -400,7 +409,8 @@ class MemberData {
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       about: json['about'],
-
+      dobrequestcheck: json['dob_request_check'],
+      dobrequesttatus: json['dob_request_status'],
       birthState: safeMap(json['birth_state']) != null
           ? RefData.fromJson(safeMap(json['birth_state'])!)
           : null,
@@ -429,7 +439,9 @@ class MemberData {
       caste: safeMap(json['caste']) != null
           ? RefData.fromJson(safeMap(json['caste'])!)
           : null,
-
+      profilesetting: json['profileSettings'] is Map
+          ? ProfileSettings.fromJson(json['profileSettings'])
+          : null,
       dosh: json['dosh'],
       gotraOther: json['gotra_other'],
 
@@ -751,6 +763,90 @@ double? parseDouble(dynamic value) {
   }
 
   return null;
+}
+
+class ProfileSettings {
+  String? id;
+  String? userId;
+  int? nameShow;
+  int? emailShow;
+  int? customerIdShow;
+  int? photoShow;
+  int? dateOfBirthShow;
+  int? workWithShow;
+  int? incomeShow;
+  String? createdAt;
+  String? updatedAt;
+  int? v;
+
+  ProfileSettings({
+    this.id,
+    this.userId,
+    this.nameShow,
+    this.emailShow,
+    this.customerIdShow,
+    this.photoShow,
+    this.dateOfBirthShow,
+    this.workWithShow,
+    this.incomeShow,
+    this.createdAt,
+    this.updatedAt,
+    this.v,
+  });
+
+  /// ---- SAFE PARSING ---- ///
+  static int? toIntSafe(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value.trim());
+    return null;
+  }
+
+  static String? toStringSafe(dynamic value) {
+    if (value == null) return null;
+    return value.toString();
+  }
+
+  /// ---- FROM JSON ---- ///
+  factory ProfileSettings.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return ProfileSettings();
+
+    return ProfileSettings(
+      id: toStringSafe(json["_id"]),
+      userId: toStringSafe(json["user_id"]),
+
+      nameShow: toIntSafe(json["name_show"]),
+      emailShow: toIntSafe(json["email_show"]),
+      customerIdShow: toIntSafe(json["customer_id_show"]),
+      photoShow: toIntSafe(json["photo_show"]),
+      dateOfBirthShow: toIntSafe(json["date_of_birth_show"]),
+      workWithShow: toIntSafe(json["work_with_show"]),
+      incomeShow: toIntSafe(json["income_show"]),
+
+      createdAt: toStringSafe(json["createdAt"]),
+      updatedAt: toStringSafe(json["updatedAt"]),
+      v: toIntSafe(json["__v"]),
+    );
+  }
+
+  /// ---- TO JSON ---- ///
+  Map<String, dynamic> toJson() {
+    return {
+      "_id": id,
+      "user_id": userId,
+      "name_show": nameShow,
+      "email_show": emailShow,
+      "customer_id_show": customerIdShow,
+      "photo_show": photoShow,
+      "date_of_birth_show": dateOfBirthShow,
+      "work_with_show": workWithShow,
+      "income_show": incomeShow,
+      "createdAt": createdAt,
+      "updatedAt": updatedAt,
+      "__v": v,
+    };
+  }
 }
 
 class Hobby {

@@ -128,8 +128,8 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
                         });
                       },
                     ),
-
                     _label("Married Brother:"),
+
                     _dropdown(
                       value: marriedBrother,
                       items: getMarriedBrotherList(), // 🔥 Dynamic items
@@ -137,7 +137,6 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
                         setState(() => marriedBrother = v);
                       },
                     ),
-
                     _label("No. of Sister in Law:"),
                     _dropdown(
                       value: noOfSisterInLaw,
@@ -152,12 +151,12 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
                       onChanged: (v) => setState(() => noOfBrotherInLaw = v),
                     ),
 
-                    // _label("Total Family Member:"),
-                    // _dropdown(
-                    //   value: totalFamilyMember,
-                    //   items: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
-                    //   onChanged: (v) => setState(() => totalFamilyMember = v),
-                    // ),
+                    _label("Total Family Member:"),
+                    _dropdown(
+                      value: totalFamilyMember,
+                      items: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+                      onChanged: (v) => setState(() => totalFamilyMember = v),
+                    ),
                     const SizedBox(height: 30),
                     _buttons(),
                     const SizedBox(height: 50),
@@ -184,7 +183,6 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
                 color: ColorResources.blackgrey,
               ),
             ),
-        
           ],
         ),
       ),
@@ -295,10 +293,13 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
         borderRadius: BorderRadius.circular(10),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton(
+        child: DropdownButton<String>(
           isExpanded: true,
-          icon: Icon(Icons.keyboard_arrow_down),
-          value: value,
+          icon: const Icon(Icons.keyboard_arrow_down),
+
+          // ✅ FIX HERE
+          value: items.contains(value) ? value : null,
+
           hint: Text(
             "Select",
             style: opensansMedium.copyWith(
@@ -308,7 +309,7 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
           ),
           items: items
               .map(
-                (e) => DropdownMenuItem(
+                (e) => DropdownMenuItem<String>(
                   value: e,
                   child: Text(
                     e,
@@ -344,7 +345,8 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
                   "no_of_brother_in_law": noOfBrotherInLaw,
                   // "total_family": totalFamilyMember,
                 },
-              );  Future.delayed(const Duration(microseconds: 1000), () {
+              );
+              Future.delayed(const Duration(microseconds: 1000), () {
                 Get.back();
               });
             },

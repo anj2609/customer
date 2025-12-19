@@ -13,12 +13,13 @@ class PhotoSliderDialog extends StatefulWidget {
 class _PhotoSliderDialogState extends State<PhotoSliderDialog> {
   PageController controller = PageController();
   int currentIndex = 0;
-@override
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
     print('image:::::${widget.photos}');
   }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(

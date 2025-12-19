@@ -178,8 +178,8 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                                 onChanged: (v) =>
                                     setState(() => selectedYear = v),
                                 items: List.generate(
-                                  (2007 - 1960) + 1, // total count
-                                  (i) => "${1960 + i}", // starting from 1960
+                                  (2007 - 1950) + 1,
+                                  (i) => "${2007 - i}",
                                 ),
                               ),
                             ),

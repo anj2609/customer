@@ -51,8 +51,30 @@ class CheckProfileModel {
 
   factory CheckProfileModel.fromJson(Map<String, dynamic> json) {
     return CheckProfileModel(
-      status: json["status"] ?? false,
-      completion: json["completion"] ?? "",
+      status: json["status"] == true,
+      completion: _parseCompletion(json["completion"]),
     );
+  }
+
+  static dynamic _parseCompletion(dynamic value) {
+    double percent = 0;
+
+    if (value == null) {
+      percent = 0;
+    } else if (value is int) {
+      percent = value.toDouble();
+    } else if (value is double) {
+      percent = value;
+    } else if (value is String) {
+      final cleaned = value.replaceAll('%', '').trim();
+      percent = cleaned.isEmpty ? 0 : double.tryParse(cleaned) ?? 0;
+    } else {
+      percent = 0;
+    }
+
+    if (percent < 0) percent = 0;
+    if (percent > 100) percent = 100;
+
+    return "${percent.toInt()}%";
   }
 }

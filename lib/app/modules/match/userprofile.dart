@@ -92,6 +92,18 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
         .toList();
   }
 
+  List<String> photosmatchblur = [];
+
+  void buildPhotoListblur(dynamic u) {
+    List<String?> raw = [u.photoBlur];
+
+    photosmatchblur = raw
+        .where((e) => e != null && e.isNotEmpty)
+        .map((e) => e!)
+        .toSet()
+        .toList();
+  }
+
   bool deshboard = true;
   final usercontroller = Get.put(UserDetailController());
   @override
@@ -369,8 +381,44 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                                 "Contact No.",
                                 "+91-${user.contactNo ?? "N/A"}",
                               ),
-                              rowSingle("Email ID", user.email ?? "N/A"),
+                              rowSingle(
+                                "Email ID",
+                                (() {
+                                  String email = (user.email ?? "").trim();
+                                  if (email.isEmpty) email = "N/A";
 
+                                  int showType =
+                                      user.profilesetting?.emailShow ?? 2;
+
+                                  bool isPremium = false;
+                                  if (my.planDetail != null) {
+                                    if (my.planDetail is Map ||
+                                        my.planDetail is List) {
+                                      isPremium = true;
+                                    }
+                                  }
+
+                                  String maskEmail(String e) {
+                                    if (e.isEmpty || e == "N/A") return "*****";
+                                    if (e.length == 1) return "${e[0]}*****";
+                                    if (e.length == 2)
+                                      return "${e.substring(0, 1)}*****";
+                                    return e.substring(0, 2) +
+                                        ("*" * (e.length - 2));
+                                  }
+
+                                  if (showType == 1)
+                                    return maskEmail(email); // always hide
+                                  if (showType == 2)
+                                    return email; // always show
+                                  if (showType == 3)
+                                    return isPremium ? email : maskEmail(email);
+
+                                  return email;
+                                })(),
+                              ),
+
+                              //  rowSingle("Email ID", user.email ?? "N/A"),
                               SizedBox(height: 15),
 
                               // ---------------- BASIC INFO ----------------
@@ -394,21 +442,16 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                               rowTopBottom(
                                 "Age / Height",
                                 "${age ?? ""} Yrs / ${user.height ?? ""}",
+
                                 "Date of Birth",
                                 (() {
-                                  if (user.dob == null || user.dob!.isEmpty)
-                                    return "";
-
-                                  try {
-                                    DateTime d = DateTime.parse(user.dob!);
-                                    return "${d.day.toString().padLeft(2, '0')}-"
-                                        "${d.month.toString().padLeft(2, '0')}-"
-                                        "${d.year}";
-                                  } catch (e) {
-                                    return "";
-                                  }
+                                  DateTime d = DateTime.parse(user.dob!);
+                                  return "${d.day.toString().padLeft(2, '0')}-"
+                                      "${d.month.toString().padLeft(2, '0')}-"
+                                      "${d.year}";
                                 })(),
                               ),
+
                               rowTopBottom(
                                 "Caste",
                                 user.caste?.name ?? "N/A",
@@ -545,11 +588,30 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                                 "Working Status",
                                 "None",
                                 "Working With",
-                                user.workingWith?.name ?? "N/A",
+                                (() {
+                                  int workShow =
+                                      user.profilesetting?.workWithShow ?? 2;
+
+                                  if (workShow == 1) {
+                                    return "***";
+                                  }
+
+                                  return user.workingWith?.name ?? "N/A";
+                                })(),
                               ),
+
                               rowTopBottom(
                                 "Annual Income",
-                                user.annualIncome ?? "N/A",
+                                (() {
+                                  int incomeShow =
+                                      user.profilesetting?.incomeShow ?? 2;
+
+                                  if (incomeShow == 1) {
+                                    return "*******";
+                                  }
+
+                                  return user.annualIncome ?? "N/A";
+                                })(),
                                 "Specific Degree",
                                 user.highestDegree?.name ?? "N/A",
                               ),
@@ -1175,30 +1237,126 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
         AspectRatio(
           aspectRatio: 9 / 11,
           child: ClipRRect(
-            child: Image.network(
-              "${ApiConstants.imageurl}${user.photo}",
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (user.profilesetting == null)
+                  Image.network(
+                    "${ApiConstants.imageurl}${user.photo}",
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        user.gender == "Male"
+                            ? "assets/images/no-image-male2.jpg"
+                            : "assets/images/no-image-female2.jpg",
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  ),
+                if (user.profilesetting?.photoShow == 2)
+                  Image.network(
+                    "${ApiConstants.imageurl}${user.photo}",
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        user.gender == "Male"
+                            ? "assets/images/no-image-male2.jpg"
+                            : "assets/images/no-image-female2.jpg",
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  ),
 
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                String gender = user.gender.toString();
+                if (user.profilesetting?.photoShow == 1 &&
+                    user.photorequeststatus == null &&
+                    user.photorequestcheck == false)
+                  Image.network(
+                    "${ApiConstants.imageurl}${user.photoBlur}",
 
-                if (gender == "Male") {
-                  return Image.asset(
-                    "assets/images/no-image-male2.jpg",
                     fit: BoxFit.contain,
-                  );
-                } else if (gender == "Female") {
-                  return Image.asset(
-                    "assets/images/no-image-female2.jpg",
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        user.gender == "Male"
+                            ? "assets/images/no-image-male2.jpg"
+                            : "assets/images/no-image-female2.jpg",
+                        fit: BoxFit.contain,
+                      );
+                    },
+                  ),
+
+                if (user.profilesetting?.photoShow == 1 &&
+                    user.photorequeststatus == null &&
+                    user.photorequestcheck == true)
+                  Image.network(
+                    "${ApiConstants.imageurl}${user.photoBlur}",
+
                     fit: BoxFit.contain,
-                  );
-                } else {
-                  return Image.asset(
-                    "assets/images/Rectangle 77.png",
-                    fit: BoxFit.contain,
-                  );
-                }
-              },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        user.gender == "Male"
+                            ? "assets/images/no-image-male2.jpg"
+                            : "assets/images/no-image-female2.jpg",
+                        fit: BoxFit.contain,
+                      );
+                    },
+                  ),
+
+                if (user.profilesetting?.photoShow == 1 &&
+                    user.photorequeststatus == 1 &&
+                    user.photorequestcheck == true)
+                  Image.network(
+                    "${ApiConstants.imageurl}${user.photo}",
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        user.gender == "Male"
+                            ? "assets/images/no-image-male2.jpg"
+                            : "assets/images/no-image-female2.jpg",
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  ),
+
+                if (user.profilesetting?.photoShow == 2) SizedBox(),
+
+                if (user.profilesetting?.photoShow == 1 &&
+                    user.photorequeststatus == null &&
+                    user.photorequestcheck == false)
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset('assets/images/locked-icon.png'),
+                        const SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () {
+                            sentCtrl.sendphotorequest(user.id.toString());
+                          },
+                          child: Text(
+                            "Request a Photo",
+                            style: opensansSemiBold.copyWith(
+                              color: ColorResources.primarycolor2,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                if (user.profilesetting?.photoShow == 1 &&
+                    user.photorequeststatus == null &&
+                    user.photorequestcheck == true)
+                  SizedBox(),
+
+                if (user.profilesetting?.photoShow == 1 &&
+                    user.photorequeststatus == 1 &&
+                    user.photorequestcheck == true)
+                  SizedBox(),
+              ],
             ),
           ),
         ),
@@ -1219,17 +1377,130 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
 
               Spacer(),
 
-              GestureDetector(
-                onTap: () {
-                  buildPhotoList(user);
-                  showDialog(
-                    context: context,
-                    barrierDismissible: true,
-                    builder: (_) => PhotoSliderDialog(photos: photosmatch),
-                  );
-                },
-                child: Image.asset('assets/images/imagecount.png', height: 40),
-              ),
+              if (user.profilesetting == null)
+                GestureDetector(
+                  onTap: () {
+                    buildPhotoList(user);
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (_) => PhotoSliderDialog(photos: photosmatch),
+                    );
+                  },
+                  child: Image.asset(
+                    'assets/images/imagecount.png',
+                    height: 40,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        user.gender == "Male"
+                            ? "assets/images/no-image-male2.jpg"
+                            : "assets/images/no-image-female2.jpg",
+                        fit: BoxFit.contain,
+                      );
+                    },
+                  ),
+                ),
+              if (user.profilesetting?.photoShow == 2)
+                GestureDetector(
+                  onTap: () {
+                    buildPhotoList(user);
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (_) => PhotoSliderDialog(photos: photosmatch),
+                    );
+                  },
+                  child: Image.asset(
+                    'assets/images/imagecount.png',
+                    height: 40,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        user.gender == "Male"
+                            ? "assets/images/no-image-male2.jpg"
+                            : "assets/images/no-image-female2.jpg",
+                        fit: BoxFit.contain,
+                      );
+                    },
+                  ),
+                ),
+              if (user.profilesetting?.photoShow == 1 &&
+                  user.photorequeststatus == null &&
+                  user.photorequestcheck == false)
+                GestureDetector(
+                  onTap: () {
+                    buildPhotoListblur(user);
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (_) =>
+                          PhotoSliderDialog(photos: photosmatchblur),
+                    );
+                  },
+                  child: Image.asset(
+                    'assets/images/imagecount.png',
+                    height: 40,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        user.gender == "Male"
+                            ? "assets/images/no-image-male2.jpg"
+                            : "assets/images/no-image-female2.jpg",
+                        fit: BoxFit.contain,
+                      );
+                    },
+                  ),
+                ),
+              if (user.profilesetting?.photoShow == 1 &&
+                  user.photorequeststatus == null &&
+                  user.photorequestcheck == true)
+                GestureDetector(
+                  onTap: () {
+                    buildPhotoListblur(user);
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (_) =>
+                          PhotoSliderDialog(photos: photosmatchblur),
+                    );
+                  },
+                  child: Image.asset(
+                    'assets/images/imagecount.png',
+                    height: 40,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        user.gender == "Male"
+                            ? "assets/images/no-image-male2.jpg"
+                            : "assets/images/no-image-female2.jpg",
+                        fit: BoxFit.contain,
+                      );
+                    },
+                  ),
+                ),
+              if (user.profilesetting?.photoShow == 1 &&
+                  user.photorequeststatus == 1 &&
+                  user.photorequestcheck == true)
+                GestureDetector(
+                  onTap: () {
+                    buildPhotoList(user);
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (_) => PhotoSliderDialog(photos: photosmatch),
+                    );
+                  },
+                  child: Image.asset(
+                    'assets/images/imagecount.png',
+                    height: 40,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        user.gender == "Male"
+                            ? "assets/images/no-image-male2.jpg"
+                            : "assets/images/no-image-female2.jpg",
+                        fit: BoxFit.contain,
+                      );
+                    },
+                  ),
+                ),
+
               SizedBox(width: 20),
               GestureDetector(
                 onTap: () {
@@ -1460,6 +1731,8 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
   }
 
   Widget rowTopBottom(String key1, String val1, String key2, String val2) {
+    final user = userbyuserController.memberData.value!;
+
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -1489,7 +1762,6 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
 
           SizedBox(width: 20),
 
-          // RIGHT BLOCK
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1501,14 +1773,98 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                     color: ColorResources.blacktext,
                   ),
                 ),
-
-                Text(
-                  val2,
-                  style: opensansMedium.copyWith(
-                    fontSize: 13,
-                    color: ColorResources.blacktext,
+                if (user.profilesetting == null)
+                  Text(
+                    (key2 == "Date of Birth") ? "Request DOB" : val2,
+                    style: opensansSemiBold.copyWith(
+                      fontSize: 13,
+                      color: (key2 == "Date of Birth")
+                          ? ColorResources.primarycolor2
+                          : ColorResources.blacktext,
+                    ),
                   ),
-                ),
+                if (user.profilesetting?.dateOfBirthShow == 2)
+                  Text(
+                    (key2 == "Date of Birth") ? "Request DOB" : val2,
+                    style: opensansSemiBold.copyWith(
+                      fontSize: 13,
+                      color: (key2 == "Date of Birth")
+                          ? ColorResources.primarycolor2
+                          : ColorResources.blacktext,
+                    ),
+                  ),
+                if (user.profilesetting?.dateOfBirthShow == 1 &&
+                    user.dobrequesttatus == null &&
+                    user.dobrequestcheck == false)
+                  GestureDetector(
+                    onTap: () {
+                      sentCtrl.senddobrequest(user.id.toString());
+                    },
+                    child: Text(
+                      (key2 == "Date of Birth") ? "Request DOB" : val2,
+                      style: opensansSemiBold.copyWith(
+                        fontSize: 13,
+                        color: (key2 == "Date of Birth")
+                            ? ColorResources.primarycolor2
+                            : ColorResources.blacktext,
+                      ),
+                    ),
+                  ),
+                if (user.profilesetting?.dateOfBirthShow == 1 &&
+                    user.dobrequesttatus == null &&
+                    user.dobrequestcheck == true)
+                  GestureDetector(
+                    child: Text(
+                      (key2 == "Date of Birth") ? "Request Sent" : val2,
+                      style: opensansSemiBold.copyWith(
+                        fontSize: 13,
+                        color: (key2 == "Date of Birth")
+                            ? Colors.orangeAccent
+                            : ColorResources.blacktext,
+                      ),
+                    ),
+                  ),
+                if (user.profilesetting?.dateOfBirthShow == 1 &&
+                    user.dobrequesttatus == 1 &&
+                    user.dobrequestcheck == true)
+                  Text(
+                    (key2 == "Date of Birth") ? val2 : val2,
+                    style: opensansSemiBold.copyWith(
+                      fontSize: 13,
+                      color: ColorResources.blacktext,
+                    ),
+                  ),
+                // Text(
+                //   val2,
+                //   style: opensansSemiBold.copyWith(
+                //     fontSize: 13,
+                //     color: ColorResources.blacktext,
+                //   ),
+                // ),
+                // GestureDetector(
+                //   onTap:
+                //       (key2 == "Date of Birth" &&
+                //           user.profilesetting?.dateOfBirthShow == 1)
+                //       ? () {
+                //           sentCtrl.senddobrequest(user.id.toString());
+                //           // print("Request DOB tapped");
+                //         }
+                //       : null,
+                // child: Text(
+                //   (key2 == "Date of Birth" &&
+                //           user.profilesetting?.dateOfBirthShow == 1)
+                //       ? "Request DOB"
+                //       : val2,
+                //   style: opensansSemiBold.copyWith(
+                //     fontSize: 13,
+                // color:
+                //     (key2 == "Date of Birth" &&
+                //         user.profilesetting?.dateOfBirthShow == 1)
+                //     ? ColorResources.primarycolor2
+                //     : ColorResources.blacktext,
+                //   ),
+                // ),
+                // ),
               ],
             ),
           ),
@@ -1519,6 +1875,8 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
 
   Widget _buildNameSection() {
     final user = userbyuserController.memberData.value!;
+    final u = usercontroller.userData.value!;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Column(
@@ -1527,17 +1885,75 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
           Row(
             children: [
               Text(
-                user.name ?? "",
+                (() {
+                  String name = user.name ?? "";
+                  int showType = user.profilesetting?.nameShow ?? 1;
+
+                  bool isPremium = false;
+                  if (u.planDetail != null) {
+                    if (u.planDetail is Map && u.planDetail == null) {
+                      isPremium = true;
+                    } else if (u.planDetail is List && u.planDetail == null) {
+                      isPremium = true;
+                    }
+                  }
+
+                  if (name.isEmpty) return "";
+
+                  String maskName(String n) {
+                    if (n.length <= 2) return n[0] + "*";
+                    return n.substring(0, 2) + ("*" * (n.length - 2));
+                  }
+
+                  if (showType == 1) {
+                    return name;
+                  }
+
+                  if (showType == 2) {
+                    return isPremium ? name : maskName(name);
+                  }
+
+                  if (showType == 3) {
+                    return maskName(name);
+                  }
+
+                  return name;
+                })(),
                 style: opensansSemiBold.copyWith(fontSize: 18),
               ),
+              // Text(
+              //   user.name ?? "",
+              //   style: opensansSemiBold.copyWith(fontSize: 18),
+              // ),
               SizedBox(width: 10),
               Text(
-                "(ID: ${user.profileId ?? ""})",
+                (() {
+                  int idShow = user.profilesetting?.customerIdShow ?? 2;
+
+                  if (idShow == 1) {
+                    return "(ID: --)";
+                  }
+
+                  if (idShow == 2) {
+                    return user.profileId == null
+                        ? "(ID: --)"
+                        : "(ID: ${user.profileId})";
+                  }
+
+                  return "(ID: --)";
+                })(),
                 style: opensansSemiBold.copyWith(
                   fontSize: 14,
                   color: ColorResources.primarycolor2,
                 ),
               ),
+              // Text(
+              //   "(ID: ${user.profileId ?? ""})",
+              //   style: opensansSemiBold.copyWith(
+              //     fontSize: 14,
+              //     color: ColorResources.primarycolor2,
+              //   ),
+              // ),
               const SizedBox(width: 10),
               Icon(Icons.verified, color: Colors.green, size: 18),
             ],

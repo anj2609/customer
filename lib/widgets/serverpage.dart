@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vivashri/app/modules/auth/login_screen.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
@@ -48,6 +49,7 @@ class ServerMaintenancePage extends StatelessWidget {
                         controller.userData.value?.id.toString() ?? "",
                         fromRetry: true,
                       );
+                      Get.offAll(() => LoginScreen());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorResources.primarycolor2,

@@ -65,7 +65,9 @@ class MatchListData {
   final String? photoBlur;
   final dynamic interestsentstatus;
   final dynamic shortlistsent;
-
+  final ProfileSettings? profilesetting;
+  bool? photorequestcheck;
+  dynamic photorequeststatus;
   MatchListData({
     this.id,
     this.profileId,
@@ -98,12 +100,15 @@ class MatchListData {
     this.photo,
     this.photo1,
     this.photo2,
+    this.photorequeststatus,
     this.photo3,
     this.photo4,
     this.photoBlur,
     this.aasherno,
     this.interestsentstatus,
     this.shortlistsent,
+    this.profilesetting,
+    this.photorequestcheck,
   });
 
   factory MatchListData.fromJson(Map<String, dynamic> json) {
@@ -121,7 +126,7 @@ class MatchListData {
 
       deviceToken: json['device_token'],
       profilePhoto: json['profile_photo']?.toString(),
-
+      photorequeststatus: json['photo_request_status'],
       caste: json['caste']?.toString(),
       dob: json['dob'],
       religion: json['religion'] is Map
@@ -148,7 +153,9 @@ class MatchListData {
       profileFor: json['profile_for'] is Map
           ? ProfileFor.fromJson(json['profile_for'])
           : null,
-
+      profilesetting: json['profileSettings'] is Map
+          ? ProfileSettings.fromJson(json['profileSettings'])
+          : null,
       highestDegree: json['highest_degree'] is Map
           ? HighestDegree.fromJson(json['highest_degree'])
           : null,
@@ -172,7 +179,7 @@ class MatchListData {
       birthState: json['birth_state'] is Map
           ? LocationModel.fromJson(json['birth_state'])
           : null,
-
+      photorequestcheck: json['photo_request_check'],
       photo: json['photo'],
       photo1: json['photo1'],
       photo2: json['photo2'],
@@ -183,6 +190,90 @@ class MatchListData {
       interestsentstatus: json['interest_sent_status'] ?? "",
       shortlistsent: json['shortlist_sent'] ?? '',
     );
+  }
+}
+
+class ProfileSettings {
+  String? id;
+  String? userId;
+  int? nameShow;
+  int? emailShow;
+  int? customerIdShow;
+  int? photoShow;
+  int? dateOfBirthShow;
+  int? workWithShow;
+  int? incomeShow;
+  String? createdAt;
+  String? updatedAt;
+  int? v;
+
+  ProfileSettings({
+    this.id,
+    this.userId,
+    this.nameShow,
+    this.emailShow,
+    this.customerIdShow,
+    this.photoShow,
+    this.dateOfBirthShow,
+    this.workWithShow,
+    this.incomeShow,
+    this.createdAt,
+    this.updatedAt,
+    this.v,
+  });
+
+  /// ---- SAFE PARSING ---- ///
+  static int? toIntSafe(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value.trim());
+    return null;
+  }
+
+  static String? toStringSafe(dynamic value) {
+    if (value == null) return null;
+    return value.toString();
+  }
+
+  /// ---- FROM JSON ---- ///
+  factory ProfileSettings.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return ProfileSettings();
+
+    return ProfileSettings(
+      id: toStringSafe(json["_id"]),
+      userId: toStringSafe(json["user_id"]),
+
+      nameShow: toIntSafe(json["name_show"]),
+      emailShow: toIntSafe(json["email_show"]),
+      customerIdShow: toIntSafe(json["customer_id_show"]),
+      photoShow: toIntSafe(json["photo_show"]),
+      dateOfBirthShow: toIntSafe(json["date_of_birth_show"]),
+      workWithShow: toIntSafe(json["work_with_show"]),
+      incomeShow: toIntSafe(json["income_show"]),
+
+      createdAt: toStringSafe(json["createdAt"]),
+      updatedAt: toStringSafe(json["updatedAt"]),
+      v: toIntSafe(json["__v"]),
+    );
+  }
+
+  /// ---- TO JSON ---- ///
+  Map<String, dynamic> toJson() {
+    return {
+      "_id": id,
+      "user_id": userId,
+      "name_show": nameShow,
+      "email_show": emailShow,
+      "customer_id_show": customerIdShow,
+      "photo_show": photoShow,
+      "date_of_birth_show": dateOfBirthShow,
+      "work_with_show": workWithShow,
+      "income_show": incomeShow,
+      "createdAt": createdAt,
+      "updatedAt": updatedAt,
+      "__v": v,
+    };
   }
 }
 

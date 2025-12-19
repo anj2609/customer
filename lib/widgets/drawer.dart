@@ -15,6 +15,7 @@ import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/auth_controller.dart';
+import 'package:vivashri/data/controller/send_interest.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/widgets/setting/setting.dart';
 
@@ -24,6 +25,7 @@ class CustomAppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(UserDetailController());
+    final sentCtrl = Get.put(SentInterestController());
 
     final u = controller.userData.value!;
     final w = MediaQuery.of(context).size.width;
@@ -311,6 +313,7 @@ class CustomAppDrawer extends StatelessWidget {
                                 isDestructiveAction: true,
                                 child: Text("Yes"),
                                 onPressed: () async {
+                                  sentCtrl.logoutapi();
                                   Get.find<AuthController>().logOut();
 
                                   final prefs =

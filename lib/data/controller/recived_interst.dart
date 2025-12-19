@@ -5,7 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/data/modal/inbox/accept_by_me.dart';
 import 'package:vivashri/data/modal/inbox/accpet_bypartner.dart';
 import 'package:vivashri/data/modal/inbox/declined.dart';
+import 'package:vivashri/data/modal/inbox/dob_request.dart';
 import 'package:vivashri/data/modal/inbox/pending.dart';
+import 'package:vivashri/data/modal/inbox/photo_request.dart';
 import 'package:vivashri/data/modal/inbox/received.dart';
 import 'package:vivashri/data/modal/inbox/shortlisted_profile.dart';
 
@@ -14,6 +16,8 @@ class InboxReceivedController extends GetxController {
   RxList<InboxData> inboxList = <InboxData>[].obs;
   RxList<PendinginboxData> pendingList = <PendinginboxData>[].obs;
   RxList<DeclinedinboxData> declinedList = <DeclinedinboxData>[].obs;
+  RxList<RequesphotoData> photorequest = <RequesphotoData>[].obs;
+  RxList<RequesdobData> dobbbrequest = <RequesdobData>[].obs;
 
   RxList<AcceptedbymeinboxData> acceptedbymeList =
       <AcceptedbymeinboxData>[].obs;
@@ -213,6 +217,72 @@ class InboxReceivedController extends GetxController {
         var model = InboxShortlistProfileModel.fromJson(jsonData);
 
         shotlisttedList.value = model.data ?? [];
+      }
+    } catch (e) {
+      print("Error : $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> photorecived() async {
+    try {
+      isLoading.value = true;
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString("token") ?? "";
+
+      var url = Uri.parse(
+        "https://vivashri.com/vivashribackend/api/user/photo-request",
+      );
+
+      var response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({"pageType": ""}),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonData = jsonDecode(response.body);
+        var model = RequestphotoModel.fromJson(jsonData);
+
+        photorequest.value = model.data ?? [];
+      }
+    } catch (e) {
+      print("Error : $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> dobrequest() async {
+    try {
+      isLoading.value = true;
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString("token") ?? "";
+
+      var url = Uri.parse(
+        "https://vivashri.com/vivashribackend/api/user/dob-request",
+      );
+
+      var response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({"pageType": ""}),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonData = jsonDecode(response.body);
+        var model = RequestdobModel.fromJson(jsonData);
+
+        dobbbrequest.value = model.data ?? [];
       }
     } catch (e) {
       print("Error : $e");

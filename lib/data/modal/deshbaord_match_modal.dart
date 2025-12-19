@@ -74,6 +74,9 @@ class MatchUserModel {
   final String? reference;
   final dynamic? interestsentstatus;
   final dynamic? shortliststatus;
+  final ProfileSettings? profilesetting;
+  bool? photorequestcheck;
+  dynamic photorequeststatus;
 
   final CommonNameModel? caste;
   final CommonNameModel? religion;
@@ -165,6 +168,9 @@ class MatchUserModel {
     this.birthState,
     this.complexion,
     this.diet,
+    this.profilesetting,
+    this.photorequestcheck,
+    this.photorequeststatus,
     this.dob,
     this.gender,
     this.height,
@@ -269,9 +275,15 @@ class MatchUserModel {
       createdAt: json["createdAt"],
       updatedAt: json["updatedAt"],
       about: json["about"],
+
       birthCity: json["birth_city"],
       birthState: json["birth_state"],
       complexion: json["complexion"],
+      photorequestcheck: json['photo_request_check'],
+      photorequeststatus: json['photo_request_status'],
+      profilesetting: json['profileSettings'] is Map
+          ? ProfileSettings.fromJson(json['profileSettings'])
+          : null,
       diet: json["diet"],
       dob: json["dob"],
       gender: json["gender"],
@@ -380,6 +392,90 @@ class CommonNameModel {
       name: json["name"],
       status: json["status"],
     );
+  }
+}
+
+class ProfileSettings {
+  String? id;
+  String? userId;
+  int? nameShow;
+  int? emailShow;
+  int? customerIdShow;
+  int? photoShow;
+  int? dateOfBirthShow;
+  int? workWithShow;
+  int? incomeShow;
+  String? createdAt;
+  String? updatedAt;
+  int? v;
+
+  ProfileSettings({
+    this.id,
+    this.userId,
+    this.nameShow,
+    this.emailShow,
+    this.customerIdShow,
+    this.photoShow,
+    this.dateOfBirthShow,
+    this.workWithShow,
+    this.incomeShow,
+    this.createdAt,
+    this.updatedAt,
+    this.v,
+  });
+
+  /// ---- SAFE PARSING ---- ///
+  static int? toIntSafe(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value.trim());
+    return null;
+  }
+
+  static String? toStringSafe(dynamic value) {
+    if (value == null) return null;
+    return value.toString();
+  }
+
+  /// ---- FROM JSON ---- ///
+  factory ProfileSettings.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return ProfileSettings();
+
+    return ProfileSettings(
+      id: toStringSafe(json["_id"]),
+      userId: toStringSafe(json["user_id"]),
+
+      nameShow: toIntSafe(json["name_show"]),
+      emailShow: toIntSafe(json["email_show"]),
+      customerIdShow: toIntSafe(json["customer_id_show"]),
+      photoShow: toIntSafe(json["photo_show"]),
+      dateOfBirthShow: toIntSafe(json["date_of_birth_show"]),
+      workWithShow: toIntSafe(json["work_with_show"]),
+      incomeShow: toIntSafe(json["income_show"]),
+
+      createdAt: toStringSafe(json["createdAt"]),
+      updatedAt: toStringSafe(json["updatedAt"]),
+      v: toIntSafe(json["__v"]),
+    );
+  }
+
+  /// ---- TO JSON ---- ///
+  Map<String, dynamic> toJson() {
+    return {
+      "_id": id,
+      "user_id": userId,
+      "name_show": nameShow,
+      "email_show": emailShow,
+      "customer_id_show": customerIdShow,
+      "photo_show": photoShow,
+      "date_of_birth_show": dateOfBirthShow,
+      "work_with_show": workWithShow,
+      "income_show": incomeShow,
+      "createdAt": createdAt,
+      "updatedAt": updatedAt,
+      "__v": v,
+    };
   }
 }
 

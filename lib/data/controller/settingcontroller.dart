@@ -45,13 +45,13 @@ class NotificationController extends GetxController implements GetxService {
 
       if (json["status"] == true) {
         EasyLoading.dismiss();
-        Get.snackbar(
-          "Success",
-          json["message"] ?? "Updated",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // Get.snackbar(
+        //   "Success",
+        //   json["message"] ?? "Updated",
+        //   snackPosition: SnackPosition.TOP,
+        //   backgroundColor: Colors.green,
+        //   colorText: Colors.white,
+        // );
       } else {
         EasyLoading.dismiss();
         Get.snackbar(
@@ -147,13 +147,13 @@ class NotificationController extends GetxController implements GetxService {
 
       if (json["status"] == true) {
         EasyLoading.dismiss();
-        Get.snackbar(
-          "Success",
-          json["message"] ?? "Updated",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // Get.snackbar(
+        //   "Success",
+        //   json["message"] ?? "Updated",
+        //   snackPosition: SnackPosition.TOP,
+        //   backgroundColor: Colors.green,
+        //   colorText: Colors.white,
+        // );
       } else {
         EasyLoading.dismiss();
         Get.snackbar(
@@ -204,13 +204,13 @@ class NotificationController extends GetxController implements GetxService {
 
       if (json["status"] == true) {
         EasyLoading.dismiss();
-        Get.snackbar(
-          "Success",
-          json["message"] ?? "Updated",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // Get.snackbar(
+        //   "Success",
+        //   json["message"] ?? "Updated",
+        //   snackPosition: SnackPosition.TOP,
+        //   backgroundColor: Colors.green,
+        //   colorText: Colors.white,
+        // );
       } else {
         EasyLoading.dismiss();
         Get.snackbar(
@@ -258,13 +258,13 @@ class NotificationController extends GetxController implements GetxService {
 
       if (json["status"] == true) {
         EasyLoading.dismiss();
-        Get.snackbar(
-          "Success",
-          json["message"] ?? "Updated",
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // Get.snackbar(
+        //   "Success",
+        //   json["message"] ?? "Updated",
+        //   snackPosition: SnackPosition.TOP,
+        //   backgroundColor: Colors.green,
+        //   colorText: Colors.white,
+        // );
       } else {
         EasyLoading.dismiss();
         Get.snackbar(

@@ -41,8 +41,10 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
 
     profileid = prefs.getString("profileid");
     usercontroller.fetchUserDetail(profileid.toString());
+    checkpercentagecontroller.checkProfileComplete(profileid.toString());
     // checkcontroller.checkProfileComplete(profileid.toString());
   }
+  final checkpercentagecontroller = Get.put(CheckProfileController());
 
   final checkcontroller = Get.put(CheckProfileController());
   @override
@@ -290,9 +292,121 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                           height: 45,
                         ),
                       ),
-                      Container(
-                        decoration: BoxDecoration(shape: BoxShape.circle),
-                        child: progressRing(0.4),
+                      GestureDetector(
+                        onTap: () {
+                          if (u.height == null) {
+                            Get.to(EditBasicDetailsScreen());
+                          } else if (u.weight == null) {
+                            Get.to(EditBasicDetailsScreen());
+                          } else if (u.manglik == null || u.manglik == "") {
+                            Get.to(EditBasicDetailsScreen());
+                          } else if (u.about!.isEmpty) {
+                            Get.to(EditBasicDetailsScreen());
+                          } else if (u.complexion == null) {
+                            Get.to(EditBasicDetailsScreen());
+                          } else if (u.disability == null ||
+                              u.disability == "") {
+                            Get.to(EditBasicDetailsScreen());
+                          } else if (u.healthInformation == null ||
+                              u.healthInformation == "") {
+                            Get.to(EditBasicDetailsScreen());
+                          } else if (u.bloodGroup == null ||
+                              u.bloodGroup == "") {
+                            Get.to(EditBasicDetailsScreen());
+                          } else if (u.birthCity == null) {
+                            Get.to(HoroscropeEdit());
+                          } else if (u.birthState == null) {
+                            Get.to(HoroscropeEdit());
+                          } else if (u.contactNo == null) {
+                            Get.to(EditContectScreen());
+                          } else if (u.contactEmail == null) {
+                            Get.to(EditContectScreen());
+                          }
+                          //
+                          else if (u.religion == null) {
+                          } else if (u.caste == null) {
+                          } else if (u.locNationality == null) {
+                            Get.to(EditLocationScreen());
+                          } else if (u.locCity == null) {
+                            Get.to(EditLocationScreen());
+                          }
+                          //
+                          else if (u.locState == null) {
+                            Get.to(EditLocationScreen());
+                          } else if (u.locPincode == null) {
+                            Get.to(EditLocationScreen());
+                          } else if (u.familyType == null) {
+                            Get.to(EditFamilyDetailsScreen());
+                          } else if (u.familyValue == null) {
+                            Get.to(EditFamilyDetailsScreen());
+                          } else if (u.noOfSister == null) {
+                            Get.to(EditFamilyDetailsScreen());
+                          } else if (u.noOfBrother == null) {
+                            Get.to(EditFamilyDetailsScreen());
+                          } else if (u.highestDegree == null) {
+                            Get.to(EditEducationDetailsScreen());
+                          } else if (u.annualIncome == null) {
+                            Get.to(EditProfessionalDetails());
+                          }
+                          //
+                          else if (u.workingWith == null) {
+                            Get.to(EditProfessionalDetails());
+                          } else if (u.occupation == null) {
+                            Get.to(EditProfessionalDetails());
+                          } else if (u.organizationName == null) {
+                            Get.to(EditProfessionalDetails());
+                          } else if (u.hobbies.isEmpty) {
+                            Get.to(EditHobbies());
+                          }
+                          //
+                          else if (u.partnerAgeFrom == null) {
+                            Get.to(EditPartnerBasicDetailsScreen());
+                          } else if (u.partnerAgeTo == null) {
+                            Get.to(EditPartnerBasicDetailsScreen());
+                          } else if (u.partnerHeightFrom == null) {
+                            Get.to(EditPartnerBasicDetailsScreen());
+                          } else if (u.partnerHeightTo == null) {
+                            Get.to(EditPartnerBasicDetailsScreen());
+                          } else if (u.partnerWeightFrom == null) {
+                            Get.to(EditPartnerBasicDetailsScreen());
+                          } else if (u.partnerWeightTo == null) {
+                            Get.to(EditPartnerBasicDetailsScreen());
+                          } else if (u.partnerMaritalStatus.isEmpty) {
+                            Get.to(EditPartnerBasicDetailsScreen());
+                          } else if (u.partnerCountry == null) {
+                            Get.to(EditPartnerlocation());
+                          } else if (u.partnerCity == null) {
+                            Get.to(EditPartnerlocation());
+                          } else if (u.partnerState == null) {
+                            Get.to(EditPartnerlocation());
+                          }
+                          //
+                          else if (u.partnerEducation == null) {
+                            Get.to(Editpartnereduction());
+                          } else if (u.partnerOccupation == null) {
+                            Get.to(Editpartnereduction());
+                          } else if (u.partnerIncomeFrom == null) {
+                            Get.to(Editpartnereduction());
+                          } else if (u.partnerIncomeTo == null) {
+                            Get.to(Editpartnereduction());
+                          } else if (u.partnerWorkingAs == null) {
+                            Get.to(Editpartnereduction());
+                          } else if (u.partnerDiet == null) {
+                            Get.to(Editpartnereditother());
+                          } else if (u.partnerDrinking == null) {
+                            Get.to(Editpartnereditother());
+                          } else if (u.partnerSmoking == null) {
+                            Get.to(Editpartnereditother());
+                          } else if (u.partnerManagedBy == null) {
+                            Get.to(Editpartnereditother());
+                          } else {}
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(shape: BoxShape.circle),
+                          child: (progressRing(
+                            checkcontroller.profileStatus.value!.completion,
+                          )),
+                        ),
                       ),
                     ],
                   ),
@@ -467,35 +581,42 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
     return years.toString();
   }
 
-  Widget progressRing(double progress) {
+  Widget progressRing(String percentText) {
+    double percentValue = 0.0;
+
+    try {
+      percentValue = (double.parse(percentText.replaceAll("%", "")) / 100)
+          .clamp(0.0, 1.0);
+    } catch (e) {
+      percentValue = 0.0;
+    }
+
+    // If 100% -> green, else pink
+    Color ringColor = percentValue == 1.0 ? Colors.green : Colors.pink;
+
     return Container(
       padding: const EdgeInsets.all(5),
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white, // Outer white circle
+        color: Colors.white,
       ),
       child: Stack(
         alignment: Alignment.center,
         children: [
           SizedBox(
-            width: 30,
-            height: 30,
+            width: 35,
+            height: 35,
             child: CircularProgressIndicator(
-              value: progress, // 0.4 = 40%
-              strokeWidth: 2,
-              color: Colors.pink, // Pink arc
-              backgroundColor: Colors.grey.shade300, // Light gray arc
+              value: percentValue,
+              strokeWidth: 3,
+              color: ringColor,
+              backgroundColor: Colors.grey.shade300,
             ),
           ),
 
-          // Center Text
           Text(
-            (checkcontroller.profileStatus.value!.completion),
-            style: opensansBold.copyWith(
-              fontSize: 9,
-              // fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+            percentText,
+            style: opensansBold.copyWith(fontSize: 9, color: Colors.black),
           ),
         ],
       ),

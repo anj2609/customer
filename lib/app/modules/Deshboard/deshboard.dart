@@ -62,6 +62,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     matchC.fetchMatches();
     searchC.fetchSearchList("", "");
     inboxCtrl.fetchInboxData();
+    checkpercentagecontroller.checkProfileComplete(profileid.toString());
   }
 
   @override
@@ -235,6 +236,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     double number = double.tryParse(value) ?? 0;
 
     return (number / 100).clamp(0.0, 1.0);
+  }
+
+  Color _getPercentColor(String percentText) {
+    final value = int.tryParse(percentText.replaceAll('%', '').trim()) ?? 0;
+
+    return value > 60 ? Colors.white : Colors.black87;
   }
 
   Widget _buildProfileCard(BuildContext context) {
@@ -484,9 +491,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 0),
                           child: Text(
-                            percentText,
+                            percentText, // e.g. "75%"
                             style: opensansSemiBold.copyWith(
-                              color: Colors.white,
+                              color: _getPercentColor(percentText),
                               fontSize: 10,
                             ),
                           ),
@@ -699,6 +706,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           statCard("${u.shortlisted}", "Shortlisted Profiles", Colors.pink, () {
             inboxCtrl.shortlistedprofileinboxdata();
+            usercontroller.fetchUserDetail("");
             Get.to(
               () => ShortlistedScreen(),
               duration: Duration(
@@ -1145,7 +1153,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _matchCard(BuildContext context, MatchUserModel user) {
     final w = MediaQuery.of(context).size.width;
-    final cardWidth = w * 0.55;
+    final cardWidth = w * 0.53;
     String age = calculateAgeInYears(user.dob);
 
     return Container(
@@ -1160,7 +1168,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           GestureDetector(
             onTap: () {
-              print('id::::${user.id}');
               userbyuserController.fetchUserDetail(user.id.toString());
               Get.to(
                 UserProfileDetailsPage(),
@@ -1170,26 +1177,129 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 transition: Transition.rightToLeft,
               );
             },
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(5),
-                topRight: Radius.circular(5),
-              ),
-              child: AspectRatio(
-                aspectRatio: 1.2,
-                child: Image.network(
-                  user.photo != null
-                      ? "${ApiConstants.imageurl}${user.photo!}"
-                      : "",
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      user.gender == "Male"
-                          ? "assets/images/no-image-male2.jpg"
-                          : "assets/images/no-image-female2.jpg",
-                      fit: BoxFit.contain,
-                    );
-                  },
+            child: AspectRatio(
+              aspectRatio: 1.2,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (user.profilesetting == null)
+                      Image.network(
+                        "${ApiConstants.imageurl}${user.photo}",
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+                    if (user.profilesetting?.photoShow == 2)
+                      Image.network(
+                        "${ApiConstants.imageurl}${user.photo}",
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      ),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == null &&
+                        user.photorequestcheck == false)
+                      Image.network(
+                        "${ApiConstants.imageurl}${user.photoBlur}",
+
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == null &&
+                        user.photorequestcheck == true)
+                      Image.network(
+                        "${ApiConstants.imageurl}${user.photoBlur}",
+
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == 1 &&
+                        user.photorequestcheck == true)
+                      Image.network(
+                        "${ApiConstants.imageurl}${user.photo}",
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      ),
+                    /////
+                    if (user.profilesetting?.photoShow == 2) SizedBox(),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == null &&
+                        user.photorequestcheck == false)
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset('assets/images/locked-icon.png'),
+                            const SizedBox(height: 20),
+                            GestureDetector(
+                              onTap: () {
+                                sentCtrl.sendphotorequest(user.id.toString());
+                              },
+                              child: Text(
+                                "Request a Photo",
+                                style: opensansSemiBold.copyWith(
+                                  color: ColorResources.primarycolor2,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == null &&
+                        user.photorequestcheck == true)
+                      SizedBox(),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == 1 &&
+                        user.photorequestcheck == true)
+                      SizedBox(),
+                  ],
                 ),
               ),
             ),
@@ -1202,16 +1312,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user.name ?? '',
+                    (() {
+                      String name = user.name ?? "";
+                      int showType = user.profilesetting?.nameShow ?? 1;
+
+                      bool isPremium = false;
+                      if (user.planDetail != null) {
+                        if (user.planDetail is Map && user.planDetail == null) {
+                          isPremium = true;
+                        } else if (user.planDetail is List &&
+                            user.planDetail == null) {
+                          isPremium = true;
+                        }
+                      }
+
+                      if (name.isEmpty) return "";
+
+                      String maskName(String n) {
+                        if (n.length <= 2) return n[0] + "*";
+                        return n.substring(0, 2) + ("*" * (n.length - 2));
+                      }
+
+                      if (showType == 1) {
+                        return name;
+                      }
+
+                      if (showType == 2) {
+                        return isPremium ? name : maskName(name);
+                      }
+
+                      if (showType == 3) {
+                        return maskName(name);
+                      }
+
+                      return name;
+                    })(),
                     style: opensansSemiBold.copyWith(fontSize: 15),
                   ),
+
                   SizedBox(height: 4),
 
                   Text(
                     "${age} yrs, "
                     "${user.height?.toString() ?? 'N/A'}\", "
-                    "${user.religion?.name ?? 'N/A'}, ",
-                    // user.locCity!.name ?? 'N/A',
+                    "${user.religion?.name ?? 'N/A'}, ${user.locCity?.name ?? ""}",
+
                     style: opensansMedium.copyWith(
                       fontSize: 12.5,
                       color: ColorResources.blackcolor11,
@@ -1278,6 +1423,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       fit: BoxFit.contain,
                     );
                   }
+                  if (status == "Declined") {
+                    return Text(
+                      "Declined",
+                      style: opensansMedium.copyWith(
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    );
+                  }
 
                   return SizedBox.shrink();
                 },
@@ -1306,7 +1460,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           GestureDetector(
             onTap: () {
-              print('id::::${user.id}');
               userbyuserController.fetchUserDetail(user.id.toString());
               Get.to(
                 UserProfileDetailsPage(),
@@ -1316,31 +1469,133 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 transition: Transition.rightToLeft,
               );
             },
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(5),
-                topRight: Radius.circular(5),
-              ),
-              child: AspectRatio(
-                aspectRatio: 1.2,
-                child: Image.network(
-                  user.photo != null
-                      ? "${ApiConstants.imageurl}${user.photo!}"
-                      : "",
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      user.gender == "Male"
-                          ? "assets/images/no-image-male2.jpg"
-                          : "assets/images/no-image-female2.jpg",
-                      fit: BoxFit.contain,
-                    );
-                  },
+            child: AspectRatio(
+              aspectRatio: 1.2,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (user.profilesetting == null)
+                      Image.network(
+                        "${ApiConstants.imageurl}${user.photo}",
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+                    if (user.profilesetting?.photoShow == 2)
+                      Image.network(
+                        "${ApiConstants.imageurl}${user.photo}",
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      ),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == null &&
+                        user.photorequestcheck == false)
+                      Image.network(
+                        "${ApiConstants.imageurl}${user.photoBlur}",
+
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == null &&
+                        user.photorequestcheck == true)
+                      Image.network(
+                        "${ApiConstants.imageurl}${user.photoBlur}",
+
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == 1 &&
+                        user.photorequestcheck == true)
+                      Image.network(
+                        "${ApiConstants.imageurl}${user.photo}",
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+                    /////
+                    if (user.profilesetting?.photoShow == 2) SizedBox(),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == null &&
+                        user.photorequestcheck == false)
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset('assets/images/locked-icon.png'),
+                            const SizedBox(height: 20),
+                            GestureDetector(
+                              onTap: () {
+                                sentCtrl.sendphotorequest(user.id.toString());
+                              },
+                              child: Text(
+                                "Request a Photo",
+                                style: opensansSemiBold.copyWith(
+                                  color: ColorResources.primarycolor2,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == null &&
+                        user.photorequestcheck == true)
+                      SizedBox(),
+
+                    if (user.profilesetting?.photoShow == 1 &&
+                        user.photorequeststatus == 1 &&
+                        user.photorequestcheck == true)
+                      SizedBox(),
+                  ],
                 ),
               ),
             ),
           ),
-
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
@@ -1348,7 +1603,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${user.name}",
+                    (() {
+                      String name = user.name ?? "";
+                      int showType = user.profilesetting?.nameShow ?? 1;
+
+                      bool isPremium = false;
+                      if (user.planDetail != null) {
+                        if (user.planDetail is Map && user.planDetail == null) {
+                          isPremium = true;
+                        } else if (user.planDetail is List &&
+                            user.planDetail == null) {
+                          isPremium = true;
+                        }
+                      }
+
+                      if (name.isEmpty) return "";
+
+                      String maskName(String n) {
+                        if (n.length <= 2) return n[0] + "*";
+                        return n.substring(0, 2) + ("*" * (n.length - 2));
+                      }
+
+                      if (showType == 1) {
+                        return name;
+                      }
+
+                      if (showType == 2) {
+                        return isPremium ? name : maskName(name);
+                      }
+
+                      if (showType == 3) {
+                        return maskName(name);
+                      }
+
+                      return name;
+                    })(),
                     style: opensansSemiBold.copyWith(fontSize: 15),
                   ),
                   SizedBox(height: 4),
@@ -1397,7 +1686,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Builder(
                 builder: (_) {
                   final status = user.interestsentstatus;
-
+                  print('statussss::::${status}');
                   if (status == null || status.isEmpty) {
                     return Text(
                       "Express Interest",
@@ -1423,6 +1712,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       'assets/images/Group 85 (1).png',
                       height: 22,
                       fit: BoxFit.contain,
+                    );
+                  }
+                  if (status == "Declined") {
+                    return Text(
+                      "Declined",
+                      style: opensansMedium.copyWith(
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
                     );
                   }
 

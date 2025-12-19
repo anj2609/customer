@@ -177,6 +177,12 @@ class _ProfileinfoSettingState extends State<ProfileinfoSetting> {
                               workwithshow: workWithVal,
                               incomeshow: incomeVal,
                             );
+                            Future.delayed(
+                              const Duration(microseconds: 1000),
+                              () {
+                                Get.back();
+                              },
+                            );
                           },
 
                           style: ElevatedButton.styleFrom(

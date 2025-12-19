@@ -38,7 +38,7 @@ class _EditContectScreenState extends State<EditContectScreen> {
   void profileapi() async {
     final u = usercontroller.userData.value;
     if (u == null) return;
-    emailController.text = u.email.toString();
+    emailController.text = u.contactEmail.toString();
     instgramidController.text = u.instagram.toString();
     facebookController.text = u.facebook.toString();
     // emailController.text = u.email.toString();
@@ -225,7 +225,7 @@ class _EditContectScreenState extends State<EditContectScreen> {
               stapercontroller.updatepartnerotherdetails(
                 formData: {
                   // "contact_no": widget.mobileemail,
-                  // "contact_email": emailController.text.trim(),
+                  "contact_email": emailController.text.trim(),
                   "instagram": instgramidController.text.trim(),
                   "facebook": facebookController.text,
 
