@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:vivashri/app/modules/match/userprofile.dart';
+import 'package:vivashri/app/modules/myprofile/editprofile.dart/partnerreliitonedit.dart';
 import 'package:vivashri/app/modules/search/search.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
@@ -55,17 +56,23 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 _buildTopBar(w),
 
                 _buildFilterBar(),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, left: 12),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Showing ${searchC.users.length} Profiles',
-                        style: opensansSemiBold.copyWith(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
+                Obx(() {
+                  if (searchC.users.isEmpty) {
+                    return const SizedBox();
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 10, left: 12),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Showing ${searchC.users.length} Profiles',
+                          style: opensansSemiBold.copyWith(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
 
                 Expanded(
                   child: RefreshIndicator(
@@ -75,25 +82,56 @@ class _MatchesScreenState extends State<MatchesScreen> {
                       searchC.fetchSearchList("", "");
                     },
                     child: Obx(() {
-                      // if (searchC.isLoading.value) {
-                      //   return ListView(
-                      //     physics: AlwaysScrollableScrollPhysics(),
-                      //     children: [
-                      //       SizedBox(
-                      //         height: 300,
-                      //         child: Center(
-                      //           child: CircularProgressIndicator(
-                      //             color: ColorResources.primarycolor2,
-                      //           ),
-                      //         ),
-                      //       ),
-                      //     ],
-                      //   );
-                      // }
+                      final u = usercontroller.userData.value!;
+
+                      if (u.partnerReligion == null || u.partnerCaste == null) {
+                        return ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: 300,
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Get.to(
+                                              EditPartnerReligionCasteScreen(),
+                                              duration: Duration(
+                                                milliseconds: ApiConstants
+                                                    .screenTransitionTime,
+                                              ),
+                                              transition:
+                                                  Transition.rightToLeft,
+                                            );
+                                          },
+                                          child: const Text(
+                                            "To view your matches, you must fill out your partner preferences, specifically at least Religion and Caste.⬈",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(fontSize: 15),
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
 
                       if (searchC.users.isEmpty) {
                         return ListView(
-                          physics: AlwaysScrollableScrollPhysics(),
+                          physics: const AlwaysScrollableScrollPhysics(),
                           children: const [
                             SizedBox(
                               height: 300,
@@ -104,12 +142,12 @@ class _MatchesScreenState extends State<MatchesScreen> {
                       }
 
                       return ListView.builder(
-                        physics: AlwaysScrollableScrollPhysics(),
+                        physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.all(12),
                         itemCount: searchC.users.length,
                         itemBuilder: (context, index) {
-                          final u = searchC.users[index];
-                          return _profileCard(u);
+                          final user = searchC.users[index];
+                          return _profileCard(user);
                         },
                       );
                     }),

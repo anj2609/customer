@@ -44,6 +44,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
     checkpercentagecontroller.checkProfileComplete(profileid.toString());
     // checkcontroller.checkProfileComplete(profileid.toString());
   }
+
   final checkpercentagecontroller = Get.put(CheckProfileController());
 
   final checkcontroller = Get.put(CheckProfileController());
@@ -295,110 +296,380 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                       GestureDetector(
                         onTap: () {
                           if (u.height == null) {
-                            Get.to(EditBasicDetailsScreen());
+                            Get.to(
+                              EditBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.weight == null) {
-                            Get.to(EditBasicDetailsScreen());
+                            Get.to(
+                              EditBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.manglik == null || u.manglik == "") {
-                            Get.to(EditBasicDetailsScreen());
+                            Get.to(
+                              EditBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.about!.isEmpty) {
-                            Get.to(EditBasicDetailsScreen());
+                            Get.to(
+                              EditBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.complexion == null) {
-                            Get.to(EditBasicDetailsScreen());
+                            Get.to(
+                              EditBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.disability == null ||
                               u.disability == "") {
-                            Get.to(EditBasicDetailsScreen());
+                            Get.to(
+                              EditBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.healthInformation == null ||
                               u.healthInformation == "") {
-                            Get.to(EditBasicDetailsScreen());
+                            Get.to(
+                              EditBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.bloodGroup == null ||
                               u.bloodGroup == "") {
-                            Get.to(EditBasicDetailsScreen());
+                            Get.to(
+                              EditBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.birthCity == null) {
-                            Get.to(HoroscropeEdit());
+                            Get.to(
+                              HoroscropeEdit(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.birthState == null) {
-                            Get.to(HoroscropeEdit());
+                            Get.to(
+                              HoroscropeEdit(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.contactNo == null) {
-                            Get.to(EditContectScreen());
+                            Get.to(
+                              EditContectScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.contactEmail == null) {
-                            Get.to(EditContectScreen());
+                            Get.to(
+                              EditContectScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           }
                           //
                           else if (u.religion == null) {
                           } else if (u.caste == null) {
                           } else if (u.locNationality == null) {
-                            Get.to(EditLocationScreen());
+                            Get.to(
+                              EditLocationScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.locCity == null) {
-                            Get.to(EditLocationScreen());
+                            Get.to(
+                              EditLocationScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           }
                           //
                           else if (u.locState == null) {
-                            Get.to(EditLocationScreen());
+                            Get.to(
+                              EditLocationScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.locPincode == null) {
-                            Get.to(EditLocationScreen());
+                            Get.to(
+                              EditLocationScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.familyType == null) {
-                            Get.to(EditFamilyDetailsScreen());
+                            Get.to(
+                              EditFamilyDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.familyValue == null) {
-                            Get.to(EditFamilyDetailsScreen());
+                            Get.to(
+                              EditFamilyDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.noOfSister == null) {
-                            Get.to(EditFamilyDetailsScreen());
+                            Get.to(
+                              EditFamilyDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.noOfBrother == null) {
-                            Get.to(EditFamilyDetailsScreen());
+                            Get.to(
+                              EditFamilyDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.highestDegree == null) {
-                            Get.to(EditEducationDetailsScreen());
+                            Get.to(
+                              EditEducationDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.annualIncome == null) {
-                            Get.to(EditProfessionalDetails());
+                            Get.to(
+                              EditProfessionalDetails(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           }
                           //
                           else if (u.workingWith == null) {
-                            Get.to(EditProfessionalDetails());
+                            Get.to(
+                              EditProfessionalDetails(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.occupation == null) {
-                            Get.to(EditProfessionalDetails());
+                            Get.to(
+                              EditProfessionalDetails(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.organizationName == null) {
-                            Get.to(EditProfessionalDetails());
+                            Get.to(
+                              EditProfessionalDetails(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.hobbies.isEmpty) {
-                            Get.to(EditHobbies());
+                            Get.to(
+                              EditHobbies(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           }
                           //
                           else if (u.partnerAgeFrom == null) {
-                            Get.to(EditPartnerBasicDetailsScreen());
+                            Get.to(
+                              EditPartnerBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerAgeTo == null) {
-                            Get.to(EditPartnerBasicDetailsScreen());
+                            Get.to(
+                              EditPartnerBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerHeightFrom == null) {
-                            Get.to(EditPartnerBasicDetailsScreen());
+                            Get.to(
+                              EditPartnerBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerHeightTo == null) {
-                            Get.to(EditPartnerBasicDetailsScreen());
+                            Get.to(
+                              EditPartnerBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerWeightFrom == null) {
-                            Get.to(EditPartnerBasicDetailsScreen());
+                            Get.to(
+                              EditPartnerBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerWeightTo == null) {
-                            Get.to(EditPartnerBasicDetailsScreen());
+                            Get.to(
+                              EditPartnerBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerMaritalStatus.isEmpty) {
-                            Get.to(EditPartnerBasicDetailsScreen());
+                            Get.to(
+                              EditPartnerBasicDetailsScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerCountry == null) {
-                            Get.to(EditPartnerlocation());
+                            Get.to(
+                              EditPartnerlocation(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerCity == null) {
-                            Get.to(EditPartnerlocation());
+                            Get.to(
+                              EditPartnerlocation(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerState == null) {
-                            Get.to(EditPartnerlocation());
+                            Get.to(
+                              EditPartnerlocation(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           }
                           //
                           else if (u.partnerEducation == null) {
-                            Get.to(Editpartnereduction());
+                            Get.to(
+                              Editpartnereduction(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerOccupation == null) {
-                            Get.to(Editpartnereduction());
+                            Get.to(
+                              Editpartnereduction(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerIncomeFrom == null) {
-                            Get.to(Editpartnereduction());
+                            Get.to(
+                              Editpartnereduction(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerIncomeTo == null) {
-                            Get.to(Editpartnereduction());
+                            Get.to(
+                              Editpartnereduction(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerWorkingAs == null) {
-                            Get.to(Editpartnereduction());
+                            Get.to(
+                              Editpartnereduction(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerDiet == null) {
-                            Get.to(Editpartnereditother());
+                            Get.to(
+                              Editpartnereditother(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerDrinking == null) {
-                            Get.to(Editpartnereditother());
+                            Get.to(
+                              Editpartnereditother(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerSmoking == null) {
-                            Get.to(Editpartnereditother());
+                            Get.to(
+                              Editpartnereditother(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else if (u.partnerManagedBy == null) {
-                            Get.to(Editpartnereditother());
+                            Get.to(
+                              Editpartnereditother(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
                           } else {}
                         },
                         child: Container(
@@ -1097,7 +1368,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                 Text(
                   title,
                   style: opensansSemiBold.copyWith(
-                    fontSize: 16,
+                    fontSize: 17,
 
                     color: ColorResources.primarycolor4,
                   ),
@@ -1145,7 +1416,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: opensansSemiBold.copyWith(fontSize: 13.5)),
+          Text(label, style: opensansSemiBold.copyWith(fontSize: 14)),
 
           Text(value, style: opensansMedium.copyWith(fontSize: 12)),
         ],

@@ -39,6 +39,7 @@ class SearchmatchController extends GetxController {
         var data = jsonDecode(response.body);
         SearchListModel model = SearchListModel.fromJson(data);
         users.value = model.data!;
+        update();
       } else {
         print("API Error: ${response.body}");
       }

@@ -244,7 +244,7 @@ class MemberData {
 
   dynamic partnerWeightFrom;
   dynamic partnerWeightTo;
-
+  ProfilePhoneSettingModel? profilePhoneSettingModel;
   RefData? partnerWorkingAs;
 
   MemberData({
@@ -323,6 +323,7 @@ class MemberData {
     this.healthInformation,
     this.height,
     this.manglik,
+    this.profilePhoneSettingModel,
 
     this.weight,
     this.annualIncome,
@@ -441,6 +442,9 @@ class MemberData {
           : null,
       profilesetting: json['profileSettings'] is Map
           ? ProfileSettings.fromJson(json['profileSettings'])
+          : null,
+      profilePhoneSettingModel: json['profilePhoneSetting'] is Map
+          ? ProfilePhoneSettingModel.fromJson(json['profilePhoneSetting'])
           : null,
       dosh: json['dosh'],
       gotraOther: json['gotra_other'],
@@ -951,6 +955,65 @@ class RefData {
     'updatedAt': updatedAt,
     '__v': v,
   };
+}
+
+class ProfilePhoneSettingModel {
+  final String? id;
+  final String? userId;
+  final int? mobileVerified;
+  final int? privacySetting;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final int? viewType;
+
+  ProfilePhoneSettingModel({
+    this.id,
+    this.userId,
+    this.mobileVerified,
+    this.privacySetting,
+    this.createdAt,
+    this.updatedAt,
+    this.viewType,
+  });
+
+  factory ProfilePhoneSettingModel.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return ProfilePhoneSettingModel(); // ✅ NULL SAFE
+    }
+
+    return ProfilePhoneSettingModel(
+      id: json['_id']?.toString(),
+      userId: json['user_id']?.toString(),
+      mobileVerified: _parseInt(json['mobile_verified']),
+      privacySetting: _parseInt(json['privacy_setting']),
+      createdAt: _parseDate(json['createdAt']),
+      updatedAt: _parseDate(json['updatedAt']),
+      viewType: _parseInt(json['view_type']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'user_id': userId,
+      'mobile_verified': mobileVerified,
+      'privacy_setting': privacySetting,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'view_type': viewType,
+    };
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    return int.tryParse(value.toString());
+  }
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    return DateTime.tryParse(value.toString());
+  }
 }
 
 // ---------------- Partner Preferences ----------------

@@ -35,8 +35,8 @@ class _MainNavigationState extends State<MainNavigation> {
     DashboardScreen(),
     MatchesScreen(),
     ConnectScreen(),
-    HomeScreen(),
-    // ChatScreen(),
+    // HomeScreen(),
+    ChatScreen(),
     MembershipPlansPage(),
   ];
   final matchC = Get.put(MatchController());

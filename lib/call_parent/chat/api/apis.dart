@@ -27,8 +27,8 @@ class APIs with ChangeNotifier {
   static int onlineStatus = 0;
   static int lastActiveStatus = 0;
   static String image =
-      "${ApiConstants.baseUrl}${myuserController.userData.value?.photo ?? ""}";
-
+      "${ApiConstants.imageurl}${myuserController.userData.value?.photo ?? ""}";
+  static String profileidd = myuserController.userData.value?.id ?? "";
   // for authentication
   // static FirebaseAuth get auth => FirebaseAuth.instance;
 
@@ -51,17 +51,18 @@ class APIs with ChangeNotifier {
     lastActiveStatus: lastActiveStatus,
     lastActive: '',
     pushToken: '',
+    primaryid: profileidd,
   );
-static Stream<int> getUnreadMessageCountStream(ChatUser user) {
-  return FirebaseFirestore.instance
-      .collection('chats')
-      .doc(getConversationID(user.id))
-      .collection('messages')
-      .where('read', isEqualTo: '')
-      .where('fromId', isNotEqualTo: myid)
-      .snapshots()
-      .map((snap) => snap.docs.length);
-}
+  static Stream<int> getUnreadMessageCountStream(ChatUser user) {
+    return FirebaseFirestore.instance
+        .collection('chats')
+        .doc(getConversationID(user.id))
+        .collection('messages')
+        .where('read', isEqualTo: '')
+        .where('fromId', isNotEqualTo: myid)
+        .snapshots()
+        .map((snap) => snap.docs.length);
+  }
 
   // to return current user
   // static User get user => auth.currentUser!;
@@ -312,6 +313,7 @@ static Stream<int> getUnreadMessageCountStream(ChatUser user) {
       lastActive: time,
       lastActiveStatus: lastActiveStatus,
       pushToken: '',
+      primaryid: profileidd,
     );
 
     return await firestore.collection('users').doc(myid).set(chatUser.toJson());
@@ -442,17 +444,13 @@ static Stream<int> getUnreadMessageCountStream(ChatUser user) {
   // chats (collection) --> conversation_id (doc) --> messages (collection) --> message (doc)
 
   // useful for getting conversation id
-  static String getConversationID(String id) =>
-      myid.hashCode <= id.hashCode ? '${myid}_$id' : '${id}_${myid}';
-
-  // for getting all messages of a specific conversation from firestore database
-  // static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
-  //     ChatUser user) {
-  //   return firestore
-  //       .collection('chats/${getConversationID(user.id)}/messages/')
-  //       .orderBy('sent', descending: true)
-  //       .snapshots();
-  // }
+  // static String getConversationID(String id) =>
+  //     myid.hashCode <= id.hashCode ? '${myid}_$id' : '${id}_${myid}';
+  static String getConversationID(String id) {
+    List<String> ids = [myid, id];
+    ids.sort();
+    return ids.join('_');
+  }
 
   static Stream<List<Message>> getAllMessages(ChatUser user) {
     final currentUserId = myid;

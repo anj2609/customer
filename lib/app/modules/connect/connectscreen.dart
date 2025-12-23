@@ -1582,20 +1582,20 @@ class _ConnectScreenState extends State<ConnectScreen>
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
-                              print('user id ====> ${user?.profileId}');
+                              // print('user id ====> ${user?.profileId}');
 
-                              if (user?.profileId!.trim().isNotEmpty &&
-                                  user?.profileId != null) {
-                                await APIs.fetchUser(
-                                  context,
-                                  user!.profileId.toString().trim(),
-                                );
-                              } else {
-                                Dialogs.showSnackbar(
-                                  context,
-                                  'Something went wrong while Chat. Please try again later!',
-                                );
-                              }
+                              // if (user?.profileId!.trim().isNotEmpty &&
+                              //     user?.profileId != null) {
+                              //   await APIs.fetchUser(
+                              //     context,
+                              //     user!.profileId.toString().trim(),
+                              //   );
+                              // } else {
+                              //   Dialogs.showSnackbar(
+                              //     context,
+                              //     'Something went wrong while Chat. Please try again later!',
+                              //   );
+                              // }
                             },
                             child: Image.asset(
                               'assets/images/viewprofile (1).png',
@@ -1634,7 +1634,7 @@ class _ConnectScreenState extends State<ConnectScreen>
         itemCount: inboxCtrl.acceptedbypartnerlist.length,
         itemBuilder: (context, index) {
           final item = inboxCtrl.acceptedbypartnerlist[index];
-          final user = item.memberId;
+          final user = item.partnerId;
           String age = calculateAgeInYears(user?.dob);
           return GestureDetector(
             onTap: () {

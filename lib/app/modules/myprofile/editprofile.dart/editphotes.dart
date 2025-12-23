@@ -1,12 +1,14 @@
 import 'dart:io';
-
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/uplaodimagecontrol.dart';
+import 'package:vivashri/data/controller/userprofile.dart';
 
 class EditphotoesScreen extends StatefulWidget {
   const EditphotoesScreen({super.key});
@@ -19,11 +21,25 @@ class _EditphotoesScreenState extends State<EditphotoesScreen> {
   File? pickedImage;
 
   final imgC = Get.put(ImageUploadController());
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    profileapi();
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {});
+    });
+  }
+
+  void profileapi() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? profileid = prefs.getString("profileid");
+    usercontroller.fetchUserDetail(profileid.toString());
+  }
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -59,7 +75,6 @@ class _EditphotoesScreenState extends State<EditphotoesScreen> {
 
                     const SizedBox(height: 25),
 
-                    // ------------ Upload Box Label ------------
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -72,14 +87,39 @@ class _EditphotoesScreenState extends State<EditphotoesScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              _imageBox(),
+                              SizedBox(width: 10),
+                              _imageBox1(),
+                              SizedBox(width: 10),
+                              _imageBox2(),
+                            ],
+                          ),
 
-                    // ------------ DOTTED BOX ------------
-                    _showBox(),
+                          SizedBox(height: 12),
 
+                          Row(
+                            children: [
+                              _imageBox3(),
+                              SizedBox(width: 10),
+                              _imageBox4(),
+                              SizedBox(width: 10),
+                              _imageBox5(),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // _showBox(),
                     const SizedBox(height: 15),
-                    //imgC.images.isEmpty ? _uploadimage() :
-                    _buttons(),
 
+                    // _buttons(),
                     const SizedBox(height: 30),
 
                     // ------------ TIPS TEXT ------------
@@ -136,22 +176,595 @@ class _EditphotoesScreenState extends State<EditphotoesScreen> {
     );
   }
 
+  final usercontroller = Get.put(UserDetailController());
+  Widget _imageBox() {
+    final u = usercontroller.userData.value!;
+    final imgC = Get.put(ImageUploadController());
+
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: GestureDetector(
+          onTap: () => showImagePickerSheet(imgC),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade500),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                /// IMAGE
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Obx(() {
+                    if (imgC.selectedImage.value != null) {
+                      return Image.file(
+                        imgC.selectedImage.value!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                      );
+                    }
+
+                    if (u.photo != null) {
+                      return Image.network(
+                        '${ApiConstants.imageurl}${u.photo}',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      );
+                    }
+
+                    return Image.asset(
+                      u.gender == "Male"
+                          ? "assets/images/no-image-male2.jpg"
+                          : "assets/images/no-image-female2.jpg",
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    );
+                  }),
+                ),
+
+                Positioned(
+                  bottom: 10,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      height: 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _imageBox1() {
+    final u = usercontroller.userData.value!;
+    final imgC = Get.put(ImageUploadController());
+
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: GestureDetector(
+          onTap: () => showImagePickerSheet1(imgC),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade500),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                /// IMAGE
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Obx(() {
+                    if (imgC.selectedImage1.value != null) {
+                      return Image.file(
+                        imgC.selectedImage1.value!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                      );
+                    }
+
+                    if (u.photo1 != null) {
+                      return Image.network(
+                        '${ApiConstants.imageurl}${u.photo1}',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      );
+                    }
+
+                    return Image.asset(
+                      u.gender == "Male"
+                          ? "assets/images/no-image-male2.jpg"
+                          : "assets/images/no-image-female2.jpg",
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    );
+                  }),
+                ),
+
+                Positioned(
+                  bottom: 10,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      height: 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _imageBox2() {
+    final u = usercontroller.userData.value!;
+    final imgC = Get.put(ImageUploadController());
+
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: GestureDetector(
+          onTap: () => showImagePickerShee2(imgC),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade500),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                /// IMAGE
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Obx(() {
+                    if (imgC.selectedImage2.value != null) {
+                      return Image.file(
+                        imgC.selectedImage2.value!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                      );
+                    }
+
+                    if (u.photo2 != null) {
+                      return Image.network(
+                        '${ApiConstants.imageurl}${u.photo2}',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      );
+                    }
+
+                    return Image.asset(
+                      u.gender == "Male"
+                          ? "assets/images/no-image-male2.jpg"
+                          : "assets/images/no-image-female2.jpg",
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    );
+                  }),
+                ),
+
+                Positioned(
+                  bottom: 10,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      height: 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _imageBox3() {
+    final u = usercontroller.userData.value!;
+    final imgC = Get.put(ImageUploadController());
+
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: GestureDetector(
+          onTap: () => showImagePickerSheet3(imgC),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade500),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                /// IMAGE
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Obx(() {
+                    if (imgC.selectedImage3.value != null) {
+                      return Image.file(
+                        imgC.selectedImage3.value!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                      );
+                    }
+
+                    if (u.photo3 != null) {
+                      return Image.network(
+                        '${ApiConstants.imageurl}${u.photo3}',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      );
+                    }
+
+                    return Image.asset(
+                      u.gender == "Male"
+                          ? "assets/images/no-image-male2.jpg"
+                          : "assets/images/no-image-female2.jpg",
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    );
+                  }),
+                ),
+
+                Positioned(
+                  bottom: 10,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      height: 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _imageBox4() {
+    final u = usercontroller.userData.value!;
+    final imgC = Get.put(ImageUploadController());
+
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: GestureDetector(
+          onTap: () => showImagePickerSheet4(imgC),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade500),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                /// IMAGE
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Obx(() {
+                    if (imgC.selectedImage4.value != null) {
+                      return Image.file(
+                        imgC.selectedImage4.value!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                      );
+                    }
+
+                    if (u.photo4 != null) {
+                      return Image.network(
+                        '${ApiConstants.imageurl}${u.photo4}',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      );
+                    }
+
+                    return Image.asset(
+                      u.gender == "Male"
+                          ? "assets/images/no-image-male2.jpg"
+                          : "assets/images/no-image-female2.jpg",
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    );
+                  }),
+                ),
+
+                Positioned(
+                  bottom: 10,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      height: 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void showImagePickerSheet(ImageUploadController imgC) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Camera"),
+              onTap: () {
+                Get.back();
+                imgC.pickImagesingle(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: const Text("Gallery"),
+              onTap: () {
+                Get.back();
+                imgC.pickImagesingle(ImageSource.gallery);
+              },
+            ),
+            SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void showImagePickerSheet1(ImageUploadController imgC) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Camera"),
+              onTap: () {
+                Get.back();
+                imgC.pickImagesingle1(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: const Text("Gallery"),
+              onTap: () {
+                Get.back();
+                imgC.pickImagesingle1(ImageSource.gallery);
+              },
+            ),
+            SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void showImagePickerShee2(ImageUploadController imgC) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Camera"),
+              onTap: () {
+                Get.back();
+                imgC.pickImagesingle2(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: const Text("Gallery"),
+              onTap: () {
+                Get.back();
+                imgC.pickImagesingle2(ImageSource.gallery);
+              },
+            ),
+            SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void showImagePickerSheet3(ImageUploadController imgC) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Camera"),
+              onTap: () {
+                Get.back();
+                imgC.pickImagesingle3(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: const Text("Gallery"),
+              onTap: () {
+                Get.back();
+                imgC.pickImagesingle3(ImageSource.gallery);
+              },
+            ),
+            SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void showImagePickerSheet4(ImageUploadController imgC) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Camera"),
+              onTap: () {
+                Get.back();
+                imgC.pickImagesingle4(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: const Text("Gallery"),
+              onTap: () {
+                Get.back();
+                imgC.pickImagesingle4(ImageSource.gallery);
+              },
+            ),
+            SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buttons() {
     return Row(
       children: [
         Expanded(
           child: GestureDetector(
             onTap: () {
-              if (imgC.images.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Upload a minimum of 1 image and a maximum of 5 images.',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else {
-                imgC.EdituploadImages();
-              }
+              imgC.editUploadImage();
+              imgC.editUploadImage1();
             },
             child: Container(
               height: 45,
@@ -176,38 +789,6 @@ class _EditphotoesScreenState extends State<EditphotoesScreen> {
     );
   }
 
-  // Widget _uploadimage() {
-  //   return Row(
-  //     children: [
-  //       Expanded(
-  //         child: GestureDetector(
-  //           onTap: () {
-  //             pickImage();
-  //           },
-  //           child: Container(
-  //             height: 45,
-  //             alignment: Alignment.center,
-  //             decoration: BoxDecoration(
-  //               borderRadius: BorderRadius.circular(10),
-  //               gradient: const LinearGradient(
-  //                 colors: [Color(0xFFBE266B), Color(0xFFEB1D7B)],
-  //               ),
-  //             ),
-  //             child: Text(
-  //               "Upload",
-  //               style: opensansMedium.copyWith(
-  //                 color: Colors.white,
-  //                 fontSize: 18,
-  //               ),
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // ---------------- INFO BOX ----------------
   Widget _infoBox(String big, String small) {
     return Column(
       children: [
@@ -225,147 +806,19 @@ class _EditphotoesScreenState extends State<EditphotoesScreen> {
     );
   }
 
-  Widget _showBox() {
-    return GestureDetector(
-      onTap: () {
-        imgC.pickImages();
-      },
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        child: Obx(() {
-          return imgC.images.isEmpty
-              ? _emptyBox()
-              : GridView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: imgC.images.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                  ),
-                  itemBuilder: (_, index) {
-                    return Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            imgC.images[index],
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
-                        ),
-
-                        /// delete button
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: GestureDetector(
-                            onTap: () {
-                              imgC.images.removeAt(index);
-                            },
-                            child: CircleAvatar(
-                              radius: 12,
-                              backgroundColor: Colors.red,
-                              child: Icon(
-                                Icons.close,
-                                size: 14,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                );
-        }),
-      ),
-    );
-  }
-
-  Widget _emptyBox() {
-    return DottedBorder(
-      options: RectDottedBorderOptions(
-        strokeWidth: 1,
-        dashPattern: [3, 5],
-        color: Colors.grey.shade600,
-      ),
-
-      child: Container(
-        height: 220,
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/imagebackk.png', height: 50),
-            SizedBox(height: 10),
-            Text(
-              "Select File",
-              style: opensansSemiBold.copyWith(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Upload a minimum of 1 image and a maximum of 5 images.',
-              textAlign: TextAlign.center,
-              style: opensansMedium.copyWith(fontSize: 12, color: Colors.red),
-            ),
-          ],
+  Widget _imageBox5() {
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: GestureDetector(
+          child: Container(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(14)),
+          ),
         ),
       ),
     );
   }
 
-  // ---------------- UPLOAD DOTTED BOX ----------------
-  // Widget _showBox() {
-  //   return GestureDetector(
-  //     onTap: () {
-  //       pickImage();
-  //     },
-  //     child: DottedBorder(
-  //       options: RoundedRectDottedBorderOptions(
-  //         radius: Radius.circular(15),
-  //         strokeWidth: 1,
-  //         dashPattern: [8, 6],
-  //         color: Colors.grey,
-  //       ),
-
-  //       child: Container(
-  //         height: 220,
-  //         width: double.infinity,
-  //         alignment: Alignment.center,
-  //         padding: const EdgeInsets.all(20),
-  //         child: Column(
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           children: [
-  //             pickedImage == null
-  //                 ? Column(
-  //                     mainAxisAlignment: MainAxisAlignment.center,
-  //                     children: [
-  //                       Image.asset('assets/images/imagebackk.png', height: 50),
-  //                       SizedBox(height: 10),
-  //                       Text(
-  //                         "Select File",
-  //                         style: TextStyle(fontSize: 16, color: Colors.grey),
-  //                       ),
-  //                     ],
-  //                   )
-  //                 : ClipRRect(
-  //                     borderRadius: BorderRadius.circular(12),
-  //                     child: Image.file(pickedImage!, fit: BoxFit.cover),
-  //                   ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-
-  //   );
-  // }
-
-  // ---------------- TIPS IMAGE ----------------
   Widget _tipExample(String label, String assetPath) {
     return Column(
       children: [

@@ -379,8 +379,17 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
 
                               rowSingle(
                                 "Contact No.",
-                                "+91-${user.contactNo ?? "N/A"}",
+                                (user.profilePhoneSettingModel?.viewType == 1 ||
+                                        user
+                                                .profilePhoneSettingModel
+                                                ?.viewType ==
+                                            2)
+                                    ? (my.planDetail != null
+                                          ? "+91-${user.contactNo ?? "N/A"}"
+                                          : "+91-****")
+                                    : "*******",
                               ),
+
                               rowSingle(
                                 "Email ID",
                                 (() {
