@@ -4,8 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/match/userprofile.dart';
 import 'package:vivashri/app/modules/search/search.dart';
-import 'package:vivashri/call_parent/chat/api/apis.dart';
-import 'package:vivashri/call_parent/chat/widgets/Snackbar.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
@@ -14,12 +12,13 @@ import 'package:vivashri/data/controller/recived_interst.dart';
 import 'package:vivashri/data/controller/send_interest.dart';
 import 'package:vivashri/data/controller/userbyuser.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
-import 'package:vivashri/widgets/drawer.dart';
 import 'package:vivashri/widgets/image_view.dart';
 
 class ConnectScreen extends StatefulWidget {
   final int initialIndex;
-  const ConnectScreen({super.key, this.initialIndex = 0});
+  String? hidenav;
+
+  ConnectScreen({super.key, this.initialIndex = 0, this.hidenav});
 
   @override
   State<ConnectScreen> createState() => _ConnectScreenState();
@@ -62,9 +61,9 @@ class _ConnectScreenState extends State<ConnectScreen>
     final h = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      key: _scaffoldKey,
+      //  key: _scaffoldKey,
       backgroundColor: Colors.white,
-      drawer: CustomAppDrawer(),
+      //drawer: CustomAppDrawer(),
       body: Stack(
         children: [
           SafeArea(
@@ -120,26 +119,42 @@ class _ConnectScreenState extends State<ConnectScreen>
 
   Widget _buildTopBar(double width) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  _scaffoldKey.currentState?.openDrawer();
-                },
-                child: Icon(
-                  Icons.menu,
-                  color: ColorResources.blackcolor11,
-                  size: 28,
+          widget.hidenav == "Hide"
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Get.back();
+                      },
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        color: ColorResources.blackcolor11,
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        _scaffoldKey.currentState?.openDrawer();
+                      },
+                      child: Icon(
+                        Icons.menu,
+                        color: ColorResources.blackcolor11,
+                        size: 28,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
 
           Container(
             padding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
@@ -532,13 +547,53 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 height: 25,
                               ),
                               SizedBox(height: 10),
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Image.asset(
-                                  'assets/images/imagecount.png',
-                                  height: 40,
+                              GestureDetector(
+                                onTap: () {
+                                  buildPhotoList(user);
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: true,
+                                    builder: (_) =>
+                                        PhotoSliderDialog(photos: photosmatch),
+                                  );
+                                },
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Image.asset(
+                                        'assets/images/imagecount.png',
+                                        height: 40,
+                                      ),
+                                    ),
+                                    (user!.photo == "")
+                                        ? const SizedBox(height: 18, width: 18)
+                                        : Positioned(
+                                            top: -4,
+                                            right: -4,
+                                            child: Container(
+                                              height: 18,
+                                              width: 18,
+                                              alignment: Alignment.center,
+                                              decoration: BoxDecoration(
+                                                color: ColorResources
+                                                    .primarycolor2,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Text(
+                                                user.photo1 == null ? "" : "+1",
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 8,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -598,7 +653,18 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 const SizedBox(height: 4),
 
                                 Text(
-                                  "• $age, ${user?.height ?? ""}” • ${user?.religion?.name ?? ""}  • ${user?.subCaste?.name ?? ""}",
+                                  "• $age, ${(() {
+                                    final raw = user?.height;
+                                    if (raw == null || raw.toString().isEmpty) return "";
+
+                                    final value = double.tryParse(raw.toString());
+                                    if (value == null) return raw.toString();
+
+                                    final ft = value.floor();
+                                    final inch = ((value - ft) * 12).round();
+
+                                    return "$ft ft $inch in";
+                                  })()} • ${user?.religion?.name ?? ""}  • ${user?.subCaste?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -607,7 +673,41 @@ class _ConnectScreenState extends State<ConnectScreen>
 
                                 // DETAILS L2
                                 Text(
-                                  "• ${user?.occupation?.name ?? ""} • Earns ₹${user?.annualIncome} Lacs p.a • ${user?.locState?.name ?? ""}",
+                                  "• ${user?.occupation?.name ?? ""} • Earns ₹${(() {
+                                    final income = user?.annualIncome;
+                                    if (income == null || income.toString().isEmpty) return "0";
+
+                                    final str = income.toString();
+
+                                    // range case: 700000-1000000
+                                    if (str.contains('-')) {
+                                      final parts = str.split('-');
+
+                                      String format(int v) {
+                                        if (v >= 10000000) {
+                                          return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                        } else if (v >= 100000) {
+                                          return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                        } else if (v >= 1000) {
+                                          return "${(v / 1000).toStringAsFixed(0)} K";
+                                        }
+                                        return v.toString();
+                                      }
+
+                                      return "${format(int.tryParse(parts[0]) ?? 0)}–${format(int.tryParse(parts[1]) ?? 0)}";
+                                    }
+
+                                    // single value
+                                    final v = int.tryParse(str) ?? 0;
+                                    if (v >= 10000000) {
+                                      return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                    } else if (v >= 100000) {
+                                      return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                    } else if (v >= 1000) {
+                                      return "${(v / 1000).toStringAsFixed(0)} K";
+                                    }
+                                    return v.toString();
+                                  })()} p.a • ${user?.locState?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -897,14 +997,43 @@ class _ConnectScreenState extends State<ConnectScreen>
                                         PhotoSliderDialog(photos: photosmatch),
                                   );
                                 },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Image.asset(
-                                    'assets/images/imagecount.png',
-                                    height: 40,
-                                  ),
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Image.asset(
+                                        'assets/images/imagecount.png',
+                                        height: 40,
+                                      ),
+                                    ),
+                                    (user.photo == "")
+                                        ? const SizedBox(height: 18, width: 18)
+                                        : Positioned(
+                                            top: -4,
+                                            right: -4,
+                                            child: Container(
+                                              height: 18,
+                                              width: 18,
+                                              alignment: Alignment.center,
+                                              decoration: BoxDecoration(
+                                                color: ColorResources
+                                                    .primarycolor2,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Text(
+                                                user.photo1 == null ? "" : "+1",
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 8,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -964,7 +1093,18 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 const SizedBox(height: 4),
 
                                 Text(
-                                  "• $age, ${user.height ?? ""}” • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
+                                  "• $age, ${(() {
+                                    final raw = user.height;
+                                    if (raw == null || raw.toString().isEmpty) return "";
+
+                                    final value = double.tryParse(raw.toString());
+                                    if (value == null) return raw.toString();
+
+                                    final ft = value.floor();
+                                    final inch = ((value - ft) * 12).round();
+
+                                    return "$ft ft $inch in";
+                                  })()} • ${user.religion?.name ?? ""}  • ${user.subCaste?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -973,7 +1113,41 @@ class _ConnectScreenState extends State<ConnectScreen>
 
                                 // DETAILS L2
                                 Text(
-                                  "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome} Lacs p.a • ${user.locState?.name ?? ""}",
+                                  "• ${user.occupation?.name ?? ""} • Earns ₹${(() {
+                                    final income = user.annualIncome;
+                                    if (income == null || income.toString().isEmpty) return "0";
+
+                                    final str = income.toString();
+
+                                    // 👉 Range case (e.g. 700000-1000000)
+                                    if (str.contains('-')) {
+                                      final parts = str.split('-');
+
+                                      String fmt(int v) {
+                                        if (v >= 10000000) {
+                                          return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                        } else if (v >= 100000) {
+                                          return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                        } else if (v >= 1000) {
+                                          return "${(v / 1000).toStringAsFixed(0)} K";
+                                        }
+                                        return v.toString();
+                                      }
+
+                                      return "${fmt(int.tryParse(parts[0]) ?? 0)}–${fmt(int.tryParse(parts[1]) ?? 0)}";
+                                    }
+
+                                    // 👉 Single value
+                                    final v = int.tryParse(str) ?? 0;
+                                    if (v >= 10000000) {
+                                      return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                    } else if (v >= 100000) {
+                                      return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                    } else if (v >= 1000) {
+                                      return "${(v / 1000).toStringAsFixed(0)} K";
+                                    }
+                                    return v.toString();
+                                  })()} p.a • ${user.locState?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -1036,9 +1210,9 @@ class _ConnectScreenState extends State<ConnectScreen>
 
   // ---------------- SENT TAB ----------------
   Widget _acceptedbyme(double w, double h) {
-    final u = usercontroller.userData.value!;
-
     return Obx(() {
+      final u = usercontroller.userData.value!;
+
       if (inboxCtrl.isLoading.value) {
         return Center(
           child: CircularProgressIndicator(color: ColorResources.primarycolor2),
@@ -1271,11 +1445,44 @@ class _ConnectScreenState extends State<ConnectScreen>
                                         ),
                                       );
                                     },
-                                    child: Image.asset(
-                                      'assets/images/imagecount.png',
-                                      height: 40,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/imagecount.png',
+                                          height: 40,
+                                        ),
+                                        user!.photo1 != null
+                                            ? Positioned(
+                                                top: -4,
+                                                right: -4,
+                                                child: Container(
+                                                  height: 18,
+                                                  width: 18,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorResources
+                                                        .primarycolor2,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    user.photo1 != null
+                                                        ? "+1"
+                                                        : "",
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            : SizedBox(),
+                                      ],
                                     ),
                                   ),
+
                                   SizedBox(width: 4),
                                 ],
                               ),
@@ -1306,11 +1513,44 @@ class _ConnectScreenState extends State<ConnectScreen>
                                         ),
                                       );
                                     },
-                                    child: Image.asset(
-                                      'assets/images/imagecount.png',
-                                      height: 40,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/imagecount.png',
+                                          height: 40,
+                                        ),
+                                        user!.photo1 == null
+                                            ? SizedBox()
+                                            : Positioned(
+                                                top: -5,
+                                                right: -5,
+                                                child: Container(
+                                                  height: 18,
+                                                  width: 18,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorResources
+                                                        .primarycolor2,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    user.photo1 != null
+                                                        ? "+1"
+                                                        : "",
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                      ],
                                     ),
                                   ),
+
                                   SizedBox(width: 4),
                                 ],
                               ),
@@ -1320,7 +1560,6 @@ class _ConnectScreenState extends State<ConnectScreen>
                         if (user?.profilesetting?.photoShow == 1 &&
                             user?.photorequeststatus == null &&
                             user?.photorequestcheck == false)
-                          //blur photo
                           Positioned(
                             top: 12,
                             left: 12,
@@ -1345,11 +1584,44 @@ class _ConnectScreenState extends State<ConnectScreen>
                                         ),
                                       );
                                     },
-                                    child: Image.asset(
-                                      'assets/images/imagecount.png',
-                                      height: 40,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/imagecount.png',
+                                          height: 40,
+                                        ),
+                                        user!.photo1 == null
+                                            ? SizedBox()
+                                            : Positioned(
+                                                top: -5,
+                                                right: -5,
+                                                child: Container(
+                                                  height: 18,
+                                                  width: 18,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorResources
+                                                        .primarycolor2,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    user.photo1 == null
+                                                        ? ""
+                                                        : "+1",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                      ],
                                     ),
                                   ),
+
                                   SizedBox(width: 4),
                                 ],
                               ),
@@ -1383,11 +1655,44 @@ class _ConnectScreenState extends State<ConnectScreen>
                                         ),
                                       );
                                     },
-                                    child: Image.asset(
-                                      'assets/images/imagecount.png',
-                                      height: 40,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/imagecount.png',
+                                          height: 40,
+                                        ),
+                                        user!.photo1 == null
+                                            ? SizedBox()
+                                            : Positioned(
+                                                top: -4,
+                                                right: -4,
+                                                child: Container(
+                                                  height: 18,
+                                                  width: 18,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorResources
+                                                        .primarycolor2,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    user.photo1 == null
+                                                        ? ""
+                                                        : "+1",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                      ],
                                     ),
                                   ),
+
                                   SizedBox(width: 4),
                                 ],
                               ),
@@ -1412,20 +1717,53 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      buildPhotoList(user);
+                                      buildPhotoList22(user);
                                       showDialog(
                                         context: context,
                                         barrierDismissible: true,
                                         builder: (_) => PhotoSliderDialog(
-                                          photos: photosmatch,
+                                          photos: photosblur,
                                         ),
                                       );
                                     },
-                                    child: Image.asset(
-                                      'assets/images/imagecount.png',
-                                      height: 40,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/imagecount.png',
+                                          height: 40,
+                                        ),
+                                        user!.photo1 == null
+                                            ? SizedBox()
+                                            : Positioned(
+                                                top: -4,
+                                                right: -4,
+                                                child: Container(
+                                                  height: 18,
+                                                  width: 18,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorResources
+                                                        .primarycolor2,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    user.photo1 == null
+                                                        ? ""
+                                                        : "+1",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                      ],
                                     ),
                                   ),
+
                                   SizedBox(width: 4),
                                 ],
                               ),
@@ -1524,16 +1862,60 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 const SizedBox(height: 4),
 
                                 Text(
-                                  "• $age, ${user?.height ?? ""}” • ${user?.religion?.name ?? ""}  • ${user?.subCaste?.name ?? ""}",
+                                  "• $age, ${(() {
+                                    final raw = user?.height;
+                                    if (raw == null || raw.toString().isEmpty) return "";
+
+                                    final value = double.tryParse(raw.toString());
+                                    if (value == null) return raw.toString();
+
+                                    final ft = value.floor();
+                                    final inch = ((value - ft) * 12).round();
+
+                                    return "$ft ft $inch in";
+                                  })()} • ${user?.religion?.name ?? ""}  • ${user?.subCaste?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
                                   ),
                                 ),
 
-                                // DETAILS L2
                                 Text(
-                                  "• ${user?.occupation?.name ?? ""} • Earns ₹${user?.annualIncome} Lacs p.a • ${user?.locState?.name ?? ""}",
+                                  "• ${user?.occupation?.name ?? ""} • Earns ₹${(() {
+                                    final income = user?.annualIncome;
+                                    if (income == null || income.toString().isEmpty) return "0";
+
+                                    final str = income.toString();
+
+                                    // 👉 Range case (e.g. 700000-1000000)
+                                    if (str.contains('-')) {
+                                      final parts = str.split('-');
+
+                                      String fmt(int v) {
+                                        if (v >= 10000000) {
+                                          return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                        } else if (v >= 100000) {
+                                          return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                        } else if (v >= 1000) {
+                                          return "${(v / 1000).toStringAsFixed(0)} K";
+                                        }
+                                        return v.toString();
+                                      }
+
+                                      return "${fmt(int.tryParse(parts[0]) ?? 0)}–${fmt(int.tryParse(parts[1]) ?? 0)}";
+                                    }
+
+                                    // 👉 Single value
+                                    final v = int.tryParse(str) ?? 0;
+                                    if (v >= 10000000) {
+                                      return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                    } else if (v >= 100000) {
+                                      return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                    } else if (v >= 1000) {
+                                      return "${(v / 1000).toStringAsFixed(0)} K";
+                                    }
+                                    return v.toString();
+                                  })()} p.a • ${user?.locState?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -1616,8 +1998,8 @@ class _ConnectScreenState extends State<ConnectScreen>
   }
 
   Widget _acceptedbypartner(double w, double h) {
-    final u = usercontroller.userData.value!;
     return Obx(() {
+      final u = usercontroller.userData.value!;
       if (inboxCtrl.isLoading.value) {
         return Center(
           child: CircularProgressIndicator(color: ColorResources.primarycolor2),
@@ -1811,26 +2193,6 @@ class _ConnectScreenState extends State<ConnectScreen>
                           ),
                         ),
 
-                        // AspectRatio(
-                        //   aspectRatio: 9 / 11,
-                        //   child: ClipRRect(
-                        //     borderRadius: BorderRadius.circular(12),
-                        //     child: Image.network(
-                        //       user!.photo != null
-                        //           ? "${ApiConstants.imageurl}${user.photo!}"
-                        //           : "",
-                        //       fit: BoxFit.cover,
-                        //       errorBuilder: (context, error, stackTrace) {
-                        //         return Image.asset(
-                        //           user.gender == "Male"
-                        //               ? "assets/images/9159790.png"
-                        //               : "assets/images/3232.png",
-                        //           fit: BoxFit.contain,
-                        //         );
-                        //       },
-                        //     ),
-                        //   ),
-                        // ),
                         Positioned(
                           bottom: 0,
                           left: 0,
@@ -1874,11 +2236,44 @@ class _ConnectScreenState extends State<ConnectScreen>
                                         ),
                                       );
                                     },
-                                    child: Image.asset(
-                                      'assets/images/imagecount.png',
-                                      height: 40,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/imagecount.png',
+                                          height: 40,
+                                        ),
+                                        user!.photo1 != null
+                                            ? Positioned(
+                                                top: -4,
+                                                right: -4,
+                                                child: Container(
+                                                  height: 18,
+                                                  width: 18,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorResources
+                                                        .primarycolor2,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    user.photo1 != null
+                                                        ? "+1"
+                                                        : "",
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            : SizedBox(),
+                                      ],
                                     ),
                                   ),
+
                                   SizedBox(width: 4),
                                 ],
                               ),
@@ -1909,11 +2304,44 @@ class _ConnectScreenState extends State<ConnectScreen>
                                         ),
                                       );
                                     },
-                                    child: Image.asset(
-                                      'assets/images/imagecount.png',
-                                      height: 40,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/imagecount.png',
+                                          height: 40,
+                                        ),
+                                        user!.photo1 == null
+                                            ? SizedBox()
+                                            : Positioned(
+                                                top: -5,
+                                                right: -5,
+                                                child: Container(
+                                                  height: 18,
+                                                  width: 18,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorResources
+                                                        .primarycolor2,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    user.photo1 != null
+                                                        ? "+1"
+                                                        : "",
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                      ],
                                     ),
                                   ),
+
                                   SizedBox(width: 4),
                                 ],
                               ),
@@ -1923,7 +2351,6 @@ class _ConnectScreenState extends State<ConnectScreen>
                         if (user?.profilesetting?.photoShow == 1 &&
                             user?.photorequeststatus == null &&
                             user?.photorequestcheck == false)
-                          //blur photo
                           Positioned(
                             top: 12,
                             left: 12,
@@ -1948,11 +2375,44 @@ class _ConnectScreenState extends State<ConnectScreen>
                                         ),
                                       );
                                     },
-                                    child: Image.asset(
-                                      'assets/images/imagecount.png',
-                                      height: 40,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/imagecount.png',
+                                          height: 40,
+                                        ),
+                                        user!.photo1 == null
+                                            ? SizedBox()
+                                            : Positioned(
+                                                top: -5,
+                                                right: -5,
+                                                child: Container(
+                                                  height: 18,
+                                                  width: 18,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorResources
+                                                        .primarycolor2,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    user.photo1 == null
+                                                        ? ""
+                                                        : "+1",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                      ],
                                     ),
                                   ),
+
                                   SizedBox(width: 4),
                                 ],
                               ),
@@ -1986,11 +2446,44 @@ class _ConnectScreenState extends State<ConnectScreen>
                                         ),
                                       );
                                     },
-                                    child: Image.asset(
-                                      'assets/images/imagecount.png',
-                                      height: 40,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/imagecount.png',
+                                          height: 40,
+                                        ),
+                                        user!.photo1 == null
+                                            ? SizedBox()
+                                            : Positioned(
+                                                top: -4,
+                                                right: -4,
+                                                child: Container(
+                                                  height: 18,
+                                                  width: 18,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorResources
+                                                        .primarycolor2,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    user.photo1 == null
+                                                        ? ""
+                                                        : "+1",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                      ],
                                     ),
                                   ),
+
                                   SizedBox(width: 4),
                                 ],
                               ),
@@ -2015,59 +2508,59 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      buildPhotoList(user);
+                                      buildPhotoList22(user);
                                       showDialog(
                                         context: context,
                                         barrierDismissible: true,
                                         builder: (_) => PhotoSliderDialog(
-                                          photos: photosmatch,
+                                          photos: photosblur,
                                         ),
                                       );
                                     },
-                                    child: Image.asset(
-                                      'assets/images/imagecount.png',
-                                      height: 40,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Image.asset(
+                                          'assets/images/imagecount.png',
+                                          height: 40,
+                                        ),
+                                        user!.photo1 == null
+                                            ? SizedBox()
+                                            : Positioned(
+                                                top: -4,
+                                                right: -4,
+                                                child: Container(
+                                                  height: 18,
+                                                  width: 18,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: ColorResources
+                                                        .primarycolor2,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    user.photo1 == null
+                                                        ? ""
+                                                        : "+1",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                      ],
                                     ),
                                   ),
+
                                   SizedBox(width: 4),
                                 ],
                               ),
                             ),
                           ),
 
-                        // Positioned(
-                        //   top: 12,
-                        //   right: 12,
-                        //   child: Column(
-                        //     children: [
-                        //       Image.asset(
-                        //         'assets/images/Group 285.png',
-                        //         height: 25,
-                        //       ),
-                        //       SizedBox(height: 10),
-                        //       GestureDetector(
-                        //         onTap: () {
-                        //           buildPhotoList(user);
-                        //           showDialog(
-                        //             context: context,
-                        //             barrierDismissible: true,
-                        //             builder: (_) =>
-                        //                 PhotoSliderDialog(photos: photosmatch),
-                        //           );
-                        //         },
-                        //         child: Container(
-                        //           decoration: BoxDecoration(
-                        //             borderRadius: BorderRadius.circular(10),
-                        //           ),
-                        //           child: Image.asset(
-                        //             'assets/images/imagecount.png',
-                        //             height: 40,
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
                         Positioned(
                           bottom: 0,
                           left: 0,
@@ -2160,7 +2653,18 @@ class _ConnectScreenState extends State<ConnectScreen>
                                 const SizedBox(height: 4),
 
                                 Text(
-                                  "• $age, ${user?.height ?? ""}” • ${user?.religion?.name ?? ""}  • ${user?.subCaste?.name ?? ""}",
+                                  "• $age, ${(() {
+                                    final raw = user?.height;
+                                    if (raw == null || raw.toString().isEmpty) return "";
+
+                                    final value = double.tryParse(raw.toString());
+                                    if (value == null) return raw.toString();
+
+                                    final ft = value.floor();
+                                    final inch = ((value - ft) * 12).round();
+
+                                    return "$ft ft $inch in";
+                                  })()} • ${user?.religion?.name ?? ""}  • ${user?.subCaste?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -2169,7 +2673,41 @@ class _ConnectScreenState extends State<ConnectScreen>
 
                                 // DETAILS L2
                                 Text(
-                                  "• ${user?.occupation?.name ?? ""} • Earns ₹${user?.annualIncome} Lacs p.a • ${user?.locState?.name ?? ""}",
+                                  "• ${user?.occupation?.name ?? ""} • Earns ₹${(() {
+                                    final income = user?.annualIncome;
+                                    if (income == null || income.toString().isEmpty) return "0";
+
+                                    final str = income.toString();
+
+                                    // Range case (e.g. 700000-1000000)
+                                    if (str.contains('-')) {
+                                      final parts = str.split('-');
+
+                                      String fmt(int v) {
+                                        if (v >= 10000000) {
+                                          return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                        } else if (v >= 100000) {
+                                          return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                        } else if (v >= 1000) {
+                                          return "${(v / 1000).toStringAsFixed(0)} K";
+                                        }
+                                        return v.toString();
+                                      }
+
+                                      return "${fmt(int.tryParse(parts[0]) ?? 0)}–${fmt(int.tryParse(parts[1]) ?? 0)}";
+                                    }
+
+                                    // Single value
+                                    final v = int.tryParse(str) ?? 0;
+                                    if (v >= 10000000) {
+                                      return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                    } else if (v >= 100000) {
+                                      return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                    } else if (v >= 1000) {
+                                      return "${(v / 1000).toStringAsFixed(0)} K";
+                                    }
+                                    return v.toString();
+                                  })()} p.a • ${user?.locState?.name ?? ""}",
                                   style: opensansMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -2351,14 +2889,43 @@ class _ConnectScreenState extends State<ConnectScreen>
                                         PhotoSliderDialog(photos: photosmatch),
                                   );
                                 },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Image.asset(
-                                    'assets/images/imagecount.png',
-                                    height: 40,
-                                  ),
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Image.asset(
+                                        'assets/images/imagecount.png',
+                                        height: 40,
+                                      ),
+                                    ),
+                                    (user.photo == "")
+                                        ? const SizedBox(height: 18, width: 18)
+                                        : Positioned(
+                                            top: -4,
+                                            right: -4,
+                                            child: Container(
+                                              height: 18,
+                                              width: 18,
+                                              alignment: Alignment.center,
+                                              decoration: BoxDecoration(
+                                                color: ColorResources
+                                                    .primarycolor2,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Text(
+                                                user.photo1 == null ? "" : "+1",
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 8,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                  ],
                                 ),
                               ),
                             ],

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/check_percentage.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 
@@ -187,6 +189,8 @@ class _EditContectScreenState extends State<EditContectScreen> {
     );
   }
 
+  final checkpercentagecontroller = Get.put(CheckProfileController());
+
   Widget _bottomButtons(numberemaild) {
     return Row(
       children: [
@@ -221,7 +225,9 @@ class _EditContectScreenState extends State<EditContectScreen> {
         // const SizedBox(width: 12),
         Expanded(
           child: GestureDetector(
-            onTap: () {
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              String? profileid = prefs.getString("profileid");
               stapercontroller.updatepartnerotherdetails(
                 formData: {
                   // "contact_no": widget.mobileemail,
@@ -233,9 +239,12 @@ class _EditContectScreenState extends State<EditContectScreen> {
                   // "reference_other": otherController.text.trim(),
                 },
               );
-              Future.delayed(const Duration(microseconds: 1000), () {
-                Get.back();
-              });
+              await Future.delayed(const Duration(milliseconds: 500));
+              await checkpercentagecontroller.checkProfileComplete(
+                profileid.toString(),
+              );
+
+              Get.back();
             },
             child: Container(
               height: 45,

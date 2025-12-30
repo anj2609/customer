@@ -191,6 +191,8 @@ class UserData {
   dynamic aadhaarno;
   dynamic shortlisted;
   dynamic totalViewContact;
+  dynamic totalfamily;
+  String? selfintroductionvideo;
   UserData({
     this.id,
     this.profileId,
@@ -322,6 +324,8 @@ class UserData {
     this.receivedInvitation,
     this.aadhaarno,
     this.totalViewContact,
+    this.totalfamily,
+    this.selfintroductionvideo,
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
@@ -483,6 +487,8 @@ class UserData {
       acceptedInvitation: safeInt(json['accepted_invitation']),
       receivedInvitation: safeInt(json['receivedInvitation']),
       totalViewContact: safeInt(json['totalViewContact']),
+      totalfamily: safeInt(json['total_family']),
+      selfintroductionvideo: json['self_introduction_video'],
     );
   }
 }

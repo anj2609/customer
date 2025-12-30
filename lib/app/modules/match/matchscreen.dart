@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/match/userprofile.dart';
 import 'package:vivashri/app/modules/myprofile/editprofile.dart/partnerreliitonedit.dart';
 import 'package:vivashri/app/modules/search/search.dart';
@@ -34,7 +35,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // searchC.fetchSearchList("", "");
   }
 
   @override
@@ -47,14 +47,12 @@ class _MatchesScreenState extends State<MatchesScreen> {
       key: _scaffoldKey,
       backgroundColor: Colors.white,
       drawer: CustomAppDrawer(),
-
       body: Stack(
         children: [
           SafeArea(
             child: Column(
               children: [
                 _buildTopBar(w),
-
                 _buildFilterBar(),
                 Obx(() {
                   if (searchC.users.isEmpty) {
@@ -73,7 +71,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
                     ),
                   );
                 }),
-
                 Expanded(
                   child: RefreshIndicator(
                     backgroundColor: ColorResources.primarycolor2,
@@ -82,8 +79,14 @@ class _MatchesScreenState extends State<MatchesScreen> {
                       searchC.fetchSearchList("", "");
                     },
                     child: Obx(() {
-                      final u = usercontroller.userData.value!;
-
+                      final u = usercontroller.userData.value;
+                      if (u == null) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: ColorResources.primarycolor2,
+                          ),
+                        );
+                      }
                       if (u.partnerReligion == null || u.partnerCaste == null) {
                         return ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
@@ -170,7 +173,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
   Widget _buildTopBar(double width) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -190,7 +193,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
               ),
             ],
           ),
-
           Container(
             padding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
             decoration: BoxDecoration(
@@ -205,7 +207,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
               ),
             ),
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -461,7 +462,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
                             height: double.infinity,
                             child: Image.network(
                               "${ApiConstants.imageurl}${u.photoBlur}",
-
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Image.asset(
@@ -482,7 +482,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
                             height: double.infinity,
                             child: Image.network(
                               "${ApiConstants.imageurl}${u.photoBlur}",
-
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Image.asset(
@@ -602,11 +601,40 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                     PhotoSliderDialog(photos: photosmatch),
                               );
                             },
-                            child: Image.asset(
-                              'assets/images/imagecount.png',
-                              height: 40,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Image.asset(
+                                  'assets/images/imagecount.png',
+                                  height: 40,
+                                ),
+                                u.photo1 != null
+                                    ? Positioned(
+                                        top: -4,
+                                        right: -4,
+                                        child: Container(
+                                          height: 18,
+                                          width: 18,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: ColorResources.primarycolor2,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            u.photo1 != null ? "+1" : "",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : SizedBox(),
+                              ],
                             ),
                           ),
+
                           SizedBox(width: 4),
                         ],
                       ),
@@ -636,11 +664,40 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                     PhotoSliderDialog(photos: photosmatch),
                               );
                             },
-                            child: Image.asset(
-                              'assets/images/imagecount.png',
-                              height: 40,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Image.asset(
+                                  'assets/images/imagecount.png',
+                                  height: 40,
+                                ),
+                                u.photo1 == null
+                                    ? SizedBox()
+                                    : Positioned(
+                                        top: -5,
+                                        right: -5,
+                                        child: Container(
+                                          height: 18,
+                                          width: 18,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: ColorResources.primarycolor2,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            u.photo1 != null ? "+1" : "",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                              ],
                             ),
                           ),
+
                           SizedBox(width: 4),
                         ],
                       ),
@@ -674,11 +731,40 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                     PhotoSliderDialog(photos: photosblur),
                               );
                             },
-                            child: Image.asset(
-                              'assets/images/imagecount.png',
-                              height: 40,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Image.asset(
+                                  'assets/images/imagecount.png',
+                                  height: 40,
+                                ),
+                                u.photo1 == null
+                                    ? SizedBox()
+                                    : Positioned(
+                                        top: -5,
+                                        right: -5,
+                                        child: Container(
+                                          height: 18,
+                                          width: 18,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: ColorResources.primarycolor2,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            u.photo1 == null ? "" : "+1",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                              ],
                             ),
                           ),
+
                           SizedBox(width: 4),
                         ],
                       ),
@@ -712,11 +798,40 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                     PhotoSliderDialog(photos: photosblur),
                               );
                             },
-                            child: Image.asset(
-                              'assets/images/imagecount.png',
-                              height: 40,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Image.asset(
+                                  'assets/images/imagecount.png',
+                                  height: 40,
+                                ),
+                                u.photo1 == null
+                                    ? SizedBox()
+                                    : Positioned(
+                                        top: -4,
+                                        right: -4,
+                                        child: Container(
+                                          height: 18,
+                                          width: 18,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: ColorResources.primarycolor2,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            u.photo1 == null ? "" : "+1",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                              ],
                             ),
                           ),
+
                           SizedBox(width: 4),
                         ],
                       ),
@@ -749,11 +864,40 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                     PhotoSliderDialog(photos: photosmatch),
                               );
                             },
-                            child: Image.asset(
-                              'assets/images/imagecount.png',
-                              height: 40,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Image.asset(
+                                  'assets/images/imagecount.png',
+                                  height: 40,
+                                ),
+                                u.photo1 == null
+                                    ? SizedBox()
+                                    : Positioned(
+                                        top: -4,
+                                        right: -4,
+                                        child: Container(
+                                          height: 18,
+                                          width: 18,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: ColorResources.primarycolor2,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            u.photo1 == null ? "" : "+1",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                              ],
                             ),
                           ),
+
                           SizedBox(width: 4),
                         ],
                       ),
@@ -799,9 +943,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                             _darkTagonline("Online"),
                           ],
                         ),
-
                         const SizedBox(height: 5),
-
                         Row(
                           children: [
                             GestureDetector(
@@ -895,13 +1037,22 @@ class _MatchesScreenState extends State<MatchesScreen> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 4),
-
                         Text(
-                          "• ${age} yrs, ${u.height ?? ''}   "
+                          "• ${age} yrs, "
+                          "${(() {
+                            final raw = u.height;
+                            if (raw == null || raw.toString().isEmpty) return "";
+
+                            final value = double.tryParse(raw.toString());
+                            if (value == null) return raw.toString();
+
+                            final ft = value.floor();
+                            final inch = ((value - ft) * 12).round();
+
+                            return "$ft ft $inch in";
+                          })()}   "
                           "• ${u.religion?.name ?? ''}   "
-                          "• ${u.manglik ?? ''}   "
                           "• ${u.highestDegree?.name ?? ''}",
                           style: opensansSemiBold.copyWith(
                             color: Colors.white,
@@ -919,7 +1070,37 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                 : (u.occupation?.name ?? "");
                             String income = incomeShow == 1
                                 ? ""
-                                : "Earns ₹${u.annualincome ?? '0'} Lacs p.a";
+                                : "Earns ₹${(() {
+                                    final income = u.annualincome ?? '0';
+
+                                    if (income.contains('-')) {
+                                      final parts = income.split('-');
+                                      String format(int v) {
+                                        if (v >= 10000000) {
+                                          return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                        } else if (v >= 100000) {
+                                          return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                        } else if (v >= 1000) {
+                                          return "${(v / 1000).toStringAsFixed(0)} K";
+                                        } else {
+                                          return v.toString();
+                                        }
+                                      }
+
+                                      return "${format(int.tryParse(parts[0]) ?? 0)}–${format(int.tryParse(parts[1]) ?? 0)}";
+                                    } else {
+                                      final v = int.tryParse(income) ?? 0;
+                                      if (v >= 10000000) {
+                                        return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                      } else if (v >= 100000) {
+                                        return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                      } else if (v >= 1000) {
+                                        return "${(v / 1000).toStringAsFixed(0)} K";
+                                      } else {
+                                        return v.toString();
+                                      }
+                                    }
+                                  })()}";
                             String state = u.locState?.name ?? "";
 
                             List<String> parts = [];
@@ -941,7 +1122,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 ),
                 Positioned(
                   bottom: 60,
-
                   right: 14,
                   child: u.shortlistsent == false
                       ? GestureDetector(
@@ -967,7 +1147,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
               ],
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             child: Row(

@@ -9,6 +9,7 @@ import 'package:vivashri/data/controller/userbyuser.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/data/modal/user_by_user.dart';
 import 'package:vivashri/widgets/image_view.dart';
+import 'package:vivashri/widgets/video_link.dart';
 
 class UserProfileDetailsPage extends StatefulWidget {
   const UserProfileDetailsPage({super.key});
@@ -199,7 +200,22 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                                       ),
                                       children: [
                                         TextSpan(
-                                          text: "${user.height ?? ""}",
+                                          text: (() {
+                                            final h = user.height ?? "";
+
+                                            if (h.toString().contains('.')) {
+                                              final parts = h.toString().split(
+                                                '.',
+                                              );
+                                              final ft = parts[0];
+                                              final inch = parts.length > 1
+                                                  ? parts[1]
+                                                  : '0';
+                                              return "$ft ft $inch in";
+                                            }
+
+                                            return h.toString();
+                                          })(),
                                           style: opensansSemiBold.copyWith(
                                             fontSize: 13,
                                             color: ColorResources.blacktext,
@@ -450,7 +466,18 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                               SizedBox(height: 0),
                               rowTopBottom(
                                 "Age / Height",
-                                "${age ?? ""} Yrs / ${user.height ?? ""}",
+                                "${age ?? ""} Yrs / ${(() {
+                                  final raw = user.height;
+                                  if (raw == null || raw.toString().isEmpty) return "";
+
+                                  final value = double.tryParse(raw.toString());
+                                  if (value == null) return raw.toString();
+
+                                  final ft = value.floor();
+                                  final inch = ((value - ft) * 12).round();
+
+                                  return "$ft ft $inch in";
+                                })()}",
 
                                 "Date of Birth",
                                 (() {
@@ -479,7 +506,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                                 "Mother Tongue",
                                 user.partnerMotherTongue?.name ?? "",
                                 "Complexion",
-                                "${user.complexion!.name}",
+                                "${user.complexion?.name ?? ""}",
                               ),
 
                               rowTopBottom(
@@ -792,11 +819,44 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                                         ),
                                       ),
                                     ),
-                                    Text(
-                                      "Match: 10,  Unmatched: 10",
-                                      style: opensansSemiBold.copyWith(
-                                        color: ColorResources.primarycolor3,
-                                        fontSize: 14,
+                                    RichText(
+                                      text: TextSpan(
+                                        style: opensansSemiBold.copyWith(
+                                          fontSize: 14,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: "Match: ",
+                                            style: TextStyle(
+                                              color: Colors.black87,
+                                              // color:
+                                              //     ColorResources.primarycolor3,
+                                            ),
+                                          ),
+
+                                          TextSpan(
+                                            text:
+                                                "${userbyuserController.fullResponse.value?.data?.totalmatches ?? 0}",
+                                            style: const TextStyle(
+                                              color: Colors.green,
+                                            ),
+                                          ),
+
+                                          TextSpan(
+                                            text: ",  Unmatched: ",
+                                            style: TextStyle(
+                                              color: Colors.black87,
+                                              // color:
+                                              //     ColorResources.primarycolor3,
+                                            ),
+                                          ),
+
+                                          TextSpan(
+                                            text:
+                                                "${16 - userbyuserController.fullResponse.value?.data?.totalmatches}",
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                     SizedBox(
@@ -850,11 +910,40 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
 
                         preferenceRow(
                           leftKey: "Height",
-                          leftValue:
-                              "${user.partnerHeightFrom ?? ""} to ${user.partnerHeightTo ?? ""}",
+                          leftValue: (() {
+                            final from = user.partnerHeightFrom;
+                            final to = user.partnerHeightTo;
+
+                            String fmt(dynamic raw) {
+                              if (raw == null || raw.toString().isEmpty)
+                                return "";
+                              final v = double.tryParse(raw.toString());
+                              if (v == null) return raw.toString();
+                              final ft = v.floor();
+                              final inch = ((v - ft) * 12).round();
+                              return "$ft ft $inch in";
+                            }
+
+                            if (from == null && to == null) return "";
+                            if (from != null && to != null) {
+                              return "${fmt(from)} to ${fmt(to)}";
+                            }
+                            return fmt(from ?? to);
+                          })(),
                           rightKey: "Height",
-                          rightValue: "${my.height ?? ""}",
-                          isMatch: pp.height!.status ?? false,
+                          rightValue: (() {
+                            final raw = my.height;
+                            if (raw == null || raw.toString().isEmpty)
+                              return "";
+
+                            final v = double.tryParse(raw.toString());
+                            if (v == null) return raw.toString();
+
+                            final ft = v.floor();
+                            final inch = ((v - ft) * 12).round();
+                            return "$ft ft $inch in";
+                          })(),
+                          isMatch: pp.height?.status ?? false,
                         ),
 
                         preferenceRow(
@@ -961,11 +1050,49 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
 
                         preferenceRow(
                           leftKey: "Annual Income",
-                          leftValue:
-                              "${user.partnerIncomeFrom ?? ""} to ${user.partnerIncomeTo ?? ""}",
+                          leftValue: (() {
+                            final from = user.partnerIncomeFrom;
+                            final to = user.partnerIncomeTo;
+
+                            String fmt(dynamic raw) {
+                              if (raw == null || raw.toString().isEmpty)
+                                return "";
+                              final v = int.tryParse(raw.toString());
+                              if (v == null) return raw.toString();
+
+                              if (v >= 10000000) {
+                                return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                              } else if (v >= 100000) {
+                                return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                              } else if (v >= 1000) {
+                                return "${(v / 1000).toStringAsFixed(0)} K";
+                              }
+                              return v.toString();
+                            }
+
+                            if (from == null && to == null) return "";
+                            if (from != null && to != null) {
+                              return "${fmt(from)} to ${fmt(to)}";
+                            }
+                            return fmt(from ?? to);
+                          })(),
                           rightKey: "Annual Income",
-                          rightValue: "₹ ${my.annualIncome ?? ""}",
-                          isMatch: pp.annualIncome!.status ?? false,
+                          rightValue:
+                              "₹ ${(() {
+                                final income = my.annualIncome;
+                                if (income == null || income.toString().isEmpty) return "0";
+
+                                final v = int.tryParse(income.toString()) ?? 0;
+                                if (v >= 10000000) {
+                                  return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                } else if (v >= 100000) {
+                                  return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                } else if (v >= 1000) {
+                                  return "${(v / 1000).toStringAsFixed(0)} K";
+                                }
+                                return v.toString();
+                              })()}",
+                          isMatch: pp.annualIncome?.status ?? false,
                         ),
 
                         preferenceRow(
@@ -976,13 +1103,15 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                           isMatch: pp.diet!.status ?? false,
                         ),
 
-                        // preferenceRow(
-                        //   leftKey: "Family Background",
-                        //   leftValue: user.familyType ?? "",
-                        //   rightKey: "Family Background",
-                        //   rightValue: my.familyType ?? "",
-                        //   isMatch: true,
-                        // ),
+                        preferenceRow(
+                          leftKey: "Family Background",
+                          leftValue: user.familyType ?? "",
+                          rightKey: "Family Background",
+                          rightValue: my.familyType ?? "",
+                          isMatch:
+                              user.familyType == "Joint" &&
+                              my.familyType == "Joint",
+                        ),
                         SizedBox(height: 20),
                       ],
                     ),
@@ -1241,6 +1370,7 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
 
   Widget _buildTopImageSection(double w, double h) {
     final user = userbyuserController.memberData.value!;
+    // print('ewewewe${user.selfintroductionvideo}');
     return Stack(
       children: [
         AspectRatio(
@@ -1396,19 +1526,49 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                       builder: (_) => PhotoSliderDialog(photos: photosmatch),
                     );
                   },
-                  child: Image.asset(
-                    'assets/images/imagecount.png',
-                    height: 40,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        user.gender == "Male"
-                            ? "assets/images/no-image-male2.jpg"
-                            : "assets/images/no-image-female2.jpg",
-                        fit: BoxFit.contain,
-                      );
-                    },
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Image.asset(
+                        'assets/images/imagecount.png',
+                        height: 35,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            height: 35,
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+                      user.photo1 == null
+                          ? SizedBox()
+                          : Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                height: 16,
+                                width: 16,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: ColorResources.primarycolor2,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  user.photo1 == null ? "" : "+1",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                    ],
                   ),
                 ),
+
               if (user.profilesetting?.photoShow == 2)
                 GestureDetector(
                   onTap: () {
@@ -1419,19 +1579,49 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                       builder: (_) => PhotoSliderDialog(photos: photosmatch),
                     );
                   },
-                  child: Image.asset(
-                    'assets/images/imagecount.png',
-                    height: 40,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        user.gender == "Male"
-                            ? "assets/images/no-image-male2.jpg"
-                            : "assets/images/no-image-female2.jpg",
-                        fit: BoxFit.contain,
-                      );
-                    },
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Image.asset(
+                        'assets/images/imagecount.png',
+                        height: 35,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            height: 35,
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+                      user.photo1 == null
+                          ? SizedBox()
+                          : Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                height: 16,
+                                width: 16,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: ColorResources.primarycolor2,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  user.photo1 != null ? "+1" : "0",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                    ],
                   ),
                 ),
+
               if (user.profilesetting?.photoShow == 1 &&
                   user.photorequeststatus == null &&
                   user.photorequestcheck == false)
@@ -1445,19 +1635,49 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                           PhotoSliderDialog(photos: photosmatchblur),
                     );
                   },
-                  child: Image.asset(
-                    'assets/images/imagecount.png',
-                    height: 40,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        user.gender == "Male"
-                            ? "assets/images/no-image-male2.jpg"
-                            : "assets/images/no-image-female2.jpg",
-                        fit: BoxFit.contain,
-                      );
-                    },
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Image.asset(
+                        'assets/images/imagecount.png',
+                        height: 35,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            height: 35,
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+                      user.photo1 == null
+                          ? SizedBox()
+                          : Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                height: 16,
+                                width: 16,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: ColorResources.primarycolor2,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  user.photo1 == null ? "" : "+1",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                    ],
                   ),
                 ),
+
               if (user.profilesetting?.photoShow == 1 &&
                   user.photorequeststatus == null &&
                   user.photorequestcheck == true)
@@ -1471,19 +1691,49 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                           PhotoSliderDialog(photos: photosmatchblur),
                     );
                   },
-                  child: Image.asset(
-                    'assets/images/imagecount.png',
-                    height: 40,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        user.gender == "Male"
-                            ? "assets/images/no-image-male2.jpg"
-                            : "assets/images/no-image-female2.jpg",
-                        fit: BoxFit.contain,
-                      );
-                    },
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Image.asset(
+                        'assets/images/imagecount.png',
+                        height: 35,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            height: 35,
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+                      user.photo1 == null
+                          ? SizedBox()
+                          : Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                height: 16,
+                                width: 16,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: ColorResources.primarycolor2,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  user.photo1 != null ? "+1" : "0",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                    ],
                   ),
                 ),
+
               if (user.profilesetting?.photoShow == 1 &&
                   user.photorequeststatus == 1 &&
                   user.photorequestcheck == true)
@@ -1496,30 +1746,69 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                       builder: (_) => PhotoSliderDialog(photos: photosmatch),
                     );
                   },
-                  child: Image.asset(
-                    'assets/images/imagecount.png',
-                    height: 40,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        user.gender == "Male"
-                            ? "assets/images/no-image-male2.jpg"
-                            : "assets/images/no-image-female2.jpg",
-                        fit: BoxFit.contain,
-                      );
-                    },
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Image.asset(
+                        'assets/images/imagecount.png',
+                        height: 35,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            user.gender == "Male"
+                                ? "assets/images/no-image-male2.jpg"
+                                : "assets/images/no-image-female2.jpg",
+                            height: 35,
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+                      user.photo1 == null
+                          ? SizedBox()
+                          : Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                height: 16,
+                                width: 16,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: ColorResources.primarycolor2,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  user.photo1 != null ? "+1" : "0",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                    ],
                   ),
                 ),
 
               SizedBox(width: 20),
-              GestureDetector(
-                onTap: () {
-                  showFirstPopup(context);
-                },
-                child: Image.asset(
-                  'assets/images/toggle-button.png',
-                  height: 35,
-                ),
-              ),
+              user.selfintroductionvideo == null
+                  ? SizedBox()
+                  : GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return VideoDialog(
+                              videoUrl:
+                                  "${ApiConstants.imageurl}${user.selfintroductionvideo}",
+                            );
+                          },
+                        );
+                      },
+                      child: Image.asset(
+                        'assets/images/Frame 84.png',
+                        height: 35,
+                      ),
+                    ),
             ],
           ),
         ),
@@ -1783,23 +2072,33 @@ class _UserProfileDetailsPageState extends State<UserProfileDetailsPage> {
                   ),
                 ),
                 if (user.profilesetting == null)
-                  Text(
-                    (key2 == "Date of Birth") ? "Request DOB" : val2,
-                    style: opensansSemiBold.copyWith(
-                      fontSize: 13,
-                      color: (key2 == "Date of Birth")
-                          ? ColorResources.primarycolor2
-                          : ColorResources.blacktext,
+                  GestureDetector(
+                    onTap: () {
+                      sentCtrl.senddobrequest(user.id.toString());
+                    },
+                    child: Text(
+                      val2,
+                      style: opensansSemiBold.copyWith(
+                        fontSize: 13,
+                        color: (key2 == "Date of Birth")
+                            ? ColorResources.primarycolor2
+                            : ColorResources.blacktext,
+                      ),
                     ),
                   ),
                 if (user.profilesetting?.dateOfBirthShow == 2)
-                  Text(
-                    (key2 == "Date of Birth") ? "Request DOB" : val2,
-                    style: opensansSemiBold.copyWith(
-                      fontSize: 13,
-                      color: (key2 == "Date of Birth")
-                          ? ColorResources.primarycolor2
-                          : ColorResources.blacktext,
+                  GestureDetector(
+                    onTap: () {
+                      sentCtrl.senddobrequest(user.id.toString());
+                    },
+                    child: Text(
+                      (key2 == "Date of Birth") ? "Request DOB" : val2,
+                      style: opensansSemiBold.copyWith(
+                        fontSize: 13,
+                        color: (key2 == "Date of Birth")
+                            ? ColorResources.primarycolor2
+                            : ColorResources.blacktext,
+                      ),
                     ),
                   ),
                 if (user.profilesetting?.dateOfBirthShow == 1 &&

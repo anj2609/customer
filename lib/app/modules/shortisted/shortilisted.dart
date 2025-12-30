@@ -84,10 +84,10 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
     final u = usercontroller.userData.value!;
 
     return Scaffold(
-      key: _scaffoldKey,
+      // key: _scaffoldKey,
       backgroundColor: Colors.white,
-      drawer: CustomAppDrawer(),
 
+      // drawer: CustomAppDrawer(),
       body: Stack(
         children: [
           SafeArea(
@@ -308,7 +308,18 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
 
                                             // DETAILS L1
                                             Text(
-                                              "• $age, ${user.height}” • ${user.religion?.name ?? ""} • ${user.subCaste?.name ?? ""} • ${user.manglik ?? ""}",
+                                              "• $age, ${(() {
+                                                final raw = user.height;
+                                                if (raw == null || raw.toString().isEmpty) return "";
+
+                                                final value = double.tryParse(raw.toString());
+                                                if (value == null) return raw.toString();
+
+                                                final ft = value.floor();
+                                                final inch = ((value - ft) * 12).round();
+
+                                                return "$ft ft $inch in";
+                                              })()} • ${user.religion?.name ?? ""} • ${user.subCaste?.name ?? ""}",
                                               style: opensansMedium.copyWith(
                                                 color: Colors.white,
                                                 fontSize: 12,
@@ -317,7 +328,41 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
 
                                             // DETAILS L2
                                             Text(
-                                              "• ${user.occupation?.name ?? ""} • Earns ₹${user.annualIncome ?? ""} Lacs p.a • ${user.locState?.name ?? ""}",
+                                              "• ${user.occupation?.name ?? ""} • Earns ₹${(() {
+                                                final income = user.annualIncome;
+                                                if (income == null || income.toString().isEmpty) return "0";
+
+                                                final str = income.toString();
+
+                                                // Range case: e.g. 700000-1000000
+                                                if (str.contains('-')) {
+                                                  final parts = str.split('-');
+
+                                                  String fmt(int v) {
+                                                    if (v >= 10000000) {
+                                                      return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                                    } else if (v >= 100000) {
+                                                      return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                                    } else if (v >= 1000) {
+                                                      return "${(v / 1000).toStringAsFixed(0)} K";
+                                                    }
+                                                    return v.toString();
+                                                  }
+
+                                                  return "${fmt(int.tryParse(parts[0]) ?? 0)}–${fmt(int.tryParse(parts[1]) ?? 0)}";
+                                                }
+
+                                                // Single value
+                                                final v = int.tryParse(str) ?? 0;
+                                                if (v >= 10000000) {
+                                                  return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                                } else if (v >= 100000) {
+                                                  return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                                } else if (v >= 1000) {
+                                                  return "${(v / 1000).toStringAsFixed(0)} K";
+                                                }
+                                                return v.toString();
+                                              })()} p.a • ${user.locState?.name ?? ""}",
                                               style: opensansMedium.copyWith(
                                                 color: Colors.white,
                                                 fontSize: 12,
@@ -514,7 +559,7 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
 
   Widget _buildTopBar(double width) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -524,12 +569,13 @@ class _ShortlistedScreenState extends State<ShortlistedScreen> {
             children: [
               GestureDetector(
                 onTap: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  Get.back();
+                  // _scaffoldKey.currentState?.openDrawer();
                 },
                 child: Icon(
-                  Icons.menu,
+                  Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 28,
+                  size: 25,
                 ),
               ),
             ],

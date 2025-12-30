@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/check_percentage.dart';
 import 'package:vivashri/data/controller/eductiondrop.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
 import 'package:vivashri/data/controller/occupation.dart';
@@ -490,12 +492,16 @@ class _EditEducationDetailsScreenState
     );
   }
 
+  final checkpercentagecontroller = Get.put(CheckProfileController());
+
   Widget _buttons() {
     return Row(
       children: [
         Expanded(
           child: GestureDetector(
-            onTap: () {
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              String? profileid = prefs.getString("profileid");
               print('data:::::$bcaaaa');
               stapercontroller.updateedcuationdetailss(
                 formData: {
@@ -508,9 +514,13 @@ class _EditEducationDetailsScreenState
                   // "school_name": bachelorCollege.text,
                   // "other_education": otherEducationDetails.text,
                 },
-              );  Future.delayed(const Duration(microseconds: 1000), () {
-                Get.back();
-              });
+              );
+              await Future.delayed(const Duration(milliseconds: 500));
+              await checkpercentagecontroller.checkProfileComplete(
+                profileid.toString(),
+              );
+
+              Get.back();
             },
             child: Container(
               height: 45,

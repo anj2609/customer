@@ -51,7 +51,7 @@ class _ChatScreenState extends State<ChatScreen>
   // --------------------- TOP BAR ---------------------------------
   Widget _buildTopBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,

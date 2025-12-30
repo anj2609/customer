@@ -24,6 +24,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
   StaperfromController stapercontroller = Get.put(StaperfromController());
   final usercontroller = Get.put(UserDetailController());
   bool deshboard = true;
+  final TextEditingController mobileController = TextEditingController();
 
   @override
   void initState() {
@@ -44,6 +45,8 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
     usercontroller.fetchUserDetail(profileid.toString());
   }
 
+  bool isEmailReadOnly = false;
+  bool isMobileReadOnly = false;
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
@@ -76,7 +79,20 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                   }
 
                   final data = usercontroller.userData.value!;
+                  final email = data.email ?? "";
+                  final mobile = data.mobile ?? "";
 
+                  if (email.isNotEmpty && mobile.isEmpty) {
+                    // ✅ Email aayi, Mobile nahi
+                    emailController.text = email;
+                    isEmailReadOnly = true;
+                    isMobileReadOnly = false;
+                  } else if (mobile.isNotEmpty && email.isEmpty) {
+                    // ✅ Mobile aaya, Email nahi
+                    mobileController.text = mobile;
+                    isMobileReadOnly = true;
+                    isEmailReadOnly = false;
+                  }
                   return Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.only(left: 15, right: 15),
@@ -84,10 +100,16 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _label("Contact Number:"),
-                          _readOnlyBox("+91 ${data.mobile ?? ""}"),
+                          _mobileField(),
 
-                          _emailWithOtp(),
+                          // SizedBox(height: 15),
+                          _label("Contact Email Address:"),
+                          _emailField(),
 
+                          // _label("Contact Number:"),
+                          // _readOnlyBox("+91 ${data.mobile ?? ""}"),
+
+                          // _emailWithOtp(),
                           _label1("Insagram Id:"),
                           _inputField(controller: instgramidController),
 
@@ -228,34 +250,64 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                if (emailController.text.isEmpty) {
-                  Get.snackbar(
-                    'Error',
-                    'Please Enter Your Email Address',
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
-                  );
-                } else if (!emailController.text.contains("@")) {
-                  Get.snackbar(
-                    'Error',
-                    'Email must contain @',
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
-                  );
-                } else {
-                  stapercontroller.conectdetailsProfile(
-                    formData: {
-                      "contact_no": widget.mobileemail,
-                      "contact_email": emailController.text.trim(),
-                      "instagram": instgramidController.text.trim(),
-                      "facebook": facebookController.text,
-                      "reference": selectedReference,
-                      "reference_other": otherController.text.trim(),
-                      "app_step": '2',
-                      "step": '2',
-                    },
-                  );
+                if (!isEmailReadOnly) {
+                  if (emailController.text.trim().isEmpty) {
+                    Get.snackbar(
+                      'Error',
+                      'Please enter your email address',
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  } else if (!emailController.text.contains("@")) {
+                    Get.snackbar(
+                      'Error',
+                      'Please enter a valid email address',
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
                 }
+
+                if (!isMobileReadOnly) {
+                  if (mobileController.text.trim().isEmpty) {
+                    Get.snackbar(
+                      'Error',
+                      'Please enter your mobile number',
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  } else if (mobileController.text.length != 10) {
+                    Get.snackbar(
+                      'Error',
+                      'Mobile number must be 10 digits',
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
+                }
+
+                stapercontroller.conectdetailsProfile(
+                  formData: {
+                    "contact_no": isMobileReadOnly
+                        ? mobileController.text
+                        : mobileController.text.trim(),
+
+                    "contact_email": isEmailReadOnly
+                        ? emailController.text
+                        : emailController.text.trim(),
+
+                    "instagram": instgramidController.text.trim(),
+                    "facebook": facebookController.text.trim(),
+                    "reference": selectedReference,
+                    "reference_other": otherController.text.trim(),
+                    "app_step": '2',
+                    "step": '2',
+                  },
+                );
               },
 
               child: Column(
@@ -390,6 +442,40 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
     );
   }
 
+  Widget _mobileField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // _label("Contact Number:"),
+        TextField(
+          controller: mobileController,
+          keyboardType: TextInputType.phone,
+          readOnly: isMobileReadOnly,
+          maxLength: 10,
+          decoration: _decoration(
+            //  hint: "Enter Mobile Number",
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _emailField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // _label("Contact Email Address:"),
+        TextField(
+          controller: emailController,
+          readOnly: isEmailReadOnly,
+          decoration: _decoration(
+            // hint: "Enter Email",
+          ),
+        ),
+      ],
+    );
+  }
+
   // ---------------- DROPDOWN ----------------
 
   Widget _dropdownBox({
@@ -444,35 +530,66 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              if (emailController.text.isEmpty) {
-                Get.snackbar(
-                  'Error',
-                  'Please Enter Your Email Address',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else if (!emailController.text.contains("@")) {
-                Get.snackbar(
-                  'Error',
-                  'Email must contain @',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              } else {
-                stapercontroller.conectdetailsProfile(
-                  formData: {
-                    "contact_no": numberemaild,
-                    "contact_email": emailController.text.trim(),
-                    "instagram": instgramidController.text.trim(),
-                    "facebook": facebookController.text,
-                    "reference": selectedReference,
-                    "reference_other": otherController.text.trim(),
-                    "app_step": '2',
-                    "step": '2',
-                  },
-                );
+              if (!isEmailReadOnly) {
+                if (emailController.text.trim().isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please enter your email address',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                  return;
+                } else if (!emailController.text.contains("@")) {
+                  Get.snackbar(
+                    'Error',
+                    'Please enter a valid email address',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                  return;
+                }
               }
+
+              if (!isMobileReadOnly) {
+                if (mobileController.text.trim().isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please enter your mobile number',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                  return;
+                } else if (mobileController.text.length != 10) {
+                  Get.snackbar(
+                    'Error',
+                    'Mobile number must be 10 digits',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                  return;
+                }
+              }
+
+              stapercontroller.conectdetailsProfile(
+                formData: {
+                  "contact_no": isMobileReadOnly
+                      ? mobileController.text
+                      : mobileController.text.trim(),
+
+                  "contact_email": isEmailReadOnly
+                      ? emailController.text
+                      : emailController.text.trim(),
+
+                  "instagram": instgramidController.text.trim(),
+                  "facebook": facebookController.text.trim(),
+                  "reference": selectedReference,
+                  "reference_other": otherController.text.trim(),
+                  "app_step": '2',
+                  "step": '2',
+                },
+              );
             },
+
             child: Container(
               height: 45,
               alignment: Alignment.center,
@@ -500,6 +617,7 @@ class _ContactDetailsScreenState extends State<ContactDetailsScreen> {
 
   InputDecoration _decoration() {
     return InputDecoration(
+      counterText: '',
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),

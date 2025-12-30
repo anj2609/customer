@@ -117,7 +117,7 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
 
   Widget _buildTopBar(double width) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -128,12 +128,11 @@ class _BasicSearchPageState extends State<BasicSearchPage> {
               GestureDetector(
                 onTap: () {
                   Get.back();
-                  //  _scaffoldKey.currentState?.openDrawer();
                 },
                 child: Icon(
                   Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 22,
+                  size: 24
                 ),
               ),
             ],

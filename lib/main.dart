@@ -250,6 +250,7 @@ class _MyAppState extends State<MyApp> {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: Get.key,
+
       title: AppConstants.appName,
       initialRoute: RouteHelper.getSplashRoute(),
       getPages: RouteHelper.routes,

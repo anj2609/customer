@@ -61,9 +61,9 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      key: _scaffoldKey,
+      //  key: _scaffoldKey,
 
-      drawer: CustomAppDrawer(),
+      // drawer: CustomAppDrawer(),
       backgroundColor: Colors.white,
       body: Obx(() {
         return Stack(
@@ -154,7 +154,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
   // ------------------ TOP BAR -----------------------
   Widget _buildTopBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -164,17 +164,32 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
             children: [
               GestureDetector(
                 onTap: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  Get.back();
                 },
                 child: Icon(
-                  Icons.menu,
+                  Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 28,
+                  size: 24,
                 ),
               ),
             ],
           ),
 
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.start,
+          //   children: [
+          //     GestureDetector(
+          //       onTap: () {
+          //         _scaffoldKey.currentState?.openDrawer();
+          //       },
+          //       child: Icon(
+          //         Icons.menu,
+          //         color: ColorResources.blackcolor11,
+          //         size: 28,
+          //       ),
+          //     ),
+          //   ],
+          // ),
           Container(
             padding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
             decoration: BoxDecoration(
@@ -722,27 +737,73 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
 
                       const SizedBox(height: 4),
 
-                      Text(
-                        "• $myage, ${u.height ?? ''}   "
-                        "• ${u.religion?.name ?? ''}   "
-                        "• ${u.subCaste?.name ?? ''}   "
-                        "• ${u.manglik ?? ''}   "
-                        "• ${u.highestDegree?.name ?? ''}",
-                        style: opensansSemiBold.copyWith(
-                          color: Colors.white,
-                          fontSize: 11,
-                        ),
-                      ),
+                    Text(
+  "• $myage, ${(() {
+    final raw = u.height;
+    if (raw == null || raw.toString().isEmpty) return "";
+
+    final value = double.tryParse(raw.toString());
+    if (value == null) return raw.toString();
+
+    final ft = value.floor();
+    final inch = ((value - ft) * 12).round();
+
+    return "$ft ft $inch in";
+  })()}   "
+  "• ${u.religion?.name ?? ''}   "
+  "• ${u.subCaste?.name ?? ''}   "
+  "• ${u.manglik ?? ''}   "
+  "• ${u.highestDegree?.name ?? ''}",
+  style: opensansSemiBold.copyWith(
+    color: Colors.white,
+    fontSize: 11,
+  ),
+),
 
                       u.occupation == null || u.annualIncome == null
                           ? SizedBox()
                           : Text(
-                              "• ${u.occupation!.name}   • Earns ₹${u.annualIncome} p.a ",
-                              style: opensansSemiBold.copyWith(
-                                color: Colors.white,
-                                fontSize: 11,
-                              ),
-                            ),
+  "• ${u.occupation!.name}   • Earns ₹${(() {
+    final income = u.annualIncome;
+    if (income == null || income.toString().isEmpty) return "0";
+
+    final str = income.toString();
+
+    // Range case (e.g. 700000-1000000)
+    if (str.contains('-')) {
+      final parts = str.split('-');
+
+      String fmt(int v) {
+        if (v >= 10000000) {
+          return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+        } else if (v >= 100000) {
+          return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+        } else if (v >= 1000) {
+          return "${(v / 1000).toStringAsFixed(0)} K";
+        }
+        return v.toString();
+      }
+
+      return "${fmt(int.tryParse(parts[0]) ?? 0)}–${fmt(int.tryParse(parts[1]) ?? 0)}";
+    }
+
+    // Single value
+    final v = int.tryParse(str) ?? 0;
+    if (v >= 10000000) {
+      return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+    } else if (v >= 100000) {
+      return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+    } else if (v >= 1000) {
+      return "${(v / 1000).toStringAsFixed(0)} K";
+    }
+    return v.toString();
+  })()} p.a",
+  style: opensansSemiBold.copyWith(
+    color: Colors.white,
+    fontSize: 11,
+  ),
+),
+
                     ],
                   ),
                 ),
@@ -772,7 +833,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
               GestureDetector(
                 onTap: () {
                   Get.to(
-                    MembershipPlansPage(),
+                    MembershipPlansPage(hidenav: "Hide",),
                     duration: Duration(
                       milliseconds: ApiConstants.screenTransitionTime,
                     ),
@@ -1029,7 +1090,12 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
               "Height Range",
               (u.height == null || u.height.toString().isEmpty)
                   ? "N/A"
-                  : "${u.height}",
+                  : (() {
+                      double h = double.tryParse(u.height.toString()) ?? 0;
+                      int feet = h.floor();
+                      int inches = ((h - feet) * 12).round();
+                      return "$feet ft $inches in";
+                    })(),
             ],
 
             [
@@ -1061,7 +1127,7 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
               "Weight",
               (u.weight == null || u.weight.toString().isEmpty)
                   ? "N/A"
-                  : "${u.weight}",
+                  : "${double.tryParse(u.weight.toString()) ?? u.weight} kg",
             ],
 
             [
@@ -1134,7 +1200,23 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
           fields: [
             [
               "Annual Income",
-              (u.annualIncome ?? 'N/A'),
+              (u.annualIncome == null || u.annualIncome.toString().isEmpty)
+                  ? "N/A"
+                  : (() {
+                      double income =
+                          double.tryParse(u.annualIncome.toString()) ?? 0;
+
+                      if (income >= 10000000) {
+                        return "${(income / 10000000).toStringAsFixed(1)} Cr";
+                      } else if (income >= 100000) {
+                        return "${(income / 100000).round()} Lakh";
+                      } else if (income >= 1000) {
+                        return "${(income / 1000).round()}k";
+                      } else {
+                        return income.toStringAsFixed(0);
+                      }
+                    })(),
+
               "Working With",
               u.workingWith == null ? "N/A" : (u.workingWith!.name ?? 'N/A'),
             ],
@@ -1442,9 +1524,12 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
                   : "${u.partnerAgeFrom}-${u.partnerAgeTo}",
 
               "Body Weight",
-              (u.partnerWeightFrom == null || u.partnerWeightTo == null)
+              (u.partnerWeightFrom == null ||
+                      u.partnerWeightTo == null ||
+                      u.partnerWeightFrom.toString().isEmpty ||
+                      u.partnerWeightTo.toString().isEmpty)
                   ? "N/A"
-                  : "${u.partnerWeightFrom}-${u.partnerWeightTo}",
+                  : "${u.partnerWeightFrom} kg - ${u.partnerWeightTo} kg",
             ],
 
             [
@@ -1452,7 +1537,16 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
               (partnermatiral.isEmpty) ? "N/A" : partnermatiral,
 
               "Height Range",
-              (u.partnerHeightFrom == null) ? "N/A" : "${u.partnerHeightFrom}",
+              (u.partnerHeightFrom == null ||
+                      u.partnerHeightFrom.toString().isEmpty)
+                  ? "N/A"
+                  : (() {
+                      double h =
+                          double.tryParse(u.partnerHeightFrom.toString()) ?? 0;
+                      int feet = h.floor();
+                      int inches = ((h - feet) * 12).round();
+                      return "$feet ft $inches in";
+                    })(),
             ],
 
             [
@@ -1524,9 +1618,28 @@ class _MyProfielScreenState extends State<MyProfielScreen> {
 
             [
               "Annual Income Range",
-              (u.partnerIncomeFrom == null || u.partnerIncomeTo == null)
+              (u.partnerIncomeFrom == null ||
+                      u.partnerIncomeTo == null ||
+                      u.partnerIncomeFrom.toString().isEmpty ||
+                      u.partnerIncomeTo.toString().isEmpty)
                   ? "N/A"
-                  : "${u.partnerIncomeFrom}-${u.partnerIncomeTo}",
+                  : (() {
+                      String formatIncome(dynamic val) {
+                        double income = double.tryParse(val.toString()) ?? 0;
+
+                        if (income >= 10000000) {
+                          return "${(income / 10000000).toStringAsFixed(1)} Cr";
+                        } else if (income >= 100000) {
+                          return "${(income / 100000).round()} Lakh";
+                        } else if (income >= 1000) {
+                          return "${(income / 1000).round()}k";
+                        } else {
+                          return income.toStringAsFixed(0);
+                        }
+                      }
+
+                      return "${formatIncome(u.partnerIncomeFrom)} - ${formatIncome(u.partnerIncomeTo)}";
+                    })(),
 
               "Work As",
               u.partnerWorkingAs == null || u.partnerWorkingAs!.name == null

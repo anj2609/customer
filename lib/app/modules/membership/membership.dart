@@ -11,7 +11,8 @@ import 'package:vivashri/data/controller/userprofile.dart';
 import 'package:vivashri/widgets/drawer.dart';
 
 class MembershipPlansPage extends StatefulWidget {
-  const MembershipPlansPage({super.key});
+  String? hidenav;
+  MembershipPlansPage({super.key, this.hidenav});
 
   @override
   _MembershipPlansPageState createState() => _MembershipPlansPageState();
@@ -502,26 +503,42 @@ class _MembershipPlansPageState extends State<MembershipPlansPage> {
 
   Widget _buildTopBar(double width) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  _scaffoldKey.currentState?.openDrawer();
-                },
-                child: Icon(
-                  Icons.menu,
-                  color: ColorResources.blackcolor11,
-                  size: 28,
+          widget.hidenav == "Hide"
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Get.back();
+                      },
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        color: ColorResources.blackcolor11,
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        _scaffoldKey.currentState?.openDrawer();
+                      },
+                      child: Icon(
+                        Icons.menu,
+                        color: ColorResources.blackcolor11,
+                        size: 28,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
 
           Container(
             padding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),

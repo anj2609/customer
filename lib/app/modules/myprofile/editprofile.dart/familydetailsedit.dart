@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/check_percentage.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 
@@ -61,7 +63,7 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
     marriedBrother = u.marriedBrother.toString();
     noOfSisterInLaw = u.noOfSisterInLaw.toString();
     noOfBrotherInLaw = u.noOfBrotherInLaw.toString();
-    // totalFamilyMember = u.fa
+    totalFamilyMember = u.totalfamily.toString();
 
     setState(() {});
   }
@@ -154,7 +156,24 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
                     _label("Total Family Member:"),
                     _dropdown(
                       value: totalFamilyMember,
-                      items: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+                      items: [
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "10",
+                        "11",
+                        "12",
+                        "13",
+                        "14",
+                        "15",
+                      ],
                       onChanged: (v) => setState(() => totalFamilyMember = v),
                     ),
                     const SizedBox(height: 30),
@@ -327,13 +346,17 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
     );
   }
 
+  final checkpercentagecontroller = Get.put(CheckProfileController());
+
   Widget _buttons() {
     return Row(
       children: [
         Expanded(
           child: GestureDetector(
-            onTap: () {
-              stapercontroller.updatepartnerotherdetails(
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              String? profileid = prefs.getString("profileid");
+              await stapercontroller.updatepartnerotherdetails(
                 formData: {
                   "family_type": familyType,
                   "family_value": familyValue,
@@ -343,12 +366,15 @@ class _EditFamilyDetailsScreenState extends State<EditFamilyDetailsScreen> {
                   "married_brother": marriedBrother,
                   "no_of_sister_in_law": noOfSisterInLaw,
                   "no_of_brother_in_law": noOfBrotherInLaw,
-                  // "total_family": totalFamilyMember,
+                  "total_family": totalFamilyMember,
                 },
               );
-              Future.delayed(const Duration(microseconds: 1000), () {
-                Get.back();
-              });
+              await Future.delayed(const Duration(milliseconds: 500));
+              await checkpercentagecontroller.checkProfileComplete(
+                profileid.toString(),
+              );
+
+              Get.back();
             },
             child: Container(
               height: 45,

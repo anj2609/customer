@@ -2,8 +2,10 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/check_percentage.dart';
 import 'package:vivashri/data/controller/complecxion.dart';
 import 'package:vivashri/data/controller/fromcontroller.dart';
 import 'package:vivashri/data/controller/looking_for_controller.dart';
@@ -877,11 +879,15 @@ class _EditBasicDetailsScreenState extends State<EditBasicDetailsScreen> {
     );
   }
 
+  final checkpercentagecontroller = Get.put(CheckProfileController());
+
   // ---------------- CONTINUE BUTTON ----------------
 
   Widget _continueButton() {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        final prefs = await SharedPreferences.getInstance();
+        String? profileid = prefs.getString("profileid");
         stapercontroller.updateedcuationdetailss(
           formData: {
             "profile_for": lookingC.selectedId.value,
@@ -905,9 +911,12 @@ class _EditBasicDetailsScreenState extends State<EditBasicDetailsScreen> {
           },
           ///////////////////// mobilenumber: widget.mobielemild,
         );
-        Future.delayed(const Duration(microseconds: 1000), () {
-          Get.back();
-        });
+        await Future.delayed(const Duration(milliseconds: 500));
+        await checkpercentagecontroller.checkProfileComplete(
+          profileid.toString(),
+        );
+
+        Get.back();
       },
       child: Container(
         height: 45,

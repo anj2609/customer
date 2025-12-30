@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
+import 'package:vivashri/app/modules/Deshboard/record_video.dart';
 import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/match/matchscreen.dart';
 import 'package:vivashri/app/modules/match/userprofile.dart';
@@ -76,6 +79,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     inboxCtrl.fetchInboxData();
     checkpercentagecontroller.checkProfileComplete(profileid.toString());
   }
+
+  final checkcontroller = Get.put(CheckProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +365,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
               child: Container(
                 width: w * 0.25,
-                height: w * 0.30,
+                height: w * 0.25,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
@@ -397,529 +402,586 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                GestureDetector(
-                  onTap: () async {
-                    final prefs = await SharedPreferences.getInstance();
-
-                    String? profileid = prefs.getString("profileid");
-                    checkpercentagecontroller.checkProfileComplete(
-                      profileid.toString(),
-                    );
-                    Get.to(
-                      MyProfielScreen(),
-                      duration: Duration(
-                        milliseconds: ApiConstants.screenTransitionTime,
-                      ),
-                      transition: Transition.rightToLeft,
-                    );
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          "${u.name![0].toUpperCase()}${u.name!.substring(1).toLowerCase()}",
-                          style: opensansSemiBold.copyWith(fontSize: 15),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-
-                      const SizedBox(width: 6),
-                      u.aadhaarno == null
-                          ? Icon(Icons.verified, color: Colors.grey, size: 15)
-                          : Icon(Icons.verified, color: Colors.green, size: 15),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 4),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        Clipboard.setData(
-                          ClipboardData(text: u.profileId ?? ""),
-                        );
-                      },
-                      child: Text(
-                        "${u.profileId}",
-                        style: opensansSemiBold.copyWith(
-                          color: ColorResources.blackgrey,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-
-                    // SizedBox(width: 5),
-                    GestureDetector(
-                      onTap: () {
-                        Get.to(
-                          MyProfielScreen(),
-                          duration: Duration(
-                            milliseconds: ApiConstants.screenTransitionTime,
-                          ),
-                          transition: Transition.rightToLeft,
-                        );
-                      },
-                      child: Image.asset(
-                        'assets/images/profileicon.png',
-                        height: 20,
-                      ),
-                    ),
-
-                    GestureDetector(
-                      onTap: () async {
-                        final prefs = await SharedPreferences.getInstance();
-
-                        String? profileid = prefs.getString("profileid");
-                        checkpercentagecontroller.checkProfileComplete(
-                          profileid.toString(),
-                        );
-                        Get.to(
-                          MyProfielScreen(),
-                          duration: Duration(
-                            milliseconds: ApiConstants.screenTransitionTime,
-                          ),
-                          transition: Transition.rightToLeft,
-                        );
-                      },
-                      child: Text(
-                        "My Profile",
-                        style: opensansSemiBold.copyWith(
-                          color: ColorResources.primarycolor3,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-
-                GestureDetector(
-                  onTap: () {
-                    if (u.height == null) {
-                      Get.to(
-                        EditBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.weight == null) {
-                      Get.to(
-                        EditBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.manglik == null || u.manglik == "") {
-                      Get.to(
-                        EditBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.about!.isEmpty) {
-                      Get.to(
-                        EditBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.complexion == null) {
-                      Get.to(
-                        EditBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.disability == null || u.disability == "") {
-                      Get.to(
-                        EditBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.healthInformation == null ||
-                        u.healthInformation == "") {
-                      Get.to(
-                        EditBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.bloodGroup == null || u.bloodGroup == "") {
-                      Get.to(
-                        EditBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.birthCity == null) {
-                      Get.to(
-                        HoroscropeEdit(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.birthState == null) {
-                      Get.to(
-                        HoroscropeEdit(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.contactNo == null) {
-                      Get.to(
-                        EditContectScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.contactEmail == null) {
-                      Get.to(
-                        EditContectScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    }
-                    //
-                    else if (u.religion == null) {
-                    } else if (u.caste == null) {
-                    } else if (u.locNationality == null) {
-                      Get.to(
-                        EditLocationScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.locCity == null) {
-                      Get.to(
-                        EditLocationScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    }
-                    //
-                    else if (u.locState == null) {
-                      Get.to(
-                        EditLocationScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.locPincode == null) {
-                      Get.to(
-                        EditLocationScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.familyType == null) {
-                      Get.to(
-                        EditFamilyDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.familyValue == null) {
-                      Get.to(
-                        EditFamilyDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.noOfSister == null) {
-                      Get.to(
-                        EditFamilyDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.noOfBrother == null) {
-                      Get.to(
-                        EditFamilyDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.highestDegree == null) {
-                      Get.to(
-                        EditEducationDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.annualIncome == null) {
-                      Get.to(
-                        EditProfessionalDetails(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    }
-                    //
-                    else if (u.workingWith == null) {
-                      Get.to(
-                        EditProfessionalDetails(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.occupation == null) {
-                      Get.to(
-                        EditProfessionalDetails(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.organizationName == null) {
-                      Get.to(
-                        EditProfessionalDetails(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.hobbies.isEmpty) {
-                      Get.to(
-                        EditHobbies(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    }
-                    //
-                    else if (u.partnerAgeFrom == null) {
-                      Get.to(
-                        EditPartnerBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerAgeTo == null) {
-                      Get.to(
-                        EditPartnerBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerHeightFrom == null) {
-                      Get.to(
-                        EditPartnerBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerHeightTo == null) {
-                      Get.to(
-                        EditPartnerBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerWeightFrom == null) {
-                      Get.to(
-                        EditPartnerBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerWeightTo == null) {
-                      Get.to(
-                        EditPartnerBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerMaritalStatus.isEmpty) {
-                      Get.to(
-                        EditPartnerBasicDetailsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerCountry == null) {
-                      Get.to(
-                        EditPartnerlocation(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerCity == null) {
-                      Get.to(
-                        EditPartnerlocation(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerState == null) {
-                      Get.to(
-                        EditPartnerlocation(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    }
-                    //
-                    else if (u.partnerEducation == null) {
-                      Get.to(
-                        Editpartnereduction(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerOccupation == null) {
-                      Get.to(
-                        Editpartnereduction(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerIncomeFrom == null) {
-                      Get.to(
-                        Editpartnereduction(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerIncomeTo == null) {
-                      Get.to(
-                        Editpartnereduction(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerWorkingAs == null) {
-                      Get.to(
-                        Editpartnereduction(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerDiet == null) {
-                      Get.to(
-                        Editpartnereditother(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerDrinking == null) {
-                      Get.to(
-                        Editpartnereditother(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerSmoking == null) {
-                      Get.to(
-                        Editpartnereditother(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else if (u.partnerManagedBy == null) {
-                      Get.to(
-                        Editpartnereditother(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    } else {}
-                  },
-                  child: Container(
-                    height: 15,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: Stack(
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            return Container(
-                              width: constraints.maxWidth * percent,
-                              decoration: BoxDecoration(
-                                color: ColorResources.primarycolor3,
-                                borderRadius: BorderRadius.circular(50),
+                        GestureDetector(
+                          onTap: () async {
+                            final prefs = await SharedPreferences.getInstance();
+
+                            String? profileid = prefs.getString("profileid");
+                            checkpercentagecontroller.checkProfileComplete(
+                              profileid.toString(),
+                            );
+                            Get.to(
+                              MyProfielScreen(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
                               ),
+                              transition: Transition.rightToLeft,
                             );
                           },
-                        ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  "${u.name![0].toUpperCase()}${u.name!.substring(1).toLowerCase()}",
+                                  style: opensansSemiBold.copyWith(
+                                    fontSize: 15,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
 
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 0),
-                            child: Text(
-                              percentText, // e.g. "75%"
-                              style: opensansSemiBold.copyWith(
-                                color: _getPercentColor(percentText),
-                                fontSize: 10,
+                              const SizedBox(width: 6),
+                              // u.aadhaarno == null
+                              //     ?
+                              //      GestureDetector(
+                              //         onTap: () {
+                              //           showVerificationDialog(context);
+                              //         },
+                              //         child: Icon(
+                              //           Icons.verified,
+                              //           color: Colors.grey,
+                              //           size: 17,
+                              //         ),
+                              //       )
+                              //     :
+                              GestureDetector(
+                                onTap: () {
+                                  showVerificationDialog(context);
+                                },
+                                child: Icon(
+                                  Icons.verified,
+                                  color: Colors.grey,
+                                  size: 17,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: u.profileId ?? ""),
+                                );
+                              },
+                              child: Text(
+                                "${u.profileId}",
+                                style: opensansSemiBold.copyWith(
+                                  color: ColorResources.blackgrey,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
+
+                            // SizedBox(width: 5),
+                            GestureDetector(
+                              onTap: () {
+                                Get.to(
+                                  MyProfielScreen(),
+                                  duration: Duration(
+                                    milliseconds:
+                                        ApiConstants.screenTransitionTime,
+                                  ),
+                                  transition: Transition.rightToLeft,
+                                );
+                              },
+                              child: Image.asset(
+                                'assets/images/profileicon.png',
+                                height: 20,
+                              ),
+                            ),
+
+                            GestureDetector(
+                              onTap: () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+
+                                String? profileid = prefs.getString(
+                                  "profileid",
+                                );
+                                checkpercentagecontroller.checkProfileComplete(
+                                  profileid.toString(),
+                                );
+                                Get.to(
+                                  MyProfielScreen(),
+                                  duration: Duration(
+                                    milliseconds:
+                                        ApiConstants.screenTransitionTime,
+                                  ),
+                                  transition: Transition.rightToLeft,
+                                );
+                              },
+                              child: Text(
+                                "My Profile",
+                                style: opensansSemiBold.copyWith(
+                                  color: ColorResources.primarycolor3,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            if (u.height == null) {
+                              Get.to(
+                                EditBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.weight == null) {
+                              Get.to(
+                                EditBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.manglik == null || u.manglik == "") {
+                              Get.to(
+                                EditBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.about!.isEmpty) {
+                              Get.to(
+                                EditBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.complexion == null) {
+                              Get.to(
+                                EditBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.disability == null ||
+                                u.disability == "") {
+                              Get.to(
+                                EditBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.healthInformation == null ||
+                                u.healthInformation == "") {
+                              Get.to(
+                                EditBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.bloodGroup == null ||
+                                u.bloodGroup == "") {
+                              Get.to(
+                                EditBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.birthCity == null) {
+                              Get.to(
+                                HoroscropeEdit(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.birthState == null) {
+                              Get.to(
+                                HoroscropeEdit(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.contactNo == null) {
+                              Get.to(
+                                EditContectScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.contactEmail == null) {
+                              Get.to(
+                                EditContectScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            }
+                            //
+                            else if (u.religion == null) {
+                            } else if (u.caste == null) {
+                            } else if (u.locNationality == null) {
+                              Get.to(
+                                EditLocationScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.locCity == null) {
+                              Get.to(
+                                EditLocationScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            }
+                            //
+                            else if (u.locState == null) {
+                              Get.to(
+                                EditLocationScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.locPincode == null) {
+                              Get.to(
+                                EditLocationScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.familyType == null) {
+                              Get.to(
+                                EditFamilyDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.familyValue == null) {
+                              Get.to(
+                                EditFamilyDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.noOfSister == null) {
+                              Get.to(
+                                EditFamilyDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.noOfBrother == null) {
+                              Get.to(
+                                EditFamilyDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.highestDegree == null) {
+                              Get.to(
+                                EditEducationDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.annualIncome == null) {
+                              Get.to(
+                                EditProfessionalDetails(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            }
+                            //
+                            else if (u.workingWith == null) {
+                              Get.to(
+                                EditProfessionalDetails(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.occupation == null) {
+                              Get.to(
+                                EditProfessionalDetails(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.organizationName == null) {
+                              Get.to(
+                                EditProfessionalDetails(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.hobbies.isEmpty) {
+                              Get.to(
+                                EditHobbies(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            }
+                            //
+                            else if (u.partnerAgeFrom == null) {
+                              Get.to(
+                                EditPartnerBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerAgeTo == null) {
+                              Get.to(
+                                EditPartnerBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerHeightFrom == null) {
+                              Get.to(
+                                EditPartnerBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerHeightTo == null) {
+                              Get.to(
+                                EditPartnerBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerWeightFrom == null) {
+                              Get.to(
+                                EditPartnerBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerWeightTo == null) {
+                              Get.to(
+                                EditPartnerBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerMaritalStatus.isEmpty) {
+                              Get.to(
+                                EditPartnerBasicDetailsScreen(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerCountry == null) {
+                              Get.to(
+                                EditPartnerlocation(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerCity == null) {
+                              Get.to(
+                                EditPartnerlocation(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerState == null) {
+                              Get.to(
+                                EditPartnerlocation(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            }
+                            //
+                            else if (u.partnerEducation == null) {
+                              Get.to(
+                                Editpartnereduction(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerOccupation == null) {
+                              Get.to(
+                                Editpartnereduction(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerIncomeFrom == null) {
+                              Get.to(
+                                Editpartnereduction(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerIncomeTo == null) {
+                              Get.to(
+                                Editpartnereduction(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerWorkingAs == null) {
+                              Get.to(
+                                Editpartnereduction(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerDiet == null) {
+                              Get.to(
+                                Editpartnereditother(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerDrinking == null) {
+                              Get.to(
+                                Editpartnereditother(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerSmoking == null) {
+                              Get.to(
+                                Editpartnereditother(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else if (u.partnerManagedBy == null) {
+                              Get.to(
+                                Editpartnereditother(),
+                                duration: Duration(
+                                  milliseconds:
+                                      ApiConstants.screenTransitionTime,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } else {}
+                          },
+
+                          child: Container(
+                            decoration: BoxDecoration(shape: BoxShape.circle),
+                            child: (progressRing(
+                              checkcontroller.profileStatus.value!.completion,
+                            )),
                           ),
                         ),
                       ],
                     ),
-                  ),
+                    SizedBox(width: 20),
+                  ],
                 ),
 
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Image.asset('assets/images/Vector32.png', height: 15),
-
-                    SizedBox(width: 4),
-
-                    Flexible(
+                    Expanded(
                       child: GestureDetector(
-                        onTap: () async {
+                        onTap: () {
                           Get.to(
                             EditphotoesScreen(),
                             duration: Duration(
@@ -928,47 +990,164 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             transition: Transition.rightToLeft,
                           );
                         },
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            "Upload Photo",
-                            style: opensansSemiBold.copyWith(
-                              color: ColorResources.primarycolor3,
-                              fontSize: 13,
-                            ),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Image.asset(
+                            'assets/images/Group 371 2.png',
+                            height: 17,
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
                     ),
-
-                    SizedBox(width: 10),
-                    Image.asset(
-                      'assets/images/upload_svgrepo.com.png',
-                      height: 15,
-                    ),
-
-                    SizedBox(width: 4),
-
                     Expanded(
-                      child: FittedBox(
-                        alignment: Alignment.centerLeft,
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          "Record Short Intro",
-                          style: opensansSemiBold.copyWith(
-                            color: ColorResources.primarycolor3,
-                            fontSize: 13,
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.to(
+                            EnableCameraScreen(),
+                            duration: Duration(
+                              milliseconds: ApiConstants.screenTransitionTime,
+                            ),
+                            transition: Transition.rightToLeft,
+                          );
+                        },
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Image.asset(
+                            'assets/images/Group 370.png',
+                            // height: 19,
+                            fit: BoxFit.contain,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
+                    SizedBox(width: 5),
                   ],
                 ),
-                SizedBox(height: 10),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showVerificationDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => Center(
+        child: CupertinoPopupSurface(
+          isSurfacePainted: true,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Stack(
+              children: [
+                /// Main content
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Verification Status",
+                      style: opensansSemiBold.copyWith(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+
+                    _verificationRow("Aadhaar Verified", "40%"),
+                    _verificationRow("Police Verified", "20%"),
+                    _verificationRow("Education Verified", "10%"),
+                    _verificationRow("Income Verified", "20%"),
+                    _verificationRow("Caste Verified", "10%"),
+
+                    const SizedBox(height: 16),
+
+                    // SizedBox(
+                    //   height: 50,
+                    //   width: 200,
+                    //   child: CupertinoButton.filled(
+                    //     color: ColorResources.primarycolor2,
+                    //     child: const Text("OK"),
+                    //     onPressed: () => Navigator.pop(context),
+                    //   ),
+                    // ),
+                  ],
+                ),
+
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: CupertinoColors.systemGrey5,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.clear,
+                        size: 16,
+                        color: CupertinoColors.systemGrey,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _verificationRow(String title, String percent) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Icon(CupertinoIcons.info, color: Colors.orangeAccent, size: 18),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    title,
+                    style: opensansMedium.copyWith(fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Text('$percent', style: opensansMedium.copyWith(fontSize: 11)),
+              const SizedBox(width: 5),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemGrey5,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  "Pending",
+                  style: opensansMedium.copyWith(
+                    fontSize: 11,
+                    color: CupertinoColors.systemGrey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1047,7 +1226,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             () {
               inboxCtrl.fetchInboxData();
               Get.to(
-                () => ConnectScreen(initialIndex: 0),
+                () => ConnectScreen(initialIndex: 0, hidenav: "Hide"),
                 duration: Duration(
                   milliseconds: ApiConstants.screenTransitionTime,
                 ),
@@ -1063,7 +1242,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               inboxCtrl.acceptedbyme();
               inboxCtrl.acceptedbypartner();
               Get.to(
-                () => ConnectScreen(initialIndex: 1),
+                () => ConnectScreen(initialIndex: 1, hidenav: "Hide"),
                 duration: Duration(
                   milliseconds: ApiConstants.screenTransitionTime,
                 ),
@@ -1090,13 +1269,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
               inboxCtrl.pendinginboxdata();
               inboxCtrl.declinedinboxdata();
               Get.to(
-                () => ConnectScreen(initialIndex: 2),
+                () => ConnectScreen(initialIndex: 2, hidenav: "Hide"),
                 duration: Duration(
                   milliseconds: ApiConstants.screenTransitionTime,
                 ),
                 transition: Transition.rightToLeft,
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget progressRing(String percentText) {
+    double percentValue = 0.0;
+
+    try {
+      percentValue = (double.parse(percentText.replaceAll("%", "")) / 100)
+          .clamp(0.0, 1.0);
+    } catch (e) {
+      percentValue = 0.0;
+    }
+
+    // If 100% -> green, else pink
+    Color ringColor = percentValue == 1.0 ? Colors.green : Colors.pink;
+
+    return Container(
+      padding: const EdgeInsets.all(5),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 35,
+            height: 35,
+            child: CircularProgressIndicator(
+              value: percentValue,
+              strokeWidth: 3,
+              color: ringColor,
+              backgroundColor: Colors.grey.shade300,
+            ),
+          ),
+
+          Text(
+            percentText,
+            style: opensansBold.copyWith(fontSize: 9, color: Colors.black),
           ),
         ],
       ),
@@ -1143,13 +1364,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const Spacer(),
               GestureDetector(
                 onTap: () {
-                  Get.to(
-                    MembershipPlansPage(),
-                    duration: Duration(
-                      milliseconds: ApiConstants.screenTransitionTime,
-                    ),
+                  Get.offAll(
+                    () => const MainNavigation(initialIndex: 4),
                     transition: Transition.rightToLeft,
+                    duration: const Duration(milliseconds: 0),
                   );
+                  // Get.to(
+                  //   MembershipPlansPage(),
+                  //   duration: Duration(
+                  //     milliseconds: ApiConstants.screenTransitionTime,
+                  //   ),
+                  //   transition: Transition.rightToLeft,
+                  // );
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -1359,13 +1585,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Spacer(),
               GestureDetector(
                 onTap: () {
-                  Get.to(
-                    MatchesScreen(),
-                    duration: Duration(
-                      milliseconds: ApiConstants.screenTransitionTime,
-                    ),
+                  Get.offAll(
+                    MainNavigation(initialIndex: 1),
+                    duration: Duration(milliseconds: 0),
                     transition: Transition.rightToLeft,
                   );
+                  // Get.to(
+                  //   MatchesScreen(),
+                  //   duration: Duration(
+                  //     milliseconds: ApiConstants.screenTransitionTime,
+                  //   ),
+                  //   transition: Transition.rightToLeft,
+                  // );
                 },
                 child: Text(
                   "View All",
@@ -1425,13 +1656,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Spacer(),
               GestureDetector(
                 onTap: () {
-                  Get.to(
-                    MatchesScreen(),
-                    duration: Duration(
-                      milliseconds: ApiConstants.screenTransitionTime,
-                    ),
+                  Get.offAll(
+                    MainNavigation(initialIndex: 1),
+                    duration: Duration(milliseconds: 0),
                     transition: Transition.rightToLeft,
                   );
+                  // Get.to(
+                  //   MatchesScreen(),
+                  //   duration: Duration(
+                  //     milliseconds: ApiConstants.screenTransitionTime,
+                  //   ),
+                  //   transition: Transition.rightToLeft,
+                  // );
                 },
                 child: Text(
                   "View All",
@@ -1547,7 +1783,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: AspectRatio(
               aspectRatio: 1.2,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(5),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -1721,8 +1957,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   Text(
                     "${age} yrs, "
-                    "${user.height?.toString() ?? 'N/A'}\", "
-                    "${user.religion?.name ?? 'N/A'}, ${user.locCity?.name ?? ""}",
+                    "${(() {
+                      final raw = user.height;
+                      if (raw == null) return "N/A";
+
+                      final value = double.tryParse(raw.toString());
+                      if (value == null) return "N/A";
+
+                      final ft = value.floor();
+                      final inch = ((value - ft) * 12).round();
+
+                      return "$ft ft $inch in";
+                    })()}"
+                    " ${user.religion?.name ?? 'N/A'}, ${user.locCity?.name ?? ""}",
 
                     style: opensansMedium.copyWith(
                       fontSize: 12.5,
@@ -2010,8 +2257,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   SizedBox(height: 4),
                   Text(
                     "${age ?? 'N/A'} yrs, "
-                    "${user.height?.toString() ?? 'N/A'}\", "
-                    "${user.religion?.name ?? 'N/A'}, ",
+                    "${(() {
+                      final raw = user.height;
+                      if (raw == null) return "N/A";
+
+                      final value = double.tryParse(raw.toString());
+                      if (value == null) return "N/A";
+
+                      final ft = value.floor();
+                      final inch = ((value - ft) * 12).round();
+
+                      return "$ft ft $inch in";
+                    })()}"
+                    " ${user.religion?.name ?? 'N/A'}, ",
                     // "${user.city ?? 'N/A'}",
                     maxLines: 1,
                     style: opensansMedium.copyWith(

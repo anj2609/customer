@@ -202,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildTopBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -213,12 +213,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               GestureDetector(
                 onTap: () {
                   Get.back();
-                  // _scaffoldKey.currentState?.openDrawer();
                 },
                 child: Icon(
                   Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 20,
+                  size: 23,
                 ),
               ),
             ],

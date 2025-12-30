@@ -188,7 +188,7 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
 
   Widget _buildTopBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -204,7 +204,7 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
                 child: Icon(
                   Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 20,
+                  size: 23,
                 ),
               ),
             ],

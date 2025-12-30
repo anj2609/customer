@@ -57,9 +57,9 @@ class _DobRequestScreenState extends State<DobRequestScreen>
     final h = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      key: _scaffoldKey,
+      //  key: _scaffoldKey,
       backgroundColor: Colors.white,
-      drawer: CustomAppDrawer(),
+      //  drawer: CustomAppDrawer(),
       body: Stack(
         children: [
           SafeArea(
@@ -106,7 +106,7 @@ class _DobRequestScreenState extends State<DobRequestScreen>
 
   Widget _buildTopBar(double width) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -116,12 +116,12 @@ class _DobRequestScreenState extends State<DobRequestScreen>
             children: [
               GestureDetector(
                 onTap: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  Get.back();
                 },
                 child: Icon(
-                  Icons.menu,
+                  Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 28,
+                  size: 22,
                 ),
               ),
             ],
@@ -263,7 +263,7 @@ class _DobRequestScreenState extends State<DobRequestScreen>
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Column(
-                             // fit: StackFit.expand,
+                              // fit: StackFit.expand,
                               children: [
                                 if (user?.profilesetting == null)
                                   Image.network(

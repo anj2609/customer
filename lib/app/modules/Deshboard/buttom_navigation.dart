@@ -11,7 +11,6 @@ import 'package:vivashri/app/modules/connect/connectscreen.dart';
 import 'package:vivashri/app/modules/match/matchscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/call_parent/chat/api/apis.dart';
-import 'package:vivashri/call_parent/chat/screens/chat_home_screen.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/check_percentage.dart';
@@ -21,7 +20,9 @@ import 'package:vivashri/data/controller/recived_interst.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
 
 class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+  final int initialIndex;
+
+  const MainNavigation({super.key, this.initialIndex = 0});
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -45,6 +46,14 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
+
+    if (Get.arguments is int &&
+        Get.arguments >= 0 &&
+        Get.arguments < _pages.length) {
+      _currentIndex = Get.arguments;
+    } else {
+      _currentIndex = widget.initialIndex;
+    }
     profileapi();
   }
 
@@ -163,10 +172,7 @@ class _MainNavigationState extends State<MainNavigation> {
         label: "Connect",
       ),
       _BottomItem(img: "assets/images/Vector (1).png", label: "Chat"),
-      _BottomItem(
-        img: "assets/images/Frame 15.png",
-        label: "",
-      ), // Premium Zone image only
+      _BottomItem(img: "assets/images/Frame 15.png", label: ""),
     ];
 
     return Container(
@@ -198,7 +204,6 @@ class _MainNavigationState extends State<MainNavigation> {
               );
             }
 
-            // ---------------- OTHER BOTTOM ITEMS ----------------
             return Expanded(
               child: InkWell(
                 onTap: () => {

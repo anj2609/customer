@@ -94,7 +94,7 @@ class _SearchListScreenState extends State<SearchListScreen> {
 
   Widget _buildTopBar(double width) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -110,7 +110,7 @@ class _SearchListScreenState extends State<SearchListScreen> {
                 child: Icon(
                   Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 22,
+                  size: 24,
                 ),
               ),
             ],
@@ -787,10 +787,20 @@ class _SearchListScreenState extends State<SearchListScreen> {
                         const SizedBox(height: 4),
 
                         Text(
-                          "• ${age} yrs, ${u.height ?? ''}   "
+                          "• ${age} yrs, ${(() {
+                            final raw = u.height;
+                            if (raw == null || raw.toString().isEmpty) return "";
+
+                            final value = double.tryParse(raw.toString());
+                            if (value == null) return raw.toString();
+
+                            final ft = value.floor();
+                            final inch = ((value - ft) * 12).round();
+
+                            return "$ft ft $inch in";
+                          })()}   "
                           "• ${u.religion?.name ?? ''}   "
-                          //  "• ${u. ?? ''}   "
-                          "• ${u.highestDegree?.name ?? ''}${u.manglik}",
+                          "• ${u.highestDegree?.name ?? ''}",
                           style: opensansSemiBold.copyWith(
                             color: Colors.white,
                             fontSize: 11,
@@ -799,9 +809,40 @@ class _SearchListScreenState extends State<SearchListScreen> {
 
                         Text(
                           "• ${u.occupation?.name ?? ''} "
-                          "Earns ₹${u.annualincome ?? '0'} Lacs p.a "
-                          "• ${u.locState?.name ?? ''}  ${u.locCity?.name ?? ""}",
+                          "Earns ₹${(() {
+                            final income = u.annualincome;
+                            if (income == null || income.toString().isEmpty) return "0";
 
+                            final str = income.toString();
+
+                            if (str.contains('-')) {
+                              final parts = str.split('-');
+
+                              String fmt(int v) {
+                                if (v >= 10000000) {
+                                  return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                                } else if (v >= 100000) {
+                                  return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                                } else if (v >= 1000) {
+                                  return "${(v / 1000).toStringAsFixed(0)} K";
+                                }
+                                return v.toString();
+                              }
+
+                              return "${fmt(int.tryParse(parts[0]) ?? 0)}–${fmt(int.tryParse(parts[1]) ?? 0)}";
+                            }
+
+                            final v = int.tryParse(str) ?? 0;
+                            if (v >= 10000000) {
+                              return "${(v / 10000000).toStringAsFixed(1).replaceAll('.0', '')} Cr";
+                            } else if (v >= 100000) {
+                              return "${(v / 100000).toStringAsFixed(1).replaceAll('.0', '')} Lakh";
+                            } else if (v >= 1000) {
+                              return "${(v / 1000).toStringAsFixed(0)} K";
+                            }
+                            return v.toString();
+                          })()} p.a "
+                          "• ${u.locState?.name ?? ''}  ${u.locCity?.name ?? ""}",
                           style: opensansMedium.copyWith(
                             color: Colors.white,
                             fontSize: 12,

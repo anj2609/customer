@@ -5,12 +5,14 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/data/controller/match_list.dart';
+import 'package:vivashri/data/controller/matchdeshboard.dart';
 import 'package:vivashri/data/controller/recived_interst.dart';
 
 class SentInterestController extends GetxController implements GetxService {
   var isLoading = false.obs;
   final searchC = Get.put(SearchmatchController());
   final inboxCtrl = Get.put(InboxReceivedController());
+  final matchC = Get.put(MatchController());
 
   Future<void> sendInterest(String partnerId) async {
     try {
@@ -40,6 +42,7 @@ class SentInterestController extends GetxController implements GetxService {
       if (res["status"] == true) {
         EasyLoading.dismiss();
         searchC.fetchSearchList("", "");
+         matchC.fetchMatches();
         Get.snackbar(
           "Success",
           res["message"] ?? "Success",

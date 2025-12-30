@@ -57,9 +57,9 @@ class _PhotoRequestScreenState extends State<PhotoRequestScreen>
     final h = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      key: _scaffoldKey,
+      // key: _scaffoldKey,
       backgroundColor: Colors.white,
-      drawer: CustomAppDrawer(),
+
       body: Stack(
         children: [
           SafeArea(
@@ -106,7 +106,7 @@ class _PhotoRequestScreenState extends State<PhotoRequestScreen>
 
   Widget _buildTopBar(double width) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -116,17 +116,17 @@ class _PhotoRequestScreenState extends State<PhotoRequestScreen>
             children: [
               GestureDetector(
                 onTap: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  Get.back();
+              
                 },
                 child: Icon(
-                  Icons.menu,
+                  Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 28,
+                  size: 22,
                 ),
               ),
             ],
           ),
-
           Container(
             padding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
             decoration: BoxDecoration(

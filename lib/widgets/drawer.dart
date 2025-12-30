@@ -116,7 +116,7 @@ class CustomAppDrawer extends StatelessWidget {
                       GestureDetector(
                         onTap: () {
                           Get.to(
-                            MembershipPlansPage(),
+                            MembershipPlansPage(hidenav: "Hide"),
                             duration: Duration(
                               milliseconds: ApiConstants.screenTransitionTime,
                             ),
@@ -204,11 +204,9 @@ class CustomAppDrawer extends StatelessWidget {
                     image: "assets/images/couple_svgrepo.com.png",
                     title: "Matches",
                     onTap: () {
-                      Get.to(
-                        MatchesScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
+                      Get.offAll(
+                        MainNavigation(initialIndex: 1),
+                        duration: Duration(milliseconds: 0),
                         transition: Transition.rightToLeft,
                       );
                     },
@@ -231,13 +229,18 @@ class CustomAppDrawer extends StatelessWidget {
                     image: "assets/images/envelope_svgrepo.com 2.png",
                     title: "Connect",
                     onTap: () {
-                      Get.to(
-                        ConnectScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
+                      Get.offAll(
+                        () => const MainNavigation(initialIndex: 2),
                         transition: Transition.rightToLeft,
+                        duration: const Duration(milliseconds: 0),
                       );
+                      // Get.to(
+                      //   ConnectScreen(),
+                      //   duration: Duration(
+                      //     milliseconds: ApiConstants.screenTransitionTime,
+                      //   ),
+                      //   transition: Transition.rightToLeft,
+                      // );
                     },
                   ),
                   // _drawerItem(
@@ -248,12 +251,10 @@ class CustomAppDrawer extends StatelessWidget {
                     image: "assets/images/crown_svgrepo.com.png",
                     title: "Membership Plans",
                     onTap: () {
-                      Get.to(
-                        MembershipPlansPage(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
+                      Get.offAll(
+                        () => const MainNavigation(initialIndex: 4),
                         transition: Transition.rightToLeft,
+                        duration: const Duration(milliseconds: 0),
                       );
                     },
                   ),
@@ -351,6 +352,7 @@ class CustomAppDrawer extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: onTap,
+          behavior: HitTestBehavior.opaque,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
             child: Row(

@@ -37,6 +37,7 @@ class ProfileData {
   PartnerPreferences? partnerPreferences;
   dynamic interestsentstatus;
   dynamic shortliststatus;
+  dynamic totalmatches;
 
   ProfileData({
     this.memberData,
@@ -45,6 +46,7 @@ class ProfileData {
     this.partnerPreferences,
     this.shortliststatus,
     this.interestsentstatus,
+    this.totalmatches,
   });
 
   factory ProfileData.fromJson(Map<String, dynamic> json) {
@@ -61,6 +63,7 @@ class ProfileData {
               json['partnerPreferences'] as Map<String, dynamic>,
             )
           : null,
+      totalmatches: json['total_matches'] ?? "",
     );
   }
 
@@ -69,6 +72,7 @@ class ProfileData {
     'express_entrest': expressEntrest,
     'contact_lock_status': contactLockStatus,
     'partnerPreferences': partnerPreferences?.toJson(),
+    'total_matches': totalmatches,
   };
 }
 
@@ -246,6 +250,7 @@ class MemberData {
   dynamic partnerWeightTo;
   ProfilePhoneSettingModel? profilePhoneSettingModel;
   RefData? partnerWorkingAs;
+  String? selfintroductionvideo;
 
   MemberData({
     this.id,
@@ -307,6 +312,7 @@ class MemberData {
     this.locTempLandmark,
     this.locTempPincode,
     this.locTempState,
+    this.selfintroductionvideo,
     this.familyType,
     this.familyValue,
     this.marriedBrother,
@@ -456,7 +462,7 @@ class MemberData {
       subCaste: safeMap(json['sub_caste']) != null
           ? RefData.fromJson(safeMap(json['sub_caste'])!)
           : null,
-
+      selfintroductionvideo: json['self_introduction_video'],
       locRelation: json['loc_relation'],
       locRelationEmail: json['loc_relation_email'],
       locRelationMobile: json['loc_relation_mobile'],

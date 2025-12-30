@@ -37,6 +37,7 @@ class MatchController extends GetxController {
         premiumMatches.value = premium
             .map((e) => MatchUserModel.fromJson(e))
             .toList();
+        update();
       }
     } catch (e) {
       print("Error => $e");

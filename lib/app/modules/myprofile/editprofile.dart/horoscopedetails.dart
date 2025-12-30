@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
+import 'package:vivashri/data/controller/check_percentage.dart';
 import 'package:vivashri/data/controller/citycontroller.dart';
 import 'package:vivashri/data/controller/complecxion.dart';
 import 'package:vivashri/data/controller/dietcontroller.dart';
@@ -586,13 +588,18 @@ class _HoroscropeEditState extends State<HoroscropeEdit> {
     );
   }
 
+  final checkpercentagecontroller = Get.put(CheckProfileController());
+
   Widget _buttons() {
     return Row(
       children: [
         Expanded(
           child: GestureDetector(
-            onTap: () {
-              stapercontroller.updatehobbies(
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              String? profileid = prefs.getString("profileid");
+
+              await stapercontroller.updatehobbies(
                 formData: {
                   "birth_hour": selectedHour ?? "",
                   "birth_minute": selectedMin ?? "",
@@ -605,9 +612,12 @@ class _HoroscropeEditState extends State<HoroscropeEdit> {
                 },
               );
 
-              Future.delayed(const Duration(microseconds: 1000), () {
-                Get.back();
-              });
+              await Future.delayed(const Duration(milliseconds: 500));
+              await checkpercentagecontroller.checkProfileComplete(
+                profileid.toString(),
+              );
+
+              Get.back();
             },
             child: Container(
               height: 45,

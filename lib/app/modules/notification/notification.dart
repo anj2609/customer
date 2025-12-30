@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vivashri/config/utils/colors.dart';
 import 'package:vivashri/config/utils/style.dart';
-import 'package:vivashri/widgets/drawer.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -12,16 +12,15 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   String dropdownValue = "All Notification";
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      key: _scaffoldKey,
+      //  key: _scaffoldKey,
       backgroundColor: Colors.white,
-      drawer: CustomAppDrawer(),
+      // drawer: CustomAppDrawer(),
       body: Stack(
         children: [
           SafeArea(
@@ -48,7 +47,7 @@ class _NotificationPageState extends State<NotificationPage> {
   // --------------------- TOP BAR --------------------------------------
   Widget _buildTopBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       color: const Color.fromARGB(255, 244, 229, 214),
       child: Stack(
         alignment: Alignment.center,
@@ -58,12 +57,12 @@ class _NotificationPageState extends State<NotificationPage> {
             children: [
               GestureDetector(
                 onTap: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  Get.back();
                 },
                 child: Icon(
-                  Icons.menu,
+                  Icons.arrow_back_ios,
                   color: ColorResources.blackcolor11,
-                  size: 28,
+                  size: 24,
                 ),
               ),
             ],
@@ -84,17 +83,17 @@ class _NotificationPageState extends State<NotificationPage> {
             ),
           ),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Image.asset(
-                'assets/images/search-alt_svgrepo.com.png',
-                height: 25,
-                color: ColorResources.blackcolor11,
-              ),
-              const SizedBox(width: 16),
-            ],
-          ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.end,
+          //   children: [
+          //     Image.asset(
+          //       'assets/images/search-alt_svgrepo.com.png',
+          //       height: 25,
+          //       color: ColorResources.blackcolor11,
+          //     ),
+          //     const SizedBox(width: 16),
+          //   ],
+          // ),
         ],
       ),
     );

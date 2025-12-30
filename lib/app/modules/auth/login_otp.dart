@@ -105,14 +105,34 @@ class _OtpScreenState extends State<OtpScreen> {
                       topRight: Radius.circular(30),
                     ),
                   ),
-                  child: Center(
-                    child: Text(
-                      "Login To Your Account",
-                      style: opensansSemiBold.copyWith(
-                        fontSize: 20,
-                        color: Colors.white,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 12),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.arrow_back_ios,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              Get.back();
+                            },
+                          ),
+                        ),
                       ),
-                    ),
+                      Text(
+                        "Login To Your Account",
+                        style: opensansSemiBold.copyWith(
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
 
