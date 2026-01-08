@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
-import 'package:vivashri/app/modules/auth/login_screen.dart';
-import 'package:vivashri/app/modules/profilefrom/basic_details.dart';
-import 'package:vivashri/app/modules/profilefrom/contact_details.dart';
-import 'package:vivashri/app/modules/profilefrom/religition_details.dart';
-import 'package:vivashri/config/utils/all_images.dart';
-import 'package:vivashri/config/utils/constants.dart';
-import 'package:vivashri/data/controller/userprofile.dart';
+import 'package:evfual/app/modules/splash/onbording_screen.dart';
+
+import 'package:evfual/config/utils/all_images.dart';
+import 'package:evfual/config/utils/constants.dart';
 
 class VivashriIntro extends StatefulWidget {
   const VivashriIntro({super.key});
@@ -26,7 +22,6 @@ class _VivashriIntroState extends State<VivashriIntro>
   late AnimationController contentController;
   late Animation<double> contentOpacity;
   late Animation<double> contentSlide;
-  final userC = Get.put(UserDetailController());
 
   @override
   void initState() {
@@ -75,91 +70,14 @@ class _VivashriIntroState extends State<VivashriIntro>
       print('profileid:::::::::${profileid}');
 
       if (token != null && token.isNotEmpty) {
-        //  Get.to(ReferenceDetailsScreen());
-        checkUser(profileid);
       } else {
         Get.to(
-          LoginScreen(),
+          Splash1(),
           duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
           transition: Transition.rightToLeft,
         );
       }
     });
-  }
-
-  Future<void> checkUser(userid) async {
-    await userC.fetchUserDetail(userid);
-
-    final step = userC.userData.value?.appStep;
-
-    if (userC.userData.value?.formStatus == "Completed") {
-      Get.offAll(
-        MainNavigation(),
-        duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-        transition: Transition.rightToLeft,
-      );
-    } else {
-      if (step is String) {
-        Get.offAll(
-          MainNavigation(),
-          duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-          transition: Transition.rightToLeft,
-        );
-        return;
-      }
-
-      if (step is int) {
-        if (step == 2 || step == 3) {
-          Get.offAll(
-            ReligionDetailsScreen(),
-            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-            transition: Transition.rightToLeft,
-          );
-          return;
-        }
-
-        switch (step) {
-          case 0:
-            Get.offAll(
-              BasicDetailsScreen(),
-              duration: Duration(
-                milliseconds: ApiConstants.screenTransitionTime,
-              ),
-              transition: Transition.rightToLeft,
-            );
-            break;
-
-          case 1:
-            Get.offAll(
-              ContactDetailsScreen(),
-              duration: Duration(
-                milliseconds: ApiConstants.screenTransitionTime,
-              ),
-              transition: Transition.rightToLeft,
-            );
-            break;
-
-          case 4:
-            Get.offAll(
-              ReligionDetailsScreen(),
-              duration: Duration(
-                milliseconds: ApiConstants.screenTransitionTime,
-              ),
-              transition: Transition.rightToLeft,
-            );
-            break;
-
-          default:
-            Get.offAll(
-              MainNavigation(),
-              duration: Duration(
-                milliseconds: ApiConstants.screenTransitionTime,
-              ),
-              transition: Transition.rightToLeft,
-            );
-        }
-      }
-    }
   }
 
   @override
@@ -175,10 +93,9 @@ class _VivashriIntroState extends State<VivashriIntro>
       backgroundColor: const Color(0xFFFFEBEE),
       body: SizedBox.expand(
         child: GestureDetector(
-          onTap: () {
-            
-          },
-          child: Image.asset(Images.splashimage, fit: BoxFit.cover)),
+          onTap: () {},
+          child: Image.asset(Images.introscreen, fit: BoxFit.cover),
+        ),
       ),
     );
   }

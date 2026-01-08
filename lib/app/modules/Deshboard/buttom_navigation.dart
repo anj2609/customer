@@ -4,20 +4,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vivashri/app/modules/Deshboard/deshboard.dart';
-import 'package:vivashri/app/modules/chat/chatscreen.dart';
-import 'package:vivashri/app/modules/connect/connectscreen.dart';
-import 'package:vivashri/app/modules/match/matchscreen.dart';
-import 'package:vivashri/app/modules/membership/membership.dart';
-import 'package:vivashri/call_parent/chat/api/apis.dart';
-import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/style.dart';
-import 'package:vivashri/data/controller/check_percentage.dart';
-import 'package:vivashri/data/controller/match_list.dart';
-import 'package:vivashri/data/controller/matchdeshboard.dart';
-import 'package:vivashri/data/controller/recived_interst.dart';
-import 'package:vivashri/data/controller/userprofile.dart';
+import 'package:evfual/app/modules/Deshboard/deshboard.dart';
+import 'package:evfual/app/modules/plan/my_plan.dart';
+import 'package:evfual/app/modules/subscription/subscription_plan.dart';
+
+import 'package:evfual/config/utils/colors.dart';
+import 'package:evfual/config/utils/style.dart';
 
 class MainNavigation extends StatefulWidget {
   final int initialIndex;
@@ -30,18 +22,14 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
-  final usercontroller = Get.put(UserDetailController());
 
   final List<Widget> _pages = [
     DashboardScreen(),
-    MatchesScreen(),
-    ConnectScreen(),
-    // HomeScreen(),
-    ChatScreen(),
-    MembershipPlansPage(),
+    MyPlanScreen(),
+    SubscirptinPlan(),
+    Text('Comming Soon'),
+    // DashboardScreen(),
   ];
-  final matchC = Get.put(MatchController());
-  final checkcontroller = Get.put(CheckProfileController());
 
   @override
   void initState() {
@@ -54,33 +42,6 @@ class _MainNavigationState extends State<MainNavigation> {
     } else {
       _currentIndex = widget.initialIndex;
     }
-    profileapi();
-  }
-
-  void login() async {
-    if (usercontroller.userData.value?.profileId != null) {
-      if (await APIs.userExists() && mounted) {
-      } else {
-        await APIs.createUser().then((value) {});
-      }
-    } else {}
-  }
-
-  final searchC = Get.put(SearchmatchController());
-  final inboxCtrl = Get.put(InboxReceivedController());
-
-  void profileapi() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    String? profileid = prefs.getString("profileid");
-
-    usercontroller.fetchUserDetail(profileid.toString()).then((_) {
-      login();
-    });
-    matchC.fetchMatches();
-    searchC.fetchSearchList("", "");
-    checkcontroller.checkProfileComplete(profileid.toString());
-    inboxCtrl.fetchInboxData();
   }
 
   @override
@@ -150,7 +111,7 @@ class _MainNavigationState extends State<MainNavigation> {
             Container(
               height: statusBarHeight,
               width: double.infinity,
-              color: ColorResources.primarycolor2,
+              color: ColorResources.primarycolor3,
             ),
           ],
         ),
@@ -163,16 +124,16 @@ class _MainNavigationState extends State<MainNavigation> {
   Widget _buildCustomBottomBar() {
     final items = [
       _BottomItem(img: "assets/images/Vector.png", label: "Home"),
+      _BottomItem(img: "assets/images/Vector 3.png", label: "My Plan"),
       _BottomItem(
-        img: "assets/images/Engagement Rings - iconSvg.co.png",
-        label: "Matches",
+        img: "assets/images/money_svgrepo.com.png",
+        label: "Subscription",
       ),
       _BottomItem(
-        img: "assets/images/envelope_svgrepo.com.png",
-        label: "Connect",
+        img: "assets/images/team_svgrepo.com 2.png",
+        label: "Account",
       ),
-      _BottomItem(img: "assets/images/Vector (1).png", label: "Chat"),
-      _BottomItem(img: "assets/images/Frame 15.png", label: ""),
+      //   _BottomItem(img: "assets/images/Frame 15.png", label: ""),
     ];
 
     return Container(
@@ -187,10 +148,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
             if (index == 4) {
               return GestureDetector(
-                onTap: () => {
-                  setState(() => _currentIndex = index),
-                  usercontroller.fetchUserDetail(''),
-                },
+                onTap: () => {setState(() => _currentIndex = index)},
 
                 child: Container(
                   child: Image.asset(
@@ -198,7 +156,7 @@ class _MainNavigationState extends State<MainNavigation> {
                     height: 70,
                     width: 75,
                     fit: BoxFit.contain,
-                    color: ColorResources.primarycolor3,
+                    color: ColorResources.greencolor,
                   ),
                 ),
               );
@@ -206,10 +164,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
             return Expanded(
               child: InkWell(
-                onTap: () => {
-                  setState(() => _currentIndex = index),
-                  usercontroller.fetchUserDetail(''),
-                },
+                onTap: () => {setState(() => _currentIndex = index)},
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Column(
@@ -220,7 +175,7 @@ class _MainNavigationState extends State<MainNavigation> {
                         height: 24,
                         width: 24,
                         color: selected
-                            ? ColorResources.primarycolor3
+                            ? ColorResources.greencolor
                             : ColorResources.blkackvoor,
                       ),
                       const SizedBox(height: 2),
@@ -229,7 +184,7 @@ class _MainNavigationState extends State<MainNavigation> {
                         style: opensansSemiBold.copyWith(
                           fontSize: 12,
                           color: selected
-                              ? ColorResources.primarycolor3
+                              ? ColorResources.greencolor
                               : ColorResources.blkackvoor,
                         ),
                       ),

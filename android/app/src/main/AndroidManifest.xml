@@ -7,7 +7,7 @@
 
 
     <application
-        android:label="Vivashri"
+        android:label="EV"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:theme="@style/NormalTheme">

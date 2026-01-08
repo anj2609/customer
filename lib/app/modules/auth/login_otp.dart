@@ -1,10 +1,9 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/config/utils/all_images.dart';
-import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/style.dart';
-import 'package:vivashri/data/controller/auth_controller.dart';
+import 'package:evfual/config/utils/all_images.dart';
+import 'package:evfual/config/utils/colors.dart';
+import 'package:evfual/config/utils/style.dart';
+import 'package:evfual/data/controller/auth_controller.dart';
 
 class OtpScreen extends StatefulWidget {
   final String? mobileemail;
@@ -33,21 +32,13 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   String? fcmToken;
-  Future<void> fibase() async {
-    try {
-      FirebaseMessaging messaging = FirebaseMessaging.instance;
-      fcmToken = await messaging.getToken();
-      print("FCM Token: $fcmToken");
-    } catch (e) {
-      print("Error fetching FCM token: $e");
-    }
-  }
+
 
   @override
   void initState() {
     super.initState();
     focusNodes[0].requestFocus();
-    fibase();
+   // fibase();
   }
 
   @override

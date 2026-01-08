@@ -1,34 +1,19 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:restart_app/restart_app.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
-import 'package:vivashri/app/modules/membership/membership.dart';
-import 'package:vivashri/app/modules/myprofile/my_profile.dart';
-import 'package:vivashri/app/modules/notification/notification.dart';
-import 'package:vivashri/app/modules/search/search.dart';
-import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/constants.dart';
-import 'package:vivashri/config/utils/style.dart';
-import 'package:vivashri/data/controller/auth_controller.dart';
-import 'package:vivashri/data/controller/send_interest.dart';
-import 'package:vivashri/data/controller/userprofile.dart';
-import 'package:vivashri/widgets/setting/setting.dart';
+import 'package:evfual/app/modules/Deshboard/buttom_navigation.dart';
+import 'package:evfual/app/modules/swap_history.dart';
+import 'package:evfual/app/modules/swap_station.dart';
+import 'package:evfual/config/utils/colors.dart';
+import 'package:evfual/config/utils/constants.dart';
+import 'package:evfual/config/utils/style.dart';
 
 class CustomAppDrawer extends StatelessWidget {
   const CustomAppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(UserDetailController());
-    final sentCtrl = Get.put(SentInterestController());
-
-    final u = controller.userData.value!;
-    final w = MediaQuery.of(context).size.width;
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: ColorResources.blkackvoor,
       width: MediaQuery.of(context).size.width * 0.78,
       child: SafeArea(
         child: Column(
@@ -50,121 +35,11 @@ class CustomAppDrawer extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: [
-                  Container(
-                    width: w * 0.20,
-                    height: w * 0.25,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        '${ApiConstants.imageurl}${u.photo}',
-                        fit: BoxFit.fill,
-                        errorBuilder: (context, error, stackTrace) {
-                          String gender = u.gender.toString();
-
-                          if (gender == "Male") {
-                            return Image.asset(
-                              "assets/images/no-image-male2.jpg",
-                              fit: BoxFit.contain,
-                            );
-                          } else if (gender == "Female") {
-                            return Image.asset(
-                              "assets/images/no-image-female2.jpg",
-                              fit: BoxFit.contain,
-                            );
-                          } else {
-                            return Image.asset(
-                              "assets/images/profilee.png",
-                              fit: BoxFit.contain,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: 10),
-
-                  // Name & Plan
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${u.name}",
-                        style: opensansSemiBold.copyWith(fontSize: 16),
-                      ),
-
-                      const SizedBox(height: 4),
-                      GestureDetector(
-                        onTap: () {
-                          Clipboard.setData(
-                            ClipboardData(text: u.profileId ?? ""),
-                          );
-                        },
-                        child: Text(
-                          "${u.profileId}",
-                          style: opensansSemiBold.copyWith(
-                            color: ColorResources.blackgrey,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 6),
-                      GestureDetector(
-                        onTap: () {
-                          Get.to(
-                            MembershipPlansPage(hidenav: "Hide"),
-                            duration: Duration(
-                              milliseconds: ApiConstants.screenTransitionTime,
-                            ),
-                            transition: Transition.rightToLeft,
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 15,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ColorResources.primarycolor3,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                "Upgrade Plan",
-                                style: opensansSemiBold.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(3.0),
-                                  child: Image.asset(
-                                    "assets/images/Crown.png",
-                                    height: 18,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                children: [Image.asset('assets/images/logo.png', height: 120)],
               ),
             ),
 
-            const SizedBox(height: 10),
-            // Divider(color: Colors.grey.shade300),
+            const SizedBox(height: 20),
 
             // ---------- MENU ITEMS ----------
             Expanded(
@@ -173,7 +48,7 @@ class CustomAppDrawer extends StatelessWidget {
                 children: [
                   _drawerItem(
                     image: "assets/images/Vector.png",
-                    title: "My Vivashri",
+                    title: "Home",
                     onTap: () {
                       Get.offAll(
                         MainNavigation(),
@@ -182,154 +57,85 @@ class CustomAppDrawer extends StatelessWidget {
                         ),
                         transition: Transition.rightToLeft,
                       );
-                      // Get.back();
-                    },
-                  ),
-                  _drawerItem(
-                    image: "assets/images/user-alt-1_svgrepo.com.png",
-                    title: "My Profile",
-                    onTap: () {
-                      Get.to(
-                        MyProfielScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    },
-                  ),
-                  _drawerItem(
-                    image: "assets/images/couple_svgrepo.com.png",
-                    title: "Matches",
-                    onTap: () {
-                      Get.offAll(
-                        MainNavigation(initialIndex: 1),
-                        duration: Duration(milliseconds: 0),
-                        transition: Transition.rightToLeft,
-                      );
-                    },
-                  ),
-                  _drawerItem(
-                    image: "assets/images/user-search-alt-1_svgrepo.com.png",
-                    title: "Search",
-                    onTap: () {
-                      Get.to(
-                        BasicSearchPage(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
                     },
                   ),
 
                   _drawerItem(
-                    image: "assets/images/envelope_svgrepo.com 2.png",
-                    title: "Connect",
+                    image: "assets/images/money_svgrepo.com.png",
+                    title: "Subscription Plan",
                     onTap: () {
                       Get.offAll(
-                        () => const MainNavigation(initialIndex: 2),
-                        transition: Transition.rightToLeft,
+                        MainNavigation(initialIndex: 2),
                         duration: const Duration(milliseconds: 0),
+                        transition: Transition.rightToLeft,
                       );
-                      // Get.to(
-                      //   ConnectScreen(),
-                      //   duration: Duration(
-                      //     milliseconds: ApiConstants.screenTransitionTime,
-                      //   ),
-                      //   transition: Transition.rightToLeft,
-                      // );
                     },
                   ),
-                  // _drawerItem(
-                  //   image: "assets/images/search-file_svgrepo.com.png",
-                  //   title: "Partner Preferences",
-                  // ),
+
                   _drawerItem(
-                    image: "assets/images/crown_svgrepo.com.png",
-                    title: "Membership Plans",
+                    image: "assets/images/money_svgrepo.com.png",
+                    title: "Swap Station",
+                    onTap: () {
+                      Get.to(
+                        () => SwapStattions(),
+                        duration: const Duration(milliseconds: 0),
+                        transition: Transition.rightToLeft,
+                      );
+                    },
+                  ),
+
+                  _drawerItem(
+                    image: "assets/images/money_svgrepo.com.png",
+                    title: "My Plan",
                     onTap: () {
                       Get.offAll(
-                        () => const MainNavigation(initialIndex: 4),
-                        transition: Transition.rightToLeft,
+                        () => const MainNavigation(initialIndex: 1),
                         duration: const Duration(milliseconds: 0),
-                      );
-                    },
-                  ),
-                  _drawerItem(
-                    image: "assets/images/bell_svgrepo.com.png",
-                    title: "Notifications",
-                    onTap: () {
-                      Get.to(
-                        NotificationPage(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
-                        transition: Transition.rightToLeft,
-                      );
-                    },
-                  ),
-                  _drawerItem(
-                    image: "assets/images/faq-file_svgrepo.com.png",
-                    title: "FAQ/Help",
-                  ),
-                  _drawerItem(
-                    image: "assets/images/setting_svgrepo.com.png",
-                    title: "Settings",
-                    onTap: () {
-                      Get.to(
-                        SettingsScreen(),
-                        duration: Duration(
-                          milliseconds: ApiConstants.screenTransitionTime,
-                        ),
                         transition: Transition.rightToLeft,
                       );
                     },
                   ),
 
-                  // LOGOUT
                   _drawerItem(
-                    image: "assets/images/logout_svgrepo.com.png",
-                    title: "Logout",
-                    isLogout: true,
+                    image: "assets/images/money_svgrepo.com.png",
+                    title: "Swap History",
                     onTap: () {
-                      showCupertinoDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return CupertinoAlertDialog(
-                            title: Text("Are you sure?"),
-                            content: Text(
-                              "Do you really want to Logout Your Account",
-                            ),
-                            actions: [
-                              CupertinoDialogAction(
-                                child: Text("No"),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              CupertinoDialogAction(
-                                isDestructiveAction: true,
-                                child: Text("Yes"),
-                                onPressed: () async {
-                                  sentCtrl.logoutapi();
-                                  Get.find<AuthController>().logOut();
-
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  await prefs.setString('userID', '');
-                                  await prefs.setString('userName', '');
-
-                                  Restart.restartApp();
-                                },
-                              ),
-                            ],
-                          );
-                        },
+                      Get.to(
+                        SwapHistory(),
+                        duration: const Duration(milliseconds: 0),
+                        transition: Transition.rightToLeft,
                       );
                     },
                   ),
                 ],
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(25),
+              child: GestureDetector(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: Colors.white),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.logout, color: ColorResources.blueeebutton),
+                      const SizedBox(width: 10),
+                      Text(
+                        "Logout",
+                        style: opensansSemiBold.copyWith(
+                          fontSize: 16,
+                          color: ColorResources.blueeebutton,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
@@ -342,7 +148,6 @@ class CustomAppDrawer extends StatelessWidget {
   Widget _drawerItem({
     required String image,
     required String title,
-    bool isLogout = false,
     bool showDivider = true,
     VoidCallback? onTap,
   }) {
@@ -355,33 +160,17 @@ class CustomAppDrawer extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
             child: Row(
               children: [
-                Image.asset(
-                  image,
-                  height: 22,
-                  width: 22,
-                  color: isLogout
-                      ? ColorResources.primarycolor3
-                      : ColorResources.primarycolor3,
-                ),
+                Image.asset(image, height: 22, width: 22, color: Colors.white),
                 const SizedBox(width: 18),
-
-                // TEXT
                 Expanded(
                   child: Text(
                     title,
                     style: opensansSemiBold.copyWith(
                       fontSize: 15,
-                      color: ColorResources.blackhalka,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-
-                // if (showArrow)
-                //   Icon(
-                //     Icons.arrow_forward_ios,
-                //     size: 16,
-                //     color: ColorResources.primarycolor3,
-                //   ),
               ],
             ),
           ),
@@ -395,24 +184,4 @@ class CustomAppDrawer extends StatelessWidget {
       ],
     );
   }
-}
-
-class DottedLinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    const dotWidth = 4; // dot size
-    const space = 4; // space size
-    final paint = Paint()
-      ..color = const Color(0xffb98b9c)
-      ..strokeWidth = 1;
-
-    double startX = 0;
-    while (startX < size.width) {
-      canvas.drawLine(Offset(startX, 0), Offset(startX + dotWidth, 0), paint);
-      startX += dotWidth + space;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

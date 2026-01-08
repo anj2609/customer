@@ -1,8 +1,7 @@
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/auth/login_screen.dart';
-import 'package:vivashri/app/modules/splash/onbording_screen.dart';
-import 'package:vivashri/app/modules/splash/splash_screen.dart';
-import 'package:vivashri/config/utils/constants.dart';
+import 'package:evfual/app/modules/auth/login_screen.dart';
+import 'package:evfual/app/modules/splash/splash_screen.dart';
+import 'package:evfual/config/utils/constants.dart';
 
 class RouteHelper {
   static const String splash = '/splash';
@@ -37,14 +36,7 @@ class RouteHelper {
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const VivashriIntro()),
 
-    GetPage(
-      name: onbordingscreen,
-      page: () => OnboardingScreen(),
-      transitionDuration: const Duration(
-        milliseconds: ApiConstants.screenTransitionTime,
-      ),
-      transition: Transition.rightToLeft,
-    ),
+ 
     GetPage(
         name: login,
         page: () => LoginScreen(),

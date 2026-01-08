@@ -6,8 +6,8 @@ import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:http/http.dart' as Http;
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vivashri/config/utils/apis/api_checker.dart';
-import 'package:vivashri/config/utils/constants.dart';
+import 'package:evfual/config/utils/apis/api_checker.dart';
+import 'package:evfual/config/utils/constants.dart';
 
 class ApiClient extends GetxService {
   String? appBaseUrl = 'https://vivashri.com/vivashribackend/api/';

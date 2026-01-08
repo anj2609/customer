@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vivashri/app/modules/auth/employee/employee_login.dart';
-import 'package:vivashri/config/utils/all_images.dart';
-import 'package:vivashri/config/utils/colors.dart';
-import 'package:vivashri/config/utils/constants.dart';
-import 'package:vivashri/config/utils/style.dart';
-import 'package:vivashri/data/controller/auth_controller.dart';
+import 'package:evfual/app/modules/Deshboard/buttom_navigation.dart';
+import 'package:evfual/config/utils/colors.dart';
+import 'package:evfual/config/utils/constants.dart';
+import 'package:evfual/config/utils/style.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,241 +13,221 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  TextEditingController inputCtrl = TextEditingController();
-  bool isValid = false;
-  void validateInput(String value) {
-    if (RegExp(r'^[0-9]{10}$').hasMatch(value)) {
-      setState(() => isValid = true);
+  final _formKey = GlobalKey<FormState>();
 
-      FocusScope.of(context).unfocus();
-      return;
-    }
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-    if (value.contains("@") &&
-        (value.endsWith(".com") || value.endsWith(".in"))) {
-      setState(() => isValid = true);
-      FocusScope.of(context).unfocus();
-      return;
-    }
-
-    setState(() => isValid = false);
-  }
+  bool isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: ColorResources.primarycolor,
-
-      body: Stack(
-        children: [
-          SizedBox(
-            height: size.height * 0.45,
-            width: double.infinity,
-            child: Image.asset(Images.loginscren, fit: BoxFit.cover),
-          ),
-
-          SingleChildScrollView(
-            padding: EdgeInsets.only(
-              top: size.height * 0.35,
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
             child: Column(
               children: [
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 22,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(80),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.20),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Image.asset("assets/images/logo2.png", height: 35),
+                SizedBox(
+                  width: double.infinity,
+                  height: 350,
+                  child: Image.asset(
+                    "assets/images/login.png",
+                    fit: BoxFit.cover,
                   ),
                 ),
 
-                const SizedBox(height: 15),
+                Text(
+                  "LOGIN NOW",
+                  style: opensansSemiBold.copyWith(
+                    fontSize: 22,
 
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
                     color: ColorResources.primarycolor,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Login To Your Account",
-                      style: opensansSemiBold.copyWith(
-                        fontSize: 20,
-                        color: Colors.white,
-                      ),
-                    ),
                   ),
                 ),
 
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 25,
-                    vertical: 30,
+                const SizedBox(height: 2),
+
+                Text(
+                  "Please login to get started",
+                  style: opensansSemiBold.copyWith(
+                    fontSize: 13,
+                    color: Colors.black54,
                   ),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                /// 🧾 Fields
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Mobile No. / Email ID",
-                        style: opensansSemiBold.copyWith(
-                          fontSize: 14,
-                          color: ColorResources.blackgrey,
-                        ),
-                      ),
-                      const SizedBox(height: 7),
-
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.black38),
-                        ),
-                        child: TextField(
-                          onChanged: validateInput,
-                          controller: inputCtrl,
-                          decoration: InputDecoration(border: InputBorder.none),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      Text(
-                        "We will send you OTP to login",
-                        style: opensansSemiBold.copyWith(
-                          fontSize: 13,
-                          color: ColorResources.blackgrey,
-                        ),
-                      ),
-
-                      const SizedBox(height: 40),
-
-                      GestureDetector(
-                        onTap: () {
-                          if (isValid) {
-                            Get.find<AuthController>().userloginapi(
-                              context: context,
-                              mobileemail: inputCtrl.text.trim(),
-                            );
-                          } else {
-                            Get.snackbar(
-                              "Error",
-                              "Please Enter Your Number/Email",
-                              snackPosition: SnackPosition.TOP,
-                              backgroundColor: ColorResources.primarycolor2,
-                              colorText: Colors.white,
-                              margin: EdgeInsets.all(12),
-                            );
+                      /// Email / UserId
+                      TextFormField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: _inputDecoration("Userid/Email"),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "Userid/Email is required";
                           }
+                          return null;
                         },
+                      ),
 
-                        child: Container(
-                          height: 50,
+                      const SizedBox(height: 14),
+
+                      /// Password
+                      TextFormField(
+                        controller: passwordController,
+                        obscureText: !isPasswordVisible,
+                        decoration: _inputDecoration(
+                          "Password",
+                          suffix: IconButton(
+                            icon: Icon(
+                              isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isPasswordVisible = !isPasswordVisible;
+                              });
+                            },
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Password is required";
+                          }
+                          if (value.length < 6) {
+                            return "Password must be at least 6 characters";
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      /// Forgot Password
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "Forgot Password?",
+                            style: opensansSemiBold.copyWith(
+                              color: ColorResources.blueeebutton,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                /// ✅ Gradient Login Button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: Material(
+                      borderRadius: BorderRadius.circular(30),
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(30),
+                        onTap: () {
+                          Get.to(
+                            MainNavigation(),
+                            duration: Duration(
+                              milliseconds: ApiConstants.screenTransitionTime,
+                            ),
+                            transition: Transition.rightToLeft,
+                          );
+                          // if (_formKey.currentState!.validate()) {
+
+                          //   ScaffoldMessenger.of(context).showSnackBar(
+                          //     const SnackBar(content: Text("Login Successful")),
+                          //   );
+
+                          // }
+                        },
+                        child: Ink(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            gradient: isValid
-                                ? const LinearGradient(
-                                    colors: [
-                                      Color(0xFFFBE266B),
-                                      Color(0xFFEB1D7B),
-                                    ],
-                                  )
-                                : null,
-                            color: !isValid ? Colors.grey.shade400 : null,
+                            gradient: const LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [Color(0xFF0CD97B), Color(0xFF0BA35E)],
+                            ),
+                            borderRadius: BorderRadius.circular(30),
                           ),
                           child: Center(
                             child: Text(
-                              "Send OTP",
-                              style: opensansMedium.copyWith(
+                              "LOG IN",
+                              style: opensansSemiBold.copyWith(
+                                fontSize: 16,
                                 color: Colors.white,
-                                fontSize: 17,
                               ),
                             ),
                           ),
                         ),
                       ),
-
-                      const SizedBox(height: 40),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            Get.to(
-                              EmployeLogin(),
-                              duration: Duration(
-                                milliseconds: ApiConstants.screenTransitionTime,
-                              ),
-                              transition: Transition.rightToLeft,
-                            );
-                          },
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "Login as Employee",
-                                    style: opensansSemiBold.copyWith(
-                                      fontSize: 13,
-                                      color: ColorResources.primarycolor2,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 12,
-                                    color: ColorResources.primarycolor2,
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 3),
-                              Container(
-                                height: 1,
-                                width: 150,
-                                color: ColorResources.primarycolor2,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 120),
-                    ],
+                    ),
                   ),
                 ),
+
+                const SizedBox(height: 20),
+
+                /// Register
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Don’t Have An Account? ",
+                      style: opensansSemiBold.copyWith(
+                        color: ColorResources.blackgrey,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {},
+                      child: Text(
+                        "Register Now",
+                        style: opensansSemiBold.copyWith(
+                          color: ColorResources.blueeebutton,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 30),
               ],
             ),
           ),
-        ],
+        ),
       ),
+    );
+  }
+
+  /// 🔹 Input Decoration
+  InputDecoration _inputDecoration(String hint, {Widget? suffix}) {
+    return InputDecoration(
+      hintText: hint,
+      suffixIcon: suffix,
+      filled: true,
+      fillColor: const Color(0xFFF5F5F5),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 }
