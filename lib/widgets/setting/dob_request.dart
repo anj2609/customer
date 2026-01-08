@@ -11,7 +11,6 @@ import 'package:vivashri/data/controller/recived_interst.dart';
 import 'package:vivashri/data/controller/send_interest.dart';
 import 'package:vivashri/data/controller/userbyuser.dart';
 import 'package:vivashri/data/controller/userprofile.dart';
-import 'package:vivashri/widgets/drawer.dart';
 
 class DobRequestScreen extends StatefulWidget {
   final int initialIndex;
@@ -24,7 +23,6 @@ class DobRequestScreen extends StatefulWidget {
 class _DobRequestScreenState extends State<DobRequestScreen>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? profileid;
   final usercontroller = Get.put(UserDetailController());
 

@@ -5,8 +5,6 @@ import 'package:get/get.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivashri/app/modules/Deshboard/buttom_navigation.dart';
-import 'package:vivashri/app/modules/connect/connectscreen.dart';
-import 'package:vivashri/app/modules/match/matchscreen.dart';
 import 'package:vivashri/app/modules/membership/membership.dart';
 import 'package:vivashri/app/modules/myprofile/my_profile.dart';
 import 'package:vivashri/app/modules/notification/notification.dart';

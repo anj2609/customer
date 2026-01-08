@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vivashri/app/modules/auth/employee/employee_login.dart';
 import 'package:vivashri/config/utils/all_images.dart';
 import 'package:vivashri/config/utils/colors.dart';
+import 'package:vivashri/config/utils/constants.dart';
 import 'package:vivashri/config/utils/style.dart';
 import 'package:vivashri/data/controller/auth_controller.dart';
 
@@ -195,6 +197,49 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
 
                       const SizedBox(height: 40),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.to(
+                              EmployeLogin(),
+                              duration: Duration(
+                                milliseconds: ApiConstants.screenTransitionTime,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Login as Employee",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 13,
+                                      color: ColorResources.primarycolor2,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 12,
+                                    color: ColorResources.primarycolor2,
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 3),
+                              Container(
+                                height: 1,
+                                width: 150,
+                                color: ColorResources.primarycolor2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
 
                       const SizedBox(height: 120),
                     ],
