@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:evfual/app/modules/auth/login_screen.dart';
+import 'package:evfual/data/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -37,10 +39,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  final Map<TextEditingController, bool> _obscureMap = {};
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+       backgroundColor:ColorResources.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Form(
@@ -119,7 +123,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       _field("Owner Name", ownerController),
 
-                      /// 📷 EV RC COPY
                       _imagePickerTile(
                         title: "EV RC Copy",
                         file: rcImage,
@@ -179,11 +182,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   );
                                   return;
                                 }
-
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Registration Successful"),
-                                  ),
+                                Get.find<AuthController>().registerEV(
+                                  evnumber: evController.text.trim(),
+                                  password: passwordController.text.trim(),
+                                  confirmpassword: confirmPasswordController
+                                      .text
+                                      .trim(),
+                                  ownername: ownerController.text.trim(),
+                                  address: addressController.text.trim(),
+                                  phone: phoneController.text.trim(),
+                                  email: emailController.text.trim(),
+                                  evrccopy: rcImage!.path,
+                                  idproof: idImage!.path,
+                                  vehiclephoto: vehicleImage!.path,
                                 );
                               }
                             },
@@ -224,7 +235,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              Get.offAll(
+                                LoginScreen(),
+                                duration: const Duration(milliseconds: 0),
+                                transition: Transition.rightToLeft,
+                              );
+                            },
                             child: Text(
                               "Login Now",
                               style: opensansSemiBold.copyWith(
@@ -247,7 +264,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  /// 🔹 TEXT FIELD
   Widget _field(
     String hint,
     TextEditingController controller, {
@@ -256,32 +272,86 @@ class _RegisterScreenState extends State<RegisterScreen> {
     int maxLines = 1,
     TextInputType keyboard = TextInputType.text,
   }) {
+    // initialize once
+    _obscureMap.putIfAbsent(controller, () => isPassword);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: TextFormField(
-        controller: controller,
-        obscureText: isPassword,
-        maxLines: maxLines,
-        keyboardType: keyboard,
-        decoration: _decoration(hint),
-        validator: (v) {
-          if (v == null || v.isEmpty) return "$hint is required";
-          if (confirm && v != passwordController.text) {
-            return "Password not match";
-          }
-          if (hint == "Phone Number" && v.length < 10) {
-            return "Enter valid phone number";
-          }
-          if (hint == "Email ID" && !v.contains("@")) {
-            return "Enter valid email";
-          }
-          return null;
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          return TextFormField(
+            controller: controller,
+            obscureText: isPassword ? _obscureMap[controller]! : false,
+            maxLines: maxLines,
+            keyboardType: keyboard,
+
+            decoration: InputDecoration(
+              hintText: hint,
+
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 14,
+              ),
+
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.grey, width: 1),
+              ),
+
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.grey, width: 1),
+              ),
+
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.red, width: 1),
+              ),
+
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Colors.redAccent,
+                  width: 1.5,
+                ),
+              ),
+
+              suffixIcon: isPassword
+                  ? IconButton(
+                      icon: Icon(
+                        _obscureMap[controller]!
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureMap[controller] = !_obscureMap[controller]!;
+                        });
+                      },
+                    )
+                  : null,
+            ),
+
+            validator: (v) {
+              if (v == null || v.isEmpty) return "$hint is required";
+              if (confirm && v != passwordController.text) {
+                return "Password not match";
+              }
+              if (hint == "Phone Number" && v.length < 10) {
+                return "Enter valid phone number";
+              }
+              if (hint == "Email ID" && !v.contains("@")) {
+                return "Enter valid email";
+              }
+              return null;
+            },
+          );
         },
       ),
     );
   }
 
-  /// 🔹 IMAGE PICK TILE + THUMBNAIL
   Widget _imagePickerTile({
     required String title,
     required File? file,
@@ -291,35 +361,70 @@ class _RegisterScreenState extends State<RegisterScreen> {
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
         children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.circular(12),
+          if (file == null) ...[
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 15,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(title, style: opensansSemiBold.copyWith()),
               ),
-              child: Text(title, style: opensansSemiBold.copyWith()),
             ),
-          ),
+          ],
           SizedBox(width: 10),
-          GestureDetector(
-            onTap: onTap,
-            child: Container(
-              height: 48,
-              width: 70,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
+          if (file == null) ...[
+            GestureDetector(
+              onTap: onTap,
+              child: Container(
+                height: 48,
+                width: 70,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(child: Text('Browse')),
               ),
-              child: Center(child: Text('Browse')),
             ),
-          ),
+          ],
 
           if (file != null) ...[
             const SizedBox(width: 8),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image.file(file, height: 40, width: 40, fit: BoxFit.cover),
+            Stack(
+              children: [
+                Container(
+                  height: 200,
+                  width: 300,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: Colors.grey.shade200,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(file, fit: BoxFit.cover),
+                  ),
+                ),
+
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: onTap,
+                    child: Container(
+                      padding: EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.close, size: 18, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ],

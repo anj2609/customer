@@ -19,3 +19,21 @@ final opensansRegular = TextStyle(
   fontFamily: 'OpenSans',
   fontWeight: FontWeight.w400,
 );
+
+final PoppinsReguler= TextStyle(
+  fontFamily: 'Poppins',
+  fontWeight: FontWeight.w300
+);
+
+final PoppinsSemiBold= TextStyle(
+  fontFamily: 'Poppins',
+ fontWeight: FontWeight.w600,
+);
+final PoppinsBold= TextStyle(
+  fontFamily: 'Poppins',
+ fontWeight: FontWeight.w700,
+);
+final PoppinsMedium= TextStyle(
+  fontFamily: 'Poppins',
+ fontWeight: FontWeight.w500,
+);

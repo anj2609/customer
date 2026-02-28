@@ -10,7 +10,7 @@ import 'package:evfual/config/utils/apis/api_checker.dart';
 import 'package:evfual/config/utils/constants.dart';
 
 class ApiClient extends GetxService {
-  String? appBaseUrl = 'https://vivashri.com/vivashribackend/api/';
+  String? appBaseUrl = 'https://evfuel.akslearning.in/api/';
   final SharedPreferences sharedPreferences;
   final String noInternetMessage =
       'Connection to API server failed due to internet connection';
@@ -60,7 +60,7 @@ class ApiClient extends GetxService {
         print('====> GetX Basebodyy: $body');
         Http.Response _response = await Http.post(
           Uri.parse(
-            'https://vivashri.com/vivashribackend/api/' + uri,
+            'https://evfuel.akslearning.in/api/' + uri,
           ),
           body: jsonEncode(body),
           headers: _mainHeaders,

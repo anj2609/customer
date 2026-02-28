@@ -1,12 +1,13 @@
 import 'dart:io';
 
+import 'package:evfual/app/modules/Promos/promos_screen.dart';
+import 'package:evfual/app/modules/activity/activity.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:evfual/app/modules/Deshboard/deshboard.dart';
-import 'package:evfual/app/modules/plan/my_plan.dart';
-import 'package:evfual/app/modules/subscription/subscription_plan.dart';
 
 import 'package:evfual/config/utils/colors.dart';
 import 'package:evfual/config/utils/style.dart';
@@ -25,10 +26,9 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _pages = [
     DashboardScreen(),
-    MyPlanScreen(),
-    SubscirptinPlan(),
-    Text('Comming Soon'),
-    // DashboardScreen(),
+    PromoScreen(),
+    ActivityScreen(),
+    AccountSettingsScreen(),
   ];
 
   @override
@@ -123,16 +123,10 @@ class _MainNavigationState extends State<MainNavigation> {
 
   Widget _buildCustomBottomBar() {
     final items = [
-      _BottomItem(img: "assets/images/Vector.png", label: "Home"),
-      _BottomItem(img: "assets/images/Vector 3.png", label: "My Plan"),
-      _BottomItem(
-        img: "assets/images/money_svgrepo.com.png",
-        label: "Subscription",
-      ),
-      _BottomItem(
-        img: "assets/images/team_svgrepo.com 2.png",
-        label: "Account",
-      ),
+      _BottomItem(img: "assets/images/home.png", label: "Home"),
+      _BottomItem(img: "assets/images/discountfill.png", label: "Promos"),
+      _BottomItem(img: "assets/images/Activity.png", label: "Activity"),
+      _BottomItem(img: "assets/images/account_circle.png", label: "Account"),
       //   _BottomItem(img: "assets/images/Frame 15.png", label: ""),
     ];
 
@@ -145,22 +139,6 @@ class _MainNavigationState extends State<MainNavigation> {
           children: List.generate(items.length, (index) {
             final item = items[index];
             final bool selected = _currentIndex == index;
-
-            if (index == 4) {
-              return GestureDetector(
-                onTap: () => {setState(() => _currentIndex = index)},
-
-                child: Container(
-                  child: Image.asset(
-                    item.img,
-                    height: 70,
-                    width: 75,
-                    fit: BoxFit.contain,
-                    color: ColorResources.greencolor,
-                  ),
-                ),
-              );
-            }
 
             return Expanded(
               child: InkWell(
@@ -175,7 +153,7 @@ class _MainNavigationState extends State<MainNavigation> {
                         height: 24,
                         width: 24,
                         color: selected
-                            ? ColorResources.greencolor
+                            ? ColorResources.blueeebutton
                             : ColorResources.blkackvoor,
                       ),
                       const SizedBox(height: 2),
@@ -184,7 +162,7 @@ class _MainNavigationState extends State<MainNavigation> {
                         style: opensansSemiBold.copyWith(
                           fontSize: 12,
                           color: selected
-                              ? ColorResources.greencolor
+                              ? ColorResources.blueeebutton
                               : ColorResources.blkackvoor,
                         ),
                       ),

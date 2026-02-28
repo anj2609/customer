@@ -1,3 +1,6 @@
+import 'package:evfual/data/controller/auth_controller.dart';
+import 'package:evfual/data/controller/swap_history.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:evfual/app/modules/Deshboard/buttom_navigation.dart';
@@ -6,12 +9,15 @@ import 'package:evfual/app/modules/swap_station.dart';
 import 'package:evfual/config/utils/colors.dart';
 import 'package:evfual/config/utils/constants.dart';
 import 'package:evfual/config/utils/style.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomAppDrawer extends StatelessWidget {
   const CustomAppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final SwapController swaipcontroller = Get.put(SwapController());
+
     return Drawer(
       backgroundColor: ColorResources.blkackvoor,
       width: MediaQuery.of(context).size.width * 0.78,
@@ -76,6 +82,7 @@ class CustomAppDrawer extends StatelessWidget {
                     image: "assets/images/money_svgrepo.com.png",
                     title: "Swap Station",
                     onTap: () {
+                      swaipcontroller.getSwapHistory();
                       Get.to(
                         () => SwapStattions(),
                         duration: const Duration(milliseconds: 0),
@@ -114,6 +121,37 @@ class CustomAppDrawer extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(25),
               child: GestureDetector(
+                onTap: () {
+                  showCupertinoDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CupertinoAlertDialog(
+                        title: Text("Are you sure?"),
+                        content: Text(
+                          "Do you really want to Logout Your Account",
+                        ),
+                        actions: [
+                          CupertinoDialogAction(
+                            child: Text("No"),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          CupertinoDialogAction(
+                            isDestructiveAction: true,
+                            child: Text("Yes"),
+                            onPressed: () async {
+                              Get.find<AuthController>().logOut();
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              prefs.clear();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(

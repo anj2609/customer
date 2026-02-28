@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -13,13 +12,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark,
+      statusBarColor: Colors.white,
+      statusBarIconBrightness: Brightness.dark, 
+      statusBarBrightness: Brightness.light,  
     ),
   );
+
   await di.init();
   runApp(MyApp());
   configLoading();
@@ -33,7 +35,7 @@ void configLoading() {
     ..indicatorSize = 45.0
     ..radius = 10.0
     ..progressColor = Colors.yellow
-    ..backgroundColor = ColorResources.blueeebutton
+    ..backgroundColor = ColorResources.primarycolor
     ..indicatorColor = Colors.white
     ..textColor = Colors.white
     ..maskColor = Colors.blue.withOpacity(0.5)
@@ -54,7 +56,6 @@ class _MyAppState extends State<MyApp> {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: Get.key,
-
       title: AppConstants.appName,
       initialRoute: RouteHelper.getSplashRoute(),
       getPages: RouteHelper.routes,
@@ -63,11 +64,10 @@ class _MyAppState extends State<MyApp> {
 
       builder: (context, child) {
         return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(
-            statusBarColor: ColorResources.blueeebutton,
-
-            statusBarIconBrightness: Brightness.light,
-            statusBarBrightness: Brightness.dark,
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.white, 
+            statusBarIconBrightness: Brightness.dark, 
+            statusBarBrightness: Brightness.light,
           ),
           child: EasyLoading.init()(context, child),
         );

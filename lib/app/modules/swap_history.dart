@@ -1,3 +1,5 @@
+import 'package:evfual/config/utils/colors.dart';
+import 'package:evfual/data/controller/swap_history.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:evfual/config/utils/style.dart';
@@ -10,6 +12,13 @@ class SwapHistory extends StatefulWidget {
 }
 
 class _SwapHistoryState extends State<SwapHistory> {
+  final SwapController swaipcontroller = Get.put(SwapController());
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    swaipcontroller.getSwapHistory();
+  }
   final List<Map<String, String>> historyList = [
     {
       "rec": "24 Nov 22",
@@ -106,8 +115,8 @@ class _SwapHistoryState extends State<SwapHistory> {
                 child: Padding(
                   padding: const EdgeInsets.only(
                     bottom: 10,
-                    right: 15,
-                    left: 15,
+                    right: 10,
+                    left: 10,
                   ),
                   child: Container(
                     decoration: BoxDecoration(
@@ -122,7 +131,7 @@ class _SwapHistoryState extends State<SwapHistory> {
                       children: [
                         /// 🔹 HEADER
                         Container(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: const BoxDecoration(
                             color: Color(0xFF0D1B3F),
                             borderRadius: BorderRadius.vertical(
@@ -139,39 +148,53 @@ class _SwapHistoryState extends State<SwapHistory> {
                           ),
                         ),
 
-                        /// 🔹 ROWS
                         Expanded(
-                          child: ListView.builder(
-                            itemCount: historyList.length,
-                            itemBuilder: (context, index) {
-                              final item = historyList[index];
-
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: index.isOdd
-                                      ? const Color(0xFFE6F1FF)
-                                      : Colors.white,
-                                  border: const Border(
-                                    bottom: BorderSide(
-                                      color: Color(0xFF10224C),
-                                      width: 0.8,
-                                    ),
+                          child: Obx(() {
+                            if (swaipcontroller.swapList.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  'No Swap History Found !',
+                                  style: opensansSemiBold.copyWith(
+                                    fontSize: 13.5,
+                                    color: ColorResources.primarycolor,
                                   ),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                child: Row(
-                                  children: [
-                                    _RowText(item["rec"]!),
-                                    _RowText(item["bs"]!),
-                                    _RowText(item["swap"]!),
-                                    _RowText(item["st"]!),
-                                  ],
-                                ),
                               );
-                            },
-                          ),
+                            }
+
+                            return ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: swaipcontroller.swapList.length,
+                              itemBuilder: (context, index) {
+                                final item = swaipcontroller.swapList[index];
+
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    color: index.isOdd
+                                        ? const Color(0xFFE6F1FF)
+                                        : Colors.white,
+                                    border: const Border(
+                                      bottom: BorderSide(
+                                        color: Color(0xFF10224C),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      _RowText(item["swap_date"]!),
+                                      _RowText(item["battery_serial_no"]!),
+                                      _RowText(item["swap_date"]!),
+                                      _RowText(item["address"]!),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          }),
                         ),
                       ],
                     ),
@@ -212,7 +235,7 @@ class _RowText extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: opensansSemiBold.copyWith(fontSize: 13, color: Colors.black),
+        style: opensansSemiBold.copyWith(fontSize: 11.5, color: Colors.black),
       ),
     );
   }

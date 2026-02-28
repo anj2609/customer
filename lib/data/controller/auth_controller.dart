@@ -1,9 +1,12 @@
+import 'dart:convert';
+
+import 'package:evfual/app/modules/Deshboard/buttom_navigation.dart';
+import 'package:evfual/app/modules/auth/login_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:evfual/app/modules/auth/login_otp.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:evfual/config/route.dart';
 import 'package:evfual/config/utils/constants.dart';
 import 'package:evfual/data/repository/auth_repo.dart';
@@ -15,31 +18,37 @@ class AuthController extends GetxController implements GetxService {
 
   Future<Response> userloginapi({
     required BuildContext context,
-    String? mobileemail,
+    String? evnumber,
+    String? passowrd,
   }) async {
     EasyLoading.show();
     update();
 
     Response response = await authRepo.usersignup(
-      numberemail: mobileemail!.trim(),
+      evnumber: evnumber!.trim(),
+      passsowrd: passowrd,
     );
 
     if (response.statusCode == 200) {
-      print(':::::::::${response.body['user_id']}');
+      print(':::::::::${response.body['status']}');
+
+      if (response.body['status'] == 200) {
+        print('id:::::${response.body['success']['userData']['id']}');
+        authRepo.saveUserToken(
+          response.body['success']['userData']['id'].toString(),
+        );
+        Get.offAll(
+          MainNavigation(),
+          duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+          transition: Transition.rightToLeft,
+        );
+      }
       EasyLoading.dismiss();
       Get.snackbar(
-        'Success',
-        'OTP has been sent successfully to your number $mobileemail.',
-        backgroundColor: Colors.green,
+        'Error',
+        response.body['error'],
+        backgroundColor: Colors.red,
         colorText: Colors.white,
-      );
-      Get.to(
-        OtpScreen(
-          mobileemail: mobileemail,
-          userid: '${response.body['user_id']}',
-        ),
-        duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-        transition: Transition.rightToLeft,
       );
     } else if (response.statusCode == 422) {
       EasyLoading.dismiss();
@@ -57,20 +66,118 @@ class AuthController extends GetxController implements GetxService {
     return response;
   }
 
-  Future<Response> ortverifyapi({
-    required BuildContext context,
+  Future<void> registerEV({
+    String? evnumber,
+    String? password,
+    String? confirmpassword,
+    String? ownername,
+    String? address,
+    String? phone,
+    String? email,
+    String? evrccopy,
+    String? idproof,
+    String? vehiclephoto,
+  }) async {
+    try {
+      var uri = Uri.parse("https://evfuel.akslearning.in/api/register");
+      var request = http.MultipartRequest('POST', uri);
+
+      request.fields.addAll({
+        'ev_number': evnumber ?? '',
+        'password': password ?? '',
+        'confirm_password': confirmpassword ?? '',
+        'owner_name': ownername ?? '',
+        'address': address ?? '',
+        'phone': phone ?? '',
+        'email': email ?? '',
+      });
+
+      /// 🔹 Files
+      if (evrccopy != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('ev_rc_copy', evrccopy),
+        );
+      }
+      if (idproof != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('id_proof', idproof),
+        );
+      }
+      if (vehiclephoto != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('vehicle_photo', vehiclephoto),
+        );
+      }
+
+      request.headers['Accept'] = 'application/json';
+
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+      var decoded = jsonDecode(responseBody);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Get.snackbar(
+          'Success',
+          decoded['message'] ?? 'Registration successful',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        Future.delayed(const Duration(seconds: 1), () {
+          Get.offAll(() => LoginScreen());
+        });
+      } else if (response.statusCode == 401 || response.statusCode == 422) {
+        if (decoded['error'] != null) {
+          /// show first validation error
+          String firstError = decoded['error'].values.first[0];
+
+          Get.snackbar(
+            'Error',
+            firstError,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } else {
+          Get.snackbar(
+            'Error',
+            decoded['message'] ?? 'Validation failed',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      }
+      /// ❌ SERVER ERROR
+      else {
+        Get.snackbar(
+          'Error',
+          decoded['message'] ?? 'Something went wrong',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    }
+    /// ❌ EXCEPTION (No internet, timeout, crash)
+    catch (e) {
+      Get.snackbar(
+        'Error',
+        'Something went wrong. Please try again',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      debugPrint("Exception 👉 $e");
+    }
+  }
+
+  Future<Response> subscribeadd({
+    required String subscrptionid,
     required String userid,
-    required String otp,
-    required String devicetoken,
-    required String mobilenu7mber,
   }) async {
     EasyLoading.show();
     update();
 
     Response response = await authRepo.otpverifyapi(
       useridd: userid,
-      otp: otp,
-      devicetoken: devicetoken,
+      subscrptionid: subscrptionid,
     );
 
     EasyLoading.dismiss();
@@ -78,45 +185,28 @@ class AuthController extends GetxController implements GetxService {
     final body = response.body;
 
     if (response.statusCode == 409 && body['status'] == "ALREADY_LOGGED_IN") {
-      Get.dialog(
-        CupertinoAlertDialog(
-          title: const Text('Session Alert'),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(body['message'] ?? ''),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Get.back(),
-              child: const Text('No'),
-            ),
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              onPressed: () {
-                Get.back();
-                secoundortverifyapi(
-                  context: Get.context!,
-                  userid: userid.toString(),
-                  otp: otp.toString(),
-                  devicetoken: devicetoken,
-                  mobilenu7mber: mobilenu7mber,
-                );
-              },
-              child: const Text('Yes'),
-            ),
-          ],
-        ),
-        barrierDismissible: false,
-      );
-    } else if (response.statusCode == 200 && body['status'] == true) {
-      authRepo.saveUserToken(body['token'].toString());
-      authRepo.saveUserprofileid(userid);
-
-     // await checkUser(userid, mobilenu7mber);
+    } else if (response.statusCode == 200) {
+      EasyLoading.dismiss();
+      if (response.body['status'] == 200) {
+        Get.snackbar(
+          'Success',
+          'Plan Upgrade Successful',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          body['error'] ?? 'Something went wrong',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     } else if (response.statusCode == 422) {
+      EasyLoading.dismiss();
       Get.snackbar(
         'Error',
-        body['message'] ?? 'Something went wrong',
+        body['error'] ?? 'Something went wrong',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -189,7 +279,7 @@ class AuthController extends GetxController implements GetxService {
 
       EasyLoading.dismiss();
 
-    //  await checkUser(userid, mobilenu7mber);
+      //  await checkUser(userid, mobilenu7mber);
     } else if (response.statusCode == 422) {
       EasyLoading.dismiss();
       Get.snackbar(

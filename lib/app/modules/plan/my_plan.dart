@@ -1,6 +1,10 @@
+import 'package:evfual/data/controller/plan_list.dart';
+import 'package:evfual/data/controller/profile_update.dart';
 import 'package:flutter/material.dart';
 import 'package:evfual/config/utils/style.dart';
 import 'package:evfual/widgets/drawer.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class MyPlanScreen extends StatefulWidget {
   const MyPlanScreen({super.key});
@@ -12,26 +16,8 @@ class MyPlanScreen extends StatefulWidget {
 class _MyPlanScreenState extends State<MyPlanScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final List<Map<String, dynamic>> plans = [
-    {
-      "name": "PLATINUM",
-      "used": "10 Batteries Consumed",
-      "days": "Expired In 15 Days",
-      "color": const Color(0xFF63C85B),
-    },
-    {
-      "name": "PLATINUM",
-      "used": "10 Batteries Consumed",
-      "days": "Expired In 15 Days",
-      "color": const Color(0xFF2E63A7),
-    },
-    {
-      "name": "PLATINUM",
-      "used": "10 Batteries Consumed",
-      "days": "Expired In 15 Days",
-      "color": const Color(0xFF5AA9E6),
-    },
-  ];
+  final controller = Get.put(PlanController());
+  final profileecontroller = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -81,11 +67,16 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
                             ),
 
                             CircleAvatar(
-                              radius: 18,
-                              backgroundImage: AssetImage(
-                                "assets/images/user 1.png",
-                              ),
-                            ),
+                                        radius: 18,
+                                        backgroundImage:
+                                            profileecontroller.profileimagee == null
+                                            ? AssetImage(
+                                                "assets/images/user 1.png",
+                                              )
+                                            : NetworkImage(
+                                                'https://evfuel.akslearning.in/${profileecontroller.profileimagee}',
+                                              ),
+                                      ),
                           ],
                         ),
                         SizedBox(height: 10),
@@ -109,22 +100,27 @@ class _MyPlanScreenState extends State<MyPlanScreen> {
 
               /// 🔹 LIST
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  itemCount: plans.length,
-                  itemBuilder: (context, index) {
-                    final item = plans[index];
-                    return SubscriptionCard(
-                      title: item["name"],
-                      usedText: item["used"],
-                      expiryText: item["days"],
-                      headerColor: item["color"],
-                    );
-                  },
-                ),
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (controller.plan.value == null) {
+                    return const Center(child: Text("No Plan Available"));
+                  }
+
+                  final item = controller.plan.value!;
+
+                  return Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: SubscriptionCard(
+                      title: item.planName,
+                      usedText: item.totalSwap.toString(),
+                      expiryText: item.validDateTill,
+                      headerColor: Colors.red,
+                    ),
+                  );
+                }),
               ),
             ],
           ),
@@ -155,11 +151,10 @@ class SubscriptionCard extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          /// 🔹 MAIN CARD
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.12),
@@ -169,15 +164,17 @@ class SubscriptionCard extends StatelessWidget {
               ],
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 /// 🔹 HEADER
                 Container(
+                  height: 60,
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
                     color: headerColor,
                     borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(14),
+                      top: Radius.circular(8),
                     ),
                   ),
                   child: Center(
@@ -185,7 +182,7 @@ class SubscriptionCard extends StatelessWidget {
                       "PACKAGE NAME: $title",
                       style: opensansSemiBold.copyWith(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 18,
                       ),
                     ),
                   ),
@@ -193,9 +190,8 @@ class SubscriptionCard extends StatelessWidget {
 
                 const SizedBox(height: 26),
 
-                /// 🔹 CENTER TEXT
                 Text(
-                  usedText,
+                  '$usedText Batteries Consumed',
                   style: opensansSemiBold.copyWith(
                     fontSize: 18,
                     color: Colors.black,
@@ -208,7 +204,8 @@ class SubscriptionCard extends StatelessWidget {
           ),
 
           Positioned(
-            bottom: -17,
+            top: 135,
+
             left: 0,
             right: 0,
             child: Center(
@@ -234,11 +231,20 @@ class SubscriptionCard extends StatelessWidget {
                     const Icon(
                       Icons.access_time,
                       color: Colors.white,
-                      size: 18,
+                      size: 15,
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      expiryText,
+                      'Expired In ',
+                      style: opensansSemiBold.copyWith(
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      DateFormat(
+                        'dd-MM-yyyy',
+                      ).format(DateTime.parse(expiryText)),
                       style: opensansSemiBold.copyWith(
                         color: Colors.white,
                         fontSize: 13,

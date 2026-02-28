@@ -8,22 +8,20 @@ class AuthRepo extends GetxService {
   final SharedPreferences sharedPreferences;
   AuthRepo({required this.apiClient, required this.sharedPreferences});
 
-  Future<Response> usersignup({String? numberemail}) async {
+  Future<Response> usersignup({String? evnumber, String? passsowrd}) async {
     return apiClient.postData(ApiConstants.loginapi, {
-      "mobile_email": numberemail,
+      "ev_number": evnumber,
+      "password": passsowrd,
     });
   }
 
   Future<Response> otpverifyapi({
     String? useridd,
-    String? otp,
-    String? devicetoken,
+    String? subscrptionid,
   }) async {
     return apiClient.postData(ApiConstants.otpapi, {
-      "application": 'true',
-      "userId": useridd,
-      "otp": otp,
-      "device_token": devicetoken,
+      "user_id": useridd,
+      "subscription_id": subscrptionid,
     });
   }
 

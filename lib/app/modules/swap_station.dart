@@ -1,3 +1,4 @@
+import 'package:evfual/data/controller/swap_station.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:evfual/config/utils/colors.dart';
@@ -11,6 +12,15 @@ class SwapStattions extends StatefulWidget {
 }
 
 class _SwapStattionsState extends State<SwapStattions> {
+  final swapcontroller = Get.put(NearestSwapStationController());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    swapcontroller.fetchNearestStations();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,105 +81,115 @@ class _SwapStattionsState extends State<SwapStattions> {
               ),
 
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 10,
-                    right: 15,
-                    left: 15,
-                  ),
-                  child: Column(
-                    children: [
-                      _stationCard(isHighlighted: true),
-                      _stationCard(),
-                      _stationCard(isHighlighted: true),
-                      _stationCard(),
-                    ],
-                  ),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: swapcontroller.stationList.length,
+                  itemBuilder: (context, index) {
+                    final station = swapcontroller.stationList[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        left: 12,
+                        right: 12,
+                        bottom: 10,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0xFFDBFBE8), Color(0xFFFFFFFF)],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.12),
+                              blurRadius: 16,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "${station.ownerName}",
+                                  style: opensansSemiBold.copyWith(
+                                    fontSize: 15,
+                                    color: ColorResources.blueeebutton,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    "${station.distance} Km",
+                                    style: opensansSemiBold.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  color: Colors.orange,
+                                  size: 18,
+                                ),
+                                SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    "${station.address}",
+                                    style: opensansSemiBold.copyWith(
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 5),
+
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.directions,
+                                  color: Colors.green,
+                                  size: 18,
+                                ),
+                                SizedBox(width: 6),
+                                Text(
+                                  "Get Direction",
+                                  style: opensansSemiBold.copyWith(
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _stationCard({bool isHighlighted = false}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFDBFBE8), Color(0xFFFFFFFF)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 16,
-            spreadRadius: 2,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "AKS Swap Station",
-                style: opensansSemiBold.copyWith(
-                  fontSize: 15,
-                  color: ColorResources.blueeebutton,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.amber,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  "1.5 Km",
-                  style: opensansSemiBold.copyWith(
-                    color: Colors.white,
-                    fontSize: 11,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 6),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.location_on, color: Colors.orange, size: 18),
-              SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  "IThum Tower A, Noida Sector 62, Uttar Pradesh. (201301)",
-                  style: opensansSemiBold.copyWith(fontSize: 11),
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: 5),
-
-          Row(
-            children: [
-              Icon(Icons.directions, color: Colors.green, size: 18),
-              SizedBox(width: 6),
-              Text(
-                "Get Direction",
-                style: opensansSemiBold.copyWith(fontSize: 11),
               ),
             ],
           ),

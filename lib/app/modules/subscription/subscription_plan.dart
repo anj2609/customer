@@ -1,6 +1,11 @@
+import 'package:evfual/data/controller/auth_controller.dart';
+import 'package:evfual/data/controller/profile_update.dart';
+import 'package:evfual/data/controller/subscription_list.dart';
 import 'package:flutter/material.dart';
 import 'package:evfual/config/utils/style.dart';
 import 'package:evfual/widgets/drawer.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SubscirptinPlan extends StatefulWidget {
   const SubscirptinPlan({super.key});
@@ -11,152 +16,123 @@ class SubscirptinPlan extends StatefulWidget {
 
 class _SubscirptinPlanState extends State<SubscirptinPlan> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  int currentIndex = 0;
-  final List<PlanModel> plans = [
-    PlanModel(
-      title: "PLAN 999",
-      subtitle: "[ Ideal For 30+ Swaps ]",
-      price: 999,
-      days: 30,
-      rate: 99,
-      freeSwaps: 5,
-      topColor: const Color(0xFF6CF47A),
-      midColor: const Color(0xFFBDF5B8),
-      buttonColor: const Color(0xFF8EF081),
-    ),
-    PlanModel(
-      title: "PLAN 1499",
-      subtitle: "[ Ideal For 45+ Swaps ]",
-      price: 1499,
-      days: 45,
-      rate: 79,
-      freeSwaps: 7,
-      topColor: const Color(0xFFFFE08A),
-      midColor: const Color(0xFFFFEDB7),
-      buttonColor: const Color(0xFFFFD56A),
-    ),
-  ];
+  // int currentIndex = 0;
+  // final controller = Get.put(SubscriptionController());
+  // final profileecontroller = Get.put(ProfileController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: CustomAppDrawer(),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset("assets/images/iPhone2.png", fit: BoxFit.cover),
-          ),
+     // drawer: CustomAppDrawer(),
+      body: Center(child: Text('Comming Soon'),)
+      // Stack(
+      //   children: [
+      //     Positioned.fill(
+      //       child: Image.asset("assets/images/iPhone2.png", fit: BoxFit.cover),
+      //     ),
 
-          Column(
-            children: [
-              SizedBox(
-                height: 160,
-                width: double.infinity,
-                child: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.menu,
-                                color: Colors.white,
-                                size: 30,
-                              ),
-                              onPressed: () {
-                                _scaffoldKey.currentState!.openDrawer();
-                              },
-                            ),
-                            Image.asset(
-                              'assets/images/logo.png',
-                              height: 60,
-                              width: 100,
-                            ),
+      //     Column(
+      //       children: [
+      //         SizedBox(
+      //           height: 160,
+      //           width: double.infinity,
+      //           child: SafeArea(
+      //             bottom: false,
+      //             child: Padding(
+      //               padding: const EdgeInsets.symmetric(
+      //                 horizontal: 10,
+      //                 vertical: 6,
+      //               ),
+      //               child:
+      //                Column(
+      //                 crossAxisAlignment: CrossAxisAlignment.start,
+      //                 children: [
+      //                   Row(
+      //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //                     children: [
+      //                       IconButton(
+      //                         icon: const Icon(
+      //                           Icons.menu,
+      //                           color: Colors.white,
+      //                           size: 30,
+      //                         ),
+      //                         onPressed: () {
+      //                           _scaffoldKey.currentState!.openDrawer();
+      //                         },
+      //                       ),
+      //                       Image.asset(
+      //                         'assets/images/logo.png',
+      //                         height: 60,
+      //                         width: 100,
+      //                       ),
 
-                            CircleAvatar(
-                              radius: 18,
-                              backgroundImage: AssetImage(
-                                "assets/images/user 1.png",
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 15),
-                          child: Center(
-                            child: Text(
-                              "Subscription Plan",
-                              style: opensansSemiBold.copyWith(
-                                color: Colors.white,
-                                fontSize: 22,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+      //                       CircleAvatar(
+      //                         radius: 18,
+      //                         backgroundImage:
+      //                             profileecontroller.profileimagee == null
+      //                             ? AssetImage("assets/images/user 1.png")
+      //                             : NetworkImage(
+      //                                 'https://evfuel.akslearning.in/${profileecontroller.profileimagee}',
+      //                               ),
+      //                       ),
+      //                     ],
+      //                   ),
+      //                   SizedBox(height: 10),
+      //                   Padding(
+      //                     padding: const EdgeInsets.only(left: 15),
+      //                     child: Center(
+      //                       child: Text(
+      //                         "Subscription Plan",
+      //                         style: opensansSemiBold.copyWith(
+      //                           color: Colors.white,
+      //                           fontSize: 22,
+      //                         ),
+      //                       ),
+      //                     ),
+      //                   ),
+      //                 ],
+      //               ),
+      //             ),
+      //           ),
+      //         ),
 
-              /// 🔹 LIST SECTION
-              Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: plans.length,
-                  itemBuilder: (context, index) {
-                    return PlanCard(
-                      plan: plans[index],
-                      onSubscribe: () {
-                        debugPrint("Subscribed ${plans[index].title}");
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+      //         /// 🔹 LIST SECTION
+      //         Expanded(
+      //           child: Obx(() {
+      //             if (controller.isLoading.value) {
+      //               return Center(child: CircularProgressIndicator());
+      //             }
+
+      //             return ListView.builder(
+      //               padding: EdgeInsets.zero,
+      //               itemCount: controller.subscriptionList.length,
+      //               itemBuilder: (context, index) {
+      //                 final plan = controller.subscriptionList[index];
+      //                 return PlanCard(
+      //                   plan: plan,
+      //                   onSubscribe: () {
+      //                     print('Plan IDdd:::${plan.subscriptionId}');
+      //                     // debugPrint("Subscribed ${plans[index].title}");
+      //                   },
+      //                 );
+      //               },
+      //             );
+      //           }),
+      //         ),
+      //       ],
+      //     ),
+      //   ],
+      // ),
+   
+   
+   
     );
   }
 }
 
-class PlanModel {
-  final String title;
-  final String subtitle;
-  final int price;
-  final int days;
-  final int rate;
-  final int freeSwaps;
-  final Color topColor;
-  final Color midColor;
-  final Color buttonColor;
-
-  PlanModel({
-    required this.title,
-    required this.subtitle,
-    required this.price,
-    required this.days,
-    required this.rate,
-    required this.freeSwaps,
-    required this.topColor,
-    required this.midColor,
-    required this.buttonColor,
-  });
-}
-
 class PlanCard extends StatelessWidget {
-  final PlanModel plan;
+  final SubscriptionModel plan;
   final VoidCallback onSubscribe;
 
   const PlanCard({super.key, required this.plan, required this.onSubscribe});
@@ -169,109 +145,127 @@ class PlanCard extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         clipBehavior: Clip.none,
         children: [
-          // ---------------- CARD ----------------
-          Container(
-            padding: const EdgeInsets.only(bottom: 45), // 🔑 button space
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // TOP
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: plan.topColor,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(22),
+          GestureDetector(
+            onTap: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              String? token = prefs.getString("token");
+              Get.find<AuthController>().subscribeadd(
+                userid: token!,
+                subscrptionid: plan.subscriptionId.toString(),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.only(bottom: 45),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // TOP
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: plan.bgColor,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(22),
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        plan.title,
-                        style: opensansSemiBold.copyWith(fontSize: 17),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        plan.subtitle,
-                        style: opensansSemiBold.copyWith(fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // PRICE
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  color: plan.midColor,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "₹${plan.price}",
-                        style: opensansSemiBold.copyWith(fontSize: 38),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        "/ For ${plan.days} Days",
-                        style: opensansSemiBold.copyWith(fontSize: 15),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // RATE
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  color: plan.midColor.withOpacity(.7),
-                  child: Center(
-                    child: Text(
-                      "RATE PER SWAP : ₹${plan.rate}",
-                      style: opensansSemiBold.copyWith(fontSize: 16),
-                    ),
-                  ),
-                ),
-
-                // FREE SWAPS
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Free Swaps: ${plan.freeSwaps}",
-                        style: opensansSemiBold.copyWith(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                    child: Column(
+                      children: [
+                        Text(
+                          plan.planName,
+                          style: opensansSemiBold.copyWith(fontSize: 17),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      const Icon(Icons.list_alt),
-                    ],
+                        const SizedBox(height: 3),
+                        Text(
+                          plan.description,
+                          style: opensansSemiBold.copyWith(fontSize: 13),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  Container(height: 1, color: Colors.white),
+                  // Divider(),
+                  // PRICE
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    color: plan.bgColor..withOpacity(.10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "₹${plan.planPrice}",
+                          style: opensansSemiBold.copyWith(fontSize: 38),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "/ For ${plan.validityDays} Days",
+                          style: opensansSemiBold.copyWith(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(height: 1, color: Colors.white),
+
+                  // RATE
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    color: plan.bgColor.withOpacity(.5),
+                    child: Center(
+                      child: Text(
+                        "RATE PER SWAP : ₹${plan.ratePerSwap}",
+                        style: opensansSemiBold.copyWith(fontSize: 16),
+                      ),
+                    ),
+                  ),
+
+                  // FREE SWAPS
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Free Swaps: ${plan.freeSwap}",
+                          style: opensansSemiBold.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Icon(Icons.list_alt),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
           // ---------------- BUTTON (OUTSIDE) ----------------
           Positioned(
-            bottom: -22,
+            bottom: -15,
             child: GestureDetector(
-              onTap: onSubscribe,
+              onTap: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                String? token = prefs.getString("token");
+                Get.find<AuthController>().subscribeadd(
+                  userid: token!,
+                  subscrptionid: plan.subscriptionId.toString(),
+                );
+              },
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 42,
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: plan.buttonColor,
+                  color: plan.bgColor,
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
