@@ -1,5 +1,6 @@
 import 'package:evfual/app/modules/activity/activity.dart';
 import 'package:evfual/config/utils/colors.dart';
+import 'package:evfual/config/utils/style.dart';
 import 'package:evfual/data/controller/canceled.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -67,7 +68,7 @@ class _CanceledScreenState extends State<CanceledScreen> {
         margin: EdgeInsets.only(bottom: height * 0.015),
         padding: EdgeInsets.all(width * 0.04),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: ColorResources.whiteColor,
           borderRadius: BorderRadius.circular(15),
         ),
         child: Row(
@@ -91,9 +92,8 @@ class _CanceledScreenState extends State<CanceledScreen> {
                 children: [
                   Text(
                     item.title,
-                    style: TextStyle(
-                      fontSize: width * 0.038,
-                      fontWeight: FontWeight.w600,
+                     style: PoppinsSemiBold.copyWith(
+                     // color: ColorResources.blackcolor,
                     ),
                   ),
                   SizedBox(height: 4),

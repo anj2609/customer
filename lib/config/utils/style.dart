@@ -35,5 +35,10 @@ final PoppinsBold= TextStyle(
 );
 final PoppinsMedium= TextStyle(
   fontFamily: 'Poppins',
- fontWeight: FontWeight.w500,
+ fontWeight: FontWeight.w400,
+);
+final PoppinsExtrabold= TextStyle(
+  fontFamily: 'Poppins',
+ fontWeight: FontWeight.w800,
+ 
 );

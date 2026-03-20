@@ -28,6 +28,13 @@ class Dimensions {
   static const double spacingSize10 = 10.0;
   static const double spacingSize18 = 18.0;
   static const double spacingSize25 = 25.0;
-
-  static const double smallPadding = 13.0;
+  static const double spacingSize20 = 20.0;
+   static const double spacingSize30 = 30.0;
+    static const double spacingSize16 = 16.0;
+      static const double spacingSize11 = 11.0;
+        static const double spacingSize40 = 40.0;
+         static const double spacingSize14 = 40.0;
+    
+ 
+  
 }

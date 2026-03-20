@@ -1,5 +1,6 @@
 import 'package:evfual/app/modules/Deshboard/driverheading_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class FindingDriverUI extends StatefulWidget {
@@ -16,10 +17,15 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
 
     Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const DriverHeadingScreen()),
-        );
+          Get.to(
+            Get.to(DriverHeadingScreen()),
+            transition: Transition.leftToRight,
+            duration: Duration(milliseconds: 0),
+          );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (_) => const DriverHeadingScreen()),
+        // );
       }
     });
   }
@@ -188,11 +194,6 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   }
 }
 
-
-
-
-
-
 ////// finding  loader ==============
 class RippleLoader extends StatefulWidget {
   const RippleLoader({super.key});
@@ -258,5 +259,3 @@ class _RippleLoaderState extends State<RippleLoader>
     );
   }
 }
-
-

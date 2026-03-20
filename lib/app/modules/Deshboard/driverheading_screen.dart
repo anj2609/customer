@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'package:evfual/app/modules/Deshboard/cancel_ride_screen.dart';
+import 'package:evfual/app/modules/Deshboard/driverprofile_screen.dart';
 import 'package:evfual/app/modules/Deshboard/driverrating_screen.dart';
 import 'package:evfual/app/modules/Deshboard/search_screen.dart';
 import 'package:evfual/app/modules/chats/chat_screen.dart';
@@ -135,10 +137,13 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
                 ],
               ),
               child: Column(
-                children: const [
+                children: [
                   Row(
                     children: [
-                      Icon(Icons.location_on, color: Colors.blue),
+                      Icon(
+                        Icons.location_on,
+                        color: ColorResources.blueeebutton,
+                      ),
                       SizedBox(width: 8),
                       Expanded(child: Text("Bobst Library")),
                     ],
@@ -149,7 +154,7 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
                       Icon(Icons.location_on, color: Colors.red),
                       SizedBox(width: 8),
                       Expanded(child: Text("Larchmont Hotel")),
-                      Icon(Icons.add, color: Colors.blue),
+                      Icon(Icons.add, color: ColorResources.blueeebutton),
                     ],
                   ),
                 ],
@@ -178,27 +183,36 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
                   const SizedBox(height: 6),
                   Text(
                     "Driver will arriving in 1 min...",
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: ColorResources.blackcolor11),
                   ),
                   const SizedBox(height: 10),
 
-                  const Text(
+                  Text(
                     "TATA TIGOR, White - TR 05 CB 2446",
                     style: TextStyle(
-                      color: Colors.blue,
+                      color: ColorResources.blueeebutton,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
 
                   const SizedBox(height: 16),
 
-                  /// DRIVER ROW
                   Row(
                     children: [
-                      const CircleAvatar(
-                        radius: 24,
-                        backgroundImage: NetworkImage(
-                          "https://i.pravatar.cc/150?img=3",
+                      GestureDetector(
+                        onTap: () {
+                          Get.to(
+                            Get.to(DriverProfileScreen()),
+                            transition: Transition.leftToRight,
+                            duration: Duration(milliseconds: 0),
+                          );
+                        },
+
+                        child: CircleAvatar(
+                          radius: 24,
+                          backgroundImage: NetworkImage(
+                            "https://i.pravatar.cc/150?img=3",
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -223,16 +237,21 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
                       /// CHAT BUTTON
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => ChatScreen()),
+                          Get.to(
+                            Get.to(DriverProfileScreen()),
+                            transition: Transition.leftToRight,
+                            duration: Duration(milliseconds: 0),
                           );
+                          // Navigator.push (
+                          //   context,
+                          //   MaterialPageRoute(builder: (_) => ChatScreen()),
+                          // );
                         },
                         child: Container(
                           height: 46,
                           width: 46,
                           decoration: BoxDecoration(
-                            color: Colors.blue,
+                            color: ColorResources.blueeebutton,
                             borderRadius: BorderRadius.circular(25),
                           ),
                           child: const Icon(Icons.chat, color: Colors.white),
@@ -263,7 +282,7 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
                         height: 46,
                         width: 46,
                         decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: ColorResources.blueeebutton,
                           borderRadius: BorderRadius.circular(25),
                         ),
                         child: const Icon(Icons.call, color: Colors.white),
@@ -313,13 +332,12 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
                   ),
 
                   /// CANCEL BUTTON
-                  GestureDetector(
+                  InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const DriverRatingScreen(),
-                        ),
+                      Get.to(
+                        Get.to(CancelRideScreen()),
+                        transition: Transition.leftToRight,
+                        duration: Duration(milliseconds: 0),
                       );
                     },
                     child: Container(

@@ -4,6 +4,7 @@ import 'package:evfual/app/modules/profile/profile.dart';
 import 'package:evfual/config/utils/colors.dart';
 import 'package:evfual/config/utils/style.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 
@@ -50,17 +51,22 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   }
 
   void goToNextScreen() {
-    if (widget.type == "Sign in") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => MainNavigation()),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => ProfilePage()),
-      );
-    }
+    // if (widget.type == "Sign in") {
+    //   Navigator.pushReplacement(
+    //     context,
+    //     MaterialPageRoute(builder: (_) => MainNavigation()),
+    //   );
+    // } else {
+    Get.to(
+                            Get.to(ProfilePage()),
+                            transition: Transition.leftToRight,
+                            duration: Duration(milliseconds: 0),
+                          );
+    // Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(builder: (_) => ProfilePage()),
+    // );
+    // }
   }
 
   @override
@@ -84,9 +90,9 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
     );
 
     return Scaffold(
-        backgroundColor:ColorResources.backgroundColor,
+      backgroundColor: ColorResources.backgroundColor,
       appBar: AppBar(
-          backgroundColor:ColorResources.backgroundColor,
+        backgroundColor: ColorResources.backgroundColor,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
@@ -94,7 +100,6 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
 
           icon: Icon(Icons.arrow_back, color: ColorResources.blackcolor11),
         ),
-        
       ),
       body: SafeArea(
         child: Padding(

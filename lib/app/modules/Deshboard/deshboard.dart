@@ -2,20 +2,18 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:evfual/app/modules/Deshboard/search_screen.dart';
+import 'package:evfual/config/utils/dimensions.dart';
 import 'package:evfual/config/utils/style.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:geocoding/geocoding.dart';
-import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
+
 import 'package:get/get.dart';
 
-import 'package:evfual/config/route.dart';
-import 'package:evfual/config/utils/app_constants.dart';
 import 'package:evfual/config/utils/colors.dart';
 import 'package:evfual/config/utils/helper/get_di.dart' as di;
 
@@ -28,6 +26,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   GoogleMapController? mapController;
+  int selectedIndex = 0;
 
   LatLng? currentLocation;
 
@@ -218,6 +217,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+ @override
+  void dispose() {
+    mapController!.dispose();
+    super.dispose();
+  }
   // ================= MARKERS =================
 
   Set<Marker> buildMarkers() {
@@ -275,58 +279,66 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Container(
               height: 200,
               padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: ColorResources.whiteColor,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
                 boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12)],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Where to?",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: PoppinsMedium.copyWith(
+                      color: ColorResources.blackcolor,
+                    ),
                   ),
 
                   const SizedBox(height: 15),
 
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Image.asset("assets/images/loaction.png"),
-                       // Icon(Icons.search),
-                        SizedBox(width: 10),
-                        Text(
-                          "Enter location",
-                          style: PoppinsReguler.copyWith(color: ColorResources.textdetailsColor),
-                        ),
-                      ],
+                  GestureDetector(
+                    onTap: () {
+                      Get.to(
+                        SearchLocationScreen(),
+                        transition: Transition.leftToRight,
+                        duration: Duration(milliseconds: 0),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset("assets/images/loaction.png"),
+                          // Icon(Icons.search),
+                          SizedBox(width: 10),
+                          Text(
+                            "Enter location",
+                            style: PoppinsReguler.copyWith(
+                              color: ColorResources.textdetailsColor,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
                   const SizedBox(height: 15),
                   SizedBox(
-  height: 50,
-  child: ListView(
-    scrollDirection: Axis.horizontal,
-    children: [
-      locationItem("Home", true),
-      locationItem("Office", false),
-      locationItem("Apartment", false),
-      locationItem("Mom’s house", false),
-    ],
-  ),
-)
-
-                  // Wrap(
-                  //   spacing: 10,
-                  //   children: [locationChip("Home"), locationChip("Office"), locationChip("Apartment")],
-                  // ),
+                    height: 50,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        locationItem("Home", 0),
+                        locationItem("Office", 1),
+                        locationItem("Apartment", 2),
+                        locationItem("Mom’s house", 3),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -335,230 +347,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-Widget locationItem(String text, bool isSelected) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-    margin: const EdgeInsets.only(right: 10),
-    decoration: BoxDecoration(
-      color: isSelected ? ColorResources.blueeebutton : ColorResources.backgroundColor,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(
-        color: isSelected ? ColorResources.blueeebutton : ColorResources.backgroundColor,
+
+  Widget locationItem(String text, int index) {
+    bool isSelected = selectedIndex == index;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedIndex = index;
+        });
+      },
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(
+          horizontal: Dimensions.spacingSize12,
+          vertical: Dimensions.spacingSize12,
+        ),
+        margin: const EdgeInsets.only(right: Dimensions.spacingSize12),
+        decoration: BoxDecoration(
+          color: isSelected ? ColorResources.blueeebutton : Colors.white,
+          borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
+          border: Border.all(
+            color: isSelected
+                ? ColorResources.blueeebutton
+                : Colors.grey.shade300,
+            width: 1.2,
+          ),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: PoppinsReguler.copyWith(
+            //  / fontWeight: FontWeight.w500,
+            color: isSelected
+                ? ColorResources.whiteColor
+                : ColorResources.blackcolor11,
+          ),
+        ),
       ),
-    ),
-    child: Text(
-      text,
-      style: TextStyle(
-        color: isSelected ? Colors.white : Colors.black87,
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-      ),
-    ),
-  );
+
+      //  Container(
+      //   alignment: Alignment.center,
+      //   padding: const EdgeInsets.symmetric(horizontal:Dimensions.spacingSize12, vertical: Dimensions.spacingSize12),
+      //   margin: const EdgeInsets.only(right: Dimensions.spacingSize12),
+      //   decoration: BoxDecoration(
+      //     color: isSelected
+      //         ? ColorResources
+      //               .blueeebutton
+      //         : Colors.white,
+      //     borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
+      //     border: Border.all(
+      //       color: isSelected
+      //           ? ColorResources.blueeebutton
+      //           : Colors.grey.shade300, //
+      //       width: 1.2,
+      //     ),
+      //   ),
+      //   child: Text(
+      //     text,
+      //     style: PoppinsReguler.copyWith(
+      //       color: isSelected ? ColorResources.whiteColor :ColorResources.blackcolor11,
+      //     ),
+      //   ),
+      // ),
+    );
+  }
 }
-  
-  // Widget chip(String text) {
-  //   return Chip(label: Text(text),
-  //    backgroundColor: Colors.grey.shade200);
-  // }
-}
-// GoogleMapController? mapController;
-
-// LatLng? currentLocation;
-// LatLng? destinationLocation;
-
-// final CameraPosition initialCamera = const CameraPosition(
-//   target: LatLng(28.6139, 77.2090),
-//   zoom: 14,
-// );
-
-// @override
-// void initState() {
-//   super.initState();
-//   checkLocationPermission();
-// }
-
-// /// ================= LOCATION PERMISSION =================
-// Future<void> checkLocationPermission() async {
-//   LocationPermission permission = await Geolocator.checkPermission();
-
-//   if (permission == LocationPermission.denied ||
-//       permission == LocationPermission.deniedForever) {
-//     showLocationPopup();
-//   } else {
-//     getCurrentLocation();
-//   }
-// }
-
-// /// ================= POPUP =================
-// void showLocationPopup() {
-//   showDialog(
-//     context: context,
-//     barrierDismissible: false,
-//     builder: (_) {
-//       return Dialog(
-//         shape: RoundedRectangleBorder(
-//           borderRadius: BorderRadius.circular(20),
-//         ),
-//         child: Padding(
-//           padding: const EdgeInsets.all(20),
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               const Icon(Icons.location_on, size: 60, color: Colors.blue),
-//               const SizedBox(height: 20),
-//               const Text(
-//                 "Enable Location",
-//                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//               ),
-//               const SizedBox(height: 10),
-//               const Text(
-//                 "To use service we need your location permission",
-//                 textAlign: TextAlign.center,
-//               ),
-//               const SizedBox(height: 20),
-//               ElevatedButton(
-//                 style: ElevatedButton.styleFrom(
-//                   backgroundColor: Colors.blue,
-//                   minimumSize: const Size(double.infinity, 50),
-//                 ),
-//                 onPressed: () async {
-//                   Navigator.pop(context);
-//                   await Geolocator.requestPermission();
-//                   getCurrentLocation();
-//                 },
-//                 child: const Text("Grant Permission"),
-//               ),
-//               TextButton(
-//                 onPressed: () => Navigator.pop(context),
-//                 child: const Text("Maybe Later"),
-//               ),
-//             ],
-//           ),
-//         ),
-//       );
-//     },
-//   );
-// }
-
-// /// ================= GET CURRENT LOCATION =================
-// Future<void> getCurrentLocation() async {
-//   Position pos = await Geolocator.getCurrentPosition(
-//     desiredAccuracy: LocationAccuracy.high,
-//   );
-
-//   currentLocation = LatLng(pos.latitude, pos.longitude);
-
-//   setState(() {});
-
-//   mapController?.animateCamera(CameraUpdate.newLatLng(currentLocation!));
-// }
-
-// /// ================= MARKERS =================
-// Set<Marker> getMarkers() {
-//   Set<Marker> markers = {};
-
-//   if (currentLocation != null) {
-//     markers.add(
-//       Marker(markerId: const MarkerId("current"), position: currentLocation!),
-//     );
-//   }
-
-//   if (destinationLocation != null) {
-//     markers.add(
-//       Marker(
-//         markerId: const MarkerId("dest"),
-//         position: destinationLocation!,
-//         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-//       ),
-//     );
-//   }
-
-//   return markers;
-// }
-
-// /// ================= UI =================
-// @override
-// Widget build(BuildContext context) {
-//   return Scaffold(
-//     body: Stack(
-//       children: [
-//         /// ===== MAP =====
-//         GoogleMap(
-//           initialCameraPosition: initialCamera,
-//           myLocationEnabled: true,
-//           markers: getMarkers(),
-//           onMapCreated: (c) => mapController = c,
-//         ),
-
-//         /// ===== BOTTOM SEARCH BOX =====
-//         Positioned(
-//           bottom: 0,
-//           left: 0,
-//           right: 0,
-//           child: Container(
-//             height: 200,
-//             padding: const EdgeInsets.all(15),
-//             decoration: const BoxDecoration(
-//               color: Colors.white,
-//               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-//             ),
-//             child: Column(
-//               mainAxisSize: MainAxisSize.min,
-//               children: [
-//                 Align(
-//                   alignment: Alignment.centerLeft,
-//                   child: Text(
-//                     "Where to?",
-//                     style: TextStyle(
-//                       fontSize: 18,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                 ),
-//                 const SizedBox(height: 10),
-
-//                 /// ===== CLICK OPEN SEARCH PAGE =====
-//                 GestureDetector(
-//                   onTap: () async {
-//                     LatLng? result = await Navigator.push(
-//                       context,
-//                       MaterialPageRoute(
-//                         builder: (_) => const SearchLocationScreen(),
-//                       ),
-//                     );
-
-//                     if (result != null) {
-//                       destinationLocation = result;
-//                       setState(() {});
-//                     }
-//                   },
-//                   child: Container(
-//                     padding: const EdgeInsets.all(14),
-//                     decoration: BoxDecoration(
-//                       color: Colors.grey.shade200,
-//                       borderRadius: BorderRadius.circular(12),
-//                     ),
-//                     child: const Row(
-//                       children: [
-//                         Icon(Icons.search),
-//                         SizedBox(width: 10),
-//                         Text("Enter location"),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ],
-//     ),
-//   );
-
-/// =================================================
-/// ================= SEARCH SCREEN =================
-/// =================================================
 
 class SearchLocationScreen extends StatefulWidget {
   const SearchLocationScreen({super.key});
@@ -566,6 +420,11 @@ class SearchLocationScreen extends StatefulWidget {
   @override
   State<SearchLocationScreen> createState() => _SearchLocationScreenState();
 }
+
+
+
+
+
 
 class _SearchLocationScreenState extends State<SearchLocationScreen> {
   TextEditingController searchController = TextEditingController();
@@ -645,11 +504,11 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
         children: [
           /// ===== TOP CARD (Screenshot जैसा) =====
           Container(
-            margin: const EdgeInsets.all(16),
+            margin: const EdgeInsets.all(Dimensions.spacingSize16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(Dimensions.spacingSize16),
             ),
             child: Column(
               children: [
@@ -657,7 +516,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                 Row(
                   children: [
                     const Icon(Icons.my_location, color: Colors.blue),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: Dimensions.spacingSize10),
                     Expanded(child: Text(currentAddress)),
                   ],
                 ),
@@ -673,7 +532,9 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                     filled: true,
                     fillColor: Colors.grey.shade200,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(
+                        Dimensions.spacingSize12,
+                      ),
                       borderSide: BorderSide.none,
                     ),
                   ),
@@ -733,9 +594,9 @@ class _PromosScreenState extends State<PromosScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 18,
-                    backgroundColor: Colors.blue,
+                    backgroundColor: ColorResources.blueeebutton,
                     child: Text(
                       "My",
                       style: TextStyle(color: Colors.white, fontSize: 10),
@@ -762,8 +623,8 @@ class _PromosScreenState extends State<PromosScreen> {
                   border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Row(
-                  children: const [
-                    Icon(Icons.discount, color: Colors.blue),
+                  children: [
+                    Icon(Icons.discount, color: ColorResources.blueeebutton),
                     SizedBox(width: 10),
                     Expanded(
                       child: Column(
@@ -807,7 +668,9 @@ class _PromosScreenState extends State<PromosScreen> {
                       margin: const EdgeInsets.only(right: 10),
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.blue : Colors.white,
+                        color: isSelected
+                            ? ColorResources.blueeebutton
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: Colors.grey.shade300),
                       ),
@@ -1054,6 +917,7 @@ class RideDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(15),

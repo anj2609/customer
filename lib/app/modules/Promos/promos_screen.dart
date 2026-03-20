@@ -19,9 +19,28 @@ class PromoScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.white,
         centerTitle: true,
-        title: const Text("Promos", style: TextStyle(color: Colors.black)),
-        actions: const [
-          Icon(Icons.more_vert, color: Colors.black),
+        leading: Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: 
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: ColorResources.blueeebutton,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset('assets/images/splashscreen.png'),
+              ),
+            ),
+          ),
+        ),
+
+        title: Text(
+          "Promos",
+          style: PoppinsMedium.copyWith(color: ColorResources.blackcolor11),
+        ),
+
+        actions: [
+          Icon(Icons.more_vert, color: ColorResources.blackcolor),
           SizedBox(width: 10),
         ],
       ),
@@ -82,16 +101,12 @@ class PromoScreen extends StatelessWidget {
                 Text(
                   "Have a Promo Code?",
                   style: PoppinsBold.copyWith(
-                    fontSize: 17,
-
                     color: ColorResources.blackcolor11,
                   ),
                 ),
                 Text(
                   "Enter your promo code here",
                   style: PoppinsReguler.copyWith(
-                    fontSize: 14,
-
                     color: ColorResources.TextColorForGrey,
                   ),
                 ),
@@ -122,15 +137,23 @@ class PromoScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(right: 10),
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.blue : Colors.white,
+                  color: isSelected
+                      ? ColorResources.blueeebutton
+                      : ColorResources.whiteColor,
                   borderRadius: BorderRadius.circular(25),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(
+                    color: isSelected
+                        ? ColorResources.blueeebutton
+                        : ColorResources.whiteColor,
+                  ),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   category,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
+                    color: isSelected
+                        ? ColorResources.whiteColor
+                        : ColorResources.blackcolor11,
                   ),
                 ),
               ),
@@ -144,10 +167,15 @@ class PromoScreen extends StatelessWidget {
   Widget _promoCard(BuildContext contextsss, PromoModel promo) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          contextsss,
-          MaterialPageRoute(builder: (_) => PromoDetailsScreen()),
+        Get.to(
+          PromoDetailsScreen(),
+          transition: Transition.leftToRight,
+          duration: Duration(milliseconds: 0),
         );
+        // Navigator.push(
+        //   contextsss,
+        //   MaterialPageRoute(builder: (_) => PromoDetailsScreen()),
+        // );
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
@@ -168,7 +196,7 @@ class PromoScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _blueTags(promo.subtitle, promo.applogo),
+              _blueTags(promo.title, promo.applogo),
 
               /// _blueTag(promo.title),
               const SizedBox(height: 8),
@@ -180,10 +208,8 @@ class PromoScreen extends StatelessWidget {
               const Spacer(),
               Text(
                 promo.discount,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+                style: PoppinsExtrabold.copyWith(
+                  color: ColorResources.whiteColor,
                 ),
               ),
               const SizedBox(height: 8),
@@ -197,7 +223,9 @@ class PromoScreen extends StatelessWidget {
                     color: ColorResources.whiteColor,
                     child: Text(
                       "CODE ",
-                      style: TextStyle(color: ColorResources.blueeebutton),
+                      style: PoppinsBold.copyWith(
+                        color: ColorResources.blueeebutton,
+                      ),
                     ),
                   ),
                   Container(
@@ -205,10 +233,12 @@ class PromoScreen extends StatelessWidget {
                       horizontal: 12,
                       vertical: 6,
                     ),
-                    color: Colors.blue,
+                    color: ColorResources.blueeebutton,
                     child: Text(
                       promo.code,
-                      style: const TextStyle(color: Colors.white),
+                      style: PoppinsBold.copyWith(
+                        color: ColorResources.whiteColor,
+                      ),
                     ),
                   ),
                 ],
@@ -223,7 +253,10 @@ class PromoScreen extends StatelessWidget {
   Widget _imageLogo(String images) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: ColorResources.blueeebutton,
+      ),
 
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -244,8 +277,11 @@ class PromoScreen extends StatelessWidget {
   Widget _blueTag(String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      color: Colors.blue,
-      child: Text(text, style: const TextStyle(color: Colors.white)),
+      color: ColorResources.blueeebutton,
+      child: Text(
+        text,
+        style: PoppinsBold.copyWith(color: ColorResources.whiteColor),
+      ),
     );
   }
 
@@ -256,8 +292,11 @@ class PromoScreen extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          color: Colors.blue,
-          child: Text(text, style: const TextStyle(color: Colors.white)),
+          color: ColorResources.blueeebutton,
+          child: Text(
+            text,
+            style: PoppinsBold.copyWith(color: ColorResources.whiteColor),
+          ),
         ),
         Spacer(),
 

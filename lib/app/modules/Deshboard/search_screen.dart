@@ -1,5 +1,9 @@
-import 'package:evfual/app/modules/Deshboard/deshboard.dart';
 import 'package:evfual/app/modules/Deshboard/promovoucher_screen.dart';
+import 'package:evfual/config/utils/colors.dart';
+import 'package:evfual/config/utils/dimensions.dart';
+import 'package:evfual/config/utils/style.dart';
+import 'package:evfual/widgets/custom_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
@@ -48,8 +52,8 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
   Set<Polyline> getPolyline() {
     return {
       Polyline(
-        polylineId: const PolylineId("route"),
-        color: Colors.blue,
+        polylineId: PolylineId("route"),
+        color: ColorResources.blueeebutton,
         width: 5,
         points: [widget.pickup, widget.destination],
       ),
@@ -94,7 +98,6 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
   ];
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAddress();
   }
@@ -120,23 +123,30 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
           /// ================= TOP LOCATION BAR =================
           Positioned(
             top: 50,
-            left: 16,
-            right: 16,
+            left: Dimensions.hight15,
+            right: Dimensions.hight15,
             child: Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(Dimensions.hight13),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(Dimensions.hight13),
                 boxShadow: const [
-                  BoxShadow(blurRadius: 10, color: Colors.black12),
+                  BoxShadow(
+                    blurRadius: Dimensions.spacingSize10,
+                    color: Colors.black12,
+                  ),
                 ],
               ),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.circle, size: 10, color: Colors.blue),
-                      const SizedBox(width: 10),
+                       Icon(
+                        Icons.circle,
+                        size: Dimensions.spacingSize10,
+                        color: ColorResources.blueeebutton,
+                      ),
+                      const SizedBox(width: Dimensions.spacingSize10),
                       Text(
                         pickupAddress.isEmpty ? "Loading..." : pickupAddress,
                         style: const TextStyle(fontWeight: FontWeight.w500),
@@ -146,8 +156,12 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.circle, size: 10, color: Colors.red),
-                      SizedBox(width: 10),
+                      Icon(
+                        Icons.circle,
+                        size: Dimensions.spacingSize10,
+                        color: Colors.red,
+                      ),
+                      SizedBox(width: Dimensions.spacingSize10),
                       Text(
                         dropAddress.isEmpty ? "Loading..." : dropAddress,
                         style: const TextStyle(fontWeight: FontWeight.w500),
@@ -159,30 +173,17 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
             ),
           ),
 
-          // /// ================= BACK BUTTON =================
-          // Positioned(
-          //   left: 16,
-          //   top: 120,
-          //   child: CircleAvatar(
-          //     backgroundColor: Colors.white,
-          //     child: IconButton(
-          //       icon: const Icon(Icons.arrow_back),
-          //       onPressed: () {
-          //         Navigator.pop(context);
-          //       },
-          //     ),
-          //   ),
-          // ),
-
           /// ================= BOTTOM CARD =================
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               height: MediaQuery.of(context).size.height * .45,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(Dimensions.spacingSize16),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(Dimensions.spacingSize25),
+                ),
               ),
               child: Column(
                 children: [
@@ -198,21 +199,30 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                             setState(() => selectedIndex = index);
                           },
                           child: Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(12),
+                            margin: const EdgeInsets.only(
+                              bottom: Dimensions.spacingSize12,
+                            ),
+                            padding: const EdgeInsets.all(
+                              Dimensions.spacingSize11,
+                            ),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(
+                                Dimensions.spacingSize11,
+                              ),
                               border: Border.all(
                                 color: selected
-                                    ? Colors.blue
+                                    ? ColorResources.blueeebutton
                                     : Colors.grey.shade300,
                               ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.directions_car, size: 40),
+                                const Icon(
+                                  Icons.directions_car,
+                                  size: Dimensions.spacingSize40,
+                                ),
 
-                                const SizedBox(width: 12),
+                                SizedBox(width: Dimensions.hight20),
 
                                 Expanded(
                                   child: Column(
@@ -234,9 +244,10 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
 
                                 Text(
                                   rides[index]["price"],
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
+                                  style: PoppinsSemiBold.copyWith(
+                                   
                                   ),
+                                 
                                 ),
                               ],
                             ),
@@ -251,24 +262,20 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                     children: [Text("Payment"), Text("My Ride Wallet")],
                   ),
 
-                  const SizedBox(height: 16),
+                
 
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
+                  const SizedBox(height: Dimensions.spacingSize16),
+                  CustomPrimaryDyanamicButton(
+                        text: "Next",
+                        onTap: () {
+                          Get.to(
+                            Get.to(PromoVoucherScreen()),
+                            transition: Transition.leftToRight,
+                            duration: Duration(milliseconds: 0),
+                          );
+                        },
                       ),
-                      onPressed: () {
-                        Get.to(PromoVoucherScreen());
-                      },
-                      child: const Text("Next"),
-                    ),
-                  ),
+                  
                 ],
               ),
             ),
@@ -277,6 +284,5 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
       ),
     );
   }
-}
-//-=-=-==-
 
+}

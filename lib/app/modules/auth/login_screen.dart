@@ -1,4 +1,5 @@
 import 'package:evfual/app/modules/auth/otp_screen.dart';
+import 'package:evfual/config/utils/dimensions.dart';
 import 'package:evfual/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,11 +41,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: Dimensions.spacingSize20),
 
                 /// Title
                 Padding(
-                  padding: const EdgeInsets.only(left: 15, right: 15),
+                  padding: const EdgeInsets.only(
+                    left: Dimensions.spacingSize12,
+                    right: Dimensions.spacingSize12,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         "Welcome Back 👋",
                         style: PoppinsSemiBold.copyWith(
+                          fontSize: Dimensions.spacingSize20,
                           color: ColorResources.blackcolor11,
                         ),
                       ),
@@ -152,8 +157,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               "or",
 
                               style: PoppinsSemiBold.copyWith(
-                              
-
                                 color: ColorResources.blackcolor11,
                               ),
                             ),
@@ -201,12 +204,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomPrimaryButton(
                         text: "Sign in",
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => OtpScreen(type: "Sign in"),
-                            ),
+                           Get.to(
+                            Get.to(OtpScreen( type: "Sign in",)),
+                            transition: Transition.leftToRight,
+                            duration: Duration(milliseconds: 0),
                           );
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => OtpScreen(type: "Sign in"),
+                          //   ),
+                          // );
                         },
                       ),
                       const SizedBox(height: 20),

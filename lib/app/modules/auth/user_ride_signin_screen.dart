@@ -1,10 +1,10 @@
 import 'package:evfual/app/modules/auth/login_screen.dart';
 import 'package:evfual/app/modules/auth/otp_screen.dart';
 import 'package:evfual/config/utils/colors.dart';
+import 'package:evfual/config/utils/dimensions.dart';
 import 'package:evfual/config/utils/style.dart';
 import 'package:evfual/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
@@ -22,18 +22,17 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:ColorResources.backgroundColor,
-     appBar:AppBar(leading:  IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Get.back();
-                  },
-                ),
-                elevation: 0,
-                  backgroundColor:ColorResources.backgroundColor,
-                
-                )
-     ,
+      backgroundColor: ColorResources.backgroundColor,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.back();
+          },
+        ),
+        elevation: 0,
+        backgroundColor: ColorResources.backgroundColor,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -44,8 +43,6 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                 const SizedBox(height: 10),
 
                 /// Back Button
-               
-
                 const SizedBox(height: 20),
 
                 /// Title
@@ -58,40 +55,39 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                       Text(
                         "Join My Ride Today ✨",
                         style: PoppinsSemiBold.copyWith(
-                          fontSize: 22,
+                          fontSize: Dimensions.spacingSize20,
 
                           color: ColorResources.blackcolor11,
                         ),
                       ),
 
-                      const SizedBox(height: 8),
-
+                      const SizedBox(height: Dimensions.fontSizeSmall),
                       Text(
-                        "Let’s get started! Enter your phone number to create your My Ride account.",
+                        "Let’s get started! Enter your phone number to \ncreate your My Ride account.",
                         style: PoppinsMedium.copyWith(
-                          fontSize: 13,
-
                           color: ColorResources.TextColorForGrey,
                         ),
                       ),
 
-                      const SizedBox(height: 30),
+                      const SizedBox(height: Dimensions.spacingSize20),
 
                       /// Phone Label
                       Text(
                         "Phone Number",
                         style: PoppinsMedium.copyWith(
-                          fontSize: 15,
+                          fontSize: Dimensions.smallSize,
 
                           color: ColorResources.blackcolor11,
                         ),
                       ),
 
-                      const SizedBox(height: 10),
+                      const SizedBox(height: Dimensions.fontSizeSmall),
 
                       /// Phone TextField
                       Container(
-                        height: 50, // 👈 Fixed height dena zaroori
+                        height:
+                            MediaQuery.of(context).size.height *
+                            0.07, // 👈 Fixed height dena zaroori
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
@@ -99,18 +95,15 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                         child: IntlPhoneField(
                           controller: mobileController,
                           initialCountryCode: 'IN',
-                          // textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            height:
-                                1.2, // 👈 vertical alignment better karta hai
-                          ),
+
+                          style: const TextStyle(height: 1.2),
                           decoration: const InputDecoration(
                             counterText: '',
                             hintText: 'Phone Number',
                             border: InputBorder.none,
                             isCollapsed: true, // 👈 IMPORTANT
                             contentPadding: EdgeInsets.symmetric(
-                              vertical: 18, // 👈 Adjust this (16–20 best range)
+                              vertical: Dimensions.spacingSize18,
                             ),
                           ),
                           dropdownIconPosition: IconPosition.trailing,
@@ -121,7 +114,7 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: Dimensions.spacingSize20),
 
                       /// Terms Checkbox
                       Row(
@@ -145,7 +138,7 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                               text: TextSpan(
                                 text: "I agree to My Ride ",
                                 style: PoppinsMedium.copyWith(
-                                  fontSize: 13,
+                                  fontSize: Dimensions.spacingSize12,
 
                                   color: ColorResources.blackcolor11,
                                 ),
@@ -154,8 +147,6 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                                   TextSpan(
                                     text: "Terms & Conditions.",
                                     style: PoppinsMedium.copyWith(
-                                      fontSize: 13,
-
                                       color: ColorResources.blueeebutton,
                                     ),
                                   ),
@@ -184,12 +175,17 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                             ),
                             InkWell(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => LoginScreen(),
-                                  ),
-                                );
+                                Get.to(
+                                LoginScreen(),
+                                duration: const Duration(milliseconds: 0),
+                                transition: Transition.rightToLeft,
+                              );
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (context) => LoginScreen(),
+                                //   ),
+                                // );
                               },
                               child: Text(
                                 "Sign in",
@@ -203,26 +199,6 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                           ],
                         ),
 
-                        //  RichText(
-                        //   text: TextSpan(
-                        //     text: "Already have an account? ",
-                        //     style: PoppinsMedium.copyWith(
-                        //       fontSize: 15,
-
-                        //       color: ColorResources.blackcolor11,
-                        //     ),
-                        //     children: [
-                        //       // TextSpan(
-                        //       //   text: "Sign in",
-                        //       //   style: PoppinsMedium.copyWith(
-                        //       //     fontSize: 15,
-
-                        //       //     color: ColorResources.blueeebutton,
-                        //       //   ),
-                        //       // ),
-                        //     ],
-                        //   ),
-                        // ),
                       ),
 
                       const SizedBox(height: 20),
@@ -251,7 +227,7 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                       /// Social Buttons login===================================///////////
                       CustomSocialButton(
                         text: "Continue with Google",
-                      images: 'assets/images/google.png',
+                        images: 'assets/images/google.png',
                         iconColor: Colors.red,
 
                         onTap: () {},
@@ -259,21 +235,22 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
 
                       CustomSocialButton(
                         text: "Continue with Apple",
-                       images: 'assets/images/apple.png',
+                        images: 'assets/images/apple.png',
                         iconColor: Colors.black,
                         onTap: () {},
                       ),
 
                       CustomSocialButton(
                         text: "Continue with Facebook",
-                       images: 'assets/images/facebook.png',
+                        images: 'assets/images/facebook.png',
                         iconColor: Colors.blue,
                         onTap: () {},
                       ),
 
                       CustomSocialButton(
                         text: "Continue with X",
-                      images: 'assets/images/twitter.png',// No official X icon in Material
+                        images:
+                            'assets/images/twitter.png', // No official X icon in Material
                         iconColor: Colors.black,
                         onTap: () {},
                       ),
@@ -284,12 +261,17 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                       CustomPrimaryButton(
                         text: "Sign up",
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => OtpScreen(),
-                            ),
-                          );
+                           Get.to(
+                                OtpScreen(),
+                                duration: const Duration(milliseconds: 0),
+                                transition: Transition.rightToLeft,
+                              );
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => OtpScreen(),
+                          //   ),
+                          // );
                         },
                       ),
                       const SizedBox(height: 20),

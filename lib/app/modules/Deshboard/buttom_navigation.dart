@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:evfual/app/modules/Promos/promos_screen.dart';
+import 'package:evfual/app/modules/acoount/acoount.dart';
 import 'package:evfual/app/modules/activity/activity.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -28,7 +29,7 @@ class _MainNavigationState extends State<MainNavigation> {
     DashboardScreen(),
     PromoScreen(),
     ActivityScreen(),
-    AccountSettingsScreen(),
+    AccountSettingScreens(),
   ];
 
   @override

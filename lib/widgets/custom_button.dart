@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:evfual/config/utils/colors.dart';
+import 'package:evfual/config/utils/dimensions.dart';
 import 'package:evfual/config/utils/style.dart';
 import 'package:flutter/material.dart';
 
@@ -163,7 +164,7 @@ class CustomSecondaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
       onTap: onTap,
       child: Container(
         height: MediaQuery.of(context).size.height * 0.06,
@@ -171,7 +172,7 @@ class CustomSecondaryButton extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: ColorResources.buttonColors,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
         ),
         child: Text(
           text,
@@ -195,7 +196,7 @@ class CustomPrimaryDyanamicButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
       onTap: onTap,
       child: Container(
         height: MediaQuery.of(context).size.height * 0.06,
@@ -203,7 +204,7 @@ class CustomPrimaryDyanamicButton extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: ColorResources.blueeebutton,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
         ),
         child: Text(
           text,
@@ -227,7 +228,7 @@ class CustomSecondaryDynamicButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
       onTap: onTap,
       child: Container(
         height: MediaQuery.of(context).size.height * 0.06,
@@ -235,11 +236,110 @@ class CustomSecondaryDynamicButton extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: ColorResources.buttonColors,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
         ),
         child: Text(
           text,
           style: PoppinsSemiBold.copyWith(color: ColorResources.blueeebutton),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomIconsButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+  final IconData? icons;
+  final Color? colors;
+
+  const CustomIconsButton({
+    Key? key,
+    required this.text,
+    required this.onTap,
+    required this.icons,
+    this.colors,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
+      onTap: onTap,
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.06,
+        decoration: BoxDecoration(
+          color: ColorResources.buttonColors,
+          borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icons, color: ColorResources.blueeebutton),
+            SizedBox(width: 8),
+            Text(
+              text,
+              style: TextStyle(color: ColorResources.blueeebutton, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+
+      // Container(
+      //   height: MediaQuery.of(context).size.height * 0.06,
+      //   width: double.infinity,
+      //   alignment: Alignment.center,
+      //   decoration: BoxDecoration(
+      //     color: ColorResources.buttonColors,
+      //     borderRadius: BorderRadius.circular(30),
+      //   ),
+      //   child: Text(
+      //     text,
+      //     style: PoppinsSemiBold.copyWith(color: ColorResources.blueeebutton),
+      //   ),
+      // ),
+    );
+  }
+}
+
+class CustomMessageButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+  final IconData? icons;
+  final Color? colors;
+
+  const CustomMessageButton({
+    Key? key,
+    required this.text,
+    required this.onTap,
+    required this.icons,
+    this.colors,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
+      onTap: onTap,
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.06,
+        decoration: BoxDecoration(
+          color: ColorResources.blueeebutton,
+          borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icons, color: ColorResources.whiteColor),
+            SizedBox(width: 8),
+            Text(
+              text,
+              style: TextStyle(
+                color: ColorResources.whiteColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );

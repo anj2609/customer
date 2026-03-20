@@ -1,98 +1,6 @@
-// import 'package:evfual/widgets/custom_button.dart';
-// import 'package:flutter/material.dart';
 
-// class PromoCodeScreen extends StatelessWidget {
-//   const PromoCodeScreen({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final width = MediaQuery.of(context).size.width;
-//     final height = MediaQuery.of(context).size.height;
-
-//     return Scaffold(
-//       backgroundColor: Colors.white,
-
-//       body: SafeArea(
-//         child: Padding(
-//           padding: EdgeInsets.symmetric(horizontal: width * 0.06),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.center,
-//             children: [
-//               const SizedBox(height: 10),
-
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.start,
-//                 children: [
-//                   IconButton(icon: const Icon(Icons.close), onPressed: () {}),
-//                 ],
-//               ),
-
-//               const SizedBox(height: 20),
-//               SizedBox(height: height * 0.08),
-
-//               Image.asset(
-//                 'assets/images/promocode.png',
-//                 height: 200,
-//                 width: 250,
-//               ),
-
-//               SizedBox(height: height * 0.05),
-
-//               // /// Percentage Illustration
-//               // Icon(
-//               //   Icons.percent,
-//               //   size: width * 0.35,
-//               //   color: Colors.grey.shade700,
-//               // ),
-
-//               // SizedBox(height: height * 0.04),
-
-//               /// Title
-//               Text(
-//                 "Have a Promo Code?",
-//                 style: TextStyle(
-//                   fontSize: width * 0.055,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-
-//               SizedBox(height: height * 0.04),
-
-//               /// Promo Code Field
-//               Container(
-//                 height: height * 0.07,
-//                 decoration: BoxDecoration(
-//                   color: Colors.white,
-//                   borderRadius: BorderRadius.circular(12),
-//                   border: Border.all(color: Colors.grey.shade300),
-//                 ),
-//                 alignment: Alignment.center,
-//                 child: TextField(
-//                   textAlign: TextAlign.center,
-//                   decoration: InputDecoration(
-//                     hintText: "EOYP25",
-//                     hintStyle: TextStyle(
-//                       fontSize: width * 0.045,
-//                       fontWeight: FontWeight.w500,
-//                     ),
-//                     border: InputBorder.none,
-//                   ),
-//                 ),
-//               ),
-
-//               const Spacer(),
-
-//               /// Redeem Button
-//               CustomPrimaryButton(text: "Redeem", onTap: () {}),
-
-//               SizedBox(height: height * 0.03),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+import 'package:evfual/config/utils/colors.dart';
+import 'package:evfual/config/utils/style.dart';
 import 'package:evfual/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 
@@ -124,8 +32,8 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
       builder: (_) {
         return Container(
           padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration:  BoxDecoration(
+            color: ColorResources.whiteColor,
             borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
           ),
           child: Column(
@@ -133,7 +41,7 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
             children: [
               CircleAvatar(
                 radius: 35,
-                backgroundColor: Colors.red,
+                backgroundColor: ColorResources.primarycolor2,
                 child: const Icon(Icons.close, color: Colors.white, size: 30),
               ),
               const SizedBox(height: 20),
@@ -262,10 +170,9 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
                 /// Title
                 Text(
                   "Have a Promo Code?",
-                  style: TextStyle(
-                    fontSize: width * 0.055,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: PoppinsSemiBold.copyWith(
+                  color: ColorResources.blackcolor11,
+                ),
                 ),
 
                 SizedBox(height: height * 0.04),
@@ -284,10 +191,9 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
                     decoration: InputDecoration(
                       hintText: "EOYP25",
                       border: InputBorder.none,
-                      hintStyle: TextStyle(
-                        fontSize: width * 0.045,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      hintStyle:  PoppinsSemiBold.copyWith(
+                  color: ColorResources.blackcolor11,
+                ),
                     ),
                   ),
                 ),
@@ -298,7 +204,9 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
                 /// 
                 /// 
                  /// Redeem Button
-              CustomPrimaryButton(text: "Redeem", onTap: () => _handleRedeem, ),
+              CustomPrimaryButton(text: "Redeem", onTap: () => _handleRedeem,
+              
+               ),
                 // SizedBox(
                 //   width: double.infinity,
                 //   height: height * 0.07,

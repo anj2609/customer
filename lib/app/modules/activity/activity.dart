@@ -40,18 +40,23 @@ class _ActivityScreenState extends State<ActivityScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.blue,
-                    child: Text(
-                      "My Ride",
-                      style: TextStyle(color: Colors.white, fontSize: 9),
+                  Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: ColorResources.blueeebutton,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.asset('assets/images/splashscreen.png'),
+                        ),
+                      ),
                     ),
                   ),
                   const Spacer(),
-                  const Text(
+                   Text(
                     "Activity",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    style: PoppinsMedium.copyWith(color: ColorResources.blackcolor11),
                   ),
                   const Spacer(),
                   const Icon(Icons.more_vert),
@@ -80,15 +85,20 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: isSelected ? ColorResources.blueeebutton : ColorResources.whiteColor,
+                        color: 
+                        isSelected
+                            ? ColorResources.blueeebutton
+                            : ColorResources.whiteColor,
                         borderRadius: BorderRadius.circular(25),
-                        border: Border.all(color: Colors.grey.shade300),
+                        border: Border.all(color: ColorResources.TextColorForGrey),
                       ),
                       child: Text(
                         tabs[index],
                         style: PoppinsReguler.copyWith(
-                    color: isSelected ? ColorResources.whiteColor : ColorResources.blackcolor,
-                  ),
+                          color: isSelected
+                              ? ColorResources.whiteColor
+                              : ColorResources.blackcolor,
+                        ),
                         // TextStyle(
                         //   color: isSelected ? Colors.white : Colors.black87,
                         // ),
@@ -144,8 +154,7 @@ class RideItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return
-     Column(
+    return Column(
       children: [
         const SizedBox(height: 12),
 
@@ -157,7 +166,7 @@ class RideItem extends StatelessWidget {
               width: 52,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-               // border: Border.all(color: Colors.grey.shade300),
+                // border: Border.all(color: Colors.grey.shade300),
               ),
               child: Icon(icon, color: ColorResources.blueeebutton),
             ),
@@ -172,15 +181,12 @@ class RideItem extends StatelessWidget {
                   Text(
                     title,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                    style: PoppinsReguler.copyWith(color: ColorResources.blackcolor11),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     subTitle,
-                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    style:  TextStyle(color: ColorResources.TextColorForGrey, fontSize: 12),
                   ),
                 ],
               ),
@@ -192,15 +198,12 @@ class RideItem extends StatelessWidget {
               children: [
                 Text(
                   time,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
+                  style: PoppinsMedium.copyWith(color: ColorResources.blackcolor11),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   rightDate,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  style:  TextStyle(color: ColorResources.TextColorForGrey, fontSize: 12),
                 ),
               ],
             ),
@@ -208,12 +211,8 @@ class RideItem extends StatelessWidget {
         ),
 
         const SizedBox(height: 12),
-        Divider(color: Colors.grey.shade300),
+        Divider(color: ColorResources.TextColorForGrey),
       ],
     );
-  
-  
-
-  
   }
 }

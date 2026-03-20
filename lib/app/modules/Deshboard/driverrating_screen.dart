@@ -1,5 +1,6 @@
 import 'package:evfual/app/modules/Deshboard/tipscreen_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class DriverRatingScreen extends StatefulWidget {
   const DriverRatingScreen({super.key});
@@ -155,10 +156,15 @@ class _DriverRatingScreenState extends State<DriverRatingScreen> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const TipScreen()),
+                      Get.to(
+                        Get.to(TipScreen()),
+                        transition: Transition.leftToRight,
+                        duration: Duration(milliseconds: 0),
                       );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (_) => const TipScreen()),
+                      // );
                     },
                     // onPressed: selectedRating == 0
                     //     ? null
@@ -185,6 +191,3 @@ class _DriverRatingScreenState extends State<DriverRatingScreen> {
     );
   }
 }
-
-
-

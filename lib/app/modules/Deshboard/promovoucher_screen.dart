@@ -1,7 +1,6 @@
-
-
 import 'package:evfual/app/modules/Deshboard/findingdriver_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class PromoVoucherScreen extends StatefulWidget {
   const PromoVoucherScreen({super.key});
@@ -210,10 +209,15 @@ class _PromoVoucherScreenState extends State<PromoVoucherScreen> {
           /// Bottom OK Button
           GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => FindingDriverUI()),
+              Get.to(
+                Get.to(FindingDriverUI()),
+                transition: Transition.leftToRight,
+                duration: Duration(milliseconds: 0),
               );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (_) => FindingDriverUI()),
+              // );
             },
             child: Container(
               padding: const EdgeInsets.all(16),
@@ -237,14 +241,8 @@ class _PromoVoucherScreenState extends State<PromoVoucherScreen> {
               ),
             ),
           ),
-      
-      
-      
         ],
       ),
     );
   }
 }
-
-
-

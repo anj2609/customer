@@ -3,6 +3,7 @@ import 'package:evfual/config/utils/colors.dart';
 import 'package:evfual/config/utils/style.dart';
 import 'package:evfual/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class PromoDetailsScreen extends StatelessWidget {
   const PromoDetailsScreen({super.key});
@@ -29,9 +30,8 @@ class PromoDetailsScreen extends StatelessWidget {
                       const SizedBox(width: 12),
                       Text(
                         "Promos",
-                        style: TextStyle(
-                          fontSize: size.width * 0.05,
-                          fontWeight: FontWeight.bold,
+                        style: PoppinsMedium.copyWith(
+                          color: ColorResources.blackcolor11,
                         ),
                       ),
                     ],
@@ -88,8 +88,6 @@ class PromoDetailsScreen extends StatelessWidget {
                                 Text(
                                   "20% OFF",
                                   style: PoppinsBold.copyWith(
-                                    fontSize: 30,
-
                                     color: ColorResources.whiteColor,
                                   ),
                                 ),
@@ -105,8 +103,6 @@ class PromoDetailsScreen extends StatelessWidget {
                                       child: Text(
                                         "CODE ",
                                         style: PoppinsSemiBold.copyWith(
-                                          fontSize: 14,
-
                                           color: ColorResources.blueeebutton,
                                         ),
                                       ),
@@ -142,27 +138,15 @@ class PromoDetailsScreen extends StatelessWidget {
                               Text(
                                 "Best Deal: 20% OFF",
                                 style: PoppinsSemiBold.copyWith(
-                                  fontSize: 17,
-
                                   color: ColorResources.blackcolor,
                                 ),
-                                // style: TextStyle(
-                                //   fontSize: size.width * 0.045,
-                                //   fontWeight: FontWeight.bold,
-                                // ),
                               ),
                               const SizedBox(height: 6),
                               Text(
                                 "End of year promo. 20% discount on all services",
                                 style: PoppinsReguler.copyWith(
-                                  fontSize: 14,
-
                                   color: ColorResources.TextColorForGrey,
                                 ),
-                                // style: TextStyle(
-                                //   color: Colors.grey.shade600,
-                                //   fontSize: size.width * 0.035,
-                                // ),
                               ),
                               const SizedBox(height: 16),
 
@@ -174,22 +158,40 @@ class PromoDetailsScreen extends StatelessWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                    color: Colors.grey.shade300,
+                                    color: ColorResources.TextColorForGrey,
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Center(
-                                  child: Text(
-                                    "EOY25",
-                                    style: PoppinsBold.copyWith(
-                                      fontSize: 18,
-
-                                      color: ColorResources.blackcolor,
-                                    ),
-                                    // style: TextStyle(
-                                    //   fontSize: 18,
-                                    //   fontWeight: FontWeight.bold,
-                                    // ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        "Promos Code",
+                                        style: PoppinsReguler.copyWith(
+                                          color:
+                                              ColorResources.TextColorForGrey,
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "EOY25",
+                                            style: PoppinsBold.copyWith(
+                                              color: ColorResources.blackcolor,
+                                            ),
+                                          ),
+                                          SizedBox(width: 7),
+                                          Icon(
+                                            Icons.copy,
+                                            color:
+                                                ColorResources.TextColorForGrey,
+                                            size: 15,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -253,12 +255,17 @@ class PromoDetailsScreen extends StatelessWidget {
                               CustomPrimaryButton(
                                 text: "Use Now",
                                 onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => PromoCodeScreen(),
-                                    ),
+                                  Get.to(
+                                    PromoCodeScreen(),
+                                    transition: Transition.leftToRight,
+                                    duration: Duration(milliseconds: 0),
                                   );
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (_) => PromoCodeScreen(),
+                                  //   ),
+                                  // );
 
                                   ///PromoCodeScreen
                                 },
@@ -281,11 +288,7 @@ class PromoDetailsScreen extends StatelessWidget {
   Widget sectionTitle(String text) {
     return Text(
       text,
-      style: PoppinsSemiBold.copyWith(
-        fontSize: 17,
-
-        color: ColorResources.blackcolor,
-      ),
+      style: PoppinsSemiBold.copyWith(color: ColorResources.blackcolor),
     );
   }
 
@@ -293,11 +296,7 @@ class PromoDetailsScreen extends StatelessWidget {
     return Text(
       text,
 
-      style: PoppinsReguler.copyWith(
-        fontSize: 14,
-
-        color: ColorResources.textdetailsColor,
-      ),
+      style: PoppinsReguler.copyWith(color: ColorResources.textdetailsColor),
     );
   }
 
@@ -307,10 +306,7 @@ class PromoDetailsScreen extends StatelessWidget {
       color: ColorResources.blueeebutton,
       child: Text(
         text,
-        style: PoppinsBold.copyWith(
-          //fontSize: 30,
-          color: ColorResources.whiteColor,
-        ),
+        style: PoppinsBold.copyWith(color: ColorResources.whiteColor),
       ),
     );
   }
@@ -351,7 +347,10 @@ class PromoDetailsScreen extends StatelessWidget {
   Widget _imageLogo(String images) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: ColorResources.blueeebutton,
+      ),
 
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,

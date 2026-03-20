@@ -66,7 +66,7 @@ class CompleteCard extends StatelessWidget {
             height: width * 0.13,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade300, width: 1),
+              border: Border.all(color: ColorResources.TextColorForGrey, width: 1),
             ),
             child: Center(
               child:
