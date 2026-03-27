@@ -209,12 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             transition: Transition.leftToRight,
                             duration: Duration(milliseconds: 0),
                           );
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => OtpScreen(type: "Sign in"),
-                          //   ),
-                          // );
+                         
                         },
                       ),
                       const SizedBox(height: 20),

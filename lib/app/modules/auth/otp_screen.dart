@@ -1,8 +1,10 @@
 import 'dart:async';
-import 'package:evfual/app/modules/Deshboard/buttom_navigation.dart';
-import 'package:evfual/app/modules/profile/profile.dart';
+import 'dart:developer';
+
 import 'package:evfual/config/utils/colors.dart';
 import 'package:evfual/config/utils/style.dart';
+import 'package:evfual/data/controller/auth_controller.dart';
+import 'package:evfual/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
@@ -10,7 +12,8 @@ import 'package:sms_autofill/sms_autofill.dart';
 
 class OtpScreen extends StatefulWidget {
   String? type;
-  OtpScreen({super.key, this.type});
+  String? phoneNumber;
+  OtpScreen({super.key, this.type, this.phoneNumber});
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -19,6 +22,8 @@ class OtpScreen extends StatefulWidget {
 class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   int _secondsRemaining = 28;
   Timer? _timer;
+  bool _enableResend = false;
+  bool _isResending = false;
   final TextEditingController _otpController = TextEditingController();
 
   @override
@@ -29,10 +34,20 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   }
 
   void startTimer() {
-    _secondsRemaining = 28;
+    setState(() {
+      _secondsRemaining = 28;
+      _enableResend = false; // disable button
+    });
+
+    _timer?.cancel(); // pehle wala timer cancel karo
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsRemaining == 0) {
         timer.cancel();
+
+        setState(() {
+          _enableResend = true; // enable button
+        });
       } else {
         setState(() {
           _secondsRemaining--;
@@ -51,22 +66,12 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   }
 
   void goToNextScreen() {
-    // if (widget.type == "Sign in") {
-    //   Navigator.pushReplacement(
-    //     context,
-    //     MaterialPageRoute(builder: (_) => MainNavigation()),
-    //   );
-    // } else {
-    Get.to(
-                            Get.to(ProfilePage()),
-                            transition: Transition.leftToRight,
-                            duration: Duration(milliseconds: 0),
-                          );
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(builder: (_) => ProfilePage()),
-    // );
-    // }
+    Get.find<AuthController>().verifyOtpApi(
+      mobileNumber: widget.phoneNumber.toString(),
+      numOfOtp: _otpController.text.trim(),
+
+      context: context,
+    );
   }
 
   @override
@@ -95,7 +100,8 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
         backgroundColor: ColorResources.backgroundColor,
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context);
+            Get.back();
+            // Navigator.pop(context);
           },
 
           icon: Icon(Icons.arrow_back, color: ColorResources.blackcolor11),
@@ -121,7 +127,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
               const SizedBox(height: 10),
 
               Text(
-                "Check your messages! We’ve sent a one-time +91 987 654 3210 . Enter the code \nbelow to verify your account and continue",
+                "Check your messages! We’ve sent a one-time ${widget.phoneNumber} . Enter the code \nbelow to verify your account and continue",
 
                 style: PoppinsMedium.copyWith(
                   color: ColorResources.TextColorForGrey,
@@ -138,30 +144,47 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                   autofocus: true,
                   keyboardType: TextInputType.number,
                   defaultPinTheme: defaultPinTheme,
-                  onCompleted: (pin) {
-                    goToNextScreen();
+                  onCompleted: (pin) async {
+                    Get.find<AuthController>().verifyOtpApi(
+                      mobileNumber: widget.phoneNumber.toString(),
+                      numOfOtp: pin,
+                      context: context,
+                    );
+                  
                   },
                 ),
               ),
 
               const SizedBox(height: 30),
-
               Center(
-                child: _secondsRemaining > 0
-                    ? Text(
-                        "You can resend the code in $_secondsRemaining seconds",
-                        style: PoppinsSemiBold.copyWith(
-                          fontSize: 13,
+                child: CustomOtpButton(
+                  text: _enableResend
+                      ? "Resend OTP"
+                      : "Resend in $_secondsRemaining sec",
+                  isLoading: _isResending,
+                  onTap: (_enableResend && !_isResending)
+                      ? () async {
+                          log('resend otp clicked |||||');
 
-                          color: ColorResources.blackcolor11,
-                        ),
-                      )
-                    : TextButton(
-                        onPressed: () {
+                          setState(() {
+                            _isResending = true;
+                          });
+
+                          await Get.find<AuthController>().reSendOtp(
+                            mobileNumber: "${widget.phoneNumber.toString()}",
+                            otpNumber: _otpController.text.trim(),
+                            context: context,
+                          );
+                          _otpController.clear();
+
+                          setState(() {
+                            _isResending = false;
+                          });
+
                           startTimer();
-                        },
-                        child: const Text("Resend code"),
-                      ),
+                        }
+                      : null,
+                ),
               ),
             ],
           ),

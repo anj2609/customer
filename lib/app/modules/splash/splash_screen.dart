@@ -1,21 +1,23 @@
 
 
 import 'package:evfual/app/modules/Deshboard/buttom_navigation.dart';
+import 'package:evfual/app/modules/splash/onbording_screen.dart';
+import 'package:evfual/config/route.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:evfual/app/modules/splash/onbording_screen.dart';
+
 import 'package:evfual/config/utils/constants.dart';
 
-class VivashriIntro extends StatefulWidget {
-  const VivashriIntro({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<VivashriIntro> createState() => _VivashriIntroState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _VivashriIntroState extends State<VivashriIntro> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -35,11 +37,12 @@ class _VivashriIntroState extends State<VivashriIntro> {
         transition: Transition.rightToLeft,
       );
     } else {
-      Get.offAll(
-        Splash1(),
-        duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-        transition: Transition.rightToLeft,
-      );
+      Get.toNamed(RouteHelper.getOnboardingRoute());
+      // Get.offAll(
+      //   LestStartedScreen(),
+      //   duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+      //   transition: Transition.rightToLeft,
+      // );
     }
   }
 

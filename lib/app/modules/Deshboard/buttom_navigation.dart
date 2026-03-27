@@ -43,6 +43,9 @@ class _MainNavigationState extends State<MainNavigation> {
     } else {
       _currentIndex = widget.initialIndex;
     }
+
+
+    
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:evfual/data/controller/profile_update.dart';
+import 'package:evfual/data/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,7 +18,7 @@ class EditProfileController extends GetxController {
   Rx<File?> rcImage = Rx<File?>(null);
   Rx<File?> idImage = Rx<File?>(null);
   Rx<File?> vehicleImage = Rx<File?>(null);
-  final procontroller = Get.put(ProfileController());
+  final procontroller = Get.put(ProfileController(profileRepo: Get.find()));
 
   final picker = ImagePicker();
   String? profileimagee;

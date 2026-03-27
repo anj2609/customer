@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart' as Foundation;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,6 +25,7 @@ class ApiClient extends GetxService {
   String? passordss;
   //String? userID;
   Map<String, String>? _mainHeaders;
+  Map<String, String>? _mainHeadersMain;
 
   ApiClient({this.appBaseUrl, required this.sharedPreferences}) {
     //  print(" token.............................................$token");
@@ -32,6 +34,13 @@ class ApiClient extends GetxService {
       'Content-Type': 'application/json',
       'Authorization':
           'Bearer ${sharedPreferences.getString(ApiConstants.token)}',
+    };
+
+    _mainHeadersMain = {
+      'Accept': 'application/json',
+      'id': '${sharedPreferences.getString(ApiConstants.profileid)}',
+      'authorizationToken':
+          '${sharedPreferences.getString(ApiConstants.token)}',
     };
   }
 
@@ -47,21 +56,20 @@ class ApiClient extends GetxService {
   // }
 
   Future<Response> postData(String uri, dynamic body) async {
-    // if (await ApiChecker.isVpnActive()) {
-    //   return Response(statusCode: -1, statusText: 'you are using vpn');
-    // }
+    if (await ApiChecker.isVpnActive()) {
+      return Response(statusCode: -1, statusText: 'you are using vpn');
+    }
     {
       try {
         if (Foundation.kDebugMode) {
           print('====> GetX Base URL: $appBaseUrl');
           print('====> GetX Call: $uri');
           print('====> GetX Body: $body');
+          print('====> GetX Body: ${ApiConstants.baseUrl}');
         }
         print('====> GetX Basebodyy: $body');
         Http.Response _response = await Http.post(
-          Uri.parse(
-            'https://evfuel.akslearning.in/api/' + uri,
-          ),
+          Uri.parse(ApiConstants.baseUrl + uri),
           body: jsonEncode(body),
           headers: _mainHeaders,
         ).timeout(Duration(seconds: timeoutInSeconds));
@@ -78,6 +86,51 @@ class ApiClient extends GetxService {
       } catch (e) {
         return Response(statusCode: 1, statusText: noInternetMessage);
       }
+    }
+  }
+
+  Future<Response> postMultipartData(
+    String uri,
+    Map<String, String> body,
+    File? imageFile,
+  ) async {
+    if (await ApiChecker.isVpnActive()) {
+      return Response(statusCode: -1, statusText: 'you are using vpn');
+    }
+    try {
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+        // ⚠️ Content-Type mat daalna yaha
+        // MultipartRequest khud set karega
+      };
+
+      var request = Http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiConstants.baseUrl + uri),
+      );
+
+      // ✅ Add headers
+      request.headers.addAll(headers);
+
+      // ✅ Add text fields
+      request.fields.addAll(body);
+
+      // ✅ Add image file
+      if (imageFile != null) {
+        request.files.add(
+          await Http.MultipartFile.fromPath(
+            'profile_image', // backend field name same hona chahiye
+            imageFile.path,
+          ),
+        );
+      }
+
+      var streamedResponse = await request.send();
+      var response = await Http.Response.fromStream(streamedResponse);
+
+      return handleResponse(response, uri);
+    } catch (e) {
+      return Response(statusCode: 1, statusText: noInternetMessage);
     }
   }
 
@@ -108,6 +161,39 @@ class ApiClient extends GetxService {
         }
         print('====>  respnosee : ${response.body}');
         return response;
+      } catch (e) {
+        return Response(statusCode: 1, statusText: noInternetMessage);
+      }
+    }
+  }
+
+  ///_mainHeadersMain
+  ///
+  ///
+
+  Future<Response> getDataApi(String uri) async {
+    if (await ApiChecker.isVpnActive()) {
+      return Response(statusCode: -1, statusText: 'you are using vpn');
+    } else {
+      try {
+        print('====> GetX Base URL: $appBaseUrl');
+        print('====> GetX Call: $uri');
+        print(
+          '====> GetX Call: ${sharedPreferences.getString(ApiConstants.token)}',
+        );
+        print(
+          '====> GetX Body: ${sharedPreferences.getString(ApiConstants.profileid)}',
+        );
+        debugPrint('====> API Call: $uri\nHeader: $_mainHeadersMain');
+        print(' Majannaha headers $_mainHeadersMain');
+        print(' url $uri');
+        Http.Response _response = await Http.get(
+          Uri.parse(appBaseUrl! + uri),
+          headers: _mainHeadersMain,
+        ).timeout(Duration(seconds: timeoutInSeconds));
+        print(' Majannah headers $_mainHeadersMain');
+        debugPrint('====> API  Fund : - response data v${_response.body}');
+        return handleResponse(_response, uri);
       } catch (e) {
         return Response(statusCode: 1, statusText: noInternetMessage);
       }

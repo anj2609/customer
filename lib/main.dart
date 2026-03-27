@@ -35,10 +35,10 @@ void configLoading() {
     ..indicatorSize = 45.0
     ..radius = 10.0
     ..progressColor = Colors.yellow
-    ..backgroundColor = ColorResources.primarycolor
+    ..backgroundColor = ColorResources.appColor
     ..indicatorColor = Colors.white
     ..textColor = Colors.white
-    ..maskColor = Colors.blue.withOpacity(0.5)
+    ..maskColor = ColorResources.appColor
     ..userInteractions = true
     ..dismissOnTap = false;
 }
@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
       getPages: RouteHelper.routes,
       defaultTransition: Transition.topLevel,
       transitionDuration: const Duration(milliseconds: 500),
-
+      
       builder: (context, child) {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: const SystemUiOverlayStyle(

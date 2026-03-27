@@ -279,7 +279,10 @@ class CustomIconsButton extends StatelessWidget {
             SizedBox(width: 8),
             Text(
               text,
-              style: TextStyle(color: ColorResources.blueeebutton, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: ColorResources.blueeebutton,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -341,6 +344,59 @@ class CustomMessageButton extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+//// =============== Resend Otp Button ==========================////////////////////
+
+class CustomOtpButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onTap; // 👈 nullable
+  final bool isLoading;
+
+  const CustomOtpButton({
+    Key? key,
+    required this.text,
+    required this.onTap,
+    this.isLoading = false,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isEnabled = onTap != null;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(30),
+      onTap: isEnabled ? onTap : null,
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.06,
+        width: double.infinity,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isEnabled
+              ? ColorResources.blueeebutton
+              : ColorResources.buttonColors,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                text,
+                style: PoppinsSemiBold.copyWith(
+                  color: isEnabled
+                      ? ColorResources.whiteColor
+                      : ColorResources.blackcolor,
+                ),
+              ),
       ),
     );
   }

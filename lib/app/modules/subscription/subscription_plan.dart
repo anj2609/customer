@@ -1,5 +1,5 @@
 import 'package:evfual/data/controller/auth_controller.dart';
-import 'package:evfual/data/controller/profile_update.dart';
+import 'package:evfual/data/controller/profile_controller.dart';
 import 'package:evfual/data/controller/subscription_list.dart';
 import 'package:flutter/material.dart';
 import 'package:evfual/config/utils/style.dart';

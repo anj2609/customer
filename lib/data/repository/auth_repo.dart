@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:evfual/config/utils/apis/api_client.dart';
@@ -7,6 +10,59 @@ class AuthRepo extends GetxService {
   final ApiClient apiClient;
   final SharedPreferences sharedPreferences;
   AuthRepo({required this.apiClient, required this.sharedPreferences});
+
+  /////========== Send  otp Api ======================///////
+  Future<Response> sendOtpApi({String? phone}) async {
+    log('resend  otp number $phone');
+    return apiClient.postData(ApiConstants.sendOtpUrl, {
+      "phone": phone,
+      "type": ApiConstants.UserRegister,
+      "user_type": ApiConstants.userType,
+    });
+  }
+   Future<Response> reSendOtp({String? phone, String? numOtp }) async {
+    log('resend  otp number $phone');
+    return apiClient.postData(ApiConstants.reSendOtp, {
+      "phone": phone,
+      "otp":numOtp,
+      "user_type": ApiConstants.userType,
+    });
+  }
+
+
+  ////re-send
+
+  /////========== verify otp Api ======================///////
+  Future<Response> verifyOtpApi({String? phone, String? otp}) async {
+    return apiClient.postData(ApiConstants.verityOtpUrl, {
+      "phone": phone,
+      "otp": otp,
+      "user_type": ApiConstants.userType,
+    });
+  }
+  Future<Response> fillPersonalApi({
+  String? name,
+  String? email,
+  String? gender,
+  String? dob,
+  File? profile_image,
+}) async {
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  dynamic userId = prefs.getString(ApiConstants.profileid);
+
+  return apiClient.postMultipartData(
+    ApiConstants.basicInfo,
+    {
+      "name": name ?? "",
+      "email": email ?? "",
+      "gender": gender ?? "",
+      "date_of_birth": dob ?? "",
+      "user_id": userId ?? "",
+    },
+    profile_image, // 👈 file yaha bhejna hai
+  );
+}
 
   Future<Response> usersignup({String? evnumber, String? passsowrd}) async {
     return apiClient.postData(ApiConstants.loginapi, {

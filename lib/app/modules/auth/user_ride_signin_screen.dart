@@ -3,6 +3,7 @@ import 'package:evfual/app/modules/auth/otp_screen.dart';
 import 'package:evfual/config/utils/colors.dart';
 import 'package:evfual/config/utils/dimensions.dart';
 import 'package:evfual/config/utils/style.dart';
+import 'package:evfual/data/controller/auth_controller.dart';
 import 'package:evfual/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -85,32 +86,61 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
 
                       /// Phone TextField
                       Container(
-                        height:
-                            MediaQuery.of(context).size.height *
-                            0.07, // 👈 Fixed height dena zaroori
+                        height: MediaQuery.of(context).size.height * 0.07,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: IntlPhoneField(
-                          controller: mobileController,
-                          initialCountryCode: 'IN',
-
-                          style: const TextStyle(height: 1.2),
-                          decoration: const InputDecoration(
-                            counterText: '',
-                            hintText: 'Phone Number',
-                            border: InputBorder.none,
-                            isCollapsed: true, // 👈 IMPORTANT
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: Dimensions.spacingSize18,
+                        child: Row(
+                          children: [
+                            /// 🌍 Network Flag + Code
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              child: Row(
+                                children: [
+                                  Image.network(
+                                    "https://flagcdn.com/w40/in.png",
+                                    height: 20,
+                                    width: 30,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Text(
+                                    "+91",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          dropdownIconPosition: IconPosition.trailing,
-                          flagsButtonPadding: const EdgeInsets.only(left: 10),
-                          onChanged: (phone) {
-                            print(phone.completeNumber);
-                          },
+
+                            Container(
+                              height: 25,
+                              width: 1,
+                              color: Colors.grey.shade300,
+                            ),
+
+                            /// Mobile Input
+                            Expanded(
+                              child: TextField(
+                                controller: mobileController,
+                                keyboardType: TextInputType.number,
+                                maxLength: 10,
+                                decoration: const InputDecoration(
+                                  counterText: "",
+                                  hintText: "Enter phone number",
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
@@ -176,10 +206,10 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                             InkWell(
                               onTap: () {
                                 Get.to(
-                                LoginScreen(),
-                                duration: const Duration(milliseconds: 0),
-                                transition: Transition.rightToLeft,
-                              );
+                                  LoginScreen(),
+                                  duration: const Duration(milliseconds: 0),
+                                  transition: Transition.rightToLeft,
+                                );
                                 // Navigator.push(
                                 //   context,
                                 //   MaterialPageRoute(
@@ -198,7 +228,6 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                             ),
                           ],
                         ),
-
                       ),
 
                       const SizedBox(height: 20),
@@ -261,17 +290,51 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                       CustomPrimaryButton(
                         text: "Sign up",
                         onTap: () {
-                           Get.to(
-                                OtpScreen(),
-                                duration: const Duration(milliseconds: 0),
-                                transition: Transition.rightToLeft,
-                              );
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => OtpScreen(),
-                          //   ),
-                          // );
+                          String mobile = mobileController.text.trim();
+
+                          /// 1️⃣ Mobile Empty Check
+                          if (mobile.isEmpty) {
+                            Get.snackbar(
+                              "Error",
+                              "Please enter mobile number",
+                              backgroundColor: ColorResources.textColorRed,
+                               colorText: ColorResources.whiteColor,
+                              duration: Duration(seconds: 2),
+                            );
+                            return;
+                          }
+
+                          /// 2️⃣ Length Check (India 10 digit)
+                          if (mobile.length != 10) {
+                            Get.snackbar(
+                              "Error",
+                              "Please enter valid 10 digit number",
+                             colorText: ColorResources.whiteColor,
+                              backgroundColor: ColorResources.textColorRed,
+                              duration: Duration(seconds: 2),
+                            );
+                            return;
+                          }
+
+                          /// 3️⃣ Checkbox Check
+                          if (!isChecked) {
+                            Get.snackbar(
+                              "Error",
+                              "Please accept Terms & Conditions",
+                            );
+                            return;
+                          }
+
+                          /// 4️⃣ Send OTP with +91
+                          Get.find<AuthController>().sendOtp(
+                            mobileNumber: "$mobile",
+                            context: context,
+                          );
+
+                          // Get.find<AuthController>().sendOtp(
+                          //   mobileNumber: mobileController.text.trim(),
+                          //   context: context
+                          //   );
                         },
                       ),
                       const SizedBox(height: 20),

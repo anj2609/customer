@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:evfual/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:evfual/app/modules/auth/login_screen.dart';
+import 'package:evfual/config/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -37,6 +39,7 @@ class AuthController extends GetxController implements GetxService {
         authRepo.saveUserToken(
           response.body['success']['userData']['id'].toString(),
         );
+
         Get.offAll(
           MainNavigation(),
           duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
@@ -65,6 +68,228 @@ class AuthController extends GetxController implements GetxService {
     update();
     return response;
   }
+
+  Future<Response> sendOtp({
+    required BuildContext context,
+    required String mobileNumber,
+  }) async {
+    EasyLoading.show(status: "Please wait...");
+    update();
+
+    Response response = await authRepo.sendOtpApi(phone: mobileNumber);
+
+    if (response.body['code'] == '200') {
+      await EasyLoading.dismiss();
+
+      Get.snackbar(
+        'Success',
+        "${response.body['message']}  ${response.body['data']['otp']}",
+        backgroundColor: ColorResources.blueeebutton,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        duration: const Duration(seconds: 5),
+      );
+
+      /// Thoda delay de do taki snackbar dikhe
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      Get.toNamed(RouteHelper.getotpScreenRoute(mobileNumber.toString()));
+    } else if (response.statusCode == 500) {
+      await EasyLoading.dismiss();
+
+      Get.snackbar(
+        'Error',
+        response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.textColorRed,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+    } else {
+      await EasyLoading.dismiss();
+    }
+
+    update();
+    return response;
+  }
+
+  Future<Response> reSendOtp({
+    required BuildContext context,
+    required String mobileNumber,
+    required String otpNumber,
+    //reSendOtp
+  }) async {
+    EasyLoading.show(status: "Please wait...");
+    update();
+
+    Response response = await authRepo.reSendOtp(
+      phone: mobileNumber,
+      numOtp: otpNumber,
+    );
+
+    if (response.body['code'] == '200') {
+      await EasyLoading.dismiss();
+
+      Get.snackbar(
+        'Success',
+        "${response.body['message']}  ${response.body['data']['otp']}",
+        backgroundColor: ColorResources.blueeebutton,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        duration: const Duration(seconds: 5),
+      );
+    } else if (response.statusCode == 500) {
+      await EasyLoading.dismiss();
+
+      Get.snackbar(
+        'Error',
+        response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.textColorRed,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+    } else {
+      await EasyLoading.dismiss();
+    }
+
+    update();
+    return response;
+  }
+
+  Future<Response> verifyOtpApi({
+    required BuildContext context,
+    required String mobileNumber,
+    required String numOfOtp,
+  }) async {
+    EasyLoading.show(status: "Please wait...");
+    update();
+
+    Response response = await authRepo.verifyOtpApi(
+      phone: mobileNumber,
+      otp: numOfOtp,
+    );
+
+    if (response.body["code"] == "200") {
+      await EasyLoading.dismiss();
+
+      Get.snackbar(
+        'Success',
+        "${response.body['message']}",
+        backgroundColor: ColorResources.blueeebutton,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        duration: const Duration(seconds: 5),
+      );
+      authRepo.saveUserToken(response.body['data']["token"].toString());
+      authRepo.saveUserprofileid(
+        response.body['data']['user']['id'].toString(),
+      );
+      //saveUserprofileid
+
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      Get.toNamed(RouteHelper.getprofileScreenRoute(mobileNumber.toString()));
+    } else if (response.body['data'] == "401") {
+      await EasyLoading.dismiss();
+      Get.snackbar(
+        'Error',
+        response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.textColorRed,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+    } else {
+      Get.snackbar(
+        'Error',
+        response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.textColorRed,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      await EasyLoading.dismiss();
+    }
+
+    update();
+    return response;
+  }
+
+  ///// ========= Api  First Sig-Up Api Call  =========
+  Future<Response> fillPersonalInfoApi({
+    required BuildContext context,
+    String? name,
+    String? email,
+    String? gender,
+    String? dob,
+    File? profileimage,
+  }) async {
+    EasyLoading.show(status: "Please wait...");
+    update();
+
+    Response response = await authRepo.fillPersonalApi(
+      name: name!.trim(),
+      email: email!.trim(),
+      gender: gender!.trim(),
+      dob: dob!.trim(),
+      profile_image: profileimage,
+    );
+
+    if (response.body["code"] == "200") {
+      await EasyLoading.dismiss();
+
+      Get.snackbar(
+        'Success',
+        "${response.body['message']}",
+        backgroundColor: ColorResources.blueeebutton,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        duration: const Duration(seconds: 5),
+      );
+      // authRepo.saveUserToken(response.body['data']["token"].toString());
+      // authRepo.saveUserprofileid(
+      //   response.body['data']['user']['id'].toString(),
+      // );
+      //saveUserprofileid
+
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      Get.toNamed(RouteHelper.getmainNavigationScreen());
+    } else if (response.body['data'] == "401") {
+      await EasyLoading.dismiss();
+      Get.snackbar(
+        'Error',
+        response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.textColorRed,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+    } else {
+      Get.snackbar(
+        'Error',
+        response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.textColorRed,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+      await EasyLoading.dismiss();
+    }
+
+    update();
+    return response;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   Future<void> registerEV({
     String? evnumber,
