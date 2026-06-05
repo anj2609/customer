@@ -1,19 +1,21 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/data/controller/auth_controller.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/data/controller/auth_controller.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
 import 'package:pinput/pinput.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 
 class OtpScreen extends StatefulWidget {
   String? type;
   String? phoneNumber;
-  OtpScreen({super.key, this.type, this.phoneNumber});
+  String? otp;
+  OtpScreen({super.key, this.type, this.phoneNumber, this.otp});
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -31,6 +33,18 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
     super.initState();
     listenForCode();
     startTimer();
+    print('Otp:::::${widget.otp}');
+    _otpController.text = widget.otp.toString();
+    if (_otpController.text.length == 4) {
+      Future.delayed(Duration.zero, () {
+        Get.find<AuthController>().verifyOtpApi(
+          mobileNumber: widget.phoneNumber.toString(),
+          numOfOtp: _otpController.text,
+          type: widget.type?.trim() ?? "",
+          context: context,
+        );
+      });
+    }
   }
 
   void startTimer() {
@@ -69,6 +83,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
     Get.find<AuthController>().verifyOtpApi(
       mobileNumber: widget.phoneNumber.toString(),
       numOfOtp: _otpController.text.trim(),
+      type: widget.type.toString(),
 
       context: context,
     );
@@ -145,12 +160,32 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                   keyboardType: TextInputType.number,
                   defaultPinTheme: defaultPinTheme,
                   onCompleted: (pin) async {
-                    Get.find<AuthController>().verifyOtpApi(
-                      mobileNumber: widget.phoneNumber.toString(),
-                      numOfOtp: pin,
+                   showDialog(
                       context: context,
+                      barrierDismissible: false,
+                      builder: (_) => PremiumBlurLoader(),
                     );
-                  
+
+                    try {
+                      Get.find<AuthController>().verifyOtpApi(
+                        mobileNumber: widget.phoneNumber.toString(),
+                        numOfOtp: pin,
+                        type: widget.type!.trim() ?? "",
+                        context: context,
+                      );
+                    } catch (e) {
+                      // Get.snackbar("Error", e.toString());
+                    } finally {
+                      if (Get.isDialogOpen ?? false) {
+                        Get.back();
+                      }
+                    }
+                    // Get.find<AuthController>().verifyOtpApi(
+                    //   mobileNumber: widget.phoneNumber.toString(),
+                    //   numOfOtp: pin,
+                    //   type: widget.type!.trim() ?? "",
+                    //   context: context,
+                    // );
                   },
                 ),
               ),
@@ -165,45 +200,65 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                   onTap: (_enableResend && !_isResending)
                       ? () async {
                           log('resend otp clicked |||||');
-
-                          setState(() {
+                           setState(() {
                             _isResending = true;
                           });
 
-                          await Get.find<AuthController>().reSendOtp(
-                            mobileNumber: "${widget.phoneNumber.toString()}",
-                            otpNumber: _otpController.text.trim(),
+                          showDialog(
                             context: context,
+                            barrierDismissible: false,
+                            builder: (_) =>  PremiumBlurLoader(),
                           );
-                          _otpController.clear();
 
-                          setState(() {
-                            _isResending = false;
-                          });
+                          try {
+                            await Get.find<AuthController>().reSendOtp(
+                              mobileNumber: widget.phoneNumber.toString(),
+                              otpNumber: _otpController.text.trim(),
+                              context: context,
+                            );
 
-                          startTimer();
+                            _otpController.clear();
+                            startTimer();
+                          } catch (e) {
+                            // Get.snackbar(
+                            //   "",
+                            //   e.toString(),
+                            //   snackPosition: SnackPosition.TOP,
+                            // );
+                          } finally {
+                            if (Navigator.canPop(context)) {
+                              Navigator.of(context, rootNavigator: true).pop();
+                            }
+
+                            if (mounted) {
+                              setState(() {
+                                _isResending = false;
+                              });
+                            }
+                          }
+
+                          // setState(() {
+                          //   _isResending = true;
+                          // });
+
+                          // await Get.find<AuthController>().reSendOtp(
+                          //   mobileNumber: "${widget.phoneNumber.toString()}",
+                          //   otpNumber: _otpController.text.trim(),
+                          //   context: context,
+                          // );
+                          // _otpController.clear();
+
+                          // setState(() {
+                          //   _isResending = false;
+                          // });
+
+                          // startTimer();
                         }
                       : null,
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class NextScreen extends StatelessWidget {
-  const NextScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          "OTP Verified ✅",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
     );

@@ -1,13 +1,14 @@
-import 'package:evfual/app/modules/auth/otp_screen.dart';
-import 'package:evfual/config/utils/dimensions.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/constants.dart';
+import 'package:myrideuser/config/utils/dimensions.dart';
+import 'package:myrideuser/data/controller/auth_controller.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/style.dart';
 import 'package:get/get.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,6 +20,11 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool isChecked = false;
   final TextEditingController mobileController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    Get.find<AuthController>().initDeviceData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,38 +91,71 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       /// Phone TextField
                       Container(
-                        height: 50, // 👈 Fixed height dena zaroori
+                        height: MediaQuery.of(context).size.height * 0.07,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: IntlPhoneField(
-                          controller: mobileController,
-                          initialCountryCode: 'IN',
-                          // textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            height:
-                                1.2, // 👈 vertical alignment better karta hai
-                          ),
-                          decoration: const InputDecoration(
-                            counterText: '',
-                            hintText: 'Phone Number',
-                            border: InputBorder.none,
-                            isCollapsed: true, // 👈 IMPORTANT
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 18, // 👈 Adjust this (16–20 best range)
+                        child: Row(
+                          children: [
+                            /// 🌍 Network Flag + Code
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              child: Row(
+                                children: [
+                                  Image.network(
+                                    "https://flagcdn.com/w40/in.png",
+                                    height: 20,
+                                    width: 30,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Text(
+                                    "+91",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          dropdownIconPosition: IconPosition.trailing,
-                          flagsButtonPadding: const EdgeInsets.only(left: 10),
-                          onChanged: (phone) {
-                            print(phone.completeNumber);
-                          },
+
+                            Container(
+                              height: 25,
+                              width: 1,
+                              color: Colors.grey.shade300,
+                            ),
+
+                            Expanded(
+                              child: TextField(
+                                controller: mobileController,
+                                keyboardType: TextInputType.phone,
+                                onChanged: (value) {
+                                  if (value.length == 10) {
+                                    FocusScope.of(context).unfocus();
+                                  }
+                                },
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(10),
+                                ],
+                                decoration: const InputDecoration(
+                                  hintText: "Enter phone number",
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
                       const SizedBox(height: 15),
-
                       Row(
                         children: [
                           Checkbox(
@@ -136,16 +175,55 @@ class _LoginScreenState extends State<LoginScreen> {
                           Expanded(
                             child: RichText(
                               text: TextSpan(
-                                text: "Remember me ",
+                                text: "I agree to My Ride ",
                                 style: PoppinsMedium.copyWith(
+                                  fontSize: Dimensions.spacingSize12,
+
                                   color: ColorResources.blackcolor11,
                                 ),
+
+                                children: [
+                                  TextSpan(
+                                    text: "Terms & Conditions.",
+                                    style: PoppinsMedium.copyWith(
+                                      color: ColorResources.blueeebutton,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         ],
                       ),
 
+                      // Row(
+                      //   children: [
+                      //     Checkbox(
+                      //       checkColor: ColorResources.buttonColors,
+                      //       activeColor: ColorResources.blueeebutton,
+
+                      //       value: isChecked,
+                      //       onChanged: (value) {
+                      //         setState(() {
+                      //           isChecked = value!;
+                      //         });
+                      //       },
+                      //       shape: RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(4),
+                      //       ),
+                      //     ),
+                      //     Expanded(
+                      //       child: RichText(
+                      //         text: TextSpan(
+                      //           text: "Remember me ",
+                      //           style: PoppinsMedium.copyWith(
+                      //             color: ColorResources.blackcolor11,
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
                       const SizedBox(height: 10),
 
                       Row(
@@ -173,16 +251,41 @@ class _LoginScreenState extends State<LoginScreen> {
                         images: 'assets/images/google.png',
                         iconColor: Colors.red,
 
-                        onTap: () {},
+                        onTap: () async {
+                           showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (_) =>  PremiumBlurLoader(),
+                            );
+
+                          try {
+                            Get.find<AuthController>().signInWithGoogle(
+                              provider: 'google',
+                               context: context,
+                            );
+                           
+                            if (Get.isDialogOpen ?? false) {
+                              Get.back();
+                            }
+                          } catch (e) {
+                            if (Get.isDialogOpen ?? false) {
+                              Get.back();
+                            }
+                          }
+                          // Get.find<AuthController>().signInWithGoogle(
+                          //   provider: 'google',
+
+                          //   /// context: context,
+                          // );
+                        },
                       ),
 
-                      CustomSocialButton(
-                        text: "Continue with Apple",
-                        images: 'assets/images/apple.png',
-                        iconColor: Colors.black,
-                        onTap: () {},
-                      ),
-
+                      // CustomSocialButton(
+                      //   text: "Continue with Apple",
+                      //   images: 'assets/images/apple.png',
+                      //   iconColor: Colors.black,
+                      //   onTap: () {},
+                      // ),
                       CustomSocialButton(
                         text: "Continue with Facebook",
                         images: 'assets/images/facebook.png',
@@ -190,28 +293,83 @@ class _LoginScreenState extends State<LoginScreen> {
                         onTap: () {},
                       ),
 
-                      CustomSocialButton(
-                        text: "Continue with X",
-                        images:
-                            'assets/images/twitter.png', // No official X icon in Material
-                        iconColor: Colors.black,
-                        onTap: () {},
-                      ),
-
+                      // CustomSocialButton(
+                      //   text: "Continue with X",
+                      //   images:
+                      //       'assets/images/twitter.png', // No official X icon in Material
+                      //   iconColor: Colors.black,
+                      //   onTap: () {},
+                      // ),
                       const SizedBox(height: 30),
 
                       /// Sign Up Button
                       CustomPrimaryButton(
                         text: "Sign in",
-                        onTap: () {
-                           Get.to(
-                            Get.to(OtpScreen( type: "Sign in",)),
-                            transition: Transition.leftToRight,
-                            duration: Duration(milliseconds: 0),
-                          );
-                         
+                        onTap: () async {
+                          String mobile = mobileController.text.trim();
+
+                          if (mobile.isEmpty) {
+                            Get.snackbar(
+                              "Error",
+                              "Please enter mobile number",
+                              backgroundColor: ColorResources.textColorRed,
+                              colorText: ColorResources.whiteColor,
+                              duration: Duration(seconds: 2),
+                            );
+                            return;
+                          }
+
+                          if (mobile.length != 10) {
+                            Get.snackbar(
+                              "Error",
+                              "Please enter valid 10 digit number",
+                              backgroundColor: ColorResources.textColorRed,
+                              colorText: ColorResources.whiteColor,
+                              duration: Duration(seconds: 2),
+                            );
+                            return;
+                          }
+
+                          /// 3️⃣ Checkbox Check
+                          if (!isChecked) {
+                            Get.snackbar(
+                              "Error",
+                              "Please accept Terms & Conditions",
+                              backgroundColor: ColorResources.textColorRed,
+                              colorText: ColorResources.whiteColor,
+                            );
+                            return;
+                          }
+                          try {
+                            await Get.find<AuthController>().initDeviceData();
+
+                             showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (_) =>  PremiumBlurLoader(),
+                            );
+                            await Get.find<AuthController>().sendOtp(
+                              mobileNumber: mobile,
+                              type: ApiConstants.UserLogin,
+                              deviceToken:
+                                  Get.find<AuthController>().deviceToken ?? "",
+                              context: context,
+                            );
+                          } finally {
+                            if (Get.isDialogOpen ?? false) {
+                              Get.back();
+                            }
+                          }
+                          // Get.find<AuthController>().sendOtp(
+                          //   mobileNumber: mobileController.text.trim(),
+                          //   type: ApiConstants.UserLogin,
+                          //   deviceToken:
+                          //       Get.find<AuthController>().deviceToken!,
+                          //   context: context,
+                          // );
                         },
                       ),
+
                       const SizedBox(height: 20),
                     ],
                   ),

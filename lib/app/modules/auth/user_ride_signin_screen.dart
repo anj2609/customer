@@ -1,13 +1,14 @@
-import 'package:evfual/app/modules/auth/login_screen.dart';
-import 'package:evfual/app/modules/auth/otp_screen.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/dimensions.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/data/controller/auth_controller.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:flutter/services.dart';
+import 'package:myrideuser/app/modules/auth/login_screen.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/constants.dart';
+import 'package:myrideuser/config/utils/dimensions.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/data/controller/auth_controller.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
 
 class UserSignInpScreen extends StatefulWidget {
   const UserSignInpScreen({Key? key}) : super(key: key);
@@ -128,6 +129,15 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                             Expanded(
                               child: TextField(
                                 controller: mobileController,
+                                onChanged: (value) {
+                                  if (value.length == 10) {
+                                    FocusScope.of(context).unfocus();
+                                  }
+                                },
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(10),
+                                ],
                                 keyboardType: TextInputType.number,
                                 maxLength: 10,
                                 decoration: const InputDecoration(
@@ -259,16 +269,41 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                         images: 'assets/images/google.png',
                         iconColor: Colors.red,
 
-                        onTap: () {},
+                        onTap: () {
+                           showDialog(
+                      context:Get.context!,
+                      barrierDismissible: false,
+                      builder: (_) => PremiumBlurLoader(),
+                    );
+
+                          try {
+                            Get.find<AuthController>().signInWithGoogle(
+                              provider: 'google',
+
+                              context: context,
+                            );
+
+                            if (Get.isDialogOpen ?? false) {
+                              Get.back();
+                            }
+                          } catch (e) {
+                            if (Get.isDialogOpen ?? false) {
+                              Get.back();
+                            }
+                          }
+                          //   Get.find<AuthController>().signInWithGoogle(
+                          //     provider: 'google',
+                          //  ///context: context,
+                          //   );
+                        },
                       ),
 
-                      CustomSocialButton(
-                        text: "Continue with Apple",
-                        images: 'assets/images/apple.png',
-                        iconColor: Colors.black,
-                        onTap: () {},
-                      ),
-
+                      // CustomSocialButton(
+                      //   text: "Continue with Apple",
+                      //   images: 'assets/images/apple.png',
+                      //   iconColor: Colors.black,
+                      //   onTap: () {},
+                      // ),
                       CustomSocialButton(
                         text: "Continue with Facebook",
                         images: 'assets/images/facebook.png',
@@ -276,20 +311,19 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                         onTap: () {},
                       ),
 
-                      CustomSocialButton(
-                        text: "Continue with X",
-                        images:
-                            'assets/images/twitter.png', // No official X icon in Material
-                        iconColor: Colors.black,
-                        onTap: () {},
-                      ),
-
+                      // CustomSocialButton(
+                      //   text: "Continue with X",
+                      //   images:
+                      //       'assets/images/twitter.png', // No official X icon in Material
+                      //   iconColor: Colors.black,
+                      //   onTap: () {},
+                      // ),
                       const SizedBox(height: 30),
 
                       /// Sign Up Button
                       CustomPrimaryButton(
                         text: "Sign up",
-                        onTap: () {
+                        onTap: () async {
                           String mobile = mobileController.text.trim();
 
                           /// 1️⃣ Mobile Empty Check
@@ -298,7 +332,7 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                               "Error",
                               "Please enter mobile number",
                               backgroundColor: ColorResources.textColorRed,
-                               colorText: ColorResources.whiteColor,
+                              colorText: ColorResources.whiteColor,
                               duration: Duration(seconds: 2),
                             );
                             return;
@@ -309,7 +343,7 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                             Get.snackbar(
                               "Error",
                               "Please enter valid 10 digit number",
-                             colorText: ColorResources.whiteColor,
+                              colorText: ColorResources.whiteColor,
                               backgroundColor: ColorResources.textColorRed,
                               duration: Duration(seconds: 2),
                             );
@@ -325,16 +359,36 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                             return;
                           }
 
-                          /// 4️⃣ Send OTP with +91
-                          Get.find<AuthController>().sendOtp(
-                            mobileNumber: "$mobile",
-                            context: context,
-                          );
+                          try {
+                            await Get.find<AuthController>().initDeviceData();
+
+                            showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) => PremiumBlurLoader(),
+                    );
+                            Get.find<AuthController>().sendOtp(
+                              mobileNumber: "$mobile",
+                              type: ApiConstants.UserRegister,
+                              deviceToken:
+                                  Get.find<AuthController>().deviceToken!,
+                              // 'register',
+                              context: context,
+                            );
+                          } finally {
+                            if (Get.isDialogOpen ?? false) {
+                              Get.back();
+                            }
+                          }
 
                           // Get.find<AuthController>().sendOtp(
-                          //   mobileNumber: mobileController.text.trim(),
-                          //   context: context
-                          //   );
+                          //   mobileNumber: "$mobile",
+                          //   type: ApiConstants.UserRegister,
+                          //   deviceToken:
+                          //       Get.find<AuthController>().deviceToken!,
+                          //   // 'register',
+                          //   context: context,
+                          // );
                         },
                       ),
                       const SizedBox(height: 20),

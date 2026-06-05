@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:evfual/data/controller/addaddress_controller.dart';
+import 'package:myrideuser/data/controller/addaddress_controller.dart';
 
 class AddressBinding extends Bindings {
   @override

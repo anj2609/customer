@@ -1,0 +1,119 @@
+import 'dart:developer';
+
+import 'package:myrideuser/config/utils/constants.dart';
+import 'package:get/get.dart';
+import 'package:myrideuser/config/utils/apis/api_client.dart';
+
+class BookingRepo extends GetxService {
+  final ApiClient apiClient;
+
+  BookingRepo({required this.apiClient});
+
+  /////==========  call estimateUrl api  ======================///////
+  Future<Response> bookingestimateListUrl({
+    dynamic pickup_lat,
+    dynamic pickup_lng,
+    dynamic drop_lat,
+    dynamic drop_lng,
+  }) async {
+    log(' booking $pickup_lat');
+    return apiClient.myridepostData(ApiConstants.estimateUrl, {
+      "pickup_lat": pickup_lat,
+      "pickup_lng": pickup_lng,
+      "drop_lat": drop_lat,
+      "drop_lng": drop_lng,
+    });
+  }
+
+  /////==========  call create booking  api  ======================///////
+  Future<Response> createBookingApi({
+    required double pickup_lat,
+    required double pickup_lng,
+    required double drop_lat,
+    required double drop_lng,
+    required String estimated_price,
+    required String vehicle_type_id,
+    required String pickup_address,
+    required String drop_address,
+    required String is_schedule,
+    required String schedule_date_time,
+  }) async {
+    log(' booking $pickup_lat');
+    return apiClient.myridepostData(ApiConstants.createBooking, {
+      "pickup_lat": pickup_lat,
+      "pickup_lng": pickup_lng,
+      "drop_lat": drop_lat,
+      "drop_lng": drop_lng,
+      "estimated_price": estimated_price,
+      "vehicle_type_id": vehicle_type_id,
+      "pickup_address": pickup_address,
+      "drop_address": drop_address,
+      "is_schedule": is_schedule,
+      "schedule_date_time": schedule_date_time,
+      "is_wallet": 0,
+      "promo_code": "",
+    });
+  }
+
+  /////==========  call track Ride api  ======================///////
+  Future<Response> trackRideApi({required String bookingId}) async {
+    log(' booking $bookingId');
+    return apiClient.myridepostData(ApiConstants.trackRide, {
+      "booking_id": bookingId,
+    });
+  }
+
+  ////// =================== Trip Ride Dteails ==================
+
+  Future<Response> tripDetailsRideApi({required String bookingId}) async {
+    log(' booking $bookingId');
+    return apiClient.myridepostData(ApiConstants.tripdetail, {
+      "booking_id": bookingId,
+    });
+  }
+
+  Future<Response> cancelationlist() async {
+   // log(' booking $bookingId');
+    return apiClient.getData(ApiConstants.cancellation);
+  }
+
+
+
+Future<Response> cancelRideApi({ required String bookingid, required String reseonId}) async {
+    log(' resean idddd ||||||||||||||  $reseonId');
+    return apiClient.myridepostData(ApiConstants.cancelRide, {
+      
+      "cancellation_type_id":reseonId,
+      "booking_id": bookingid,
+    });
+  }
+
+
+  Future<Response> rateDriver({ required String bookingid, required String rateId}) async {
+    log(' resean idddd ||||||||||||||  $rateId');
+    return apiClient.myridepostData(ApiConstants.rateDriver, {
+      "booking_id": bookingid,
+      "rating": rateId,
+    });
+  }
+
+
+
+  Future<Response> driverAvailbledata({ required double latitude, required double longitude}) async {
+    log(' resean idddd ||||||||||||||  $latitude');
+    return apiClient.myridepostData(ApiConstants.driverAvailbleList, {
+      "latitude": latitude,
+      "longitude": longitude,
+    });
+  }
+
+
+
+
+
+///booking_id , rating
+
+
+//cancellation
+  ///cancellation
+}

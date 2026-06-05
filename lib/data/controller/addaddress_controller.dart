@@ -1,4 +1,4 @@
-import 'package:evfual/data/modal/addaddress_model.dart';
+import 'package:myrideuser/data/modal/addaddress_model.dart';
 import 'package:get/get.dart';
 
 class AddressController extends GetxController {

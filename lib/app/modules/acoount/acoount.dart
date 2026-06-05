@@ -1,16 +1,15 @@
-import 'package:evfual/app/modules/acoount/accountsecurity_screen.dart';
-import 'package:evfual/app/modules/acoount/dataanalytics_screen.dart';
-import 'package:evfual/app/modules/acoount/help_support.dart';
-import 'package:evfual/app/modules/acoount/linkedaccount_screen.dart';
-import 'package:evfual/app/modules/acoount/notification_screen.dart';
-import 'package:evfual/app/modules/acoount/saveaddress_screen.dart';
-import 'package:evfual/app/modules/acoount/topup_screen.dart';
-import 'package:evfual/app/modules/profile/profile.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/dimensions.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/data/binding/binding_screens.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/app/modules/acoount/help_support.dart';
+import 'package:myrideuser/app/modules/acoount/linkedaccount_screen.dart';
+import 'package:myrideuser/app/modules/acoount/notification_screen.dart';
+import 'package:myrideuser/app/modules/acoount/topup_screen.dart';
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/constants.dart';
+import 'package:myrideuser/config/utils/dimensions.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/data/controller/auth_controller.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -26,9 +25,23 @@ class SettingModel {
 /// MAIN SCREEN
 ////////////////////////////////////////////////////////////
 
-class AccountSettingScreens extends StatelessWidget {
+class AccountSettingScreens extends StatefulWidget {
   const AccountSettingScreens({super.key});
 
+  @override
+  State<AccountSettingScreens> createState() => _AccountSettingScreensState();
+}
+
+class _AccountSettingScreensState extends State<AccountSettingScreens> {
+  final profilecontroller = Get.find<ProfileController>();
+ @override
+  void initState() {
+    super.initState();
+    Get.find<ProfileController>().customerWalletAmount();
+    
+  }  
+ 
+  
   @override
   Widget build(BuildContext context) {
     /// 🔥 DYNAMIC SETTINGS LIST
@@ -48,11 +61,11 @@ class AccountSettingScreens extends StatelessWidget {
       //   title: "Payment n Methods",
       //   onTap: () => _open(context, "Payment Methods"),
       // ),
-      SettingModel(
-        icon: Icons.shield_outlined,
-        title: "Account & Security",
-        onTap: () => _open(context, "Account & Security"),
-      ),
+      // SettingModel(
+      //   icon: Icons.shield_outlined,
+      //   title: "Account & Security",
+      //   onTap: () => _open(context, "Account & Security"),
+      // ),
       SettingModel(
         icon: Icons.sync_alt,
         title: "Linked Accounts",
@@ -63,25 +76,25 @@ class AccountSettingScreens extends StatelessWidget {
       //   title: "App Appearance",
       //   onTap: () => _open(context, "App Appearance"),
       // ),
-      SettingModel(
-        icon: Icons.bar_chart,
-        title: "Data & Analytics",
-        onTap: () => _open(context, "Data & Analytics"),
-      ),
-      SettingModel(
-        icon: Icons.help_outline,
-        title: "Help & Support",
-        onTap: () => _open(context, "Help & Support"),
-      ),
-      SettingModel(
-        icon: Icons.star_border,
-        title: "Rate us",
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Open Play Store Rating")),
-          );
-        },
-      ),
+      // SettingModel(
+      //   icon: Icons.bar_chart,
+      //   title: "Data & Analytics",
+      //   onTap: () => _open(context, "Data & Analytics"),
+      // ),
+      // SettingModel(
+      //   icon: Icons.help_outline,
+      //   title: "Help & Support",
+      //   onTap: () => _open(context, "Help & Support"),
+      // ),
+      // SettingModel(
+      //   icon: Icons.star_border,
+      //   title: "Rate us",
+      //   onTap: () {
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       const SnackBar(content: Text("Open Play Store Rating")),
+      //     );
+      //   },
+      // ),
     ];
 
     return Scaffold(
@@ -106,16 +119,18 @@ class AccountSettingScreens extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Spacer(),
+
+                  //  // Spacer(),
+                  SizedBox(width: Dimensions.spacingSize60),
                   Text(
-                    "Activity",
+                    "Account",
                     style: PoppinsExtrabold.copyWith(
                       color: ColorResources.blackcolor11,
                       fontSize: Dimensions.spacingSize16,
                     ),
                   ),
-                  Spacer(),
-                  Icon(Icons.more_vert),
+                  // Spacer(),
+                  // Icon(Icons.more_vert),
                 ],
               ),
 
@@ -132,50 +147,79 @@ class AccountSettingScreens extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: Dimensions.spacingSize25,
-                          backgroundImage: AssetImage(
-                            "assets/images/profile.png",
+                    GestureDetector(
+                      onTap: () {
+                        Get.toNamed(RouteHelper.geteditProfileScreen());
+                      },
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: Dimensions.spacingSize25,
+                            backgroundColor: Colors.grey.shade200,
+                            child: ClipOval(
+                              child:
+                                  profilecontroller.profileImage.value != null
+                                  ? Image.file(
+                                      profilecontroller.profileImage.value!,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                    )
+                                  : (profilecontroller.profileimagee != null &&
+                                        profilecontroller
+                                            .profileimagee!
+                                            .isNotEmpty)
+                                  ? Image.network(
+                                      '${ApiConstants.imageurl}${profilecontroller.profileimagee}',
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Image.asset(
+                                              "assets/images/profile.png",
+                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                    )
+                                  : Image.asset(
+                                      "assets/images/profile.png",
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
                           ),
-                        ),
-                        SizedBox(width: Dimensions.spacingSize12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Ansh Saxena",
-                                style: PoppinsBold.copyWith(
-                                  color: ColorResources.blackcolor11,
+                          SizedBox(width: Dimensions.spacingSize12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${profilecontroller.nameController.text}",
+                                  style: PoppinsBold.copyWith(
+                                    color: ColorResources.blackcolor11,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 3),
-                              Text(
-                                "+91 987-654-3210",
-                                style: PoppinsReguler.copyWith(
-                                  color: ColorResources.TextColorForGrey,
+                                SizedBox(height: 3),
+                                Text(
+                                  "+91 ${profilecontroller.phoneController.text}",
+                                  style: PoppinsReguler.copyWith(
+                                    color: ColorResources.TextColorForGrey,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Get.to(
-                              () => ProfilePage(),
-                              transition: Transition.leftToRight,
-
-                              duration: const Duration(milliseconds: 300),
-                            );
-                          },
-                          child: Icon(
-                            Icons.arrow_forward_ios,
-                            size: Dimensions.spacingSize16,
+                          InkWell(
+                            onTap: () {
+                              Get.toNamed(RouteHelper.geteditProfileScreen());
+                            },
+                            child: Icon(
+                              Icons.arrow_forward_ios,
+                              size: Dimensions.spacingSize16,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
 
                     SizedBox(height: Dimensions.spacingSize10),
@@ -203,7 +247,13 @@ class AccountSettingScreens extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "₹ 3582.67",
+                                '₹ ${profilecontroller.walletbalance ?? 0}',
+                                // profilecontroller.walletbalance!.isNotEmpty
+                                //     ? "₹ ${profilecontroller.walletbalance}"
+                                //     : "₹ 0",
+
+                                ///  profilecontroller.
+                                // "₹ 3582.67",
                                 style: PoppinsMedium.copyWith(
                                   color: ColorResources.blackcolor11,
                                 ),
@@ -222,7 +272,7 @@ class AccountSettingScreens extends StatelessWidget {
                           onTap: () {
                             Get.to(
                               Get.to(TopupScreen()),
-                              transition: Transition.leftToRight,
+                              transition: Transition.rightToLeft,
                               duration: Duration(milliseconds: 0),
                             );
                           },
@@ -278,62 +328,66 @@ class AccountSettingScreens extends StatelessWidget {
 
   void _open(BuildContext context, String title) {
     if (title == "Saved Addresses") {
-      Get.to(
-        () => SavedAddressScreen(),
-        transition: Transition.leftToRight,
-        binding: AddressBinding(),
-        duration: const Duration(milliseconds: 300),
-      );
+      Get.toNamed(RouteHelper.getsavedAddressScreen());
+      // Get.to(
+      //   () => SavedAddressScreen(),
+      //   transition: Transition.leftToRight,
+      //   binding: AddressBinding(),
+      //   duration: const Duration(milliseconds: 300),
+      // );
     } else if (title == "Notifications") {
       Get.to(
         () => NotificationsScreen(),
         transition: Transition.leftToRight,
 
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 00),
       );
     } else if (title == "Payment Methods") {
       Get.to(
         () => NotificationsScreen(),
         transition: Transition.leftToRight,
 
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 00),
       );
-    } else if (title == "Account & Security") {
-      Get.to(
-        () => AccountSecurityScreen(),
-        transition: Transition.leftToRight,
-
-        duration: const Duration(milliseconds: 300),
-      );
-    } else if (title == "Linked Accounts") {
+    }
+    //  else if (title == "Account & Security") {
+    //   Get.to(
+    //     () => AccountSecurityScreen(),
+    //     transition: Transition.leftToRight,
+    //     duration: const Duration(milliseconds: 00),
+    //   );
+    // }
+    else if (title == "Linked Accounts") {
       Get.to(
         () => LinkedAccountScreen(),
         transition: Transition.leftToRight,
 
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 00),
       );
     } else if (title == "Help & Support") {
       Get.to(
         () => HelpSupportScreen(),
         transition: Transition.leftToRight,
 
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 00),
       );
-    } else if (title == "Data & Analytics") {
-      Get.to(
-        () => DataAnalyticsScreen(),
-        transition: Transition.leftToRight,
+    }
+    // else if (title == "Data & Analytics") {
+    //   Get.to(
+    //     () => DataAnalyticsScreen(),
+    //     transition: Transition.leftToRight,
 
-        duration: const Duration(milliseconds: 300),
-      );
-    } else if (title == "Rate us") {
-      //  Get.to(
-      //   () => DataAnalyticsScreen(),
-      //   transition: Transition.leftToRight,
+    //     duration: const Duration(milliseconds: 00),
+    //   );
+    // }
+    // else if (title == "Rate us") {
+    //   //  Get.to(
+    //   //   () => DataAnalyticsScreen(),
+    //   //   transition: Transition.leftToRight,
 
-      //   duration: const Duration(milliseconds: 300),
-      // );
-    } else {}
+    //   //   duration: const Duration(milliseconds: 300),
+    //   // );
+    // } else {}
     ////App Appearance
   }
 }
@@ -476,7 +530,8 @@ class LogoutTile extends StatelessWidget {
                         // CustomPrimaryButton(
                         text: "Cancle",
                         onTap: () {
-                          Navigator.pop(context);
+                          Get.back();
+                          //  Navigator.pop(context);
                         },
                       ),
                     ),
@@ -485,7 +540,11 @@ class LogoutTile extends StatelessWidget {
                       child: CustomPrimaryButton(
                         text: "Yes, Logout",
                         onTap: () {
-                          Navigator.pop(context);
+                          Get.find<AuthController>().userLogOut(
+                            context: context,
+                          );
+
+                          // Get.back();
 
                           /// Logout logic here
                         },

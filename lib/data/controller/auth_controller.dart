@@ -1,29 +1,196 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
-import 'package:evfual/app/modules/Deshboard/buttom_navigation.dart';
-import 'package:evfual/app/modules/auth/login_screen.dart';
-import 'package:evfual/config/utils/colors.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:myrideuser/app/modules/Deshboard/buttom_navigation.dart';
+import 'package:myrideuser/app/modules/auth/login_screen.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:evfual/config/route.dart';
-import 'package:evfual/config/utils/constants.dart';
-import 'package:evfual/data/repository/auth_repo.dart';
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/constants.dart';
+import 'package:myrideuser/data/repository/auth_repo.dart';
+import 'package:myrideuser/widgets/toaster_animation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthController extends GetxController implements GetxService {
   final AuthRepo authRepo;
 
   AuthController({required this.authRepo});
 
+  //// ====== Google SignIn =============== //////////////
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+  String? deviceToken;
+  String? deviceType;
+
+  @override
+  void onInit() {
+    super.onInit();
+    initDeviceData();
+  }
+
+  Future<void> initDeviceData() async {
+    deviceType = Platform.isAndroid ? "android" : "ios";
+
+    deviceToken = await FirebaseMessaging.instance.getToken();
+
+    await saveDeviceData();
+
+    print("Saved Token: $deviceToken");
+    print("Saved Device Type: $deviceType");
+  }
+
+  Future<void> saveDeviceData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("device_token", deviceToken ?? "");
+    await prefs.setString("device_type", deviceType ?? "");
+  }
+
+  Future<void> loadSavedDeviceData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    deviceToken = prefs.getString("device_token");
+    deviceType = prefs.getString("device_type");
+  }
+
+  Future<Response?> signInWithGoogle({
+    required BuildContext context,
+    String? provider,
+  }) async {
+    try {
+      final GoogleSignInAccount? account = await _googleSignIn.signIn();
+
+      if (account == null) {
+        print("User cancelled login");
+        return null;
+      }
+
+      final GoogleSignInAuthentication auth = await account.authentication;
+
+      final String? idToken = auth.idToken;
+      final String? accessToken = auth.accessToken;
+
+      // /// ===== STORE DATA =====
+      // ApiConstants.socialtoken = accessToken.toString();
+
+      // ApiConstants.gmailAddres = account.email;
+
+      // // User Name
+      // ApiConstants.userName = account.displayName ?? "";
+
+      ApiConstants.profileImage = account.photoUrl ?? "";
+
+      print("User Name: ${account.displayName}");
+      print("Gmail: ${account.email}");
+      print("Photo: ${account.photoUrl}");
+
+      print("ID Token: $idToken");
+      print("Access Token: $accessToken");
+
+      /// API CALL
+      final response = await socailLogin(
+        provider: provider.toString(),
+        userToken: idToken,
+
+          context: context,
+      );
+
+      return response;
+    } catch (e) {
+      print("Error: $e");
+      return null;
+    }
+  }
+
+  Future<Response> socailLogin({
+     required BuildContext context,
+    required String provider,
+    String? userToken,
+  }) async {
+    ///EasyLoading.show(status: "Please wait...");
+    update();
+
+    Response response = await authRepo.socialSignup(
+      provider: provider,
+      idToken: userToken.toString(),
+    );
+
+    if (response.body != null && response.body["code"] == "200") {
+    ///  await EasyLoading.dismiss();
+      print('social login ${response.body['user']}');
+
+      // Get.snackbar(
+      //   '',
+      //   "${response.body['message']}",
+
+      //   ///${response.body['data']['otp']}",
+      //   backgroundColor: ColorResources.blueeebutton,
+      //   colorText: Colors.white,
+      //   snackPosition: SnackPosition.TOP,
+      //   duration: const Duration(seconds: 5),
+      // );
+       AnimatedTopToast.show(
+        context: context,
+        message:
+             response.body?['message'],
+        backgroundColor: ColorResources.blueeebutton,
+        icon: Icons.check_circle_rounded,
+      );
+
+      await Future.delayed(const Duration(milliseconds: 500));
+      ApiConstants.userTokenSocial = response.body['data']['api_token']
+          .toString();
+      ApiConstants.userIdSocial = response.body['data']['id'].toString();
+      ApiConstants.usernames = response.body['data']['name'].toString();
+      ApiConstants.emailAddress = response.body['data']['email'].toString();
+
+      ApiConstants.provider = provider.toString();
+      if (response.body['data']['status'].toString() == '1' ) {
+        authRepo.saveUserToken(response.body['data']['api_token'].toString());
+        authRepo.saveUserprofileid(response.body['data']['id'].toString());
+        Get.offAll(
+          MainNavigation(),
+          duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+          transition: Transition.rightToLeft,
+        );
+      } else {
+        Get.offAllNamed(RouteHelper.getprofileScreenRoute());
+      }
+    } else if (response.statusCode == 500) {
+     /// await EasyLoading.dismiss();
+  AnimatedTopToast.show(
+        context: context,
+        message:
+             response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.blueeebutton,
+        icon: Icons.check_circle_rounded,
+      );
+      // Get.snackbar(
+      //   '',
+      //   response.body['message'] ?? "Something went wrong",
+      //   backgroundColor: ColorResources.textColorRed,
+      //   colorText: Colors.white,
+      //   snackPosition: SnackPosition.TOP,
+      // );
+    } else {
+    ///  await EasyLoading.dismiss();
+    }
+   /// await EasyLoading.dismiss();
+    update();
+    return response;
+  }
+
   Future<Response> userloginapi({
     required BuildContext context,
     String? evnumber,
     String? passowrd,
   }) async {
-    EasyLoading.show();
+  //  EasyLoading.show();
     update();
 
     Response response = await authRepo.usersignup(
@@ -35,10 +202,10 @@ class AuthController extends GetxController implements GetxService {
       print(':::::::::${response.body['status']}');
 
       if (response.body['status'] == 200) {
-        print('id:::::${response.body['success']['userData']['id']}');
-        authRepo.saveUserToken(
-          response.body['success']['userData']['id'].toString(),
-        );
+        // print('id:::::${response.body['success']['userData']['id']}');
+        // authRepo.saveUserToken(
+        //   response.body['success']['userData']['id'].toString(),
+        // );
 
         Get.offAll(
           MainNavigation(),
@@ -46,23 +213,25 @@ class AuthController extends GetxController implements GetxService {
           transition: Transition.rightToLeft,
         );
       }
-      EasyLoading.dismiss();
-      Get.snackbar(
-        'Error',
-        response.body['error'],
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      //EasyLoading.dismiss();
+       AnimatedTopToast.show(
+        context: context,
+        message:
+             response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.textColorRed,
+        icon: Icons.check_circle_rounded,
       );
     } else if (response.statusCode == 422) {
-      EasyLoading.dismiss();
-      Get.snackbar(
-        'Error',
-        response.body['message'],
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+     //// EasyLoading.dismiss();
+      AnimatedTopToast.show(
+        context: context,
+        message:
+             response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.textColorRed,
+        icon: Icons.check_circle_rounded,
       );
     } else {
-      EasyLoading.dismiss();
+   ///   EasyLoading.dismiss();
     }
 
     update();
@@ -72,45 +241,104 @@ class AuthController extends GetxController implements GetxService {
   Future<Response> sendOtp({
     required BuildContext context,
     required String mobileNumber,
+    required String type,
+    required String deviceToken,
   }) async {
-    EasyLoading.show(status: "Please wait...");
+    ///EasyLoading.show(status: "Please wait...");
     update();
 
-    Response response = await authRepo.sendOtpApi(phone: mobileNumber);
+    Response response = await authRepo.sendOtpApi(
+      phone: mobileNumber,
+      type: type,
+      deviceToken: Get.find<AuthController>().deviceToken!,
+      devicetype: deviceType,
+    );
 
-    if (response.body['code'] == '200') {
-      await EasyLoading.dismiss();
+    if (response.body["code"] == "200") {
+    ///  await EasyLoading.dismiss();
 
-      Get.snackbar(
-        'Success',
-        "${response.body['message']}  ${response.body['data']['otp']}",
-        backgroundColor: ColorResources.blueeebutton,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-        duration: const Duration(seconds: 5),
+      AnimatedTopToast.show(
+        context: context,
+        message:
+            "${response.body['message']}  ${response.body['data']['otp']} 🎉",
+        backgroundColor: ColorResources.appColor,
+        icon: Icons.check_circle_rounded,
       );
 
-      /// Thoda delay de do taki snackbar dikhe
       await Future.delayed(const Duration(milliseconds: 500));
-
-      Get.toNamed(RouteHelper.getotpScreenRoute(mobileNumber.toString()));
+      RouteHelper.getOtpScreenRoute(
+        mobileNumber,
+        type,
+        response.body['data']['otp'].toString(),
+      );
     } else if (response.statusCode == 500) {
-      await EasyLoading.dismiss();
+     // await EasyLoading.dismiss();
 
-      Get.snackbar(
-        'Error',
-        response.body['message'] ?? "Something went wrong",
+      // Get.snackbar(
+      //   'Error',
+      //   response.body['message'] ?? "Something went wrong",
+      //   backgroundColor: ColorResources.textColorRed,
+      //   colorText: Colors.white,
+      //   snackPosition: SnackPosition.TOP,
+      // );
+       AnimatedTopToast.show(
+        context: context,
+        message:
+           response.body['message'] ?? "Something went wrong",
         backgroundColor: ColorResources.textColorRed,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
+        icon: Icons.check_circle_rounded,
       );
     } else {
-      await EasyLoading.dismiss();
+     // await EasyLoading.dismiss();
     }
 
     update();
     return response;
   }
+
+  // Future<void> socialSignup(String provider) async {
+  //   try {
+  //     EasyLoading.show(status: "Please wait...");
+
+  //     String? idToken;
+
+  //     if (provider == "google") {
+  //       final GoogleSignInAccount googleUser = await _googleSignIn
+  //           .authenticate();
+
+  //       final GoogleSignInAuthentication googleAuth =
+  //           await googleUser.authentication;
+
+  //       idToken = googleAuth.idToken;
+  //     }
+
+  //     if (idToken == null) {
+  //       await EasyLoading.dismiss();
+  //       Get.snackbar("Error", "Token not found");
+  //       return;
+  //     }
+
+  //     final response = await authRepo.socialSignup(
+  //       provider: provider, // dynamic
+  //       idToken: idToken, // real token
+  //     );
+
+  //     await EasyLoading.dismiss();
+
+  //     if (response.statusCode == 200) {
+  //       var data = response.body;
+  //       print("Success Response: $data");
+
+  //       Get.snackbar("Success", "Login Successfully");
+  //     } else {
+  //       Get.snackbar("Error", "Something went wrong");
+  //     }
+  //   } catch (e) {
+  //     await EasyLoading.dismiss();
+  //     Get.snackbar("Error", e.toString());
+  //     log('getting  google  issue ${e.toString()}');
+  //   }
+  // }
 
   Future<Response> reSendOtp({
     required BuildContext context,
@@ -118,37 +346,83 @@ class AuthController extends GetxController implements GetxService {
     required String otpNumber,
     //reSendOtp
   }) async {
-    EasyLoading.show(status: "Please wait...");
+   /// EasyLoading.show(status: "Please wait...");
     update();
 
-    Response response = await authRepo.reSendOtp(
-      phone: mobileNumber,
-      numOtp: otpNumber,
-    );
+    Response response = await authRepo.reSendOtp(phone: mobileNumber);
 
     if (response.body['code'] == '200') {
-      await EasyLoading.dismiss();
+      ///await EasyLoading.dismiss();
 
-      Get.snackbar(
-        'Success',
-        "${response.body['message']}  ${response.body['data']['otp']}",
-        backgroundColor: ColorResources.blueeebutton,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-        duration: const Duration(seconds: 5),
+      AnimatedTopToast.show(
+        context: context,
+        message:
+           "${response.body['message']}  ${response.body['data']['otp']} 🎉",
+        backgroundColor: ColorResources.appColor,
+        icon: Icons.check_circle_rounded,
       );
     } else if (response.statusCode == 500) {
-      await EasyLoading.dismiss();
+     // await EasyLoading.dismiss();
 
-      Get.snackbar(
-        'Error',
-        response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorRed,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
+      AnimatedTopToast.show(
+        context: context,
+        message:
+           "${response.body['message']}",
+        backgroundColor: ColorResources.appColor,
+        icon: Icons.check_circle_rounded,
       );
     } else {
-      await EasyLoading.dismiss();
+      ////await EasyLoading.dismiss();
+    }
+
+    update();
+    return response;
+  }
+
+  Future<Response> userLogOut({
+    required BuildContext context,
+
+    //reSendOtp
+  }) async {
+   /// EasyLoading.show(status: "Please wait...");
+    update();
+
+    Response response = await authRepo.logOut();
+
+    if (response.body['code'] == '200') {
+    //  await EasyLoading.dismiss();
+      logOut();
+
+      // Get.snackbar(
+      //   '',
+      //   response.body['message'] ?? "Logout Successfully",
+      //   backgroundColor: ColorResources.blueeebutton,
+      //   colorText: Colors.white,
+      //   snackPosition: SnackPosition.TOP,
+      //   duration: const Duration(seconds: 3),
+      // );
+       AnimatedTopToast.show(
+        context: context,
+        message:
+            response.body['message'] ?? "Logout Successfully",
+        backgroundColor: ColorResources.appColor,
+        icon: Icons.check_circle_rounded,
+      );
+
+      // 🔥 Remove all previous routes
+      Get.offAllNamed(RouteHelper.getLoginRoute());
+    } else if (response.statusCode == 500) {
+    //  await EasyLoading.dismiss();
+
+      AnimatedTopToast.show(
+        context: context,
+        message:
+            response.body['message'] ?? "Logout Successfully",
+        backgroundColor: ColorResources.textColorRed,
+        icon: Icons.check_circle_rounded,
+      );
+    } else {
+     // await EasyLoading.dismiss();
     }
 
     update();
@@ -159,8 +433,9 @@ class AuthController extends GetxController implements GetxService {
     required BuildContext context,
     required String mobileNumber,
     required String numOfOtp,
+    required String type,
   }) async {
-    EasyLoading.show(status: "Please wait...");
+   // EasyLoading.show(status: "Please wait...");
     update();
 
     Response response = await authRepo.verifyOtpApi(
@@ -168,44 +443,55 @@ class AuthController extends GetxController implements GetxService {
       otp: numOfOtp,
     );
 
-    if (response.body["code"] == "200") {
-      await EasyLoading.dismiss();
+    if (response.body['code'] == "200") {
+     /// await EasyLoading.dismiss();
 
-      Get.snackbar(
-        'Success',
-        "${response.body['message']}",
-        backgroundColor: ColorResources.blueeebutton,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-        duration: const Duration(seconds: 5),
+      AnimatedTopToast.show(
+        context: context,
+        message:
+            response.body['message'] ,
+        backgroundColor: ColorResources.appColor,
+        icon: Icons.check_circle_rounded,
       );
       authRepo.saveUserToken(response.body['data']["token"].toString());
       authRepo.saveUserprofileid(
         response.body['data']['user']['id'].toString(),
       );
-      //saveUserprofileid
+      log(
+        'login  user token ||||||||||||||| ====== ${response.body['data']["token"].toString()}',
+      );
+      log(
+        'login  user user Id ||||||||||||||| ====== ${response.body['data']['user']['id'].toString()}',
+      );
 
       await Future.delayed(const Duration(milliseconds: 500));
-
-      Get.toNamed(RouteHelper.getprofileScreenRoute(mobileNumber.toString()));
+      if (type == ApiConstants.UserRegister) {
+        Get.toNamed(RouteHelper.getprofileScreenRoute(),
+        arguments: {
+        'phonenumber': mobileNumber.toString()
+        }
+        );
+      } else {
+        Get.toNamed(RouteHelper.getmainNavigationScreen());
+      }
     } else if (response.body['data'] == "401") {
-      await EasyLoading.dismiss();
-      Get.snackbar(
-        'Error',
-        response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorRed,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
+      
+      AnimatedTopToast.show(
+        context: context,
+        message:
+            response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.appColor,
+        icon: Icons.check_circle_rounded,
       );
     } else {
-      Get.snackbar(
-        'Error',
-        response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorRed,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
+     AnimatedTopToast.show(
+        context: context,
+        message:
+            response.body['message'] ?? "Something went wrong",
+        backgroundColor: ColorResources.appColor,
+        icon: Icons.check_circle_rounded,
       );
-      await EasyLoading.dismiss();
+      
     }
 
     update();
@@ -221,7 +507,7 @@ class AuthController extends GetxController implements GetxService {
     String? dob,
     File? profileimage,
   }) async {
-    EasyLoading.show(status: "Please wait...");
+   // EasyLoading.show(status: "Please wait...");
     update();
 
     Response response = await authRepo.fillPersonalApi(
@@ -232,64 +518,58 @@ class AuthController extends GetxController implements GetxService {
       profile_image: profileimage,
     );
 
-    if (response.body["code"] == "200") {
-      await EasyLoading.dismiss();
+    if (response.body['code'] == "200") {
+    //  await EasyLoading.dismiss();
 
-      Get.snackbar(
-        'Success',
-        "${response.body['message']}",
-        backgroundColor: ColorResources.blueeebutton,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-        duration: const Duration(seconds: 5),
-      );
-      // authRepo.saveUserToken(response.body['data']["token"].toString());
-      // authRepo.saveUserprofileid(
-      //   response.body['data']['user']['id'].toString(),
+      // Get.snackbar(
+      //   'Success',
+      //   "${response.body['message']}",
+      //   backgroundColor: ColorResources.blueeebutton,
+      //   colorText: Colors.white,
+      //   snackPosition: SnackPosition.TOP,
+      //   duration: const Duration(seconds: 5),
       // );
-      //saveUserprofileid
+      AnimatedTopToast.show(
+        context: context,
+        message:
+            "${response.body['message']}",
+        backgroundColor: ColorResources.appColor,
+        icon: Icons.check_circle_rounded,
+      );
 
       await Future.delayed(const Duration(milliseconds: 500));
 
       Get.toNamed(RouteHelper.getmainNavigationScreen());
     } else if (response.body['data'] == "401") {
-      await EasyLoading.dismiss();
-      Get.snackbar(
-        'Error',
-        response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorRed,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
+     // await EasyLoading.dismiss();
+      // Get.snackbar(
+      //   '',
+      //   response.body['message'] ?? "Something went wrong",
+      //   backgroundColor: ColorResources.textColorRed,
+      //   colorText: Colors.white,
+      //   snackPosition: SnackPosition.TOP,
+      // );
+       AnimatedTopToast.show(
+        context: context,
+        message:
+             "Something went wrong",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.check_circle_rounded,
       );
     } else {
-      Get.snackbar(
-        'Error',
-        response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorRed,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
+      
+        AnimatedTopToast.show(
+        context: context,
+        message:
+            "Something went wrong",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.check_circle_rounded,
       );
-      await EasyLoading.dismiss();
     }
-
+    //await EasyLoading.dismiss();
     update();
     return response;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   Future<void> registerEV({
     String? evnumber,
@@ -380,9 +660,7 @@ class AuthController extends GetxController implements GetxService {
           colorText: Colors.white,
         );
       }
-    }
-    /// ❌ EXCEPTION (No internet, timeout, crash)
-    catch (e) {
+    } catch (e) {
       Get.snackbar(
         'Error',
         'Something went wrong. Please try again',
@@ -497,14 +775,7 @@ class AuthController extends GetxController implements GetxService {
     );
 
     if (response.statusCode == 200) {
-      print(':::::::::${response.body['user_id']}');
-
-      authRepo.saveUserToken(response.body['token'].toString());
-      authRepo.saveUserprofileid(userid);
-
       EasyLoading.dismiss();
-
-      //  await checkUser(userid, mobilenu7mber);
     } else if (response.statusCode == 422) {
       EasyLoading.dismiss();
       Get.snackbar(
@@ -530,7 +801,8 @@ class AuthController extends GetxController implements GetxService {
   }
 
   void logOut() {
-    Get.offNamed(RouteHelper.getLoginRoute());
+    Get.back();
+
     return authRepo.removeUserToken();
   }
 }

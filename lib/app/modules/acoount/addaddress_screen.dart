@@ -1,24 +1,26 @@
-import 'package:evfual/data/controller/addaddress_controller.dart';
-import 'package:evfual/data/modal/addaddress_model.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/data/controller/addaddress_controller.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
+import 'package:myrideuser/data/modal/addaddress_model.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
 
-class AddAddressScreen extends StatefulWidget {
+class AddAddresScreen extends StatefulWidget {
   bool? isEdit;
   int? index;
   AddressModel? address;
-  AddAddressScreen({super.key, this.isEdit, this.index, this.address});
+  AddAddresScreen({super.key, this.isEdit, this.index, this.address});
   @override
-  State<AddAddressScreen> createState() => _AddAddressScreenState();
+  State<AddAddresScreen> createState() => _AddAddresScreenState();
 }
 
-class _AddAddressScreenState extends State<AddAddressScreen> {
-  final AddressController controller = Get.find();
+class _AddAddresScreenState extends State<AddAddresScreen> {
+  //  final AddressController controller = Get.find();
 
   GoogleMapController? mapController;
   CameraPosition? _lastCameraPosition;
@@ -78,11 +80,11 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     lat = position.latitude;
     lng = position.longitude;
 
-    mapController?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(target: currentLatLng, zoom: 16),
-      ),
-    );
+    // mapController?.animateCamera(
+    //   CameraUpdate.newCameraPosition(
+    //     CameraPosition(target: currentLatLng, zoom: 16),
+    //   ),
+    // );
 
     await getAddress(currentLatLng);
   }
@@ -124,7 +126,6 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           children: [
-            /// GOOGLE MAP
             Stack(
               children: [
                 SizedBox(
@@ -158,7 +159,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                   right: 16,
                   child: GooglePlaceAutoCompleteTextField(
                     textEditingController: searchController,
-                    googleAPIKey: "AIzaSyAv-WwyCAZ5rJArnCELEtTalFrSBmcyLgk",
+                    googleAPIKey: "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU",
+
                     inputDecoration: InputDecoration(
                       hintText: "Search for location",
                       filled: true,
@@ -303,21 +305,43 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                               Get.snackbar("Error", "Please select address");
                               return;
                             }
+                            // String finalAddress =
+                            //     detailController.text.trim().isNotEmpty
+                            //     ? "${detailController.text.trim()}, $address"
+                            //     : address;
+                            // Get.find<ProfileController>().addAddressCustomer(
+                            //   context: context,
+                            //   label: nameController.text.trim(),
+                            //   address: finalAddress,
+                            //   lat: lat!,
+                            //   lng: lng!,
+                            // );
 
-                            String finalAddress =
-                                detailController.text.trim().isNotEmpty
-                                ? "${detailController.text.trim()}, $address"
-                                : address;
+                            try {
+                               showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) => PremiumBlurLoader(),
+                    );
 
-                            controller.addAddress(
-                              nameController.text.trim(),
-                              finalAddress,
-                              detailController.text.trim(),
-                              lat!,
-                              lng!,
-                            );
-
-                            Get.back();
+                              String finalAddress =
+                                  detailController.text.trim().isNotEmpty
+                                  ? "${detailController.text.trim()}, $address"
+                                  : address;
+                              Get.find<ProfileController>().addAddressCustomer(
+                                context: context,
+                                label: nameController.text.trim(),
+                                address: finalAddress,
+                                lat: lat!,
+                                lng: lng!,
+                              );
+                            } catch (e) {
+                              debugPrint('address update Error: $e');
+                            } finally {
+                              if (Get.isDialogOpen ?? false) {
+                                Get.back();
+                              }
+                            }
                           },
                         ),
                       ),

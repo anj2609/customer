@@ -1,17 +1,18 @@
 import 'dart:io';
 
-import 'package:evfual/app/modules/Promos/promos_screen.dart';
-import 'package:evfual/app/modules/acoount/acoount.dart';
-import 'package:evfual/app/modules/activity/activity.dart';
+import 'package:myrideuser/app/modules/Promos/promos_screen.dart';
+import 'package:myrideuser/app/modules/acoount/acoount.dart';
+import 'package:myrideuser/app/modules/activity/activity.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:evfual/app/modules/Deshboard/deshboard.dart';
+import 'package:myrideuser/app/modules/Deshboard/deshboard.dart';
 
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/style.dart';
 
 class MainNavigation extends StatefulWidget {
   final int initialIndex;
@@ -24,6 +25,8 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
+
+  final controller = Get.find<ProfileController>();
 
   final List<Widget> _pages = [
     DashboardScreen(),
@@ -43,9 +46,7 @@ class _MainNavigationState extends State<MainNavigation> {
     } else {
       _currentIndex = widget.initialIndex;
     }
-
-
-    
+    controller.fetchProfile();
   }
 
   @override

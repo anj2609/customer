@@ -1,4 +1,4 @@
-package com.example.vivashri
+package com.myrideinfiniti
 
 import io.flutter.embedding.android.FlutterActivity
 

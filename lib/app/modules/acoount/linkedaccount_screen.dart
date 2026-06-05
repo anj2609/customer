@@ -1,8 +1,83 @@
+import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class LinkedAccountScreen extends StatelessWidget {
+class LinkedAccountScreen extends StatefulWidget {
   const LinkedAccountScreen({super.key});
+
+  @override
+  State<LinkedAccountScreen> createState() => _LinkedAccountScreenState();
+}
+
+class _LinkedAccountScreenState extends State<LinkedAccountScreen> {
+  String? token;
+
+  /// Dynamic connection status
+  Map<String, bool> connectedStatus = {
+    'google': false,
+    'apple': false,
+    'facebook': false,
+    'instagram': false,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    loadToken();
+  }
+
+  Future<void> loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs.getString("token");
+    });
+  }
+
+  /// Common function for all providers
+  Future<void> handleSocialTap(String provider) async {
+    final profileController = Get.find<ProfileController>();
+
+    bool isConnected = connectedStatus[provider] ?? false;
+
+    if (token == null || token!.isEmpty) {
+      Get.snackbar("Error", "Token not found");
+      return;
+    }
+
+    try {
+      if (isConnected) {
+        /// Disconnect API
+        final response =
+            await profileController.linkAccountDeconnectCallApi(
+          context: context,
+          provider: provider,
+        );
+
+        if (response != null) {
+          setState(() {
+            connectedStatus[provider] = false;
+          });
+        }
+      } else {
+        /// Connect API
+        final response =
+            await profileController.linkAccountConnectCallApi(
+          context: context,
+          provider: provider,
+          accesstoken: token!,
+        );
+
+        if (response != null) {
+          setState(() {
+            connectedStatus[provider] = true;
+          });
+        }
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Something went wrong");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +99,7 @@ class LinkedAccountScreen extends StatelessWidget {
               Row(
                 children: [
                   InkWell(
-                    onTap: () {
-                      Get.back();
-                    },
+                    onTap: () => Get.back(),
                     child: Icon(Icons.arrow_back, size: width * 0.06),
                   ),
                   SizedBox(width: width * 0.05),
@@ -42,36 +115,38 @@ class LinkedAccountScreen extends StatelessWidget {
 
               SizedBox(height: height * 0.04),
 
-              /// Account Cards
-              accountTile(
-                context,
+              /// Google
+              socialTile(
+                provider: 'google',
                 icon: "assets/images/googlelog.png",
                 title: "Google",
-                connected: true,
               ),
+
               SizedBox(height: height * 0.02),
 
-              accountTile(
-                context,
+              /// Apple
+              socialTile(
+                provider: 'apple',
                 icon: "assets/images/applelogo.png",
                 title: "Apple",
-                connected: true,
               ),
+
               SizedBox(height: height * 0.02),
 
-              accountTile(
-                context,
+              /// Facebook
+              socialTile(
+                provider: 'facebook',
                 icon: "assets/images/Facebooklogo.png",
                 title: "Facebook",
-                connected: false,
               ),
+
               SizedBox(height: height * 0.02),
 
-              accountTile(
-                context,
+              /// Instagram
+              socialTile(
+                provider: 'instagram',
                 icon: "assets/images/Instagram.png",
                 title: "Instagram",
-                connected: false,
               ),
             ],
           ),
@@ -80,51 +155,58 @@ class LinkedAccountScreen extends StatelessWidget {
     );
   }
 
-  Widget accountTile(
-    BuildContext context, {
+  /// Reusable Tile
+  Widget socialTile({
+    required String provider,
     required String icon,
     required String title,
-    required bool connected,
   }) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: width * 0.04,
-        vertical: height * 0.018,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Image.asset(
-            icon,
-            height: width * 0.08,
-            width: width * 0.08,
-            fit: BoxFit.contain,
-          ),
-          SizedBox(width: width * 0.05),
-          Expanded(
-            child: Text(
-              title,
+    return InkWell(
+      onTap: () => handleSocialTap(provider),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: width * 0.04,
+          vertical: height * 0.018,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Image.asset(
+              icon,
+              height: width * 0.08,
+              width: width * 0.08,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(width: width * 0.05),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: width * 0.045,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Text(
+              connectedStatus[provider] == true
+                  ? "Connected"
+                  : "Disconnected",
               style: TextStyle(
-                fontSize: width * 0.045,
+                fontSize: width * 0.04,
+                color: connectedStatus[provider] == true
+                    ? Colors.grey
+                    : Colors.blue,
                 fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-          Text(
-            connected ? "Connected" : "Connect",
-            style: TextStyle(
-              fontSize: width * 0.04,
-              color: connected ? Colors.grey : Colors.blue,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

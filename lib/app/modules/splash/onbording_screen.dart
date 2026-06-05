@@ -1,42 +1,42 @@
+
+
 import 'dart:async';
-import 'package:evfual/app/modules/auth/sign_up_screen.dart';
-import 'package:evfual/config/route.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 
 class OnBoardingSCreen extends StatefulWidget {
-  const OnBoardingSCreen({Key? key}) : super(key: key);
+  const OnBoardingSCreen({super.key});
 
   @override
   State<OnBoardingSCreen> createState() => _OnBoardingSCreenState();
 }
 
 class _OnBoardingSCreenState extends State<OnBoardingSCreen> {
-  int currentIndex = 0;
-  Timer? timer;
+  final PageController _pageController = PageController();
+  int _currentIndex = 0;
+  Timer? _timer;
 
-  final List<Map<String, String>> pages = [
+  final List<Map<String, String>> onboardingData = [
     {
-      "image": "assets/images/walk1.svg",
-      "title": "Welcome to My Ride – Your Journey, Your Way",
-      "desc":
-          "Get ready to experience hassle-free transportation. We've got everything you need to travel with ease. Let’s get started!",
+      "image": "assets/images/driver-pana.json",
+      "title": "Quick & Easy Ride Booking",
+      "subtitle": "Book a ride in seconds. Just enter your destination and get matched with a nearby driver instantly.",
     },
     {
-      "image": "assets/images/walk2.svg",
-      "title": "Choose Your Ride – Tailored to Your Needs",
-      "desc":
-          "Select your preferred mode of transportation – motorbike / scooter, or car – and order a ride with just a few taps.",
+      "image": "assets/images/frame.json",
+      "title": "Verified Drivers for Your Safety",
+      "subtitle":"Ride with confidence. All drivers are background-checked and trained for a safe journey.",
     },
     {
-      "image": "assets/images/walk3.svg",
-      "title": "Secure Payments & Seamless Transactions",
-      "desc":
-          "Pay for your rides securely using Wallet, PhonePe, Paytm, Google Pay, card or cash.",
+      "image": "assets/images/mobile-landing.json",
+      "title": "Live Ride Tracking",
+      "subtitle":
+          "Track your ride in real time. Share your trip details with friends and family for added safety.",
     },
   ];
 
@@ -44,174 +44,177 @@ class _OnBoardingSCreenState extends State<OnBoardingSCreen> {
   void initState() {
     super.initState();
 
-    timer = Timer.periodic(const Duration(seconds: 2), (Timer t) {
-      nextPage();
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (_currentIndex < onboardingData.length - 1) {
+        _currentIndex++;
+      } else {
+        _currentIndex = 0;
+      }
+
+      _pageController.animateToPage(
+        _currentIndex,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      );
     });
   }
 
   @override
   void dispose() {
-    timer?.cancel();
+    _timer?.cancel();
+    _pageController.dispose();
     super.dispose();
-  }
-
-  void nextPage() {
-    if (currentIndex < pages.length - 1) {
-      setState(() {
-        currentIndex++;
-      });
-    } else {
-      timer?.cancel();
-
-      // Get.offAll(
-      //   MyRideLoginScreen(),
-      //   transition: Transition.leftToRight,
-      //   duration: const Duration(milliseconds: 0),
-      // );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final height = size.height;
-    final width = size.width;
+     final size = MediaQuery.of(context).size;
+  final height = size.height;
+  final width = size.width;
 
-    return Scaffold(
-      backgroundColor: ColorResources.backgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              flex: 6,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: width * 0.07),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Column(
-                      children: [
-                        SizedBox(height: height * 0.09),
-
-                        Expanded(
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 400),
-                            child: Column(
-                              key: ValueKey<int>(currentIndex),
-                              children: [
-                                SizedBox(
-                                  height: height * 0.32,
-                                  child: SvgPicture.asset(
-                                    pages[currentIndex]["image"]!,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-
-                                SizedBox(height: height * 0.04),
-
-                                Text(
-                                  pages[currentIndex]["title"]!,
-                                  textAlign: TextAlign.center,
-                                  style: PoppinsBold.copyWith(
-                                    fontSize: width * 0.055,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-
-                                SizedBox(height: height * 0.02),
-
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: width * 0.03,
-                                  ),
-                                  child: Text(
-                                    pages[currentIndex]["desc"]!,
-                                    textAlign: TextAlign.center,
-                                    style: PoppinsMedium.copyWith(
-                                      fontSize: width * 0.035,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-
-                                SizedBox(height: height * 0.03),
-
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: List.generate(
-                                    pages.length,
-                                    (index) => AnimatedContainer(
-                                      duration: const Duration(
-                                        milliseconds: 300,
-                                      ),
-                                      margin: EdgeInsets.symmetric(
-                                        horizontal: width * 0.01,
-                                      ),
-                                      height: 6,
-                                      width: currentIndex == index
-                                          ? width * 0.08
-                                          : width * 0.02,
-                                      decoration: BoxDecoration(
-                                        color: currentIndex == index
-                                            ? ColorResources.blueeebutton
-                                            : Colors.grey.shade300,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+  return Scaffold(
+    backgroundColor: ColorResources.appgroundcolor,
+    body: SafeArea(
+      child: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: height,
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: width * 0.06,
+              vertical: height * 0.02,
             ),
+            child: Column(
+              children: [
+                SizedBox(height: height * 0.04),
 
-            SizedBox(height: 20),
+                /// PAGE VIEW
+                SizedBox(
+                  height: height * 0.65,
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: onboardingData.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentIndex = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 500),
+                        child: Column(
+                          key: ValueKey(index),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            /// IMAGE
+                            SizedBox(
+                              height: height * 0.28,
+                              child: Lottie.asset(
+                                onboardingData[index]["image"]!,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
 
-            Divider(color: Colors.grey.shade300),
+                            SizedBox(height: height * 0.04),
 
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: width * 0.06),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      width: width * 0.35,
-                      child: CustomPrimaryDyanamicButton(
-                        text: "Skip",
-                        onTap: () {
-                          timer?.cancel();
+                            /// TITLE
+                            Text(
+                              onboardingData[index]["title"]!,
+                              textAlign: TextAlign.center,
+                              style: PoppinsBold.copyWith(
+                                fontSize: width * 0.06,
+                                color: ColorResources.blackcolor,
+                              ),
+                            ),
 
-                          if (currentIndex < pages.length - 1) {
-                            setState(() {
-                              currentIndex++;
-                            });
+                            SizedBox(height: height * 0.02),
 
-                            timer = Timer.periodic(
-                              const Duration(seconds: 2),
-                              (Timer t) => nextPage(),
-                            );
-                          } else {
-                            Get.toNamed(
-                              RouteHelper.getLestMyRideStartedScreenRoute(),
-                            );
-                          }
-                        },
+                            /// SUBTITLE
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: width * 0.04,
+                              ),
+                              child: Text(
+                                onboardingData[index]["subtitle"]!,
+                                textAlign: TextAlign.center,
+                                style: PoppinsReguler.copyWith(
+                                  fontSize: width * 0.038,
+                                  color:
+                                      ColorResources.TextColorForGrey,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                /// DOT INDICATOR
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    onboardingData.length,
+                    (index) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin:
+                          EdgeInsets.symmetric(horizontal: width * 0.01),
+                      height: width * 0.02,
+                      width: _currentIndex == index
+                          ? width * 0.06
+                          : width * 0.02,
+                      decoration: BoxDecoration(
+                        color: _currentIndex == index
+                            ? ColorResources.appColor
+                            : ColorResources.greycolorborder,
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+
+                SizedBox(height: height * 0.04),
+
+                /// BUTTON
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    width: width * 0.35,
+                    child: CustomPrimaryDyanamicButton(
+                      text: _currentIndex == onboardingData.length - 1
+                          ? "Start"
+                          : "Next",
+                      onTap: () {
+                        _timer?.cancel();
+
+                        if (_currentIndex <
+                            onboardingData.length - 1) {
+                          _pageController.nextPage(
+                            duration:
+                                const Duration(milliseconds: 500),
+                            curve: Curves.easeInOut,
+                          );
+                        } else {
+                          Get.toNamed(
+                            RouteHelper
+                                .getLestMyRideStartedScreenRoute(),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: height * 0.03),
+              ],
             ),
-          ],
+          ),
         ),
       ),
-    );
+    ),
+  );
   }
 }

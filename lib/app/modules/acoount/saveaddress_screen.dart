@@ -1,162 +1,11 @@
-// import 'package:evfual/app/modules/acoount/addaddress_screen.dart';
-// import 'package:evfual/config/utils/colors.dart';
-// import 'package:evfual/config/utils/dimensions.dart';
-// import 'package:evfual/data/controller/addaddress_controller.dart';
-// import 'package:evfual/widgets/custom_button.dart';
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-
-// class SavedAddressScreen extends StatelessWidget {
-//   final AddressController controller = Get.find();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: ColorResources.appgroundcolor,
-//       appBar: AppBar(
-//         elevation: 0,
-//         backgroundColor: Colors.white,
-//         leading: Icon(Icons.arrow_back, color: Colors.black),
-//         title: Text(
-//           "Saved Addresses",
-//           style: TextStyle(color: Colors.black),
-//         ),
-//       ),
-
-//       body: Obx(() {
-//         return ListView.builder(
-//           padding: EdgeInsets.all(16),
-//           itemCount: controller.addressList.length,
-//           itemBuilder: (context, index) {
-//             final data = controller.addressList[index];
-
-//             return Container(
-//               margin: EdgeInsets.only(bottom: 14),
-//               padding: EdgeInsets.all(16),
-//               decoration: BoxDecoration(
-//                 color: Colors.white,
-//                 borderRadius: BorderRadius.circular(14),
-//                 boxShadow: [
-//                   BoxShadow(
-//                     color: Colors.black12,
-//                     blurRadius: 6,
-//                   )
-//                 ],
-//               ),
-//               child: Row(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Icon(Icons.location_on, color: Colors.blue),
-
-//                   SizedBox(width: 12),
-
-//                   Expanded(
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         Text(
-//                           data.name,
-//                           style: TextStyle(
-//                             fontSize: 16,
-//                             fontWeight: FontWeight.w600,
-//                           ),
-//                         ),
-//                         SizedBox(height: 6),
-//                         Text(
-//                           data.address,
-//                           style: TextStyle(
-//                             fontSize: 13,
-//                             color: Colors.grey.shade600,
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-
-//                   /// Share Icon
-//                   Icon(Icons.share, size: 20),
-//                   SizedBox(width: 10),
-
-//                   /// Popup Menu
-//                   PopupMenuButton<String>(
-//                     icon: Icon(Icons.more_vert),
-//                     shape: RoundedRectangleBorder(
-//                       borderRadius: BorderRadius.circular(12),
-//                     ),
-//                     onSelected: (value) {
-//                       if (value == "edit") {
-//                         Get.to(() => AddAddressScreen(
-//                               isEdit: true,
-//                               index: index,
-//                               address: data,
-//                             ));
-//                       } else if (value == "delete") {
-//                         controller.addressList.removeAt(index);
-//                         Get.snackbar(
-//                           "Deleted",
-//                           "Address deleted successfully",
-//                           snackPosition: SnackPosition.BOTTOM,
-//                         );
-//                       }
-//                     },
-//                     itemBuilder: (context) => [
-//                       PopupMenuItem(
-//                         value: "edit",
-//                         child: Row(
-//                           children: [
-//                             Icon(Icons.edit, size: 18),
-//                             SizedBox(width: 8),
-//                             Text("Edit"),
-//                           ],
-//                         ),
-//                       ),
-//                       PopupMenuItem(
-//                         value: "delete",
-//                         child: Row(
-//                           children: [
-//                             Icon(Icons.delete, size: 18, color: Colors.red),
-//                             SizedBox(width: 8),
-//                             Text(
-//                               "Delete",
-//                               style: TextStyle(color: Colors.red),
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ],
-//               ),
-//             );
-//           },
-//         );
-//       }),
-
-//       bottomNavigationBar: Padding(
-//         padding: EdgeInsets.all(Dimensions.spacingSize25),
-//         child: CustomPrimaryButton(
-//           text: "+ Add Address",
-//           onTap: () {
-//             Get.to(
-//               () => AddAddressScreen(),
-//               duration: const Duration(milliseconds: 300),
-//               transition: Transition.leftToRight,
-//             );
-//           },
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-import 'dart:async';
-import 'package:evfual/app/modules/acoount/addaddress_screen.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/dimensions.dart';
-import 'package:evfual/data/controller/addaddress_controller.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/dimensions.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
 
 class SavedAddressScreen extends StatefulWidget {
   @override
@@ -164,17 +13,14 @@ class SavedAddressScreen extends StatefulWidget {
 }
 
 class _SavedAddressScreenState extends State<SavedAddressScreen> {
-  final AddressController controller = Get.find();
-  RxBool isLoading = true.obs;
+  /// ✅ Controller define karo
+  final ProfileController controller = Get.find<ProfileController>();
 
   @override
   void initState() {
     super.initState();
 
-    /// 3 second loader
-    Timer(Duration(seconds: 3), () {
-      isLoading.value = false;
-    });
+    controller.getAddressCustomer(context: context);
   }
 
   @override
@@ -189,149 +35,317 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          "Saved Addresses",
+          "Saved Address",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
       ),
 
-      body: Obx(() {
-        /// ✅ Loader
-        if (isLoading.value) {
-          return Center(child: CircularProgressIndicator());
-        }
+      body: GetBuilder<ProfileController>(
+        builder: (controller) {
+          /// ✅ Loader
+          if (controller.isLoadings == true) {
+            return Center(child: PremiumBlurLoader());
+          }
 
-        /// ✅ Data Not Found
-        if (controller.addressList.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.location_off, size: 60, color: Colors.grey),
-                SizedBox(height: 12),
-                Text(
-                  "No Address Found",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
 
-        /// ✅ Address List
-        return ListView.builder(
-          padding: EdgeInsets.all(16),
-          itemCount: controller.addressList.length,
-          itemBuilder: (context, index) {
-            final data = controller.addressList[index];
-
-            return Container(
-              margin: EdgeInsets.only(bottom: 14),
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          
+          if (controller.addressList.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.location_on, color: Colors.blue),
-
-                  SizedBox(width: 12),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          data.name ?? "",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          data.address ?? "",
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
+                  Icon(Icons.location_off, size: 60, color: Colors.grey),
+                  SizedBox(height: 12),
+                  Text(
+                    "No Address Found",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade600,
                     ),
-                  ),
-
-                  PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    onSelected: (value) {
-                      if (value == "edit") {
-                        Get.to(
-                          () => AddAddressScreen(
-                            isEdit: true,
-                            index: index,
-                            address: data,
-                          ),
-                        );
-                      } else if (value == "delete") {
-                        controller.addressList.removeAt(index);
-                        Get.snackbar(
-                          "Deleted",
-                          "Address deleted successfully",
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: "edit",
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 8),
-                            Text("Edit"),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: "delete",
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, size: 18, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text("Delete", style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
             );
-          },
-        );
-      }),
+          }
+
+          /// ✅ Address List (Same UI Design)
+          return ListView.builder(
+            padding: EdgeInsets.all(16),
+            itemCount: controller.addressList.length,
+            itemBuilder: (context, index) {
+              final data = controller.addressList[index];
+
+              return Container(
+                margin: EdgeInsets.only(bottom: 14),
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: data.isDefault == 1
+                      ? Colors.blue.shade50
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.location_on, color: Colors.blue, size: 22),
+
+                    SizedBox(width: 12),
+
+                    /// Address Text
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            data.label ?? "",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            data.address ?? "",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    /// Share Icon
+                    // Icon(Icons.share, size: 20),
+                    // SizedBox(width: 10),
+
+                    /// Popup Menu
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      onSelected: (value) {
+                        if (value == "edit") {
+                          Get.toNamed(
+                            RouteHelper.getaddressUpdateScreen(),
+                            arguments: {
+                              'isEdit': true,
+                              'index': index,
+
+                              'address': data,
+                            },
+                          );
+                        } else if (value == "delete") {
+                          _showDeleteBottomSheet(
+                            context,
+                            data,
+                            index,
+                            data.id!,
+                          );
+
+                          // controller.addressList.removeAt(index);
+                          // controller.update();
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: "edit",
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 18),
+                              SizedBox(width: 8),
+                              Text("Edit"),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: "delete",
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 18, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text(
+                                "Delete",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
 
       bottomNavigationBar: Padding(
         padding: EdgeInsets.all(Dimensions.spacingSize25),
         child: CustomPrimaryButton(
-          text: "+ Add Address",
-          onTap: () {
-            Get.to(
-              () => AddAddressScreen(),
-              duration: const Duration(milliseconds: 300),
-              transition: Transition.leftToRight,
+          text: "Add Address",
+          onTap: () async {
+            final result = await Get.toNamed(
+              RouteHelper.getaddAddressScreens(),
             );
+
+            if (result == true) {
+              controller.getAddressCustomer(context: context);
+            }
           },
         ),
       ),
+    );
+  }
+
+  void _showDeleteBottomSheet(
+    BuildContext context,
+    dynamic data,
+    int index,
+    int addresId,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /// TITLE
+              const Text(
+                "Delete Address",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+              const Divider(),
+
+              const SizedBox(height: 10),
+
+              const Text(
+                "Sure you want to delete this address?",
+                style: TextStyle(fontSize: 14),
+              ),
+
+              const SizedBox(height: 16),
+
+              /// ADDRESS PREVIEW CARD
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.location_on, color: Colors.blue, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            data.label ?? "",
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            data.address ?? "",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              /// BUTTONS
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 45,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade200,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: () {
+                          Get.back();
+                        },
+                        child: const Text(
+                          "Cancel",
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Container(
+                      height: 45,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: () {
+                          // Get.find<ProfileController>().deleteaddressapi(
+                          //   context: context,
+                          //   address_id: addresId,
+                          // );
+                          Get.find<ProfileController>().deleteaddressapi(
+                            context: context,
+                            address_id: addresId,
+                            index: index,
+                          );
+
+                          // controller.addressList.removeAt(index);
+                          // controller.update();
+                        },
+                        child: const Text(
+                          "Yes, Delete",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -1,4 +1,4 @@
-import 'package:evfual/app/modules/Deshboard/findingdriver_screen.dart';
+import 'package:myrideuser/app/modules/Deshboard/findingdriver_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -209,11 +209,11 @@ class _PromoVoucherScreenState extends State<PromoVoucherScreen> {
           /// Bottom OK Button
           GestureDetector(
             onTap: () {
-              Get.to(
-                Get.to(FindingDriverUI()),
-                transition: Transition.leftToRight,
-                duration: Duration(milliseconds: 0),
-              );
+              // Get.to(
+              //   Get.to(FindingDriverUI()),
+              //   transition: Transition.leftToRight,
+              //   duration: Duration(milliseconds: 0),
+              // );
               // Navigator.push(
               //   context,
               //   MaterialPageRoute(builder: (_) => FindingDriverUI()),

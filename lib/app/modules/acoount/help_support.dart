@@ -1,7 +1,5 @@
-import 'package:evfual/app/modules/acoount/contactus_screen.dart';
-import 'package:evfual/app/modules/acoount/faq_screen.dart';
-import 'package:evfual/app/modules/acoount/privacypolicy_screen.dart';
-import 'package:evfual/app/modules/acoount/terms_services_screen.dart';
+import 'package:myrideuser/app/modules/acoount/faq_screen.dart';
+import 'package:myrideuser/config/route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,14 +16,8 @@ class HelpSupportScreen extends StatelessWidget {
       "Contact Support",
       "Privacy Policy",
       "Terms of Services",
-      "Partner",
-      "Job Vacancy",
-      "Accessibility",
-      "Feedback",
       "About us",
       "Rate us",
-      "Visit Our Website",
-      "Follow us on Social Media",
     ];
 
     return Scaffold(
@@ -75,33 +67,20 @@ class HelpSupportScreen extends StatelessWidget {
                 ),
                 onTap: () {
                   if (index == 0) {
-                    Get.to(
-                      () => FaqScreen(),
-                      transition: Transition.leftToRight,
-
-                      duration: const Duration(milliseconds: 300),
-                    );
+                    Get.toNamed(RouteHelper.getfaqScreen());
                   } else if (index == 1) {
-                    Get.to(
-                      () => ContactSupportScreen(),
-                      transition: Transition.leftToRight,
-
-                      duration: const Duration(milliseconds: 300),
-                    );
+                    Get.toNamed(RouteHelper.getcontactSupportScreen());
                   } else if (index == 2) {
-                    Get.to(
-                      () => PrivacyPolicyScreen(),
-                      transition: Transition.leftToRight,
-
-                      duration: const Duration(milliseconds: 300),
-                    );
+                    Get.toNamed(RouteHelper.getprivacyPolicyScreen());
                   } else if (index == 3) {
-                    Get.to(
-                      () => TermsOfServiceScreen(),
-                      transition: Transition.leftToRight,
+                    Get.toNamed(RouteHelper.gettermsOfServiceScreen());
+                  } else if (index == 4) {
+                    Get.toNamed(RouteHelper.getaboutusScreen());
+                  } else if (index == 5) {
+                    print('rating |||||||||||');
 
-                      duration: const Duration(milliseconds: 300),
-                    );
+                    /// Get.toNamed(RouteHelper.getaboutusScreen());
+                    //
                   }
                 },
               );

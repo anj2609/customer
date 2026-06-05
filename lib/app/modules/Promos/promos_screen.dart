@@ -1,15 +1,22 @@
-import 'package:evfual/app/modules/Promos/promosdetail_screen.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/data/controller/promoslist.dart';
-import 'package:evfual/data/modal/promo_model.dart';
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
+import 'package:myrideuser/data/modal/promolist_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
+import 'package:shimmer/shimmer.dart';
 
-class PromoScreen extends StatelessWidget {
-  final PromoController controller = Get.put(PromoController());
+class PromoScreen extends StatefulWidget {
 
   PromoScreen({super.key});
+
+  @override
+  State<PromoScreen> createState() => _PromoScreenState();
+}
+
+class _PromoScreenState extends State<PromoScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +28,7 @@ class PromoScreen extends StatelessWidget {
         centerTitle: true,
         leading: Padding(
           padding: const EdgeInsets.all(3.0),
-          child: 
-          CircleAvatar(
+          child: CircleAvatar(
             radius: 18,
             backgroundColor: ColorResources.blueeebutton,
             child: Center(
@@ -39,37 +45,56 @@ class PromoScreen extends StatelessWidget {
           style: PoppinsMedium.copyWith(color: ColorResources.blackcolor11),
         ),
 
-        actions: [
-          Icon(Icons.more_vert, color: ColorResources.blackcolor),
-          SizedBox(width: 10),
-        ],
+        // actions: [
+        //   Icon(Icons.more_vert, color: ColorResources.blackcolor),
+        //   SizedBox(width: 10),
+        // ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            /// Promo Code Input Card
             _promoCodeCard(),
 
             const SizedBox(height: 20),
 
-            /// Horizontal Category List
             _categoryList(),
 
             const SizedBox(height: 20),
 
-            /// Dynamic Promo List
             Expanded(
-              child: Obx(
-                () => ListView.builder(
-                  itemCount: controller.filteredList.length,
-                  itemBuilder: (context, index) {
-                    final promo = controller.filteredList[index];
-                    return _promoCard(context, promo);
-                  },
-                ),
+              child: GetBuilder<ProfileController>(
+                builder: (controller) {
+                  if (controller.isPromoLoading) {
+                    return  Center(child: PremiumBlurLoader());
+                  }
+
+                  if (controller.promoCategoryListData.isEmpty) {
+                    return const Center(child: Text("No Promos Available"));
+                  }
+
+                  return ListView.builder(
+                    itemCount: controller.promoCategoryListData.length,
+                    itemBuilder: (context, index) {
+                      final promo = controller.promoCategoryListData[index];
+
+                      return _promoCard(context, promo);
+                    },
+                  );
+                },
               ),
             ),
+            // Expanded(
+            //   child: Obx(
+            //     () => ListView.builder(
+            //       itemCount: controller.filteredList.length,
+            //       itemBuilder: (context, index) {
+            //         final promo = controller.filteredList[index];
+            //         return _promoCard(context, promo);
+            //       },
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -121,61 +146,128 @@ class PromoScreen extends StatelessWidget {
   }
 
   Widget _categoryList() {
-    return SizedBox(
-      height: 45,
-      child: Obx(
-        () => ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: controller.categories.length,
-          itemBuilder: (context, index) {
-            final category = controller.categories[index];
-            final isSelected = controller.selectedCategory.value == category;
+    return GetBuilder<ProfileController>(
+      builder: (controller) {
+        if (controller.isCategoryLoading) {
+          return _categoryShimmer();
+        }
 
-            return GestureDetector(
-              onTap: () => controller.changeCategory(category),
-              child: Container(
-                margin: const EdgeInsets.only(right: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? ColorResources.blueeebutton
-                      : ColorResources.whiteColor,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
+        if (controller.promoCategoryList.isEmpty) {
+          return const SizedBox(
+            height: 45,
+            child: Center(
+              child: Text(
+                "No Categories Found",
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+          );
+        }
+
+        if (controller.selectedCategory.isEmpty) {
+          controller.selectedCategory =
+              controller.promoCategoryList.first.name ?? "";
+        }
+
+        /// ✅ DATA SHOW
+        return SizedBox(
+          height: 45,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: controller.promoCategoryList.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final categoryModel = controller.promoCategoryList[index];
+
+              final category = categoryModel.name ?? "";
+
+              if (category.isEmpty) {
+                return const SizedBox();
+              }
+
+              final isSelected = controller.selectedCategory == category;
+
+              return GestureDetector(
+                onTap: () {
+                  controller.getPromoListByCategory(
+                    category: category,
+                    context: context,
+                  );
+                  controller.changeCategory(context, category);
+
+                  //getPromoListByCategory
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
                     color: isSelected
                         ? ColorResources.blueeebutton
                         : ColorResources.whiteColor,
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: isSelected
+                          ? ColorResources.blueeebutton
+                          : Colors.grey.shade300,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    category,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: isSelected
+                          ? ColorResources.whiteColor
+                          : ColorResources.blackcolor11,
+                    ),
                   ),
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  category,
-                  style: TextStyle(
-                    color: isSelected
-                        ? ColorResources.whiteColor
-                        : ColorResources.blackcolor11,
-                  ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _categoryShimmer() {
+    return SizedBox(
+      height: 45,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 6,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+              child: Container(
+                width: 80,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(25),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _promoCard(BuildContext contextsss, PromoModel promo) {
+  Widget _promoCard(BuildContext context, PromoolistDataModel promo) {
     return GestureDetector(
       onTap: () {
-        Get.to(
-          PromoDetailsScreen(),
-          transition: Transition.leftToRight,
-          duration: Duration(milliseconds: 0),
+        Get.toNamed(
+          RouteHelper.getpromoDetailsScreen(),
+          arguments: {"id": promo.id.toString()},
         );
-        // Navigator.push(
-        //   contextsss,
-        //   MaterialPageRoute(builder: (_) => PromoDetailsScreen()),
-        // );
+        Get.find<ProfileController>()
+       .promoDetials(id: promo.id.toString(), context: context);
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
@@ -183,7 +275,7 @@ class PromoScreen extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           image: DecorationImage(
-            image: AssetImage(promo.image),
+            image: AssetImage("assets/images/Rectangle.png"),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
               Colors.black.withOpacity(0.5),
@@ -196,23 +288,24 @@ class PromoScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _blueTags(promo.title, promo.applogo),
-
-              /// _blueTag(promo.title),
-              const SizedBox(height: 8),
-
-              /// _blueTags(promo.subtitle,promo.applogo),
-              _blueTag(promo.subtitle),
-
-              //_blueTags
-              const Spacer(),
-              Text(
-                promo.discount,
-                style: PoppinsExtrabold.copyWith(
-                  color: ColorResources.whiteColor,
-                ),
+              _blueTags(
+                promo.title ?? "",
+                "assets/images/splashscreen.png" ?? "",
               ),
+
               const SizedBox(height: 8),
+
+              _blueTag(promo.title ?? ""),
+
+              const Spacer(),
+
+              Text(
+                promo.priceOff ?? "",
+                style: PoppinsExtrabold.copyWith(color: Colors.white),
+              ),
+
+              const SizedBox(height: 8),
+
               Row(
                 children: [
                   Container(
@@ -220,7 +313,7 @@ class PromoScreen extends StatelessWidget {
                       horizontal: 12,
                       vertical: 6,
                     ),
-                    color: ColorResources.whiteColor,
+                    color: Colors.white,
                     child: Text(
                       "CODE ",
                       style: PoppinsBold.copyWith(
@@ -235,10 +328,8 @@ class PromoScreen extends StatelessWidget {
                     ),
                     color: ColorResources.blueeebutton,
                     child: Text(
-                      promo.code,
-                      style: PoppinsBold.copyWith(
-                        color: ColorResources.whiteColor,
-                      ),
+                      promo.code ?? "",
+                      style: PoppinsBold.copyWith(color: Colors.white),
                     ),
                   ),
                 ],
@@ -250,6 +341,7 @@ class PromoScreen extends StatelessWidget {
     );
   }
 
+  // Widget _promoCard(BuildContext contextsss, PromoModel promo) {
   Widget _imageLogo(String images) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -266,7 +358,6 @@ class PromoScreen extends StatelessWidget {
             images,
             height: 30,
             width: 30,
-
             color: ColorResources.whiteColor,
           ),
         ],

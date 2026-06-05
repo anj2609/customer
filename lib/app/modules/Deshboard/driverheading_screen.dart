@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:ui' as ui;
-import 'package:evfual/app/modules/Deshboard/cancel_ride_screen.dart';
-import 'package:evfual/app/modules/Deshboard/driverprofile_screen.dart';
-import 'package:evfual/app/modules/Deshboard/driverrating_screen.dart';
-import 'package:evfual/app/modules/Deshboard/search_screen.dart';
-import 'package:evfual/app/modules/chats/chat_screen.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/app/modules/Deshboard/cancel_ride_screen.dart';
+import 'package:myrideuser/app/modules/Deshboard/driverprofile_screen.dart';
+import 'package:myrideuser/app/modules/Deshboard/driverrating_screen.dart';
+import 'package:myrideuser/app/modules/Deshboard/ridesearch_screen.dart';
+import 'package:myrideuser/app/modules/chats/chat_screen.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -17,10 +17,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
-import 'package:evfual/config/route.dart';
-import 'package:evfual/config/utils/app_constants.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/helper/get_di.dart' as di;
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/app_constants.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/helper/get_di.dart' as di;
 
 class DriverHeadingScreen extends StatefulWidget {
   const DriverHeadingScreen({super.key});
@@ -167,7 +167,8 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(
+            child:
+             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -334,11 +335,11 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
                   /// CANCEL BUTTON
                   InkWell(
                     onTap: () {
-                      Get.to(
-                        Get.to(CancelRideScreen()),
-                        transition: Transition.leftToRight,
-                        duration: Duration(milliseconds: 0),
-                      );
+                      // Get.to(
+                      //   Get.to(CancelRideScreen()),
+                      //   transition: Transition.leftToRight,
+                      //   duration: Duration(milliseconds: 0),
+                      // );
                     },
                     child: Container(
                       width: double.infinity,
@@ -360,6 +361,10 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
                 ],
               ),
             ),
+          
+          
+          
+          
           ),
         ],
       ),
@@ -390,4 +395,7 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
       ],
     );
   }
+
+
+
 }

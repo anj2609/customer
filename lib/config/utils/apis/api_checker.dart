@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:evfual/config/route.dart';
+import 'package:myrideuser/config/route.dart';
 
 class ApiChecker {
   static void checkApi(Response response) {

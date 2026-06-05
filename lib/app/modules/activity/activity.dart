@@ -1,12 +1,14 @@
-import 'package:evfual/app/modules/Deshboard/deshboard.dart';
-import 'package:evfual/app/modules/activity/canceled_screen.dart';
-import 'package:evfual/app/modules/activity/complete_screen.dart';
-import 'package:evfual/app/modules/activity/ongoing_screen.dart';
-import 'package:evfual/app/modules/activity/scheduled_screen.dart';
-import 'package:evfual/app/modules/activity/topup_screen.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:myrideuser/app/modules/activity/canceled_screen.dart';
+import 'package:myrideuser/app/modules/activity/complete_screen.dart';
+import 'package:myrideuser/app/modules/activity/ongoing_screen.dart';
+import 'package:myrideuser/app/modules/activity/scheduled_screen.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/constants.dart';
+import 'package:myrideuser/config/utils/style.dart';
 import 'package:flutter/material.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -18,15 +20,16 @@ class ActivityScreen extends StatefulWidget {
 class _ActivityScreenState extends State<ActivityScreen> {
   int selectedTab = 0;
 
-  final List<String> tabs = [
-    "Ongoing",
-    "Scheduled",
-    "Completed",
-    "Canceled",
-    "Top Up",
-  ];
+  final List<String> tabs = ["Ongoing", "Scheduled", "Completed", "Canceled"];
 
-  //
+  @override
+  void initState() {
+    super.initState();
+    Get.find<ProfileController>().getActivityData(
+      context: context,
+      typeOfSlug: 'ongoing',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +57,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     ),
                   ),
                   const Spacer(),
-                   Text(
+                  Text(
                     "Activity",
-                    style: PoppinsMedium.copyWith(color: ColorResources.blackcolor11),
+                    style: PoppinsMedium.copyWith(
+                      color: ColorResources.blackcolor11,
+                    ),
                   ),
                   const Spacer(),
-                  const Icon(Icons.more_vert),
+                  //const Icon(Icons.more_vert),
                 ],
               ),
             ),
@@ -79,18 +84,41 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       setState(() {
                         selectedTab = index;
                       });
+
+                      String slug = "";
+
+                      switch (index) {
+                        case 0:
+                          slug = "pending";
+                          break;
+                        case 1:
+                          slug = "scheduled";
+                          break;
+                        case 2:
+                          slug = "completed";
+                          break;
+                        case 3:
+                          slug = "cancelled";
+                          break;
+                      }
+
+                      Get.find<ProfileController>().getActivityData(
+                        context: context,
+                        typeOfSlug: slug.toString(),
+                      );
                     },
                     child: Container(
                       margin: const EdgeInsets.only(right: 10),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: 
-                        isSelected
+                        color: isSelected
                             ? ColorResources.blueeebutton
                             : ColorResources.whiteColor,
                         borderRadius: BorderRadius.circular(25),
-                        border: Border.all(color: ColorResources.TextColorForGrey),
+                        border: Border.all(
+                          color: ColorResources.TextColorForGrey,
+                        ),
                       ),
                       child: Text(
                         tabs[index],
@@ -111,7 +139,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
             const SizedBox(height: 20),
 
-            /// ✅ TAB BODY SWITCH
             Expanded(
               child: Builder(
                 builder: (context) {
@@ -121,10 +148,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     return ScheduledScreen();
                   } else if (selectedTab == 2) {
                     return CompletedScreen();
-                  } else if (selectedTab == 3) {
-                    return CanceledScreen();
                   } else {
-                    return TopUpScreen();
+                    return CanceledScreen();
                   }
                 },
               ),
@@ -139,21 +164,22 @@ class _ActivityScreenState extends State<ActivityScreen> {
 class RideItem extends StatelessWidget {
   final String title;
   final String subTitle;
-  final String time;
-  final String rightDate;
-  final IconData icon;
+  //  final String time;
+  // final String rightDate;
+  final String imageUrl;
 
   const RideItem({
     super.key,
     required this.title,
     required this.subTitle,
-    required this.time,
-    required this.rightDate,
-    required this.icon,
+
+    required this.imageUrl,
+    
   });
 
   @override
   Widget build(BuildContext context) {
+     final width = MediaQuery.of(context).size.width;
     return Column(
       children: [
         const SizedBox(height: 12),
@@ -161,15 +187,39 @@ class RideItem extends StatelessWidget {
         Row(
           children: [
             /// LEFT CIRCLE ICON
-            Container(
-              height: 52,
-              width: 52,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                // border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Icon(icon, color: ColorResources.blueeebutton),
-            ),
+          (imageUrl != null &&imageUrl!.isNotEmpty)
+              ? CircleAvatar(
+                  radius: width * 0.09,
+                  backgroundColor: ColorResources.whiteColor,
+                  child: ClipOval(
+                    child: Image.network(
+                      '${ApiConstants.imageurl}${imageUrl.toString()}',
+                      width: width * 0.16,
+                      height: width * 0.16,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          "assets/images/cars.png",
+                          width: width * 0.14,
+                          height: width * 0.14,
+                          fit: BoxFit.cover,
+                          color: ColorResources.blueeebutton,
+                        );
+                      },
+                    ),
+                  ),
+                )
+              : CircleAvatar(
+                  radius: width * 0.06,
+                  backgroundColor: Colors.blue.shade50,
+                  child: Image.asset(
+                    "assets/images/cars.png",
+                    width: width * 0.08,
+                    height: width * 0.08,
+                    fit: BoxFit.cover,
+                    color: ColorResources.blueeebutton,
+                  ),
+                ),
 
             const SizedBox(width: 12),
 
@@ -181,13 +231,18 @@ class RideItem extends StatelessWidget {
                   Text(
                     title,
                     overflow: TextOverflow.ellipsis,
-                    style: PoppinsReguler.copyWith(color: ColorResources.blackcolor11),
+                    style: PoppinsReguler.copyWith(
+                      color: ColorResources.blackcolor11,
+                    ),
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    subTitle,
-                    style:  TextStyle(color: ColorResources.TextColorForGrey, fontSize: 12),
-                  ),
+                  // const SizedBox(height: 5),
+                  // Text(
+                  //   subTitle,
+                  //   style: TextStyle(
+                  //     color: ColorResources.TextColorForGrey,
+                  //     fontSize: 12,
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -196,14 +251,20 @@ class RideItem extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  time,
-                  style: PoppinsMedium.copyWith(color: ColorResources.blackcolor11),
-                ),
+                // Text(
+                //   time,
+                //   style: PoppinsMedium.copyWith(
+                //     color: ColorResources.blackcolor11,
+                //   ),
+                // ),
                 const SizedBox(height: 6),
                 Text(
-                  rightDate,
-                  style:  TextStyle(color: ColorResources.TextColorForGrey, fontSize: 12),
+                  formatDate(subTitle),
+                  // rightDate,
+                  style: TextStyle(
+                    color: ColorResources.TextColorForGrey,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -214,5 +275,17 @@ class RideItem extends StatelessWidget {
         Divider(color: ColorResources.TextColorForGrey),
       ],
     );
+  }
+
+  String formatDate(String dateString) {
+    DateTime dateTime = DateTime.parse(dateString);
+
+    // 2026-04-27
+    String fullDate = DateFormat('yyyy-MM-dd').format(dateTime);
+
+    // 27 April
+    String dayMonth = DateFormat('dd MMMM').format(dateTime);
+
+    return "$fullDate  $dayMonth";
   }
 }

@@ -1,11 +1,12 @@
 
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 
 class PromoCodeScreen extends StatefulWidget {
-  const PromoCodeScreen({super.key});
+  final String? promo_id;
+   PromoCodeScreen({super.key, this.promo_id});
 
   @override
   State<PromoCodeScreen> createState() => _PromoCodeScreenState();
@@ -24,7 +25,6 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
     }
   }
 
-  /// ❌ Error Bottom Sheet
   void _showErrorSheet() {
     showModalBottomSheet(
       context: context,
@@ -63,7 +63,7 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
     );
   }
 
-  /// ✅ Success Bottom Sheet
+
   void _showSuccessSheet() {
     showModalBottomSheet(
       context: context,
@@ -207,24 +207,7 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
               CustomPrimaryButton(text: "Redeem", onTap: () => _handleRedeem,
               
                ),
-                // SizedBox(
-                //   width: double.infinity,
-                //   height: height * 0.07,
-                //   child: ElevatedButton(
-                //     style: ElevatedButton.styleFrom(
-                //       backgroundColor: const Color(0xFF1CA7C6),
-                //       shape: RoundedRectangleBorder(
-                //         borderRadius: BorderRadius.circular(40),
-                //       ),
-                //     ),
-                //     onPressed: _handleRedeem,
-                //     child: const Text(
-                //       "Redeem",
-                //       style: TextStyle(fontSize: 16, color: Colors.white),
-                //     ),
-                //   ),
-                // ),
-
+              
 
 
 

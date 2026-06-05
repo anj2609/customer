@@ -1,44 +1,71 @@
-import 'package:evfual/data/controller/plan_list.dart';
-import 'package:evfual/data/controller/profile_controller.dart';
-import 'package:evfual/data/controller/subscription_list.dart';
-import 'package:evfual/data/controller/swap_history.dart';
-import 'package:evfual/data/controller/swap_station.dart';
-import 'package:evfual/data/controller/user_profile.dart';
-import 'package:evfual/data/repository/profile_repo.dart';
+import 'package:myrideuser/data/controller/booking_controller.dart';
+import 'package:myrideuser/data/controller/chat_controller.dart';
+
+import 'package:myrideuser/data/controller/profile_controller.dart';
+
+import 'package:myrideuser/data/repository/booking_repo.dart';
+import 'package:myrideuser/data/repository/chat_repo.dart';
+import 'package:myrideuser/data/repository/profile_repo.dart';
 import 'package:get/get.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:evfual/config/utils/apis/api_client.dart';
-import 'package:evfual/data/controller/auth_controller.dart';
+import 'package:myrideuser/config/utils/apis/api_client.dart';
+import 'package:myrideuser/data/controller/auth_controller.dart';
 
-import 'package:evfual/data/repository/auth_repo.dart';
-import 'package:evfual/data/repository/home_repo.dart';
+import 'package:myrideuser/data/repository/auth_repo.dart';
+import 'package:myrideuser/data/repository/home_repo.dart';
 
 Future<Map<String, Map<String, String>>> init() async {
   final sharedPreferences = await SharedPreferences.getInstance();
-  Get.lazyPut(() => sharedPreferences, fenix: true);
 
-  Map<String, Map<String, String>> _languages = Map();
-  Get.lazyPut(() => AuthController(authRepo: Get.find()));
+  Get.lazyPut<SharedPreferences>(() => sharedPreferences, fenix: true);
+
+  /// API CLIENT
   Get.lazyPut<ApiClient>(
     () => ApiClient(sharedPreferences: Get.find()),
     fenix: true,
   );
 
-  Get.lazyPut(
+  /// REPOSITORIES
+  Get.lazyPut<AuthRepo>(
     () => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()),
-  );
-   Get.lazyPut(
-    () => ProfiileRepo(apiClient: Get.find(),),
+    fenix: true,
   );
 
-  Get.lazyPut(() => HomeRepo(apiClient: Get.find()));
-  Get.lazyPut(() => SubscriptionController());
-  Get.lazyPut(() => UserProfileController());
-  Get.lazyPut(() => NearestSwapStationController());
-  Get.lazyPut(() => PlanController());
-  Get.lazyPut(() => SwapController());
-  Get.lazyPut(() => ProfileController(profileRepo: Get.find()));
+  Get.lazyPut<HomeRepo>(() => HomeRepo(apiClient: Get.find()), fenix: true);
 
-  return _languages;
+  Get.lazyPut<BookingRepo>(
+    () => BookingRepo(apiClient: Get.find()),
+    fenix: true,
+  );
+
+  Get.lazyPut<ChatRepo>(() => ChatRepo(apiClient: Get.find()), fenix: true);
+
+  Get.lazyPut<ProfiileRepo>(
+    () => ProfiileRepo(apiClient: Get.find()),
+    fenix: true,
+  );
+
+  /// CONTROLLERS
+  Get.lazyPut<AuthController>(
+    () => AuthController(authRepo: Get.find()),
+    fenix: true,
+  );
+
+  Get.lazyPut<BookingController>(
+    () => BookingController(bookingRepo: Get.find()),
+    fenix: true,
+  );
+
+  Get.lazyPut<ProfileController>(
+    () => ProfileController(profileRepo: Get.find()),
+    fenix: true,
+  );
+
+  Get.lazyPut<ChatController>(
+    () => ChatController(chatRepo: Get.find()),
+    fenix: true,
+  );
+
+  return {};
 }

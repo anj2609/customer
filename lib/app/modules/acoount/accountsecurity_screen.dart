@@ -1,17 +1,17 @@
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/dimensions.dart';
-import 'package:evfual/config/utils/style.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/dimensions.dart';
+import 'package:myrideuser/config/utils/style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class AccountSecurityScreen extends StatefulWidget {
-  const AccountSecurityScreen({super.key});
+class SecurityScreen extends StatefulWidget {
+  const SecurityScreen({super.key});
 
   @override
-  State<AccountSecurityScreen> createState() => _AccountSecurityScreenState();
+  State<SecurityScreen> createState() => _SecurityScreenState();
 }
 
-class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
+class _SecurityScreenState extends State<SecurityScreen> {
   bool biometric = true;
   bool faceId = true;
   bool smsAuth = false;
@@ -47,7 +47,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                   Expanded(
                     child: Center(
                       child: Text(
-                        "Account & Security",
+                        " & Security",
                         style: PoppinsExtrabold.copyWith(
                           color: ColorResources.blackcolor,
                           fontSize: Dimensions.spacingSize16
@@ -100,19 +100,19 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                       buildNavTile(
                         "Device Management",
                         subtitle:
-                            "Manage your account on the various device you own.",
+                            "Manage your  on the various device you own.",
                       ),
 
                       buildNavTile(
-                        "Deactivate Account",
+                        "Deactivate ",
                         subtitle:
-                            "Temporarily deactivate your account. Easily reactivate when you're ready.",
+                            "Temporarily deactivate your . Easily reactivate when you're ready.",
                       ),
 
                       buildNavTile(
-                        "Delete Account",
+                        "Delete ",
                         subtitle:
-                            "permanently remove your account and data. Proceed with caution.",
+                            "permanently remove your  and data. Proceed with caution.",
                         isDanger: true,
                       ),
                     ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/style.dart';
 
 Widget customHeader(GlobalKey<ScaffoldState> scaffoldKey) {
   return Container(

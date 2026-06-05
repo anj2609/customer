@@ -1,4 +1,4 @@
-name: evfual
+name: myrideuser
 description: "A new Flutter project."
 publish_to: 'none'
 version: 1.0.0+1
@@ -29,13 +29,24 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   google_places_flutter: ^2.1.1
   flutter_html: ^3.0.0
-
+  google_sign_in: ^6.1.5
+  firebase_auth: ^6.3.0
+  firebase_core: ^4.6.0
+  url_launcher: ^6.3.2
+  shimmer: ^3.0.0
+  flutter_image_compress: ^2.4.0
+  flutter_polyline_points: ^3.1.0
+  lottie: ^3.3.3
+  flutter_local_notifications: ^20.1.0
+  firebase_messaging: ^16.2.1
+  mobile_number: ^3.0.0
+  path_provider: ^2.1.5
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
 flutter_icons:
-  image_path: "assets/images/logo111.png"
+  image_path: "assets/images/applogo.png"
   android: true
   ios: true
 

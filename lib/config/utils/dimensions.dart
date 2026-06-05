@@ -34,7 +34,7 @@ class Dimensions {
       static const double spacingSize11 = 11.0;
         static const double spacingSize40 = 40.0;
          static const double spacingSize14 = 40.0;
-    
+      static const double spacingSize60 = 60.0;
  
   
 }

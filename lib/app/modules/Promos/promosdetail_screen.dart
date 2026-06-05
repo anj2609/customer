@@ -1,12 +1,400 @@
-import 'package:evfual/app/modules/Promos/promocode_screen.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/widgets/custom_button.dart';
+// import 'package:myrideuser/app/modules/Promos/promocode_screen.dart';
+// import 'package:myrideuser/config/utils/colors.dart';
+// import 'package:myrideuser/config/utils/style.dart';
+// import 'package:myrideuser/widgets/custom_button.dart';
+// import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+
+// class PromoDetailsScreen extends StatelessWidget {
+//   const PromoDetailsScreen({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final size = MediaQuery.of(context).size;
+//     final padding = size.width * 0.05;
+
+//     return Scaffold(
+//       backgroundColor: Colors.grey.shade100,
+//       body: SafeArea(
+//         child: LayoutBuilder(
+//           builder: (context, constraints) {
+//             return SingleChildScrollView(
+//               padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16),
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   /// App Bar Row
+//                   Row(
+//                     children: [
+//                       const Icon(Icons.arrow_back),
+//                       const SizedBox(width: 12),
+//                       Text(
+//                         "Promos",
+//                         style: PoppinsMedium.copyWith(
+//                           color: ColorResources.blackcolor11,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+
+//                   const SizedBox(height: 20),
+
+//                   /// Promo Card
+//                   Container(
+//                     width: double.infinity,
+//                     decoration: BoxDecoration(
+//                       color: Colors.white,
+//                       borderRadius: BorderRadius.circular(16),
+//                       boxShadow: [
+//                         BoxShadow(
+//                           color: Colors.black.withOpacity(0.05),
+//                           blurRadius: 8,
+//                         ),
+//                       ],
+//                     ),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         /// Image Banner
+//                         Container(
+//                           margin: const EdgeInsets.only(bottom: 20),
+//                           height: 200,
+//                           decoration: BoxDecoration(
+//                             borderRadius: BorderRadius.circular(15),
+//                             image: DecorationImage(
+//                               image: AssetImage("assets/images/Rectangle.png"),
+//                               fit: BoxFit.cover,
+//                               colorFilter: ColorFilter.mode(
+//                                 Colors.black.withOpacity(0.5),
+//                                 BlendMode.darken,
+//                               ),
+//                             ),
+//                           ),
+//                           child: Padding(
+//                             padding: const EdgeInsets.all(16),
+//                             child: Column(
+//                               crossAxisAlignment: CrossAxisAlignment.start,
+//                               children: [
+//                                 _blueTags(
+//                                   "BEST DEAL",
+//                                   "assets/images/splashscreen.png",
+//                                 ),
+
+//                                 const SizedBox(height: 8),
+
+//                                 _blueTag("END OF YEAR PROMO"),
+
+//                                 const Spacer(),
+//                                 Text(
+//                                   "20% OFF",
+//                                   style: PoppinsBold.copyWith(
+//                                     color: ColorResources.whiteColor,
+//                                   ),
+//                                 ),
+//                                 const SizedBox(height: 8),
+//                                 Row(
+//                                   children: [
+//                                     Container(
+//                                       padding: const EdgeInsets.symmetric(
+//                                         horizontal: 12,
+//                                         vertical: 6,
+//                                       ),
+//                                       color: ColorResources.whiteColor,
+//                                       child: Text(
+//                                         "CODE ",
+//                                         style: PoppinsSemiBold.copyWith(
+//                                           color: ColorResources.blueeebutton,
+//                                         ),
+//                                       ),
+//                                     ),
+//                                     Container(
+//                                       padding: const EdgeInsets.symmetric(
+//                                         horizontal: 12,
+//                                         vertical: 6,
+//                                       ),
+//                                       color: ColorResources.blueeebutton,
+//                                       child: Text(
+//                                         "EOYP25",
+//                                         style: PoppinsBold.copyWith(
+//                                           fontSize: 14,
+
+//                                           color: ColorResources.whiteColor,
+//                                         ),
+//                                       ),
+//                                     ),
+//                                   ],
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+
+//                         /// Content
+//                         Padding(
+//                           padding: const EdgeInsets.all(16.0),
+//                           child: Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               Text(
+//                                 "Best Deal: 20% OFF",
+//                                 style: PoppinsSemiBold.copyWith(
+//                                   color: ColorResources.blackcolor,
+//                                 ),
+//                               ),
+//                               const SizedBox(height: 6),
+//                               Text(
+//                                 "End of year promo. 20% discount on all services",
+//                                 style: PoppinsReguler.copyWith(
+//                                   color: ColorResources.TextColorForGrey,
+//                                 ),
+//                               ),
+//                               const SizedBox(height: 16),
+
+//                               /// Promo Code Box
+//                               Container(
+//                                 width: double.infinity,
+//                                 padding: const EdgeInsets.symmetric(
+//                                   vertical: 14,
+//                                 ),
+//                                 decoration: BoxDecoration(
+//                                   border: Border.all(
+//                                     color: ColorResources.TextColorForGrey,
+//                                   ),
+//                                   borderRadius: BorderRadius.circular(8),
+//                                 ),
+//                                 child: Center(
+//                                   child: Column(
+//                                     children: [
+//                                       Text(
+//                                         "Promos Code",
+//                                         style: PoppinsReguler.copyWith(
+//                                           color:
+//                                               ColorResources.TextColorForGrey,
+//                                         ),
+//                                       ),
+//                                       Row(
+//                                         mainAxisAlignment:
+//                                             MainAxisAlignment.center,
+//                                         children: [
+//                                           Text(
+//                                             "EOY25",
+//                                             style: PoppinsBold.copyWith(
+//                                               color: ColorResources.blackcolor,
+//                                             ),
+//                                           ),
+//                                           SizedBox(width: 7),
+//                                           Icon(
+//                                             Icons.copy,
+//                                             color:
+//                                                 ColorResources.TextColorForGrey,
+//                                             size: 15,
+//                                           ),
+//                                         ],
+//                                       ),
+//                                     ],
+//                                   ),
+//                                 ),
+//                               ),
+
+//                               const SizedBox(height: 20),
+
+//                               sectionTitle("Promo Valid Date"),
+//                               sectionText("March 1st – March 31st 2025"),
+
+//                               const SizedBox(height: 16),
+
+//                               sectionTitle("Minimum Spend"),
+//                               sectionText("There is no minimum spend."),
+
+//                               const SizedBox(height: 16),
+
+//                               sectionTitle("Terms and Conditions"),
+//                               const SizedBox(height: 8),
+//                               bulletText(
+//                                 "Enjoy a 20% discount on your next ride with MyRide.",
+//                               ),
+//                               bulletText(
+//                                 "Valid for rides booked and completed between March 1st and March 31st.",
+//                               ),
+//                               bulletText(
+//                                 "Promo code must be entered before booking.",
+//                               ),
+//                               bulletText("Discount applies to base fare only."),
+//                               bulletText(
+//                                 "Promo code can only be used once per user account.",
+//                               ),
+//                               bulletText(
+//                                 "Cannot be combined with other promos.",
+//                               ),
+//                               bulletText(
+//                                 "MyRide reserves the right to modify or cancel the promo.",
+//                               ),
+
+//                               const SizedBox(height: 16),
+
+//                               sectionTitle("How to Use"),
+//                               const SizedBox(height: 8),
+//                               bulletText("Open the MyRide app."),
+//                               bulletText("Select pickup and drop-off."),
+//                               bulletText("Tap on the Promo/Voucher section."),
+//                               bulletText("Enter the promo code 'EOY25'."),
+//                               bulletText("Confirm booking to enjoy discount."),
+
+//                               const SizedBox(height: 16),
+
+//                               sectionTitle("Additional Information"),
+//                               const SizedBox(height: 8),
+//                               bulletText("Limited time offer."),
+//                               bulletText(
+//                                 "Question or issues? Contact support.",
+//                               ),
+
+//                               const SizedBox(height: 24),
+
+//                               /// Button
+//                               CustomPrimaryButton(
+//                                 text: "Use Now",
+//                                 onTap: () {
+//                                   Get.to(
+//                                     PromoCodeScreen(),
+//                                     transition: Transition.leftToRight,
+//                                     duration: Duration(milliseconds: 0),
+//                                   );
+//                                   // Navigator.push(
+//                                   //   context,
+//                                   //   MaterialPageRoute(
+//                                   //     builder: (_) => PromoCodeScreen(),
+//                                   //   ),
+//                                   // );
+
+//                                   ///PromoCodeScreen
+//                                 },
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             );
+//           },
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget sectionTitle(String text) {
+//     return Text(
+//       text,
+//       style: PoppinsSemiBold.copyWith(color: ColorResources.blackcolor),
+//     );
+//   }
+
+//   Widget sectionText(String text) {
+//     return Text(
+//       text,
+
+//       style: PoppinsReguler.copyWith(color: ColorResources.textdetailsColor),
+//     );
+//   }
+
+//   Widget _blueTag(String text) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+//       color: ColorResources.blueeebutton,
+//       child: Text(
+//         text,
+//         style: PoppinsBold.copyWith(color: ColorResources.whiteColor),
+//       ),
+//     );
+//   }
+
+//   Widget bulletText(String text) {
+//     return Padding(
+//       padding: const EdgeInsets.only(bottom: 6),
+//       child: Row(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           const Text("• "),
+//           Expanded(child: Text(text)),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _blueTags(String text, String image) {
+//     return Row(
+//       mainAxisAlignment: MainAxisAlignment.start,
+
+//       children: [
+//         Container(
+//           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+//           color: ColorResources.blueeebutton,
+//           child: Text(
+//             text,
+//             style: PoppinsBold.copyWith(color: ColorResources.whiteColor),
+//           ),
+//         ),
+//         Spacer(),
+
+//         _imageLogo(image),
+//       ],
+//     );
+//   }
+
+//   Widget _imageLogo(String images) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+//       decoration: BoxDecoration(
+//         shape: BoxShape.circle,
+//         color: ColorResources.blueeebutton,
+//       ),
+
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.end,
+
+//         children: [
+//           Image.asset(
+//             images,
+//             height: 30,
+//             width: 30,
+
+//             color: ColorResources.whiteColor,
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   ////assets/images/splashscreen.png
+// }
+
+import 'package:myrideuser/app/modules/Promos/promocode_screen.dart';
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
-class PromoDetailsScreen extends StatelessWidget {
-  const PromoDetailsScreen({super.key});
+class PromoDetailsScreen extends StatefulWidget {
+  final String id;
+
+  const PromoDetailsScreen({super.key, required this.id});
+
+  @override
+  State<PromoDetailsScreen> createState() => _PromoDetailsScreenState();
+}
+
+class _PromoDetailsScreenState extends State<PromoDetailsScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,17 +404,30 @@ class PromoDetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
+        child: GetBuilder<ProfileController>(
+          builder: (controller) {
+            if (controller.isPromoDetailsLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final data = controller.promoDetailsModel;
+
+            if (data == null) {
+              return const Center(child: Text("No Promo Details Found"));
+            }
+
             return SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// App Bar Row
+                  /// 🔹 App Bar
                   Row(
                     children: [
-                      const Icon(Icons.arrow_back),
+                      GestureDetector(
+                        onTap: () => Get.back(),
+                        child: const Icon(Icons.arrow_back),
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         "Promos",
@@ -39,30 +440,26 @@ class PromoDetailsScreen extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  /// Promo Card
+                  /// 🔹 Promo Card
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                        ),
-                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        /// Image Banner
+                        /// ✅ STATIC IMAGE
                         Container(
                           margin: const EdgeInsets.only(bottom: 20),
                           height: 200,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
                             image: DecorationImage(
-                              image: AssetImage("assets/images/Rectangle.png"),
+                              image: const AssetImage(
+                                "assets/images/Rectangle.png",
+                              ),
                               fit: BoxFit.cover,
                               colorFilter: ColorFilter.mode(
                                 Colors.black.withOpacity(0.5),
@@ -75,23 +472,21 @@ class PromoDetailsScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _blueTags(
-                                  "BEST DEAL",
-                                  "assets/images/splashscreen.png",
-                                ),
-
-                                const SizedBox(height: 8),
-
-                                _blueTag("END OF YEAR PROMO"),
+                                _blueTag(data.category?.toUpperCase() ?? ""),
 
                                 const Spacer(),
+
+                                /// 🔥 PRICE OFF
                                 Text(
-                                  "20% OFF",
+                                  "${data.priceOff ?? "0"}% OFF",
                                   style: PoppinsBold.copyWith(
-                                    color: ColorResources.whiteColor,
+                                    color: Colors.white,
                                   ),
                                 ),
+
                                 const SizedBox(height: 8),
+
+                                /// 🔥 CODE
                                 Row(
                                   children: [
                                     Container(
@@ -99,9 +494,9 @@ class PromoDetailsScreen extends StatelessWidget {
                                         horizontal: 12,
                                         vertical: 6,
                                       ),
-                                      color: ColorResources.whiteColor,
+                                      color: Colors.white,
                                       child: Text(
-                                        "CODE ",
+                                        "CODE",
                                         style: PoppinsSemiBold.copyWith(
                                           color: ColorResources.blueeebutton,
                                         ),
@@ -114,11 +509,9 @@ class PromoDetailsScreen extends StatelessWidget {
                                       ),
                                       color: ColorResources.blueeebutton,
                                       child: Text(
-                                        "EOYP25",
+                                        data.code ?? "",
                                         style: PoppinsBold.copyWith(
-                                          fontSize: 14,
-
-                                          color: ColorResources.whiteColor,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     ),
@@ -129,145 +522,69 @@ class PromoDetailsScreen extends StatelessWidget {
                           ),
                         ),
 
-                        /// Content
+                        /// 🔹 CONTENT
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              /// TITLE
                               Text(
-                                "Best Deal: 20% OFF",
+                                data.title ?? "",
                                 style: PoppinsSemiBold.copyWith(
                                   color: ColorResources.blackcolor,
                                 ),
                               ),
+
                               const SizedBox(height: 6),
+
+                              /// SHORT DESCRIPTION
                               Text(
-                                "End of year promo. 20% discount on all services",
+                                data.shortDescription ?? "",
                                 style: PoppinsReguler.copyWith(
                                   color: ColorResources.TextColorForGrey,
                                 ),
                               ),
+
                               const SizedBox(height: 16),
 
-                              /// Promo Code Box
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: ColorResources.TextColorForGrey,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    children: [
+                              /// VALID DATE
+                              sectionTitle("Promo Valid Date"),
+                              sectionText(
+                                "${formatDateTime(data?.startDate)} - ${formatDateTime(data?.endDate)}",
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              if (data.details != null)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    sectionTitle("Terms and Conditions"),
+                                    const SizedBox(height: 6),
+                                    if ((data?.shortDescription ?? "")
+                                        .isNotEmpty)
                                       Text(
-                                        "Promos Code",
+                                        data!.shortDescription!,
                                         style: PoppinsReguler.copyWith(
                                           color:
                                               ColorResources.TextColorForGrey,
                                         ),
                                       ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "EOY25",
-                                            style: PoppinsBold.copyWith(
-                                              color: ColorResources.blackcolor,
-                                            ),
-                                          ),
-                                          SizedBox(width: 7),
-                                          Icon(
-                                            Icons.copy,
-                                            color:
-                                                ColorResources.TextColorForGrey,
-                                            size: 15,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
+                                    // Text(data.details!),
+                                  ],
                                 ),
-                              ),
-
-                              const SizedBox(height: 20),
-
-                              sectionTitle("Promo Valid Date"),
-                              sectionText("March 1st – March 31st 2025"),
-
-                              const SizedBox(height: 16),
-
-                              sectionTitle("Minimum Spend"),
-                              sectionText("There is no minimum spend."),
-
-                              const SizedBox(height: 16),
-
-                              sectionTitle("Terms and Conditions"),
-                              const SizedBox(height: 8),
-                              bulletText(
-                                "Enjoy a 20% discount on your next ride with MyRide.",
-                              ),
-                              bulletText(
-                                "Valid for rides booked and completed between March 1st and March 31st.",
-                              ),
-                              bulletText(
-                                "Promo code must be entered before booking.",
-                              ),
-                              bulletText("Discount applies to base fare only."),
-                              bulletText(
-                                "Promo code can only be used once per user account.",
-                              ),
-                              bulletText(
-                                "Cannot be combined with other promos.",
-                              ),
-                              bulletText(
-                                "MyRide reserves the right to modify or cancel the promo.",
-                              ),
-
-                              const SizedBox(height: 16),
-
-                              sectionTitle("How to Use"),
-                              const SizedBox(height: 8),
-                              bulletText("Open the MyRide app."),
-                              bulletText("Select pickup and drop-off."),
-                              bulletText("Tap on the Promo/Voucher section."),
-                              bulletText("Enter the promo code 'EOY25'."),
-                              bulletText("Confirm booking to enjoy discount."),
-
-                              const SizedBox(height: 16),
-
-                              sectionTitle("Additional Information"),
-                              const SizedBox(height: 8),
-                              bulletText("Limited time offer."),
-                              bulletText(
-                                "Question or issues? Contact support.",
-                              ),
 
                               const SizedBox(height: 24),
 
-                              /// Button
                               CustomPrimaryButton(
-                                text: "Use Now",
+                                text: "Add Now",
                                 onTap: () {
-                                  Get.to(
-                                    PromoCodeScreen(),
-                                    transition: Transition.leftToRight,
-                                    duration: Duration(milliseconds: 0),
-                                  );
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (_) => PromoCodeScreen(),
-                                  //   ),
-                                  // );
-
-                                  ///PromoCodeScreen
+                                  Get.find<ProfileController>()
+                                      .customerPromoAdd(
+                                        context: context,
+                                        promoid: data.id.toString(),
+                                      );
                                 },
                               ),
                             ],
@@ -295,7 +612,6 @@ class PromoDetailsScreen extends StatelessWidget {
   Widget sectionText(String text) {
     return Text(
       text,
-
       style: PoppinsReguler.copyWith(color: ColorResources.textdetailsColor),
     );
   }
@@ -304,69 +620,19 @@ class PromoDetailsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       color: ColorResources.blueeebutton,
-      child: Text(
-        text,
-        style: PoppinsBold.copyWith(color: ColorResources.whiteColor),
-      ),
+      child: Text(text, style: PoppinsBold.copyWith(color: Colors.white)),
     );
   }
 
-  Widget bulletText(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text("• "),
-          Expanded(child: Text(text)),
-        ],
-      ),
-    );
+  String formatDateTime(String? date) {
+    if (date == null || date.isEmpty) return "Not Available";
+
+    try {
+      DateTime parsedDate = DateTime.parse(date).toLocal();
+
+      return DateFormat("yyyy-MM-dd hh:mm a").format(parsedDate);
+    } catch (e) {
+      return "Invalid Date";
+    }
   }
-
-  Widget _blueTags(String text, String image) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          color: ColorResources.blueeebutton,
-          child: Text(
-            text,
-            style: PoppinsBold.copyWith(color: ColorResources.whiteColor),
-          ),
-        ),
-        Spacer(),
-
-        _imageLogo(image),
-      ],
-    );
-  }
-
-  Widget _imageLogo(String images) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: ColorResources.blueeebutton,
-      ),
-
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-
-        children: [
-          Image.asset(
-            images,
-            height: 30,
-            width: 30,
-
-            color: ColorResources.whiteColor,
-          ),
-        ],
-      ),
-    );
-  }
-
-  ////assets/images/splashscreen.png
 }

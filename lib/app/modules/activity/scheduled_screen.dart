@@ -1,60 +1,68 @@
-
-import 'package:evfual/app/modules/activity/activity.dart';
-import 'package:evfual/app/modules/activity/ridedetail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:myrideuser/app/modules/activity/activity.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
 
 class ScheduledScreen extends StatelessWidget {
   const ScheduledScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const RideDetailsScreen()),
+    final controller = Get.find<ProfileController>();
+
+    return GetBuilder<ProfileController>(
+      builder: (_) {
+        // 🔄 Loading State
+        if (controller.isPromoLoading) {
+          return  Center(child: PremiumBlurLoader());
+        }
+
+        if (controller.bookingActivityList!.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset("assets/images/notdatafound.png", height: 150),
+                const SizedBox(height: 10),
+                const Text(
+                  "No Complete Rides",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          itemCount: controller.bookingActivityList!.length,
+          itemBuilder: (context, index) {
+            final item = controller.bookingActivityList![index];
+
+            return GestureDetector(
+              onTap: () {
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (_) => RideDetailsScreen(
+                //       bookingId: item.id.toString(),
+                //     ),
+                //   ),
+                // );
+              },
+              child: RideItem(
+                title: item.dropAddress ?? "N/A",
+                imageUrl: item.image ?? "",
+                // time: item!.runtimeType ?? "N/A",
+                subTitle: item.createdAt ?? "",
+                
+                //rightDate: item.createdAt ?? "",
+              ),
+            );
+          },
         );
-       
       },
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        children: [
-          RideItem(
-            title: "Larchmont Hotel",
-            icon: Icons.directions_car,
-            time: "16:00 PM",
-            subTitle: "Today, Mar 20, 2026  ·  09:41 AM",
-            rightDate: "Mar 21",
-          ),
-
-          RideItem(
-            title: "Strand Book Store",
-            icon: Icons.two_wheeler,
-            time: "10:30 AM",
-            subTitle: "Mar 18, 2026  ·  11:02 AM",
-            rightDate: "Mar 19",
-          ),
-
-          RideItem(
-            title: "Angelika Film Center &...",
-            icon: Icons.two_wheeler,
-            time: "19:00 PM",
-            subTitle: "Feb 21, 2026  ·  10:00 AM",
-            rightDate: "Feb 28",
-          ),
-
-          RideItem(
-            title: "Beacon,s Closet",
-            icon: Icons.directions_car,
-            time: "14:30 PM",
-            subTitle: "Feb 16, 2026  ·  13:45 PM",
-            rightDate: "Feb 18",
-          ),
-        ],
-      ),
     );
   }
 }
-
-
-

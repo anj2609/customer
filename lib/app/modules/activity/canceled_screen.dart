@@ -1,20 +1,22 @@
-import 'package:evfual/app/modules/activity/activity.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/data/controller/canceled.dart';
+import 'package:intl/intl.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/constants.dart';
+import 'package:myrideuser/config/utils/style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
+import 'package:myrideuser/data/modal/activity_model.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
 
 class CanceledScreen extends StatefulWidget {
-  CanceledScreen({super.key});
+  const CanceledScreen({super.key});
 
   @override
   State<CanceledScreen> createState() => _CanceledScreenState();
 }
 
 class _CanceledScreenState extends State<CanceledScreen> {
-  final ActivityController controller = Get.put(ActivityController());
-  int selectedIndex = 0;
+  final ProfileController controller = Get.find<ProfileController>();
 
   @override
   Widget build(BuildContext context) {
@@ -31,21 +33,47 @@ class _CanceledScreenState extends State<CanceledScreen> {
             children: [
               SizedBox(height: height * 0.02),
 
-              SizedBox(height: height * 0.02),
-
-              /// Tabs
-
-              /// List
+              /// LIST USING GETBUILDER
               Expanded(
-                child: Obx(
-                  () => ListView.builder(
-                    itemCount: controller.activityList.length,
-                    itemBuilder: (context, index) {
-                      final item = controller.activityList[index];
+                child: GetBuilder<ProfileController>(
+                  builder: (controller) {
+                    /// Loading
+                    if (controller.isPromoLoading) {
+                      return  Center(child: PremiumBlurLoader());
+                    }
 
-                      return _activityCard(item, width, height);
-                    },
-                  ),
+                    if (controller.bookingActivityList!.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              "assets/images/notdatafound.png",
+                              height: 150,
+                            ),
+                            const SizedBox(height: 10),
+                            const Text(
+                              "No Canceled Rides",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    /// List
+                    return ListView.builder(
+                      itemCount: controller.bookingActivityList!.length,
+                      itemBuilder: (context, index) {
+                        final item = controller.bookingActivityList![index];
+
+                        return _activityCard(item, width, height);
+                      },
+                    );
+                  },
                 ),
               ),
             ],
@@ -55,14 +83,13 @@ class _CanceledScreenState extends State<CanceledScreen> {
     );
   }
 
-  Widget _activityCard(item, double width, double height) {
+  Widget _activityCard(
+    ActivityDataMainModel item,
+    double width,
+    double height,
+  ) {
     return GestureDetector(
-      onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (_) => RideDetailsScreen()),
-        // );
-      },
+      onTap: () {},
 
       child: Container(
         margin: EdgeInsets.only(bottom: height * 0.015),
@@ -74,14 +101,39 @@ class _CanceledScreenState extends State<CanceledScreen> {
         child: Row(
           children: [
             /// Icon
-            CircleAvatar(
-              radius: width * 0.06,
-              backgroundColor: Colors.blue.shade50,
-              child: Icon(
-                item.icon == "car" ? Icons.directions_car : Icons.pedal_bike,
-                color: ColorResources.blueeebutton,
-              ),
-            ),
+            (item.image != null && item.image!.isNotEmpty)
+                ? CircleAvatar(
+                    radius: width * 0.09,
+                    backgroundColor: ColorResources.whiteColor,
+                    child: ClipOval(
+                      child: Image.network(
+                        '${ApiConstants.imageurl}${item.image.toString()}',
+                        width: width * 0.16,
+                        height: width * 0.16,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            "assets/images/cars.png",
+                            width: width * 0.14,
+                            height: width * 0.14,
+                            fit: BoxFit.cover,
+                            color: ColorResources.blueeebutton,
+                          );
+                        },
+                      ),
+                    ),
+                  )
+                : CircleAvatar(
+                    radius: width * 0.06,
+                    backgroundColor: Colors.blue.shade50,
+                    child: Image.asset(
+                      "assets/images/cars.png",
+                      width: width * 0.08,
+                      height: width * 0.08,
+                      fit: BoxFit.cover,
+                      color: ColorResources.blueeebutton,
+                    ),
+                  ),
 
             SizedBox(width: width * 0.04),
 
@@ -90,23 +142,25 @@ class _CanceledScreenState extends State<CanceledScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(item.dropAddress ?? "", style: PoppinsSemiBold),
+                  const SizedBox(height: 4),
                   Text(
-                    item.title,
-                     style: PoppinsSemiBold.copyWith(
-                     // color: ColorResources.blackcolor,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    item.date,
+                    formatDate(item.createdAt!),
                     style: TextStyle(
                       fontSize: width * 0.03,
                       color: Colors.grey,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  // Text(
+                  //   item.createdAt ?? "",
+                  //   style: TextStyle(
+                  //     fontSize: width * 0.03,
+                  //     color: Colors.grey,
+                  //   ),
+                  // ),
+                  const SizedBox(height: 4),
                   Text(
-                    item.status,
+                    item.status ?? "",
                     style: TextStyle(fontSize: width * 0.03, color: Colors.red),
                   ),
                 ],
@@ -115,7 +169,7 @@ class _CanceledScreenState extends State<CanceledScreen> {
 
             /// Amount
             Text(
-              item.amount,
+              item.totalFare.toString() ?? "",
               style: TextStyle(
                 fontSize: width * 0.038,
                 fontWeight: FontWeight.bold,
@@ -125,5 +179,17 @@ class _CanceledScreenState extends State<CanceledScreen> {
         ),
       ),
     );
+  }
+
+  String formatDate(String dateString) {
+    DateTime dateTime = DateTime.parse(dateString);
+
+    // 2026-04-27
+    String fullDate = DateFormat('yyyy-MM-dd').format(dateTime);
+
+    // 27 April
+    String dayMonth = DateFormat('dd MMMM').format(dateTime);
+
+    return "$fullDate  $dayMonth";
   }
 }

@@ -1,8 +1,9 @@
-import 'package:evfual/app/modules/acoount/topuppaymentmethod_screen.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/dimensions.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/app/modules/acoount/topuppaymentmethod_screen.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/dimensions.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -72,10 +73,10 @@ class _TopupScreenState extends State<TopupScreen> {
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      suffixText: "₹",
-                    ),
+                    // decoration: const InputDecoration(
+                    //   border: InputBorder.none,
+                    //   suffixText: "₹",
+                    // ),
                     onChanged: (value) {
                       setState(() {
                         selectedIndex = -1;
@@ -149,13 +150,18 @@ class _TopupScreenState extends State<TopupScreen> {
               text: "Next",
               onTap: () {
                 if (amountController.text.isNotEmpty) {
-                  Get.to(
-                    () => TopUpMethodScreen(
-                      paymentamount: '666',
-                    ),
-                    transition: Transition.leftToRight,
-                    duration: const Duration(milliseconds: 300),
+                  Get.find<ProfileController>().createTopUpIntent(
+                    context: context,
+                    amount: amountController.text.toString(),
                   );
+
+                  // Get.to(
+                  //   () => TopUpMethodScreen(
+                  //     paymentamount: '666',
+                  //   ),
+                  //   transition: Transition.leftToRight,
+                  //   duration: const Duration(milliseconds: 300),
+                  // );
                 } else {
                   Get.snackbar(
                     "Error",

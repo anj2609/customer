@@ -1,5 +1,5 @@
-import 'package:evfual/app/modules/activity/topupdetail_screen.dart';
-import 'package:evfual/config/utils/colors.dart';
+import 'package:myrideuser/app/modules/activity/topupdetail_screen.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,12 +24,7 @@ class TopUpScreen extends StatelessWidget {
                 transition: Transition.leftToRight,
                 duration: Duration(milliseconds: 0),
               );
-              //  Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //         builder: (_) => const TopUpDetailsScreen(),
-              //       ),
-              //     );
+             
             },
             child: _topUpTile(width),
           );

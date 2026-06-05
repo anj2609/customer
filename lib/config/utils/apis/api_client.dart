@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/foundation.dart' as Foundation;
 import 'package:flutter/material.dart';
@@ -7,15 +8,14 @@ import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:http/http.dart' as Http;
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:evfual/config/utils/apis/api_checker.dart';
-import 'package:evfual/config/utils/constants.dart';
+import 'package:myrideuser/config/utils/apis/api_checker.dart';
+import 'package:myrideuser/config/utils/constants.dart';
 
 class ApiClient extends GetxService {
-  String? appBaseUrl = 'https://evfuel.akslearning.in/api/';
   final SharedPreferences sharedPreferences;
   final String noInternetMessage =
       'Connection to API server failed due to internet connection';
-  final int timeoutInSeconds = 30;
+  final int timeoutInSeconds = 60;
 
   String? token;
   String? profileid;
@@ -23,46 +23,35 @@ class ApiClient extends GetxService {
   String? emailid;
   String? pancardno;
   String? passordss;
-  //String? userID;
-  Map<String, String>? _mainHeaders;
-  Map<String, String>? _mainHeadersMain;
 
-  ApiClient({this.appBaseUrl, required this.sharedPreferences}) {
-    //  print(" token.............................................$token");
+  //Map<String, String>? _mainHeadersMain;
 
-    _mainHeaders = {
-      'Content-Type': 'application/json',
-      'Authorization':
-          'Bearer ${sharedPreferences.getString(ApiConstants.token)}',
-    };
+  ApiClient({required this.sharedPreferences}) {
+    // _mainHeadersMain = {
+    //   'Accept': 'application/json',
+    //   'id': '${sharedPreferences.getString(ApiConstants.profileid)}',
+    //   'authorizationToken':
+    //       '${sharedPreferences.getString(ApiConstants.token)}',
+    // };
+  }
 
-    _mainHeadersMain = {
+  Map<String, String> get _mainHeadersMain {
+    return {
       'Accept': 'application/json',
-      'id': '${sharedPreferences.getString(ApiConstants.profileid)}',
+      "Content-Type": "application/json",
+      'id': sharedPreferences.getString(ApiConstants.profileid) ?? "",
       'authorizationToken':
-          '${sharedPreferences.getString(ApiConstants.token)}',
+          "${sharedPreferences.getString(ApiConstants.token) ?? ""}",
     };
   }
 
-  void updateHeader(String token) {
-    _mainHeaders = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
-  }
-
-  // void userId(String userID) {
-  //   _mainHeaders = {};
-  // }
-
-  Future<Response> postData(String uri, dynamic body) async {
+  Future<Response> postsignUpData(String uri, dynamic body) async {
     if (await ApiChecker.isVpnActive()) {
       return Response(statusCode: -1, statusText: 'you are using vpn');
     }
     {
       try {
         if (Foundation.kDebugMode) {
-          print('====> GetX Base URL: $appBaseUrl');
           print('====> GetX Call: $uri');
           print('====> GetX Body: $body');
           print('====> GetX Body: ${ApiConstants.baseUrl}');
@@ -71,7 +60,11 @@ class ApiClient extends GetxService {
         Http.Response _response = await Http.post(
           Uri.parse(ApiConstants.baseUrl + uri),
           body: jsonEncode(body),
-          headers: _mainHeaders,
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+          //_mainHeaders,
         ).timeout(Duration(seconds: timeoutInSeconds));
         print("++++++++++++>>>=====");
         Response response = handleResponse(_response, uri);
@@ -89,6 +82,114 @@ class ApiClient extends GetxService {
     }
   }
 
+  Future<Response> postData(String uri, dynamic body) async {
+    if (await ApiChecker.isVpnActive()) {
+      return Response(statusCode: -1, statusText: 'you are using vpn');
+    }
+    {
+      try {
+        if (Foundation.kDebugMode) {
+          print('====> GetX Call: $uri');
+          print('====> GetX Body: $body');
+          print('====> GetX Body: ${ApiConstants.baseUrl}');
+        }
+        print('====> GetX Basebodyy: $body');
+        Http.Response _response = await Http.post(
+          Uri.parse(ApiConstants.baseUrl + uri),
+          body: jsonEncode(body),
+          headers: _mainHeadersMain,
+          //_mainHeaders,
+        ).timeout(Duration(seconds: timeoutInSeconds));
+        print("++++++++++++>>>=====");
+        Response response = handleResponse(_response, uri);
+
+        if (Foundation.kDebugMode) {
+          print(
+            '====> API Response: [${response.statusCode}] $uri\n${response.body}',
+          );
+        }
+        print('====>  respnosee : ${response.body}');
+        return response;
+      } catch (e) {
+        return Response(statusCode: 1, statusText: noInternetMessage);
+      }
+    }
+  }
+
+  Future<Response> postChatData(String uri, dynamic body) async {
+    if (await ApiChecker.isVpnActive()) {
+      return Response(statusCode: -1, statusText: 'you are using vpn');
+    }
+
+    try {
+      if (Foundation.kDebugMode) {
+        print('====> GetX Base URL: $ApiConstants.baseUrl');
+        print('====> GetX Call: $uri');
+        print('====> GetX Body: ${jsonEncode(body)}');
+      }
+      Map<String, String> headerschat = {
+        'id': '${sharedPreferences.getString(ApiConstants.profileid)}',
+        "authorizationToken":
+            "${sharedPreferences.getString(ApiConstants.token)}",
+      };
+      print("testing mode: ${body}");
+
+      Http.Response _response = await Http.post(
+        Uri.parse(ApiConstants.baseUrl + uri),
+        body: jsonEncode(body),
+        headers: {...headerschat, "Content-Type": "application/json"},
+      ).timeout(Duration(seconds: timeoutInSeconds));
+
+      print("STATUS CODE: ${_response.statusCode}");
+      print("RESPONSE BODY: ${_response.body}");
+
+      Response response = handleResponse(_response, uri);
+
+      return response;
+    } catch (e) {
+      print("❌ ERROR: $e");
+      return Response(statusCode: 1, statusText: noInternetMessage);
+    }
+  }
+
+  Future<Response> myridepostData(String uri, dynamic body) async {
+    if (await ApiChecker.isVpnActive()) {
+      return Response(statusCode: -1, statusText: 'You are using VPN');
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      String? profileId = prefs.getString(ApiConstants.profileid);
+      String? token = prefs.getString(ApiConstants.token);
+
+      print("PROFILE ID: $profileId");
+      print("PROFILE ID: $token");
+      print("TOKEN: $token");
+      print("boyyy: $body");
+
+      Http.Response httpResponse = await Http.post(
+        Uri.parse(ApiConstants.baseUrl + uri),
+        body: jsonEncode(body),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'id': profileId ?? "",
+          'authorizationToken': token ?? "",
+        },
+      ).timeout(Duration(seconds: timeoutInSeconds));
+
+      print("STATUS: ${httpResponse.statusCode}");
+      print("BODY: ${httpResponse.body}");
+
+      return handleResponse(httpResponse, uri);
+    } catch (e, s) {
+      print("ERROR: $e");
+      print("STACK: $s");
+      return Response(statusCode: 1, statusText: noInternetMessage);
+    }
+  }
+
   Future<Response> postMultipartData(
     String uri,
     Map<String, String> body,
@@ -97,31 +198,23 @@ class ApiClient extends GetxService {
     if (await ApiChecker.isVpnActive()) {
       return Response(statusCode: -1, statusText: 'you are using vpn');
     }
+
+    log('testing   $body');
     try {
-      Map<String, String> headers = {
-        'Accept': 'application/json',
-        // ⚠️ Content-Type mat daalna yaha
-        // MultipartRequest khud set karega
-      };
+      Map<String, String> headers = {'Accept': 'application/json'};
 
       var request = Http.MultipartRequest(
         'POST',
         Uri.parse(ApiConstants.baseUrl + uri),
       );
 
-      // ✅ Add headers
       request.headers.addAll(headers);
 
-      // ✅ Add text fields
       request.fields.addAll(body);
 
-      // ✅ Add image file
       if (imageFile != null) {
         request.files.add(
-          await Http.MultipartFile.fromPath(
-            'profile_image', // backend field name same hona chahiye
-            imageFile.path,
-          ),
+          await Http.MultipartFile.fromPath('profile_image', imageFile.path),
         );
       }
 
@@ -134,6 +227,116 @@ class ApiClient extends GetxService {
     }
   }
 
+  Future<Response> postMultipartNewSelectProfile(
+    String uri,
+    Map<String, String> body,
+    File? imageFile,
+  ) async {
+    if (await ApiChecker.isVpnActive()) {
+      return Response(statusCode: -1, statusText: 'you are using vpn');
+    }
+   
+
+    log('testing   $body');
+    try {
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+         'id': ApiConstants.userIdSocial.isNotEmpty
+          ? ApiConstants.userIdSocial
+          : (sharedPreferences.getString(ApiConstants.profileid) ?? ""),
+
+      'authorizationToken': ApiConstants.userTokenSocial.isNotEmpty
+          ? ApiConstants.userTokenSocial
+          : (sharedPreferences.getString(ApiConstants.token) ?? ""),
+        
+      };
+ debugPrint('user testing $headers');
+      var request = Http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiConstants.baseUrl + uri),
+      );
+
+      request.headers.addAll(headers);
+
+      request.fields.addAll(body);
+
+      if (imageFile != null) {
+        request.files.add(
+          await Http.MultipartFile.fromPath('profile_image', imageFile.path),
+        );
+      }
+
+      var streamedResponse = await request.send();
+      var response = await Http.Response.fromStream(streamedResponse);
+
+      return handleResponse(response, uri);
+    } catch (e) {// 'id': userId,
+        // 'authorizationToken':
+        //     '${sharedPreferences.getString(ApiConstants.token)}',
+      return Response(statusCode: 1, statusText: noInternetMessage);
+    }
+  }
+
+  Future<Response> postMultipartUpdate(
+    String uri,
+    Map<String, String> body,
+    dynamic imageFile,
+  ) async {
+    if (await ApiChecker.isVpnActive()) {
+      return Response(statusCode: -1, statusText: 'You are using VPN');
+    }
+
+    try {
+      log('POST body server image: $body');
+
+      
+
+      var request = Http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiConstants.baseUrl + uri),
+      );
+       debugPrint(' testing edit profile ${body}');
+
+      request.headers.addAll({
+        'Accept': 'application/json',
+         'id': ApiConstants.userIdSocial.isNotEmpty
+          ? ApiConstants.userIdSocial
+          : (sharedPreferences.getString(ApiConstants.profileid) ?? ""),
+
+      'authorizationToken': ApiConstants.userTokenSocial.isNotEmpty
+          ? ApiConstants.userTokenSocial
+          : (sharedPreferences.getString(ApiConstants.token) ?? ""),
+        // 'id': userId,
+        // 'authorizationToken':
+        //     '${sharedPreferences.getString(ApiConstants.token)}',
+      });
+
+      request.fields.addAll(body);
+
+      if (imageFile != null) {
+        if (imageFile is File && await imageFile.exists()) {
+          request.files.add(
+            await Http.MultipartFile.fromPath('profile_image', imageFile.path),
+          );
+          log('Uploading file: ${imageFile.path}');
+        } else if (imageFile is String) {
+          request.fields['old_profile_image'] = imageFile;
+          log('Sending old image URL as string: $imageFile');
+        }
+      }
+
+      var streamedResponse = await request.send();
+      var response = await Http.Response.fromStream(streamedResponse);
+
+      log('Multipart response: ${response.statusCode}, body: ${response.body}');
+
+      return handleResponse(response, uri);
+    } catch (e, st) {
+      log('Multipart upload error: $e\n$st');
+      return Response(statusCode: 1, statusText: noInternetMessage);
+    }
+  }
+
   Future<Response> postDataMap(String uri, dynamic body) async {
     if (await ApiChecker.isVpnActive()) {
       return Response(statusCode: -1, statusText: 'you are using vpn');
@@ -141,15 +344,16 @@ class ApiClient extends GetxService {
     {
       try {
         if (Foundation.kDebugMode) {
-          print('====> GetX Base URL: $appBaseUrl');
           print('====> GetX Call: $uri');
           print('====> GetX Body: $body');
         }
         print('====> GetX Basebodyy: $body');
         Http.Response _response = await Http.post(
-          Uri.parse(appBaseUrl! + uri),
+          Uri.parse(ApiConstants.baseUrl + uri),
           body: body,
-          headers: _mainHeaders,
+          headers: _mainHeadersMain,
+
+          /// _mainHeaders,
         ).timeout(Duration(seconds: timeoutInSeconds));
         print("++++++++++++>>>=====");
         Response response = handleResponse(_response, uri);
@@ -176,22 +380,51 @@ class ApiClient extends GetxService {
       return Response(statusCode: -1, statusText: 'you are using vpn');
     } else {
       try {
-        print('====> GetX Base URL: $appBaseUrl');
-        print('====> GetX Call: $uri');
+        print('====> GetX Call : $uri');
         print(
-          '====> GetX Call: ${sharedPreferences.getString(ApiConstants.token)}',
+          '====> GetX Call userrrr: ${sharedPreferences.getString(ApiConstants.token)}',
         );
         print(
-          '====> GetX Body: ${sharedPreferences.getString(ApiConstants.profileid)}',
+          '====> GetX Body user get profile: ${sharedPreferences.getString(ApiConstants.profileid)}',
         );
+
+        Map<String, String> headers = {
+          'Accept': 'application/json',
+          'id': '${sharedPreferences.getString(ApiConstants.profileid)}',
+          'authorizationToken':
+              '${sharedPreferences.getString(ApiConstants.token)}',
+        };
         debugPrint('====> API Call: $uri\nHeader: $_mainHeadersMain');
-        print(' Majannaha headers $_mainHeadersMain');
+        print(' Mainnnnnnn headers $_mainHeadersMain');
         print(' url $uri');
         Http.Response _response = await Http.get(
-          Uri.parse(appBaseUrl! + uri),
-          headers: _mainHeadersMain,
+          Uri.parse(ApiConstants.baseUrl + uri),
+          headers: headers,
+
+          /// _mainHeadersMain,
         ).timeout(Duration(seconds: timeoutInSeconds));
         print(' Majannah headers $_mainHeadersMain');
+        debugPrint('====> API  Fund : - response data v${_response.body}');
+        return handleResponse(_response, uri);
+      } catch (e) {
+        return Response(statusCode: 1, statusText: noInternetMessage);
+      }
+    }
+  }
+
+  Future<Response> getApi(String uri) async {
+    if (await ApiChecker.isVpnActive()) {
+      return Response(statusCode: -1, statusText: 'you are using vpn');
+    } else {
+      try {
+        print('====> GetX Call : $uri');
+
+        print(' url $uri');
+        Http.Response _response = await Http.get(
+          Uri.parse(ApiConstants.baseUrl + uri),
+          headers: {"Accept": 'application/json'},
+        ).timeout(Duration(seconds: timeoutInSeconds));
+
         debugPrint('====> API  Fund : - response data v${_response.body}');
         return handleResponse(_response, uri);
       } catch (e) {
@@ -205,14 +438,16 @@ class ApiClient extends GetxService {
       return Response(statusCode: -1, statusText: 'you are using vpn');
     } else {
       try {
-        debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
-        print(' Majannaha headers $_mainHeaders');
+        // debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
+        // print(' Majannaha headers $_mainHeaders');
         print(' url $uri');
+        print(' header $_mainHeadersMain');
         Http.Response _response = await Http.get(
-          Uri.parse(appBaseUrl! + uri),
-          headers: _mainHeaders,
+          Uri.parse(ApiConstants.baseUrl + uri),
+          headers: _mainHeadersMain,
+          // _mainHeaders,
         ).timeout(Duration(seconds: timeoutInSeconds));
-        print(' Majannah headers $_mainHeaders');
+        //print(' Majannah headers $_mainHeaders');
         debugPrint('====> API  Fund : - response data v${_response.body}');
         return handleResponse(_response, uri);
       } catch (e) {

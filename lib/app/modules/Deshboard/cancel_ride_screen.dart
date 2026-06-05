@@ -1,15 +1,29 @@
-import 'package:evfual/app/modules/Deshboard/final_cancel_screen.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/data/controller/cancleride_controller.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/data/controller/booking_controller.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
 
-class CancelRideScreen extends StatelessWidget {
-  CancelRideScreen({super.key});
+class CancelRideScreen extends StatefulWidget {
+  final dynamic bookingId;
 
-  final CancelRideController controller = Get.put(CancelRideController());
+  const CancelRideScreen({super.key, required this.bookingId});
+
+  @override
+  State<CancelRideScreen> createState() => _CancelRideScreenState();
+}
+
+class _CancelRideScreenState extends State<CancelRideScreen> {
+  int? selected;
+
+  @override
+  void initState() {
+    super.initState();
+    print('Booking Id ${widget.bookingId}');
+    Get.find<BookingController>().cancelationListApi(context: context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +31,8 @@ class CancelRideScreen extends StatelessWidget {
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      backgroundColor: Colors.white,
+
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
@@ -25,56 +41,59 @@ class CancelRideScreen extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
         title: Text("Cancel Ride", style: PoppinsBold.copyWith()),
-        centerTitle: false,
       ),
 
-      body: Container(
-        width: width,
-        height: height,
-        color: Colors.white,
-        child: Column(
-          children: [
-            SizedBox(height: height * 0.02),
+      body: Column(
+        children: [
+          SizedBox(height: height * 0.02),
 
-            /// Question Text
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.05),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Why are you cancelling?",
-                  style: PoppinsReguler.copyWith(),
-                ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Why are you cancelling?",
+                style: PoppinsReguler.copyWith(),
               ),
             ),
+          ),
 
-            SizedBox(height: height * 0.02),
+          SizedBox(height: height * 0.02),
 
-            /// Reasons List
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: width * 0.04),
-                child: Obx(() {
-                  int selected = controller.selectedReason.value;
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+              child: GetBuilder<BookingController>(
+                builder: (controller) {
+                  if (controller.cancelationList.isEmpty) {
+                    return Center(child: PremiumBlurLoader());
+                  }
 
                   return ListView.builder(
-                    itemCount: controller.reasons.length,
+                    itemCount: controller.cancelationList.length,
                     itemBuilder: (context, index) {
                       return InkWell(
-                        onTap: () => controller.selectReason(index),
+                        onTap: () {
+                          setState(() {
+                            selected = index;
+                          });
+                        },
                         child: Row(
                           children: [
                             Radio<int>(
                               value: index,
                               groupValue: selected,
-                              onChanged: (value) {
-                                controller.selectReason(index);
-                              },
                               activeColor: const Color(0xFF1FA2C3),
+                              onChanged: (value) {
+                                setState(() {
+                                  selected = value;
+                                });
+                              },
                             ),
+
                             Expanded(
                               child: Text(
-                                controller.reasons[index],
+                                controller.cancelationList[index].name ?? "",
                                 style: PoppinsReguler.copyWith(),
                               ),
                             ),
@@ -83,51 +102,63 @@ class CancelRideScreen extends StatelessWidget {
                       );
                     },
                   );
-                }),
+                },
               ),
             ),
+          ),
+        ],
+      ),
 
-            /// Confirm Button
-            CustomPrimaryDyanamicButton(
-              text: "Confirm",
-              onTap: () {
-                print("Selected: ${controller.selectedReason.value}");
-                Get.to(
-                  Get.to(RideCancelledScreen()),
-                  transition: Transition.leftToRight,
-                  duration: Duration(milliseconds: 0),
+      /// Fixed Bottom Button
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(width * 0.05),
+          child: CustomPrimaryDyanamicButton(
+            text: "Confirm",
+            onTap: () {
+              /// Validation
+              if (selected == null) {
+                Get.snackbar(
+                  "Alert",
+                  "Please select cancellation reason",
+                  snackPosition: SnackPosition.BOTTOM,
                 );
-              },
-            ),
+                return;
+              }
 
-            // Padding(
-            //   padding: EdgeInsets.all(width * 0.05),
-            //   child: SizedBox(
-            //     width: width,
-            //     height: height * 0.065,
-            //     child: ElevatedButton(
-            //       style: ElevatedButton.styleFrom(
-            //         backgroundColor: const Color(0xFF1FA2C3),
-            //         shape: RoundedRectangleBorder(
-            //           borderRadius: BorderRadius.circular(30),
-            //         ),
-            //         elevation: 0,
-            //       ),
-            //       onPressed: () {
-            //         print("Selected: ${controller.selectedReason.value}");
-            //       },
-            //       child: Text(
-            //         "Confirm",
-            //         style: TextStyle(
-            //           fontSize: width * 0.045,
-            //           color: Colors.white,
-            //           fontWeight: FontWeight.w500,
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-          ],
+              try {
+                 showDialog(
+                      context:Get.context!,
+                      barrierDismissible: false,
+                      builder: (_) => PremiumBlurLoader(),
+                    );
+                Get.find<BookingController>().cancelRideApi(
+                  context: context,
+                  bookingid: widget.bookingId,
+
+                  reseonId: Get.find<BookingController>()
+                      .cancelationList[selected!]
+                      .id,
+                );
+              } catch (e) {
+                debugPrint('ride cancle Error: $e');
+              } finally {
+                if (Get.isDialogOpen ?? false) {
+                  Get.back();
+                }
+              }
+
+              // Get.find<BookingController>().cancelRideApi(
+              //   context: context,
+              //   bookingid: widget.bookingId,
+
+              //   /// index send karne ki jagah reason id bhejo
+              //   reseonId: Get.find<BookingController>()
+              //       .cancelationList[selected!]
+              //       .id,
+              // );
+            },
+          ),
         ),
       ),
     );

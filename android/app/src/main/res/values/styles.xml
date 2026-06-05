@@ -1,22 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- Launch Theme -->
-    <style name="LaunchTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <!-- Splash background -->
         <item name="android:windowBackground">@drawable/launch_background</item>
-
-        <!-- STATUS BAR COLOR -->
-        <item name="android:statusBarColor">#EB1D7B</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
-
-    <!-- Normal Theme -->
-    <style name="NormalTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">?android:colorBackground</item>
-
-        <!-- STATUS BAR COLOR -->
-        <item name="android:statusBarColor">#EB1D7B</item>
-        <item name="android:windowLightStatusBar">false</item>
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <!-- App background after splash -->
+        <item name="android:windowBackground">#21ADE3</item>
     </style>
-
 </resources>

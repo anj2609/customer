@@ -1,4 +1,10 @@
+import 'dart:developer';
+
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
 
 class FaqScreen extends StatefulWidget {
   const FaqScreen({Key? key}) : super(key: key);
@@ -10,26 +16,20 @@ class FaqScreen extends StatefulWidget {
 class _FaqScreenState extends State<FaqScreen> {
   int selectedIndex = 0;
 
-  final List<String> categories = [
-    "General",
-    "Account",
-    "Services",
-    "Ride",
-  ];
+  final List<String> categories = ["general", "account", "services", "ride"];
 
-  final List<Map<String, String>> faqList = [
-    {
-      "question": "What is My Ride?",
-      "answer":
-          "My Ride is a convenient ride-hailing service that allows you to book rides quickly and easily using your smartphone."
-    },
-    {"question": "How does My Ride work?", "answer": ""},
-    {"question": "Is My Ride free to use?", "answer": ""},
-    {"question": "Can I use My Ride offline?", "answer": ""},
-    {"question": "Is my data secure with My Ride?", "answer": ""},
-    {"question": "Can I export my My Ride data?", "answer": ""},
-    {"question": "How do i contact support?", "answer": ""},
-  ];
+  @override
+  void initState() {
+    super.initState();
+
+    /// First time load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.find<ProfileController>().getFaqList(
+        context: context,
+        type: categories[selectedIndex],
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +40,16 @@ class _FaqScreenState extends State<FaqScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const Icon(Icons.arrow_back, color: Colors.black),
+        leading: InkWell(
+          onTap: () {
+            Get.back();
+          },
+          child: Icon(Icons.arrow_back, color: ColorResources.blackcolor),
+        ),
         centerTitle: true,
         title: const Text(
           "FAQ",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
       ),
       body: Padding(
@@ -56,7 +58,7 @@ class _FaqScreenState extends State<FaqScreen> {
           children: [
             SizedBox(height: size.height * 0.02),
 
-            /// 🔍 Search Field
+            /// 🔍 Search Field (UI same)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
@@ -74,7 +76,6 @@ class _FaqScreenState extends State<FaqScreen> {
 
             SizedBox(height: size.height * 0.02),
 
-            /// 🏷 Category Chips
             SizedBox(
               height: 40,
               child: ListView.separated(
@@ -87,10 +88,21 @@ class _FaqScreenState extends State<FaqScreen> {
                       setState(() {
                         selectedIndex = index;
                       });
+
+                      String selectedCategory = categories[index];
+
+                      log('Selected category: $selectedCategory');
+
+                      Get.find<ProfileController>().getFaqList(
+                        context: context,
+                        type: selectedCategory.toLowerCase(),
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 8),
+                        horizontal: 18,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: selectedIndex == index
                             ? Colors.blue
@@ -98,7 +110,7 @@ class _FaqScreenState extends State<FaqScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        categories[index],
+                        categories[index].capitalizeFirst!,
                         style: TextStyle(
                           color: selectedIndex == index
                               ? Colors.white
@@ -114,41 +126,56 @@ class _FaqScreenState extends State<FaqScreen> {
 
             SizedBox(height: size.height * 0.02),
 
-            /// 📋 FAQ List
             Expanded(
-              child: ListView.builder(
-                itemCount: faqList.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ExpansionTile(
-                      tilePadding:
-                          const EdgeInsets.symmetric(horizontal: 16),
-                      childrenPadding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      title: Text(
-                        faqList[index]["question"]!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
+              child: GetBuilder<ProfileController>(
+                builder: (controller) {
+                  if (controller.isfqlLoading) {
+                    return  Center(child: PremiumBlurLoader());
+                  }
+
+
+                
+
+                  if (controller.faqList.isEmpty) {
+                    return const Center(child: Text("No FAQ Available"));
+                  }
+
+                  return ListView.builder(
+                    itemCount: controller.faqList.length,
+                    itemBuilder: (context, index) {
+                      final faq = controller.faqList[index];
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                      iconColor: Colors.black,
-                      collapsedIconColor: Colors.black,
-                      children: faqList[index]["answer"]!.isNotEmpty
-                          ? [
-                              Text(
-                                faqList[index]["answer"]!,
-                                style: const TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              )
-                            ]
-                          : [],
-                    ),
+                        child: ExpansionTile(
+                          tilePadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                          ),
+                          childrenPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          title: Text(
+                            faq.question ?? "",
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          iconColor: Colors.black,
+                          collapsedIconColor: Colors.black,
+                          children: (faq.answer ?? "").isNotEmpty
+                              ? [
+                                  Text(
+                                    faq.answer ?? "",
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
+                                ]
+                              : [],
+                        ),
+                      );
+                    },
                   );
                 },
               ),

@@ -1,10 +1,10 @@
 import 'dart:developer';
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:evfual/config/utils/apis/api_client.dart';
-import 'package:evfual/config/utils/constants.dart';
+import 'package:myrideuser/config/utils/apis/api_client.dart';
+import 'package:myrideuser/config/utils/constants.dart';
 
 class AuthRepo extends GetxService {
   final ApiClient apiClient;
@@ -12,57 +12,63 @@ class AuthRepo extends GetxService {
   AuthRepo({required this.apiClient, required this.sharedPreferences});
 
   /////========== Send  otp Api ======================///////
-  Future<Response> sendOtpApi({String? phone}) async {
-    log('resend  otp number $phone');
-    return apiClient.postData(ApiConstants.sendOtpUrl, {
-      "phone": phone,
-      "type": ApiConstants.UserRegister,
-      "user_type": ApiConstants.userType,
-    });
-  }
-   Future<Response> reSendOtp({String? phone, String? numOtp }) async {
-    log('resend  otp number $phone');
-    return apiClient.postData(ApiConstants.reSendOtp, {
-      "phone": phone,
-      "otp":numOtp,
-      "user_type": ApiConstants.userType,
+  Future<Response> sendOtpApi({
+    String? phone,
+    String? type,
+    String? deviceToken,
+    String? devicetype,
+  }) async {
+    log('send   otp number $phone');
+    return apiClient.postsignUpData(ApiConstants.sendOtpUrl, {
+      "phone": phone!.trim(),
+      "type": type.toString(),
+      "user_type": ApiConstants.customer,
+      "device_type": devicetype,
+      "device_token": deviceToken,
     });
   }
 
+  Future<Response> reSendOtp({String? phone, String? numOtp}) async {
+    log('resend  otp number $phone');
+    return apiClient.postsignUpData(ApiConstants.reSendOtp, {
+      "phone": phone,
+      "user_type": ApiConstants.customer,
+    });
+  }
 
-  ////re-send
+  Future<Response> logOut() async {
+    return apiClient.myridepostData(ApiConstants.logOutUrl, {});
+  }
 
   /////========== verify otp Api ======================///////
   Future<Response> verifyOtpApi({String? phone, String? otp}) async {
-    return apiClient.postData(ApiConstants.verityOtpUrl, {
+    return apiClient.postsignUpData(ApiConstants.verityOtpUrl, {
       "phone": phone,
       "otp": otp,
-      "user_type": ApiConstants.userType,
+      "user_type": ApiConstants.customer,
     });
   }
+
   Future<Response> fillPersonalApi({
-  String? name,
-  String? email,
-  String? gender,
-  String? dob,
-  File? profile_image,
-}) async {
+    String? name,
+    String? email,
+    String? gender,
+    String? dob,
+    File? profile_image,
+  }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    dynamic userId = prefs.getString(ApiConstants.profileid);
 
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  dynamic userId = prefs.getString(ApiConstants.profileid);
-
-  return apiClient.postMultipartData(
-    ApiConstants.basicInfo,
-    {
+    return apiClient.postMultipartData(ApiConstants.basicInfo, {
       "name": name ?? "",
       "email": email ?? "",
       "gender": gender ?? "",
       "date_of_birth": dob ?? "",
-      "user_id": userId ?? "",
-    },
-    profile_image, // 👈 file yaha bhejna hai
-  );
-}
+      "user_id": ApiConstants.userIdSocial.isNotEmpty
+          ? ApiConstants.userIdSocial
+          : userId ?? "",
+    }, profile_image);
+  }
 
   Future<Response> usersignup({String? evnumber, String? passsowrd}) async {
     return apiClient.postData(ApiConstants.loginapi, {
@@ -95,9 +101,23 @@ class AuthRepo extends GetxService {
     });
   }
 
+  //////===================== Social Signup - SingIn =================================//////////
+
+  Future<Response> socialSignup({
+    required String provider,
+    required String idToken,
+  }) async {
+    return apiClient.postsignUpData(ApiConstants.socialAuth, {
+      "provider": provider,
+      "id_token": idToken,
+      "user_type": ApiConstants.customer,
+    });
+  }
+
+  //driveraddress
   Future<bool> saveUserToken(String token) async {
     apiClient.token = token.toString();
-    apiClient.updateHeader(token.toString());
+    // ///apiClient.updateHeader(token.toString());
     return await sharedPreferences.setString(
       ApiConstants.token,
       token.toString(),

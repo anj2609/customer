@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/dimensions.dart';
-import 'package:evfual/config/utils/style.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/dimensions.dart';
+import 'package:myrideuser/config/utils/style.dart';
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {

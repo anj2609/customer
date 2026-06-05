@@ -1,8 +1,8 @@
-import 'package:evfual/app/modules/chats/chat_screen.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/dimensions.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/dimensions.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -164,11 +164,7 @@ class DriverProfileScreen extends StatelessWidget {
                 icons: Icons.message,
                 colors: ColorResources.blueeebutton,
                 onTap: () {
-                  Get.to(
-                    Get.to(ChatScreen()),
-                    transition: Transition.leftToRight,
-                    duration: Duration(milliseconds: 0),
-                  );
+                 Get.toNamed(RouteHelper.getchatScreenScreen());
                 },
               ),
             ),

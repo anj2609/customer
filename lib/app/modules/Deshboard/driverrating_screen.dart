@@ -1,9 +1,35 @@
-import 'package:evfual/app/modules/Deshboard/tipscreen_screen.dart';
+import 'package:myrideuser/config/utils/constants.dart';
+import 'package:myrideuser/data/controller/booking_controller.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myrideuser/widgets/custom_loader.dart';
 
 class DriverRatingScreen extends StatefulWidget {
-  const DriverRatingScreen({super.key});
+  final String bookingid;
+  final String drivername;
+  final String details;
+  final String estimatetime;
+  final String distance;
+  final String distancekillo;
+  final String basefare;
+  final String discount;
+  final String total;
+  final String profile;
+
+  DriverRatingScreen({
+    super.key,
+    required this.bookingid,
+    required this.drivername,
+    required this.details,
+    required this.estimatetime,
+    required this.distance,
+    required this.distancekillo,
+    required this.basefare,
+    required this.discount,
+    required this.total,
+    required this.profile,
+  });
 
   @override
   State<DriverRatingScreen> createState() => _DriverRatingScreenState();
@@ -46,15 +72,25 @@ class _DriverRatingScreenState extends State<DriverRatingScreen> {
                 /// CLOSE ICON
                 Row(children: const [Icon(Icons.close)]),
 
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
 
                 /// DRIVER IMAGE
-                const CircleAvatar(
-                  radius: 45,
-                  backgroundImage: NetworkImage(
-                    "https://i.pravatar.cc/150?img=12",
-                  ),
-                ),
+                widget.profile.isNotEmpty
+                    ? CircleAvatar(
+                        radius: 45,
+                        backgroundImage: NetworkImage(
+                          "${ApiConstants.imageurl}${widget.profile}",
+                        ),
+                        // NetworkImage(
+                        //   "https://i.pravatar.cc/150?img=12",
+                        // ),
+                      )
+                    : CircleAvatar(
+                        radius: 45,
+                        backgroundImage: NetworkImage(
+                          "https://i.pravatar.cc/150?img=12",
+                        ),
+                      ),
 
                 const SizedBox(height: 15),
 
@@ -90,11 +126,11 @@ class _DriverRatingScreenState extends State<DriverRatingScreen> {
                   ),
                   child: Column(
                     children: const [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [Text("Ride"), Text("Economy (Non-AC)")],
-                      ),
-                      SizedBox(height: 10),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   children: [Text("Ride"), Text("Economy (Non-AC)")],
+                      // ),
+                      // SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [Text("Payment"), Text("MyRide Wallet")],
@@ -112,16 +148,22 @@ class _DriverRatingScreenState extends State<DriverRatingScreen> {
                     border: Border.all(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Column(
+                  child: Column(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [Text("Trip Fare"), Text("₹ 560")],
+                        children: [
+                          Text("Trip Fare"),
+                          Text("₹ ${widget.basefare}"),
+                        ],
                       ),
                       SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [Text("Discount (20%)"), Text("- ₹ 112")],
+                        children: [
+                          Text("Discount (20%)"),
+                          Text("- ₹ ${widget.discount}"),
+                        ],
                       ),
                       Divider(),
                       Row(
@@ -132,7 +174,7 @@ class _DriverRatingScreenState extends State<DriverRatingScreen> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            "₹ 448",
+                            "₹ ${widget.total}",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -141,48 +183,115 @@ class _DriverRatingScreenState extends State<DriverRatingScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                // const SizedBox(height: 10),
 
-                const Text(
-                  "Hide details",
-                  style: TextStyle(color: Colors.blue),
-                ),
+                // const Text(
+                //   "Hide details",
+                //   style: TextStyle(color: Colors.blue),
+                // ),
 
-                const SizedBox(height: 18),
+                // const SizedBox(height: 18),
 
                 /// GIVE RATE BUTTON
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Get.to(
-                        Get.to(TipScreen()),
-                        transition: Transition.leftToRight,
-                        duration: Duration(milliseconds: 0),
+                ///
+                ///
+                CustomPrimaryButton(
+                  text: "Give Rate",
+                  onTap: () {
+                    if (selectedRating == 0) {
+                      Get.snackbar(
+                        "Rating Required",
+                        "Please select a rating before continuing",
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
                       );
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(builder: (_) => const TipScreen()),
-                      // );
-                    },
-                    // onPressed: selectedRating == 0
-                    //     ? null
-                    //     : () {
-                    //         print("Rating Given: $selectedRating");
-                    //       },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff19A7CE),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text(
-                      "Give Rate",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
+                      return;
+                    }
+
+                    print(
+                      "Rating Given: ${widget.bookingid} ${selectedRating}",
+                    );
+
+                    try {
+                      showDialog(
+                        context: Get.context!,
+                        barrierDismissible: false,
+                        builder: (_) => PremiumBlurLoader(),
+                      );
+                      Get.find<BookingController>().rateForDriver(
+                        context: context,
+                        bookingid: widget.bookingid,
+                        rateId: selectedRating,
+                      );
+                    } catch (e) {
+                      debugPrint('rating Error: $e');
+                    } finally {
+                      if (Get.isDialogOpen ?? false) {
+                        Get.back();
+                      }
+                    }
+
+                    //       // Get.to(
+                    //       //   const TipScreen(),
+                    //       //   transition: Transition.leftToRight,
+                    //       //   duration: const Duration(milliseconds: 300),
+                    //       // );
+                    //       // Get.to(
+                    //       //   Get.to(TipScreen()),
+                    //       //   transition: Transition.leftToRight,
+                    //       //   duration: Duration(milliseconds: 0),
+                    //       // );
+                  },
                 ),
+
+                // SizedBox(
+                //   width: double.infinity,
+                //   height: 50,
+                //   child: ElevatedButton(
+                //     onPressed: () {
+                //       if (selectedRating == 0) {
+                //         Get.snackbar(
+                //           "Rating Required",
+                //           "Please select a rating before continuing",
+                //           snackPosition: SnackPosition.BOTTOM,
+                //           backgroundColor: Colors.red,
+                //           colorText: Colors.white,
+                //         );
+                //         return;
+                //       }
+
+                //       print("Rating Given: $selectedRating");
+                //        Get.find<BookingController>().rateForDriver(
+                //     context: context,
+                //     bookingid: widget.bookingid,
+                //     rateId:selectedRating,
+                //   );
+
+                //       // Get.to(
+                //       //   const TipScreen(),
+                //       //   transition: Transition.leftToRight,
+                //       //   duration: const Duration(milliseconds: 300),
+                //       // );
+                //       // Get.to(
+                //       //   Get.to(TipScreen()),
+                //       //   transition: Transition.leftToRight,
+                //       //   duration: Duration(milliseconds: 0),
+                //       // );
+                //     },
+
+                //     style: ElevatedButton.styleFrom(
+                //       backgroundColor: const Color(0xff19A7CE),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(30),
+                //       ),
+                //     ),
+                //     child: const Text(
+                //       "Give Rate",
+                //       style: TextStyle(fontSize: 16),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),

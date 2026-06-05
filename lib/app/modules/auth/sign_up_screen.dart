@@ -1,9 +1,9 @@
 
-import 'package:evfual/config/route.dart';
-import 'package:evfual/config/utils/colors.dart';
-import 'package:evfual/config/utils/dimensions.dart';
-import 'package:evfual/config/utils/style.dart';
-import 'package:evfual/widgets/custom_button.dart';
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/dimensions.dart';
+import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -57,12 +57,12 @@ class LatestMyRideLoginScreen extends StatelessWidget {
                 onTap: () {},
               ),
 
-              CustomSocialButton(
-                text: "Continue with Apple",
-                images: 'assets/images/apple.png',
-                iconColor: Colors.black,
-                onTap: () {},
-              ),
+              // CustomSocialButton(
+              //   text: "Continue with Apple",
+              //   images: 'assets/images/apple.png',
+              //   iconColor: Colors.black,
+              //   onTap: () {},
+              // ),
 
               CustomSocialButton(
                 text: "Continue with Facebook",
@@ -71,13 +71,12 @@ class LatestMyRideLoginScreen extends StatelessWidget {
                 onTap: () {},
               ),
 
-              CustomSocialButton(
-                text: "Continue with X",
-                images: 'assets/images/twitter.png',
-                // icon: Icons.close, // No official X icon in Material
-                iconColor: Colors.black,
-                onTap: () {},
-              ),
+              // CustomSocialButton(
+              //   text: "Continue with X",
+              //   images: 'assets/images/twitter.png',
+              //   iconColor: Colors.black,
+              //   onTap: () {},
+              // ),
 
               //const Spacer(),
                SizedBox(height: Dimensions.spacingSize10),
@@ -86,11 +85,7 @@ class LatestMyRideLoginScreen extends StatelessWidget {
                 text: "Sign up",
                 onTap: () {
                   Get.toNamed(RouteHelper.getuserSignunpScreenRoute());
-                  // Get.to(
-                  //   UserSignInpScreen(),
-                  //   transition: Transition.leftToRight,
-                  //   duration: Duration(milliseconds: 0),
-                  // );
+                 
                 },
               ),
 
@@ -100,12 +95,8 @@ class LatestMyRideLoginScreen extends StatelessWidget {
               CustomSecondaryButton(
                 text: "Sign in",
                 onTap: () {
+                  Get.toNamed(RouteHelper.getLoginRoute());
 
-                  // Get.to(
-                  //   LoginScreen(),
-                  //   transition: Transition.leftToRight,
-                  //   duration: Duration(milliseconds: 0),
-                  // );
                 },
               ),
 
