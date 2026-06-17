@@ -70,16 +70,13 @@ class RouteHelper {
   //SearchLocationScreen
   static getSplashRoute() => splash;
   static getOnboardingRoute() => onbordingscreen;
-  static getOtpScreenRoute(String? phoneNumber, String? type, String? otp) {
-    print('testing mobile number $phoneNumber');
+  static getOtpScreenRoute(String? phoneNumber, String? type) {
     Get.toNamed(
       otpScreen,
       arguments: {
         "phone": phoneNumber ?? "",
         "type": type ?? "",
-        "otp": otp ?? "",
       },
-      // arguments: phoneNumber.toString()
     );
   }
 
@@ -128,7 +125,6 @@ class RouteHelper {
         return OtpScreen(
           phoneNumber: args["phone"] ?? "",
           type: args["type"] ?? "",
-          otp: args['otp'] ?? "",
         );
       },
       //page: () => OtpScreen(phoneNumber: Get.arguments),

@@ -2,42 +2,54 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 
-
-/////=================================  customer loader ==========================================
+///// ================================= Premium Blur Loader ==========================================
 
 class PremiumBlurLoader extends StatelessWidget {
   const PremiumBlurLoader({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 100,
+        height: 100,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color.fromRGBO(0, 0, 0, 0.08),
+              blurRadius: 24,
+              spreadRadius: 2,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: SpinKitFadingCircle(
+          color: ColorResources.blueeebutton,
+          size: 40,
+        ),
+      ),
+    );
+  }
+}
+
+///// ================================= Full-Screen Blur Overlay ==========================================
+
+class PremiumBlurOverlay extends StatelessWidget {
+  const PremiumBlurOverlay({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Positioned.fill(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Container(
-          color: Colors.black.withOpacity(0.2),
-          child: Center(
-            child: Container(
-              width: 140,
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  SpinKitThreeBounce(color: Colors.blue, size: 24),
-                  SizedBox(height: 14),
-                  Text(
-                    "Loading...",
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          color: const Color.fromRGBO(0, 0, 0, 0.15),
+          child: const PremiumBlurLoader(),
         ),
       ),
     );

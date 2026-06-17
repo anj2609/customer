@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -517,7 +517,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                   boxShadow: [
                     BoxShadow(
                       blurRadius: 10,
-                      color: Colors.black.withOpacity(.08),
+                      color: Colors.black.withValues(alpha: 0.08),
                     ),
                   ],
                 ),
@@ -1261,7 +1261,7 @@ class _RippleLoaderState extends State<RippleLoader>
                 height: 60 + (value * 20),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.blue.withOpacity(1 - value)),
+                  border: Border.all(color: Colors.blue.withValues(alpha: 1 - value)),
                 ),
               ),
 

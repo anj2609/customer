@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -387,7 +387,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: GetBuilder<ProfileController>(
                       builder: (controller) {
                         if (controller.isLoadings == true) {
-                          return Center(child: PremiumBlurLoader());
+                          return Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: ColorResources.blueeebutton,
+                              ),
+                            ),
+                          );
                         }
 
                         if (controller.addressList.isEmpty) {

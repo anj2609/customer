@@ -1,4 +1,5 @@
-﻿import 'package:myrideuser/config/utils/constants.dart';
+import 'package:flutter/gestures.dart';
+import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/dimensions.dart';
 import 'package:myrideuser/data/controller/auth_controller.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/style.dart';
 import 'package:get/get.dart';
+import 'package:myrideuser/app/modules/auth/terms_and_conditions_screen.dart';
 import 'package:myrideuser/widgets/custom_loader.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -186,7 +188,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     text: "Terms & Conditions.",
                                     style: PoppinsMedium.copyWith(
                                       color: ColorResources.blueeebutton,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: ColorResources.blueeebutton,
                                     ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Get.to(
+                                          () => const TermsAndConditionsScreen(),
+                                          transition: Transition.rightToLeft,
+                                          duration: const Duration(milliseconds: 300),
+                                        );
+                                      },
                                   ),
                                 ],
                               ),

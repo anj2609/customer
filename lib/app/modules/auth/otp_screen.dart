@@ -9,19 +9,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myrideuser/widgets/custom_loader.dart';
 import 'package:pinput/pinput.dart';
-import 'package:sms_autofill/sms_autofill.dart';
 
 class OtpScreen extends StatefulWidget {
-  String? type;
-  String? phoneNumber;
-  String? otp;
-  OtpScreen({super.key, this.type, this.phoneNumber, this.otp});
+  final String? type;
+  final String? phoneNumber;
+  const OtpScreen({super.key, this.type, this.phoneNumber});
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
+class _OtpScreenState extends State<OtpScreen> {
   int _secondsRemaining = 28;
   Timer? _timer;
   bool _enableResend = false;
@@ -31,20 +29,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   @override
   void initState() {
     super.initState();
-    listenForCode();
     startTimer();
-    print('Otp:::::${widget.otp}');
-    _otpController.text = widget.otp.toString();
-    if (_otpController.text.length == 4) {
-      Future.delayed(Duration.zero, () {
-        Get.find<AuthController>().verifyOtpApi(
-          mobileNumber: widget.phoneNumber.toString(),
-          numOfOtp: _otpController.text,
-          type: widget.type?.trim() ?? "",
-          context: context,
-        );
-      });
-    }
   }
 
   void startTimer() {
@@ -71,27 +56,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   }
 
   @override
-  void codeUpdated() {
-    _otpController.text = code ?? "";
-
-    if (_otpController.text.length == 4) {
-      goToNextScreen();
-    }
-  }
-
-  void goToNextScreen() {
-    Get.find<AuthController>().verifyOtpApi(
-      mobileNumber: widget.phoneNumber.toString(),
-      numOfOtp: _otpController.text.trim(),
-      type: widget.type.toString(),
-
-      context: context,
-    );
-  }
-
-  @override
   void dispose() {
-    cancel();
     _timer?.cancel();
     _otpController.dispose();
     super.dispose();
@@ -133,7 +98,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
               const SizedBox(height: 10),
 
               Text(
-                "Enter OTP Code 🔐",
+                "Enter OTP Code",
                 style: PoppinsSemiBold.copyWith(
                   color: ColorResources.blackcolor11,
                 ),

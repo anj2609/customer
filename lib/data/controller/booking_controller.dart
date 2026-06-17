@@ -148,12 +148,12 @@ class BookingController extends GetxController implements GetxService {
       } else {
        // EasyLoading.dismiss();
          AnimatedTopToast.show(
-        context: context,
-        message:
-            response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.check_circle_rounded,
-      );
+         context: context,
+         message:
+             _getUserFriendlyMessage(response.body['message'] ?? "Oops! Something went wrong. Please try again."),
+         backgroundColor: ColorResources.textColorBaclColor,
+         icon: Icons.error_outline,
+       );
         // Get.snackbar(
         //   'Error',
         //   response.body['error'] ?? "Something went wrong",
@@ -165,9 +165,9 @@ class BookingController extends GetxController implements GetxService {
        AnimatedTopToast.show(
         context: context,
         message:
-            response.body['message'] ?? "Something went wrong",
+            _getUserFriendlyMessage(response.body['message'] ?? "Please check your details and try again."),
         backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
     } else {
      // EasyLoading.dismiss();
@@ -320,6 +320,18 @@ class BookingController extends GetxController implements GetxService {
     if (msg.contains('server') || msg.contains('internal')) {
       return "Our servers are busy. Please try again in a moment.";
     }
+    if (msg.contains('data not found') || msg.contains('no data') || msg.contains('not found')) {
+      return "No results available at the moment.";
+    }
+    if (msg.contains('network') || msg.contains('connection') || msg.contains('timeout')) {
+      return "Please check your internet connection and try again.";
+    }
+    if (msg.contains('validation') || msg.contains('invalid')) {
+      return "Please check your details and try again.";
+    }
+    if (msg.contains('token') && msg.contains('expired')) {
+      return "Your session has expired. Please log in again.";
+    }
 
     // If the message looks like a proper sentence (has spaces), show it as-is
     if (backendMessage.contains(' ') && !backendMessage.contains('_')) {
@@ -328,7 +340,7 @@ class BookingController extends GetxController implements GetxService {
 
     // If it looks like a backend field name (has underscores), make it generic
     if (backendMessage.contains('_')) {
-      return "Something went wrong. Please try again.";
+      return "Oops! Something went wrong. Please try again.";
     }
 
     return backendMessage;
@@ -505,9 +517,9 @@ update();
        AnimatedTopToast.show(
         context: context,
         message:
-            response.body['message'] ?? "Something went wrong",
+            "We're having trouble connecting. Please try again shortly.",
         backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
     } else {}
 
@@ -545,9 +557,9 @@ update();
        AnimatedTopToast.show(
         context: context,
         message:
-            response.body['message'] ?? "Something went wrong",
+            "We're having trouble connecting. Please try again shortly.",
         backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
     } else {}
 
@@ -686,9 +698,9 @@ update();
        AnimatedTopToast.show(
         context: context,
         message:
-            response.body['message'] ?? "Something went wrong",
+            "Unable to find nearby drivers. Please try again.",
         backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
     } else {}
 

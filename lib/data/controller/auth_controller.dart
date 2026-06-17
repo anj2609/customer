@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -49,6 +49,28 @@ class AuthController extends GetxController implements GetxService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString("device_token", deviceToken ?? "");
     await prefs.setString("device_type", deviceType ?? "");
+  }
+
+  /// Converts raw backend error messages to user-friendly text
+  String _sanitizeBackendMessage(String? rawMessage, String fallback) {
+    if (rawMessage == null || rawMessage.isEmpty) return fallback;
+    final msg = rawMessage.toLowerCase().trim();
+    if (msg.contains('data not found') || msg.contains('no data') || msg == 'not found') {
+      return fallback;
+    }
+    if (msg.contains('server') || msg.contains('internal') || msg.contains('exception')) {
+      return "We're having trouble connecting. Please try again.";
+    }
+    if (msg.contains('unauthorized') || msg.contains('unauthenticated')) {
+      return "Your session has expired. Please log in again.";
+    }
+    if (msg.contains('network') || msg.contains('connection') || msg.contains('timeout')) {
+      return "Please check your internet connection and try again.";
+    }
+    if (rawMessage.contains(' ') && !rawMessage.contains('_')) {
+      return rawMessage;
+    }
+    return fallback;
   }
 
   Future<void> loadSavedDeviceData() async {
@@ -166,9 +188,9 @@ class AuthController extends GetxController implements GetxService {
   AnimatedTopToast.show(
         context: context,
         message:
-             response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.blueeebutton,
-        icon: Icons.check_circle_rounded,
+             "We're having trouble connecting. Please try again shortly.",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
       );
       // Get.snackbar(
       //   '',
@@ -217,18 +239,18 @@ class AuthController extends GetxController implements GetxService {
        AnimatedTopToast.show(
         context: context,
         message:
-             response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+             _sanitizeBackendMessage(response.body['message'], "Unable to sign in. Please try again."),
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
       );
     } else if (response.statusCode == 422) {
      //// EasyLoading.dismiss();
       AnimatedTopToast.show(
         context: context,
         message:
-             response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+             _sanitizeBackendMessage(response.body['message'], "Please check your details and try again."),
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
       );
     } else {
    ///   EasyLoading.dismiss();
@@ -266,7 +288,6 @@ class AuthController extends GetxController implements GetxService {
       RouteHelper.getOtpScreenRoute(
         phone,
         ApiConstants.UserLogin,
-        loginResp.body['data']['otp'].toString(),
       );
       return;
     }
@@ -306,8 +327,7 @@ class AuthController extends GetxController implements GetxService {
       if (regResp.body != null && regResp.body['code'] == '200') {
         AnimatedTopToast.show(
           context: context,
-          message:
-              '${regResp.body['message']}  ${regResp.body['data']['otp']} \u{1F389}',
+          message: "OTP sent successfully.",
           backgroundColor: ColorResources.appColor,
           icon: Icons.check_circle_rounded,
         );
@@ -315,7 +335,6 @@ class AuthController extends GetxController implements GetxService {
         RouteHelper.getOtpScreenRoute(
           phone,
           ApiConstants.UserRegister,
-          regResp.body['data']['otp'].toString(),
         );
         return;
       }
@@ -353,8 +372,7 @@ class AuthController extends GetxController implements GetxService {
 
       AnimatedTopToast.show(
         context: context,
-        message:
-            "${response.body['message']}  ${response.body['data']['otp']} 🎉",
+        message: "OTP sent successfully.",
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
@@ -363,7 +381,6 @@ class AuthController extends GetxController implements GetxService {
       RouteHelper.getOtpScreenRoute(
         mobileNumber,
         type,
-        response.body['data']['otp'].toString(),
       );
     } else if (response.statusCode == 500) {
      // await EasyLoading.dismiss();
@@ -378,9 +395,9 @@ class AuthController extends GetxController implements GetxService {
        AnimatedTopToast.show(
         context: context,
         message:
-           response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+           "Unable to send verification code. Please try again.",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
       );
     } else {
      // await EasyLoading.dismiss();
@@ -450,8 +467,7 @@ class AuthController extends GetxController implements GetxService {
 
       AnimatedTopToast.show(
         context: context,
-        message:
-           "${response.body['message']}  ${response.body['data']['otp']} 🎉",
+        message: "OTP resent successfully.",
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
@@ -460,8 +476,7 @@ class AuthController extends GetxController implements GetxService {
 
       AnimatedTopToast.show(
         context: context,
-        message:
-           "${response.body['message']}",
+        message: "Unable to resend OTP. Please try again.",
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
@@ -498,12 +513,12 @@ class AuthController extends GetxController implements GetxService {
        AnimatedTopToast.show(
         context: context,
         message:
-            response.body['message'] ?? "Logout Successfully",
+            _sanitizeBackendMessage(response.body['message'], "Logged out successfully."),
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
 
-      // 🔥 Remove all previous routes
+      // Remove all previous routes
       Get.offAllNamed(RouteHelper.getLoginRoute());
     } else if (response.statusCode == 500) {
     //  await EasyLoading.dismiss();
@@ -511,9 +526,9 @@ class AuthController extends GetxController implements GetxService {
       AnimatedTopToast.show(
         context: context,
         message:
-            response.body['message'] ?? "Logout Successfully",
-        backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+            _sanitizeBackendMessage(response.body['message'], "Unable to log out. Please try again."),
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
       );
     } else {
      // await EasyLoading.dismiss();
@@ -543,7 +558,7 @@ class AuthController extends GetxController implements GetxService {
       AnimatedTopToast.show(
         context: context,
         message:
-            response.body['message'] ,
+            _sanitizeBackendMessage(response.body['message'], "Verified successfully."),
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
@@ -573,17 +588,17 @@ class AuthController extends GetxController implements GetxService {
       AnimatedTopToast.show(
         context: context,
         message:
-            response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.appColor,
-        icon: Icons.check_circle_rounded,
+            _sanitizeBackendMessage(response.body['message'], "Verification failed. Please check your code and try again."),
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
       );
     } else {
      AnimatedTopToast.show(
         context: context,
         message:
-            response.body['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.appColor,
-        icon: Icons.check_circle_rounded,
+            _sanitizeBackendMessage(response.body['message'], "Verification failed. Please check your code and try again."),
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
       );
       
     }
@@ -626,7 +641,7 @@ class AuthController extends GetxController implements GetxService {
       AnimatedTopToast.show(
         context: context,
         message:
-            "${response.body['message']}",
+            _sanitizeBackendMessage(response.body['message'], "Profile updated successfully."),
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
@@ -646,18 +661,18 @@ class AuthController extends GetxController implements GetxService {
        AnimatedTopToast.show(
         context: context,
         message:
-             "Something went wrong",
+             "Unable to save your details. Please try again.",
         backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
     } else {
       
         AnimatedTopToast.show(
         context: context,
         message:
-            "Something went wrong",
+            "Unable to save your details. Please try again.",
         backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
     }
     //await EasyLoading.dismiss();
@@ -691,7 +706,7 @@ class AuthController extends GetxController implements GetxService {
         'email': email ?? '',
       });
 
-      /// 🔹 Files
+      /// Files
       if (evrccopy != null) {
         request.files.add(
           await http.MultipartFile.fromPath('ev_rc_copy', evrccopy),
@@ -745,7 +760,7 @@ class AuthController extends GetxController implements GetxService {
           );
         }
       }
-      /// ❌ SERVER ERROR
+      /// SERVER ERROR
       else {
         Get.snackbar(
           'Error',
@@ -761,7 +776,7 @@ class AuthController extends GetxController implements GetxService {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-      debugPrint("Exception 👉 $e");
+      debugPrint("Exception: $e");
     }
   }
 
@@ -874,7 +889,7 @@ class AuthController extends GetxController implements GetxService {
       EasyLoading.dismiss();
       Get.snackbar(
         'Error',
-        response.body['message'],
+        _sanitizeBackendMessage(response.body['message'], "Verification failed. Please try again."),
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

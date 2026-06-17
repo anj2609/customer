@@ -93,6 +93,36 @@ class ProfileController extends GetxController implements GetxService {
       customerWalletAmount();
     });
   }
+
+  /// Converts raw backend error messages to user-friendly text
+  String _sanitizeBackendMessage(String? rawMessage, String fallback) {
+    if (rawMessage == null || rawMessage.isEmpty) return fallback;
+    final msg = rawMessage.toLowerCase().trim();
+    if (msg.contains('data not found') || msg.contains('no data') || msg == 'not found') {
+      return fallback;
+    }
+    if (msg.contains('server') || msg.contains('internal') || msg.contains('exception')) {
+      return "We're having trouble connecting. Please try again.";
+    }
+    if (msg.contains('unauthorized') || msg.contains('unauthenticated')) {
+      return "Your session has expired. Please log in again.";
+    }
+    if (msg.contains('network') || msg.contains('connection') || msg.contains('timeout')) {
+      return "Please check your internet connection and try again.";
+    }
+    // If it's a reasonable sentence, show it
+    if (rawMessage.contains(' ') && !rawMessage.contains('_')) {
+      return rawMessage;
+    }
+    return fallback;
+  }
+
+  /// Returns true if the backend response message is just 'data not found' — not a real error
+  bool _isDataNotFoundResponse(dynamic body) {
+    if (body == null || body is! Map) return false;
+    final msg = (body['message'] ?? '').toString().toLowerCase().trim();
+    return msg.contains('data not found') || msg.contains('no data') || msg == 'not found';
+  }
   // @override
   // void onInit() {
   //   super.onInit();
@@ -139,10 +169,13 @@ class ProfileController extends GetxController implements GetxService {
           log("Name: ${userData!.email}");
           log("Email: ${profileimagee}");
         } else {
-          Get.snackbar("Error", body['message'] ?? "Something went wrong");
+          // Silently ignore 'data not found' — profile may just be empty
+          if (!_isDataNotFoundResponse(body)) {
+            Get.snackbar("Notice", _sanitizeBackendMessage(body['message'], "Unable to load your profile. Please try again."));
+          }
         }
       } else {
-        Get.snackbar("Error", "Server Error: ${response.statusCode}");
+        Get.snackbar("Notice", "We're having trouble connecting. Please try again.");
       }
     } catch (e) {
       // /Get.snackbar("Error", e.toString());
@@ -208,9 +241,9 @@ class ProfileController extends GetxController implements GetxService {
       /// await EasyLoading.dismiss();
       AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       rethrow;
     }
@@ -221,7 +254,7 @@ class ProfileController extends GetxController implements GetxService {
     if (body['code'] == '200') {
       AnimatedTopToast.show(
         context: context,
-        message: "${response.body['message'] ?? "Updated Successfully"}",
+        message: _sanitizeBackendMessage(response.body['message'], "Updated successfully."),
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
@@ -241,9 +274,9 @@ class ProfileController extends GetxController implements GetxService {
     } else {
       AnimatedTopToast.show(
         context: context,
-        message: response.body['message'] ?? "Something went wrong",
+        message: _sanitizeBackendMessage(response.body['message'], "Oops! Something went wrong. Please try again."),
         backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       // await EasyLoading.dismiss();
       // print('kkkk${response.body}');
@@ -307,7 +340,7 @@ class ProfileController extends GetxController implements GetxService {
       // );
       AnimatedTopToast.show(
         context: context,
-        message: "${body['message'] ?? "Updated Successfully"}",
+        message: _sanitizeBackendMessage(body['message'], "Updated successfully."),
         backgroundColor: ColorResources.blueeebutton,
         icon: Icons.check_circle_rounded,
       );
@@ -382,7 +415,7 @@ class ProfileController extends GetxController implements GetxService {
       // );
       AnimatedTopToast.show(
         context: context,
-        message: "${body['message'] ?? "Updated Successfully"}",
+        message: _sanitizeBackendMessage(body['message'], "Updated successfully."),
         backgroundColor: ColorResources.blueeebutton,
         icon: Icons.check_circle_rounded,
       );
@@ -416,7 +449,7 @@ class ProfileController extends GetxController implements GetxService {
   }) async {
     // EasyLoading.show(status: "Please wait...");
 
-    /// ✅ BottomSheet close
+    /// BottomSheet close
     Get.back();
 
     addressList.removeAt(index);
@@ -434,7 +467,7 @@ class ProfileController extends GetxController implements GetxService {
         getAddressCustomer(context: context);
         AnimatedTopToast.show(
           context: context,
-          message: body['message'] ?? "Deleted Successfully",
+          message: _sanitizeBackendMessage(body['message'], "Deleted successfully."),
           backgroundColor: ColorResources.blueeebutton,
           icon: Icons.check_circle_rounded,
         );
@@ -534,7 +567,7 @@ class ProfileController extends GetxController implements GetxService {
       if (body['code'].toString() == '200') {
         AnimatedTopToast.show(
           context: context,
-          message: body['message'] ?? "Updated Successfully",
+          message: _sanitizeBackendMessage(body['message'], "Updated successfully."),
           backgroundColor: ColorResources.blueeebutton,
           icon: Icons.check_circle_rounded,
         );
@@ -587,21 +620,7 @@ class ProfileController extends GetxController implements GetxService {
           }
         } else {
           addressList.clear();
-
-          // Get.snackbar(
-          //   '',
-          //   body['message'] ?? "Something went wrong",
-          //   backgroundColor: ColorResources.textColorRed,
-          //   colorText: Colors.white,
-          //   snackPosition: SnackPosition.TOP,
-          // );
-
-          AnimatedTopToast.show(
-            context: context,
-            message: body['message'] ?? "Something went wrong",
-            backgroundColor: ColorResources.textdetailsColor,
-            icon: Icons.check_circle_rounded,
-          );
+          // Silently handle — the UI will show "No Address" empty state
         }
 
         isLoadings = false;
@@ -665,9 +684,9 @@ class ProfileController extends GetxController implements GetxService {
       //// await EasyLoading.dismiss();
       AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textdetailsColor,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       rethrow;
     }
@@ -677,7 +696,7 @@ class ProfileController extends GetxController implements GetxService {
     if (body['code'].toString() == '200') {
       AnimatedTopToast.show(
         context: context,
-        message: "${body['message'] ?? "Updated Successfully"}",
+        message: _sanitizeBackendMessage(body['message'], "Updated successfully."),
         backgroundColor: ColorResources.blueeebutton,
         icon: Icons.check_circle_rounded,
       );
@@ -698,9 +717,9 @@ class ProfileController extends GetxController implements GetxService {
     } else {
       AnimatedTopToast.show(
         context: context,
-        message: body['message'] ?? "Something went wrong",
+        message: _sanitizeBackendMessage(body['message'], "Oops! Something went wrong. Please try again."),
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       // await EasyLoading.dismiss();
       // Get.snackbar(
@@ -740,9 +759,9 @@ class ProfileController extends GetxController implements GetxService {
       // );
       AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       rethrow;
     }
@@ -752,7 +771,7 @@ class ProfileController extends GetxController implements GetxService {
     if (body['code'].toString() == '200') {
       AnimatedTopToast.show(
         context: context,
-        message: "${body['message'] ?? "Updated Successfully"}",
+        message: _sanitizeBackendMessage(body['message'], "Updated successfully."),
         backgroundColor: ColorResources.blueeebutton,
         icon: Icons.check_circle_rounded,
       );
@@ -783,9 +802,9 @@ class ProfileController extends GetxController implements GetxService {
       // );
       AnimatedTopToast.show(
         context: context,
-        message: body['message'] ?? "Something went wrong",
+        message: _sanitizeBackendMessage(body['message'], "Oops! Something went wrong. Please try again."),
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
     }
 
@@ -806,7 +825,9 @@ class ProfileController extends GetxController implements GetxService {
       FaqModel faqModel = FaqModel.fromJson(response.body);
       faqList = faqModel.data ?? [];
     } else {
-      Get.snackbar("Error", response.body['message'] ?? "Something went wrong");
+      if (!_isDataNotFoundResponse(response.body)) {
+        Get.snackbar("Notice", _sanitizeBackendMessage(response.body['message'], "Unable to load FAQs. Please try again."));
+      }
     }
 
     isfqlLoading = false;
@@ -827,7 +848,9 @@ class ProfileController extends GetxController implements GetxService {
       promoList = model.data ?? [];
       filteredList = promoList;
     } else {
-      Get.snackbar("Error", response.body['message']);
+      if (!_isDataNotFoundResponse(response.body)) {
+        Get.snackbar("Notice", _sanitizeBackendMessage(response.body['message'], "Unable to load offers."));
+      }
     }
 
     isPromoDataLoading = false;
@@ -850,9 +873,9 @@ class ProfileController extends GetxController implements GetxService {
       update();
       AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
 
       // Get.snackbar(
@@ -881,9 +904,9 @@ class ProfileController extends GetxController implements GetxService {
       // );
       AnimatedTopToast.show(
         context: context,
-        message: body['message'] ?? "Something went wrong",
+        message: _sanitizeBackendMessage(body['message'], "Oops! Something went wrong. Please try again."),
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
     }
 
@@ -912,9 +935,9 @@ class ProfileController extends GetxController implements GetxService {
 
       AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       return null;
     }
@@ -928,9 +951,9 @@ class ProfileController extends GetxController implements GetxService {
     } else {
       AnimatedTopToast.show(
         context: context,
-        message: body['message'] ?? "Something went wrong",
+        message: _sanitizeBackendMessage(body['message'], "Oops! Something went wrong. Please try again."),
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       // Get.snackbar(
       //   'Error',
@@ -971,9 +994,9 @@ class ProfileController extends GetxController implements GetxService {
       // );
        AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       return null;
     }
@@ -987,9 +1010,9 @@ class ProfileController extends GetxController implements GetxService {
     } else {
       AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       // Get.snackbar(
       //   'Error',
@@ -1023,9 +1046,9 @@ class ProfileController extends GetxController implements GetxService {
 
       AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       return null;
     }
@@ -1039,9 +1062,9 @@ class ProfileController extends GetxController implements GetxService {
     } else {
       AnimatedTopToast.show(
         context: context,
-        message: body['message'] ?? "Something went wrong",
+        message: _sanitizeBackendMessage(body['message'], "Oops! Something went wrong. Please try again."),
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       // Get.snackbar(
       //   'Error',
@@ -1091,26 +1114,25 @@ class ProfileController extends GetxController implements GetxService {
           selectedCategory = promoCategoryList.first.name ?? "";
         }
       } else {
-        AnimatedTopToast.show(
-        context: context,
-        message: response.body?['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
-      );
-        // Get.snackbar(
-        //   'Error',
-        //   response.body?['message'] ?? "Something went wrong",
-        //   backgroundColor: ColorResources.textColorRed,
-        //   colorText: Colors.white,
-        //   snackPosition: SnackPosition.TOP,
-        // );
+        // If API just means "no data", handle silently
+        final rawMsg = (response.body?['message'] ?? '').toString().toLowerCase();
+        if (rawMsg.contains('data not found') || rawMsg.contains('no data') || rawMsg.contains('not found')) {
+          promoCategoryList.clear();
+        } else {
+          AnimatedTopToast.show(
+            context: context,
+            message: _sanitizeBackendMessage(response.body?['message'], "Oops! Something went wrong. Please try again."),
+            backgroundColor: ColorResources.textColorRed,
+            icon: Icons.error_outline,
+          );
+        }
       }
     } catch (e) {
         AnimatedTopToast.show(
         context: context,
-        message:"Something went wrong",
+        message:"Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       // await EasyLoading.dismiss();
       // Get.snackbar(
@@ -1152,26 +1174,25 @@ class ProfileController extends GetxController implements GetxService {
         promoCategoryListData.clear();
         promoCategoryListData.addAll(promoListModel.data ?? []);
       } else {
+        // If API just means "no data", handle silently
+        final rawMsg = (response.body?['message'] ?? '').toString().toLowerCase();
+        if (rawMsg.contains('data not found') || rawMsg.contains('no data') || rawMsg.contains('not found')) {
+          promoCategoryListData.clear();
+        } else {
           AnimatedTopToast.show(
-        context: context,
-        message: response.body?['message'] ?? "Something went wrong",
-        backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
-      );
-        // Get.snackbar(
-        //   'Error',
-        //   response.body?['message'] ?? "Something went wrong",
-        //   backgroundColor: ColorResources.textColorRed,
-        //   colorText: Colors.white,
-        //   snackPosition: SnackPosition.TOP,
-        // );
+            context: context,
+            message: _sanitizeBackendMessage(response.body?['message'], "Oops! Something went wrong. Please try again."),
+            backgroundColor: ColorResources.textColorRed,
+            icon: Icons.error_outline,
+          );
+        }
       }
     } catch (e) {
       AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       // await EasyLoading.dismiss();
       // Get.snackbar(
@@ -1299,17 +1320,17 @@ class ProfileController extends GetxController implements GetxService {
       } else {
       AnimatedTopToast.show(
         context: context,
-        message: response.body?['message'] ?? "Something went wrong",
+        message: _sanitizeBackendMessage(response.body?['message'], "Oops! Something went wrong. Please try again."),
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       }
     } catch (e) {
      AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
     } finally {
       isCategoryLoading = false;
@@ -1338,18 +1359,18 @@ class ProfileController extends GetxController implements GetxService {
       } else {
       AnimatedTopToast.show(
         context: context,
-        message: response.body?['message'] ?? "Something went wrong",
+        message: _sanitizeBackendMessage(response.body?['message'], "Oops! Something went wrong. Please try again."),
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       ///  Get.snackbar("Error", response.body['message']);
       }
     } catch (e) {
       AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
       // await EasyLoading.dismiss();
       // Get.snackbar("Error", e.toString());
@@ -1391,7 +1412,6 @@ class ProfileController extends GetxController implements GetxService {
         update();
       } else {
         walletbalance = "0";
-        Get.snackbar("Error", response.body['message']);
       }
     } catch (e) {
       await EasyLoading.dismiss();
@@ -1420,7 +1440,7 @@ class ProfileController extends GetxController implements GetxService {
           response.body['code'].toString() == "200") {
             AnimatedTopToast.show(
         context: context,
-        message: "${response.body['message']}  ${response.body['data']['otp']}",
+        message: _sanitizeBackendMessage(response.body['message'], "OTP sent successfully."),
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
@@ -1442,7 +1462,7 @@ class ProfileController extends GetxController implements GetxService {
       } else {
           AnimatedTopToast.show(
         context: context,
-        message: "${response.body['message']}",
+        message: _sanitizeBackendMessage(response.body['message'], "Verification successful."),
         backgroundColor: ColorResources.textdetailsColor,
         icon: Icons.check_circle_rounded,
       );
@@ -1451,9 +1471,9 @@ class ProfileController extends GetxController implements GetxService {
     } catch (e) {
         AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
-        backgroundColor: ColorResources.appColor,
-        icon: Icons.check_circle_rounded,
+        message: "Oops! Something went wrong. Please try again.",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
       );
       // await EasyLoading.dismiss();
       // Get.snackbar("Error", e.toString());
@@ -1489,7 +1509,7 @@ class ProfileController extends GetxController implements GetxService {
         // );
          AnimatedTopToast.show(
         context: context,
-        message: "${response.body['message']}",
+        message: _sanitizeBackendMessage(response.body['message'], "OTP sent successfully."),
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
@@ -1503,7 +1523,7 @@ class ProfileController extends GetxController implements GetxService {
        // Get.snackbar("Error", response.body['message']);
  AnimatedTopToast.show(
         context: context,
-        message: "${response.body['message']}",
+        message: _sanitizeBackendMessage(response.body['message'], "Unable to send OTP. Please try again."),
         backgroundColor: ColorResources.textColorRed,
         icon: Icons.check_circle_rounded,
       );
@@ -1513,9 +1533,9 @@ class ProfileController extends GetxController implements GetxService {
       await EasyLoading.dismiss();
      AnimatedTopToast.show(
         context: context,
-        message: "Something went wrong",
+        message: "Oops! Something went wrong. Please try again.",
         backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
+        icon: Icons.error_outline,
       );
     } finally {
       isTopUpIntentLoading = false;

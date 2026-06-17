@@ -278,7 +278,7 @@ class _PromoScreenState extends State<PromoScreen> {
             image: AssetImage("assets/images/Rectangle.png"),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.5),
+              Colors.black.withValues(alpha: 0.5),
               BlendMode.darken,
             ),
           ),

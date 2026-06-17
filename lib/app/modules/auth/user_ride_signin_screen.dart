@@ -1,5 +1,7 @@
-﻿import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:myrideuser/app/modules/auth/login_screen.dart';
+import 'package:myrideuser/app/modules/auth/terms_and_conditions_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/dimensions.dart';
@@ -188,7 +190,17 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                                     text: "Terms & Conditions.",
                                     style: PoppinsMedium.copyWith(
                                       color: ColorResources.blueeebutton,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: ColorResources.blueeebutton,
                                     ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Get.to(
+                                          () => const TermsAndConditionsScreen(),
+                                          transition: Transition.rightToLeft,
+                                          duration: const Duration(milliseconds: 300),
+                                        );
+                                      },
                                   ),
                                 ],
                               ),
