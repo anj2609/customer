@@ -4,8 +4,10 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/dimensions.dart';
 import 'package:myrideuser/data/controller/booking_controller.dart';
+import 'package:myrideuser/widgets/toaster_animation.dart';
 import 'package:http/http.dart' as http;
 
 //////// Search Location ===================
@@ -102,22 +104,56 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
 
   /// ================= GET PLACE LAT LNG =================
   Future<void> getPlaceDetail(String placeId) async {
-    String url =
-        "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey";
+    if (_isCheckingLocation) return;
+    setState(() => _isCheckingLocation = true);
 
-    var response = await http.get(Uri.parse(url));
-    var data = jsonDecode(response.body);
+    try {
+      String url =
+          "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey";
 
-    var location = data["result"]["geometry"]["location"];
+      var response = await http.get(Uri.parse(url));
+      var data = jsonDecode(response.body);
 
-    LatLng selectedLatLng = LatLng(location["lat"], location["lng"]);
-    Get.find<BookingController>().bookingestimateListApi(
-      pickup_lat: currentLatLng!.latitude,
-      pickup_lng: currentLatLng!.longitude,
-      drop_lat: selectedLatLng.latitude,
-      drop_lng: selectedLatLng.longitude,
-      context: context,
-    );
+      var location = data["result"]["geometry"]["location"];
+      LatLng selectedLatLng = LatLng(location["lat"], location["lng"]);
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        selectedLatLng.latitude,
+        selectedLatLng.longitude,
+      );
+
+      final state = placemarks.isNotEmpty
+          ? placemarks.first.administrativeArea
+          : null;
+
+      if (!_isLocationAllowed(state)) {
+        AnimatedTopToast.show(
+          context: context,
+          message:
+              "Sorry! We are not available in this location at the moment.",
+          backgroundColor: ColorResources.textColorBaclColor,
+          icon: Icons.location_off_outlined,
+        );
+        return;
+      }
+
+      Get.find<BookingController>().bookingestimateListApi(
+        pickup_lat: currentLatLng!.latitude,
+        pickup_lng: currentLatLng!.longitude,
+        drop_lat: selectedLatLng.latitude,
+        drop_lng: selectedLatLng.longitude,
+        context: context,
+      );
+    } catch (e) {
+      AnimatedTopToast.show(
+        context: context,
+        message: "Could not verify location. Please try again.",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
+      );
+    } finally {
+      if (mounted) setState(() => _isCheckingLocation = false);
+    }
   }
 
   @override
@@ -127,6 +163,15 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
   }
 
   bool isSearching = false;
+  bool _isCheckingLocation = false;
+
+  static const List<String> _allowedStates = ['delhi', 'telangana'];
+
+  bool _isLocationAllowed(String? administrativeArea) {
+    if (administrativeArea == null || administrativeArea.isEmpty) return false;
+    final lower = administrativeArea.toLowerCase();
+    return _allowedStates.any((s) => lower.contains(s));
+  }
 
   /// ================= UI =================
   @override
@@ -257,23 +302,41 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
           ),
 
           /// ===== LIST =====
-          Expanded(
-            child: ListView.builder(
-              itemCount: predictions.length,
-              itemBuilder: (context, index) {
-                var place = predictions[index];
+          if (_isCheckingLocation)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(strokeWidth: 2),
+                    SizedBox(height: 12),
+                    Text(
+                      "Checking availability...",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Expanded(
+              child: ListView.builder(
+                itemCount: predictions.length,
+                itemBuilder: (context, index) {
+                  var place = predictions[index];
 
-                return ListTile(
-                  leading: const Icon(Icons.location_on),
-                  title: Text(place["structured_formatting"]["main_text"]),
-                  subtitle: Text(place["description"]),
-                  onTap: () {
-                    getPlaceDetail(place["place_id"]);
-                  },
-                );
-              },
+                  return ListTile(
+                    leading: const Icon(Icons.location_on),
+                    title: Text(place["structured_formatting"]["main_text"]),
+                    subtitle: Text(place["description"]),
+                    onTap: () {
+                      getPlaceDetail(place["place_id"]);
+                    },
+                  );
+                },
+              ),
             ),
-          ),
         ],
       ),
     );

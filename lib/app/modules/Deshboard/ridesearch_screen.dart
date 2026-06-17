@@ -11,7 +11,6 @@ import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:myrideuser/widgets/custom_loader.dart';
 import 'package:myrideuser/widgets/toaster_animation.dart';
 
 class RideOptionScreen extends StatefulWidget {
@@ -77,6 +76,7 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
   int selectedIndex = -1;
   String pickupAddress = "";
   String dropAddress = "";
+  bool _isBooking = false;
 
   /// ===== DEMO POLYLINE (DIRECT LINE) =====
   Set<Polyline> getPolyline() {
@@ -507,8 +507,10 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                   ),
                   const SizedBox(height: Dimensions.radiusSizeSmall),
                   CustomPrimaryDyanamicButton(
-                    text: "Next",
+                    text: _isBooking ? "Booking..." : "Next",
                     onTap: () async {
+                      if (_isBooking) return;
+
                       // Validate vehicle selection
                       if (selectedIndex == -1 || vehicletypeid.isEmpty) {
                         AnimatedTopToast.show(
@@ -531,17 +533,12 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                         return;
                       }
 
+                      setState(() => _isBooking = true);
+
                       try {
                         final String scheduleFlag = isScheduled ? "1" : "0";
-                        final String scheduleDateTime = isScheduled
-                            ? formattedDateTime
-                            : "";
-
-                        showDialog(
-                          context: Get.context!,
-                          barrierDismissible: false,
-                          builder: (_) => PremiumBlurLoader(),
-                        );
+                        final String scheduleDateTime =
+                            isScheduled ? formattedDateTime : "";
 
                         await Get.find<BookingController>().CreateBooking(
                           pickup_lat: widget.pickup_lat,
@@ -558,10 +555,15 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                         );
                       } catch (e) {
                         debugPrint('CreateBooking Error: $e');
+                        AnimatedTopToast.show(
+                          context: context,
+                          message:
+                              "Something went wrong. Please try again.",
+                          backgroundColor: Colors.red,
+                          icon: Icons.error_outline,
+                        );
                       } finally {
-                        if (Get.isDialogOpen ?? false) {
-                          Get.back();
-                        }
+                        if (mounted) setState(() => _isBooking = false);
                       }
                     },
                   ),

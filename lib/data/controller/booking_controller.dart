@@ -170,7 +170,12 @@ class BookingController extends GetxController implements GetxService {
         icon: Icons.error_outline,
       );
     } else {
-     // EasyLoading.dismiss();
+      AnimatedTopToast.show(
+        context: context,
+        message: "Unable to get ride estimates. Please check your connection and try again.",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
+      );
     }
 
     update();
