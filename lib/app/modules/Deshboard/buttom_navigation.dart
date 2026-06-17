@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:myrideuser/app/modules/Promos/promos_screen.dart';
 import 'package:myrideuser/app/modules/acoount/acoount.dart';
@@ -135,11 +135,11 @@ class _MainNavigationState extends State<MainNavigation> {
       //   _BottomItem(img: "assets/images/Frame 15.png", label: ""),
     ];
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
-      decoration: BoxDecoration(color: Colors.white),
-      child: SafeArea(
-        top: false,
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 5),
+        decoration: const BoxDecoration(color: Colors.white),
         child: Row(
           children: List.generate(items.length, (index) {
             final item = items[index];
@@ -147,7 +147,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
             return Expanded(
               child: InkWell(
-                onTap: () => {setState(() => _currentIndex = index)},
+                onTap: () => setState(() => _currentIndex = index),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Column(

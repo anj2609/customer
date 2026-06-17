@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myrideuser/data/modal/chatmessages_model.dart';
@@ -27,6 +25,7 @@ class ChatController extends GetxController {
     required String driverId,
     required String customerId,
   }) async {
+    isLoading = true;
     update();
 
     try {
@@ -64,61 +63,64 @@ class ChatController extends GetxController {
       print("Start Chat Error: $e");
 
       return Response(statusCode: 500, statusText: e.toString());
-    }
-  }
-
- 
-
-
-Future<Response> sendChatMessages({
-  required BuildContext context,
-  required String bookingId,
-  required String driverId,
-  required String customerId,
-  required String message,
-}) async {
-  try {
-    print('chat id |||||  ${bookingId}');
-    print('chat id |||||  ${driverId}');
-    print('chat id |||||  ${customerId}');
-    print('chat id |||||  ${chatId}');
-     print('${message}');
-    Response response = await chatRepo.sendChat(
-      bookingId: bookingId.toString(),
-      driverId: driverId.toString(),
-      customerId: customerId.toString(),
-      chatId: chatId ?? '',
-      messages: message.toString(),
-    );
-
-    if (response.statusCode == 200 &&
-        response.body != null &&
-        response.body['code'].toString() == '200') {
-
-      var resp = response.body; 
-
-      chatId = resp['data']?['chat_id']?.toString();
-      senderId = resp['data']?['sender_id']?.toString();
-      messagesDate = resp['data']?['created_at']?.toString();
-      isRead = resp['data']?['is_read'];
-
-      await chatessagesList(context: context);
-
+    } finally {
+      isLoading = false;
       update();
     }
-
-    return response;
-  } catch (e) {
-    print("Send Message Error: $e");
-    rethrow;
   }
-}
- 
- 
- 
+
+  Future<Response> sendChatMessages({
+    required BuildContext context,
+    required String bookingId,
+    required String driverId,
+    required String customerId,
+    required String message,
+  }) async {
+    isLoading = true;
+    update();
+
+    try {
+      print('chat id |||||  $bookingId');
+      print('chat id |||||  $driverId');
+      print('chat id |||||  $customerId');
+      print('chat id |||||  $chatId');
+      print(message);
+      Response response = await chatRepo.sendChat(
+        bookingId: bookingId.toString(),
+        driverId: driverId.toString(),
+        customerId: customerId.toString(),
+        chatId: chatId ?? '',
+        messages: message.toString(),
+      );
+
+      if (response.statusCode == 200 &&
+          response.body != null &&
+          response.body['code'].toString() == '200') {
+        var resp = response.body;
+
+        chatId = resp['data']?['chat_id']?.toString();
+        senderId = resp['data']?['sender_id']?.toString();
+        messagesDate = resp['data']?['created_at']?.toString();
+        isRead = resp['data']?['is_read'];
+
+        await chatessagesList(context: context);
+
+        update();
+      }
+
+      return response;
+    } catch (e) {
+      print("Send Message Error: $e");
+      rethrow;
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
   /////===============  Chat Messages Lists  =============================
   Future<Response> chatessagesList({required BuildContext context}) async {
-  //  isLoading = true;
+    isLoading = chatMessagesList.isEmpty;
     update();
 
     try {
@@ -146,7 +148,7 @@ Future<Response> sendChatMessages({
     } catch (e) {
       rethrow;
     } finally {
-      //isLoading = false;
+      isLoading = false;
       update();
     }
   }
@@ -154,7 +156,7 @@ Future<Response> sendChatMessages({
   Future<Response> chatMessageListingSeen({
     required BuildContext context,
   }) async {
-   //// isLoading = true;
+    isLoading = true;
     update();
 
     try {
@@ -174,7 +176,7 @@ Future<Response> sendChatMessages({
     } catch (e) {
       rethrow;
     } finally {
-     /// isLoading = false;
+      isLoading = false;
       update();
     }
   }

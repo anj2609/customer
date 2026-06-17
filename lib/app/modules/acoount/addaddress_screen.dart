@@ -300,7 +300,7 @@ class _AddAddresScreenState extends State<AddAddresScreen> {
                       Expanded(
                         child: CustomPrimaryDyanamicButton(
                           text: "Save Address",
-                          onTap: () {
+                          onTap: () async {
                             if (address.isEmpty || lat == null || lng == null) {
                               Get.snackbar("Error", "Please select address");
                               return;
@@ -318,17 +318,18 @@ class _AddAddresScreenState extends State<AddAddresScreen> {
                             // );
 
                             try {
-                               showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (_) => PremiumBlurLoader(),
-                    );
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (_) => PremiumBlurLoader(),
+                              );
 
                               String finalAddress =
                                   detailController.text.trim().isNotEmpty
                                   ? "${detailController.text.trim()}, $address"
                                   : address;
-                              Get.find<ProfileController>().addAddressCustomer(
+                              await Get.find<ProfileController>()
+                                  .addAddressCustomer(
                                 context: context,
                                 label: nameController.text.trim(),
                                 address: finalAddress,

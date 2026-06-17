@@ -315,7 +315,7 @@ class _AddressUpdateScreenState extends State<AddressUpdateScreen> {
                           text: widget.isEdit == true
                               ? "Update Address"
                               : "Save Address",
-                          onTap: () {
+                          onTap: () async {
                             if (address.isEmpty || lat == null || lng == null) {
                               Get.snackbar("Error", "Please select address");
                               return;
@@ -332,7 +332,7 @@ class _AddressUpdateScreenState extends State<AddressUpdateScreen> {
                                 builder: (_) => PremiumBlurLoader(),
                               );
 
-                              Get.find<ProfileController>().updateAddress(
+                              await Get.find<ProfileController>().updateAddress(
                                 context: context,
                                 address_id: widget.address!.id!,
                                 label: nameController.text.trim(),

@@ -167,10 +167,10 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                     );
 
                     try {
-                      Get.find<AuthController>().verifyOtpApi(
+                      await Get.find<AuthController>().verifyOtpApi(
                         mobileNumber: widget.phoneNumber.toString(),
                         numOfOtp: pin,
-                        type: widget.type!.trim() ?? "",
+                        type: widget.type?.trim() ?? "",
                         context: context,
                       );
                     } catch (e) {

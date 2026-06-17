@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -236,6 +236,100 @@ class AuthController extends GetxController implements GetxService {
 
     update();
     return response;
+  }
+
+  /// Checks if the phone is registered, then routes to the correct OTP flow.
+  /// Throws an Exception with a user-readable message on failure.
+  Future<void> checkPhoneAndNavigate({
+    required BuildContext context,
+    required String phone,
+  }) async {
+    await initDeviceData();
+
+    // Step 1 — try a login OTP; if it succeeds the number is registered.
+    final loginResp = await authRepo.sendOtpApi(
+      phone: phone,
+      type: ApiConstants.UserLogin,
+      deviceToken: deviceToken ?? '',
+      devicetype: deviceType,
+    );
+
+    if (loginResp.body != null && loginResp.body['code'] == '200') {
+      // Registered user
+      AnimatedTopToast.show(
+        context: context,
+        message: 'Your number is already registered. Signing you in...',
+        backgroundColor: ColorResources.appColor,
+        icon: Icons.check_circle_rounded,
+      );
+      await Future.delayed(const Duration(milliseconds: 600));
+      RouteHelper.getOtpScreenRoute(
+        phone,
+        ApiConstants.UserLogin,
+        loginResp.body['data']['otp'].toString(),
+      );
+      return;
+    }
+
+    // Step 2 — distinguish "user not found" errors from real server errors.
+    final int statusCode = loginResp.statusCode ?? 0;
+    final String msg = (loginResp.body?['message'] ?? '').toString().toLowerCase();
+
+    final bool isNotFound = statusCode == 404 ||
+        statusCode == 422 ||
+        msg.contains('not found') ||
+        msg.contains('not register') ||
+        msg.contains('does not exist') ||
+        msg.contains('no account') ||
+        msg.contains('invalid') ||
+        (loginResp.body?['code'] != null &&
+            loginResp.body['code'] != '200' &&
+            statusCode != 500);
+
+    if (isNotFound) {
+      // Not registered — send a register OTP.
+      AnimatedTopToast.show(
+        context: context,
+        message: 'Please create your account to continue.',
+        backgroundColor: ColorResources.blueeebutton,
+        icon: Icons.person_add_rounded,
+      );
+      await Future.delayed(const Duration(milliseconds: 600));
+
+      final regResp = await authRepo.sendOtpApi(
+        phone: phone,
+        type: ApiConstants.UserRegister,
+        deviceToken: deviceToken ?? '',
+        devicetype: deviceType,
+      );
+
+      if (regResp.body != null && regResp.body['code'] == '200') {
+        AnimatedTopToast.show(
+          context: context,
+          message:
+              '${regResp.body['message']}  ${regResp.body['data']['otp']} \u{1F389}',
+          backgroundColor: ColorResources.appColor,
+          icon: Icons.check_circle_rounded,
+        );
+        await Future.delayed(const Duration(milliseconds: 500));
+        RouteHelper.getOtpScreenRoute(
+          phone,
+          ApiConstants.UserRegister,
+          regResp.body['data']['otp'].toString(),
+        );
+        return;
+      }
+
+      throw Exception(
+        regResp.body?['message'] ??
+            'Unable to verify your account at the moment. Please try again.',
+      );
+    }
+
+    // Step 3 — real server / network error.
+    throw Exception(
+      'Unable to verify your account at the moment. Please try again.',
+    );
   }
 
   Future<Response> sendOtp({

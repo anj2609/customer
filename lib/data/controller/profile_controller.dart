@@ -1059,10 +1059,10 @@ class ProfileController extends GetxController implements GetxService {
   }
 
   Future<Response?> promoCategoryData({required BuildContext context}) async {
-    try {
-      isCategoryLoading = true;
-      update();
+    isCategoryLoading = true;
+    update();
 
+    try {
      /// EasyLoading.show(status: "Please wait...");
 
       Response? response = await profileRepo.getpromoCategorylist();
@@ -1120,10 +1120,10 @@ class ProfileController extends GetxController implements GetxService {
       //   colorText: ColorResources.textColorRed,
       //   snackPosition: SnackPosition.TOP,
       // );
+    } finally {
+      isCategoryLoading = false;
+      update();
     }
-
-    isCategoryLoading = false;
-    update();
 
     return null;
   }
@@ -1132,10 +1132,10 @@ class ProfileController extends GetxController implements GetxService {
     required String category,
     required BuildContext context,
   }) async {
-    try {
-      isPromoLoading = true;
-      update();
+    isPromoLoading = true;
+    update();
 
+    try {
      /// EasyLoading.show(status: "Please wait...");
 
       Response? response = await profileRepo.promoCategorywisedata(
@@ -1181,21 +1181,20 @@ class ProfileController extends GetxController implements GetxService {
       //   colorText: ColorResources.textColorRed,
       //   snackPosition: SnackPosition.TOP,
       // );
+    } finally {
+      isPromoLoading = false;
+      update();
     }
-
-    isPromoLoading = false;
-    update();
   }
 
   Future<void> getActivityData({
     required String typeOfSlug,
     required BuildContext context,
   }) async {
+    isPromoLoading = true;
+    update();
+
     try {
-      isPromoLoading = true;
-
-      update();
-
       ///EasyLoading.show(status: "Please wait...");
 
       Response? response = await profileRepo.getBookingdata(
@@ -1224,10 +1223,10 @@ class ProfileController extends GetxController implements GetxService {
     } catch (e) {
       await EasyLoading.dismiss();
       print(e.toString());
+    } finally {
+      isPromoLoading = false;
+      update();
     }
-
-    isPromoLoading = false;
-    update();
   }
   // Future<void> getActivityData({
   //   required String typeOfSlug,
@@ -1276,10 +1275,10 @@ class ProfileController extends GetxController implements GetxService {
     required BuildContext context,
     String? id,
   }) async {
-    try {
-      isCategoryLoading = true;
-      update();
+    isCategoryLoading = true;
+    update();
 
+    try {
      /// EasyLoading.show(status: "Please wait...");
 
       Response? response = await profileRepo.getpromoCategorylist();
@@ -1312,10 +1311,10 @@ class ProfileController extends GetxController implements GetxService {
         backgroundColor: ColorResources.textColorRed,
         icon: Icons.check_circle_rounded,
       );
+    } finally {
+      isCategoryLoading = false;
+      update();
     }
-
-    isCategoryLoading = false;
-    update();
 
     return null;
   }
@@ -1354,10 +1353,10 @@ class ProfileController extends GetxController implements GetxService {
       );
       // await EasyLoading.dismiss();
       // Get.snackbar("Error", e.toString());
+    } finally {
+      isPromoDetailsLoading = false;
+      update();
     }
-
-    isPromoDetailsLoading = false;
-    update();
   }
 
   ///// ==================== Customer Wallet Amount  =================
@@ -1398,10 +1397,10 @@ class ProfileController extends GetxController implements GetxService {
       await EasyLoading.dismiss();
       walletbalance = "0";
       // Get.snackbar("Error", e.toString());
+    } finally {
+      isCustomerWalletLoading = false;
+      update();
     }
-
-    isCustomerWalletLoading = false;
-    update();
   }
 
   Future<void> customerPromoAdd({String? promoid, required context}) async {
@@ -1458,10 +1457,10 @@ class ProfileController extends GetxController implements GetxService {
       );
       // await EasyLoading.dismiss();
       // Get.snackbar("Error", e.toString());
+    } finally {
+      isPromoDetailsLoading = false;
+      update();
     }
-
-    isPromoDetailsLoading = false;
-    update();
   }
 
   Future<void> createTopUpIntent({String? amount, required context}) async {
@@ -1518,10 +1517,10 @@ class ProfileController extends GetxController implements GetxService {
         backgroundColor: ColorResources.textColorRed,
         icon: Icons.check_circle_rounded,
       );
+    } finally {
+      isTopUpIntentLoading = false;
+      update();
     }
-
-    isTopUpIntentLoading = false;
-    update();
   }
 
   ////topCreateAmount

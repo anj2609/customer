@@ -115,7 +115,7 @@ class _CancelRideScreenState extends State<CancelRideScreen> {
           padding: EdgeInsets.all(width * 0.05),
           child: CustomPrimaryDyanamicButton(
             text: "Confirm",
-            onTap: () {
+            onTap: () async {
               /// Validation
               if (selected == null) {
                 Get.snackbar(
@@ -132,7 +132,7 @@ class _CancelRideScreenState extends State<CancelRideScreen> {
                       barrierDismissible: false,
                       builder: (_) => PremiumBlurLoader(),
                     );
-                Get.find<BookingController>().cancelRideApi(
+                await Get.find<BookingController>().cancelRideApi(
                   context: context,
                   bookingid: widget.bookingId,
 

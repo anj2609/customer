@@ -197,7 +197,7 @@ class _DriverRatingScreenState extends State<DriverRatingScreen> {
                 ///
                 CustomPrimaryButton(
                   text: "Give Rate",
-                  onTap: () {
+                  onTap: () async {
                     if (selectedRating == 0) {
                       Get.snackbar(
                         "Rating Required",
@@ -219,7 +219,7 @@ class _DriverRatingScreenState extends State<DriverRatingScreen> {
                         barrierDismissible: false,
                         builder: (_) => PremiumBlurLoader(),
                       );
-                      Get.find<BookingController>().rateForDriver(
+                      await Get.find<BookingController>().rateForDriver(
                         context: context,
                         bookingid: widget.bookingid,
                         rateId: selectedRating,

@@ -347,7 +347,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 40),
                 CustomPrimaryButton(
                   text: "Continue",
-                  onTap: () {
+                  onTap: () async {
                     
                     try {
                       String num = controller.phoneController.text.toString();
@@ -357,7 +357,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       builder: (_) => PremiumBlurLoader(),
                     );
 
-                      Get.find<ProfileController>().updatePersonalInfoApi(
+                      await Get.find<ProfileController>().updatePersonalInfoApi(
                         name: nameController.text.trim(),
                         email: emailController.text.trim(),
                         gender: selectedGender.toString(),

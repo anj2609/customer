@@ -1,5 +1,4 @@
-import 'package:myrideuser/config/route.dart';
-import 'package:myrideuser/config/utils/constants.dart';
+﻿import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/dimensions.dart';
 import 'package:myrideuser/data/controller/auth_controller.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
@@ -60,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Welcome Back 👋",
+                        "Welcome Back",
                         style: PoppinsSemiBold.copyWith(
                           fontSize: Dimensions.spacingSize20,
                           color: ColorResources.blackcolor11,
@@ -252,22 +251,20 @@ class _LoginScreenState extends State<LoginScreen> {
                         iconColor: Colors.red,
 
                         onTap: () async {
-                           showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (_) =>  PremiumBlurLoader(),
-                            );
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => PremiumBlurLoader(),
+                          );
 
                           try {
-                            Get.find<AuthController>().signInWithGoogle(
+                            await Get.find<AuthController>().signInWithGoogle(
                               provider: 'google',
-                               context: context,
+                              context: context,
                             );
-                           
-                            if (Get.isDialogOpen ?? false) {
-                              Get.back();
-                            }
                           } catch (e) {
+                            debugPrint('Google sign-in Error: $e');
+                          } finally {
                             if (Get.isDialogOpen ?? false) {
                               Get.back();
                             }
@@ -286,13 +283,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       //   iconColor: Colors.black,
                       //   onTap: () {},
                       // ),
-                      CustomSocialButton(
-                        text: "Continue with Facebook",
-                        images: 'assets/images/facebook.png',
-                        iconColor: Colors.blue,
-                        onTap: () {},
-                      ),
-
                       // CustomSocialButton(
                       //   text: "Continue with X",
                       //   images:
@@ -343,10 +333,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           try {
                             await Get.find<AuthController>().initDeviceData();
 
-                             showDialog(
+                            showDialog(
                               context: context,
                               barrierDismissible: false,
-                              builder: (_) =>  PremiumBlurLoader(),
+                              builder: (_) => PremiumBlurLoader(),
                             );
                             await Get.find<AuthController>().sendOtp(
                               mobileNumber: mobile,

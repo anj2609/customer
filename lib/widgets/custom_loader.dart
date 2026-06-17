@@ -18,20 +18,21 @@ class PremiumBlurLoader extends StatelessWidget {
           color: Colors.black.withOpacity(0.2),
           child: Center(
             child: Container(
-              width: 130,
-              height: 130,
+              width: 140,
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.95),
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: const Column(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SpinKitThreeBounce(color: Colors.blue, size: 28),
-                  SizedBox(height: 12),
+                children: const [
+                  SpinKitThreeBounce(color: Colors.blue, size: 24),
+                  SizedBox(height: 14),
                   Text(
                     "Loading...",
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                   ),
                 ],
               ),

@@ -48,6 +48,7 @@ class BookingRepo extends GetxService {
       "vehicle_type_id": vehicle_type_id,
       "pickup_address": pickup_address,
       "drop_address": drop_address,
+      "status": "pending",
       "is_schedule": is_schedule,
       "schedule_date_time": schedule_date_time,
       "is_wallet": 0,

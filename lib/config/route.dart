@@ -1,4 +1,4 @@
-import 'package:myrideuser/app/modules/Deshboard/buttom_navigation.dart';
+﻿import 'package:myrideuser/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:myrideuser/app/modules/Deshboard/cancel_ride_screen.dart';
 import 'package:myrideuser/app/modules/Deshboard/driverrating_screen.dart';
 import 'package:myrideuser/app/modules/Deshboard/findingdriver_screen.dart';
@@ -17,6 +17,7 @@ import 'package:myrideuser/app/modules/acoount/aboutus_model.dart';
 import 'package:myrideuser/app/modules/acoount/update/addressupdate_screen.dart';
 import 'package:myrideuser/app/modules/activity/canceled_screen.dart';
 import 'package:myrideuser/app/modules/auth/otp_screen.dart';
+import 'package:myrideuser/app/modules/auth/phone_check_screen.dart';
 import 'package:myrideuser/app/modules/auth/sign_up_screen.dart';
 import 'package:myrideuser/app/modules/auth/user_ride_signin_screen.dart';
 import 'package:myrideuser/app/modules/chats/chat_screen.dart';
@@ -33,6 +34,7 @@ class RouteHelper {
   static const String onbordingscreen = '/onbordingscreen';
   static const String lestStartedScreen = '/lestStartedScreen';
   static const String userSignunpScreen = '/userSignunpScreen';
+  static const String phoneCheckScreen = '/phoneCheckScreen';
   static const String otpScreen = '/otpScreen';
   static const String login = '/login';
   static const String profileScreen = '/profileScreen';
@@ -85,6 +87,7 @@ class RouteHelper {
   // otpScreen; cancelRideScreen
   static getLestMyRideStartedScreenRoute() => lestStartedScreen;
   static getuserSignunpScreenRoute() => userSignunpScreen;
+  static getphoneCheckScreenRoute() => phoneCheckScreen;
   static getLoginRoute() => login;
   static getRegisterRoute() => myInvestmentScreen;
   static getwelcomesrcRoute() => policyscreen;
@@ -162,6 +165,14 @@ class RouteHelper {
     GetPage(
       name: userSignunpScreen,
       page: () => UserSignInpScreen(),
+      transitionDuration: const Duration(
+        milliseconds: ApiConstants.screenTransitionTime,
+      ),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: phoneCheckScreen,
+      page: () => PhoneCheckScreen(),
       transitionDuration: const Duration(
         milliseconds: ApiConstants.screenTransitionTime,
       ),

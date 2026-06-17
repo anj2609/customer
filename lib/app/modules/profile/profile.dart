@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:mobile_number/mobile_number.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/constants.dart';
@@ -13,8 +12,6 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'dart:io';
-
 import 'package:myrideuser/widgets/custom_loader.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -302,7 +299,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 40),
               CustomPrimaryButton(
                 text: "Continue",
-                onTap: () {
+                onTap: () async {
                   String phone = phoneController.text.trim();
                   String email = emailController.text.trim();
                   String dob = dobController.text.trim();
@@ -382,7 +379,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       builder: (_) => PremiumBlurLoader(),
                     );
 
-                    Get.find<AuthController>().fillPersonalInfoApi(
+                    await Get.find<AuthController>().fillPersonalInfoApi(
                       name: nameController.text.trim(),
                       email: emailController.text.trim(),
                       gender: selectedGender.toString(),

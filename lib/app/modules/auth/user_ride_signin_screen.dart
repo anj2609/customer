@@ -1,4 +1,4 @@
-import 'package:flutter/services.dart';
+﻿import 'package:flutter/services.dart';
 import 'package:myrideuser/app/modules/auth/login_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/constants.dart';
@@ -55,7 +55,7 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Join My Ride Today ✨",
+                        "Join My Ride Today ",
                         style: PoppinsSemiBold.copyWith(
                           fontSize: Dimensions.spacingSize20,
 
@@ -65,7 +65,7 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
 
                       const SizedBox(height: Dimensions.fontSizeSmall),
                       Text(
-                        "Let’s get started! Enter your phone number to \ncreate your My Ride account.",
+                        "Let's get started! Enter your phone number to \ncreate your My Ride account.",
                         style: PoppinsMedium.copyWith(
                           color: ColorResources.TextColorForGrey,
                         ),
@@ -269,24 +269,22 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                         images: 'assets/images/google.png',
                         iconColor: Colors.red,
 
-                        onTap: () {
-                           showDialog(
-                      context:Get.context!,
-                      barrierDismissible: false,
-                      builder: (_) => PremiumBlurLoader(),
-                    );
+                        onTap: () async {
+                          showDialog(
+                            context: Get.context!,
+                            barrierDismissible: false,
+                            builder: (_) => PremiumBlurLoader(),
+                          );
 
                           try {
-                            Get.find<AuthController>().signInWithGoogle(
+                            await Get.find<AuthController>().signInWithGoogle(
                               provider: 'google',
 
                               context: context,
                             );
-
-                            if (Get.isDialogOpen ?? false) {
-                              Get.back();
-                            }
                           } catch (e) {
+                            debugPrint('Google sign-in Error: $e');
+                          } finally {
                             if (Get.isDialogOpen ?? false) {
                               Get.back();
                             }
@@ -304,13 +302,6 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                       //   iconColor: Colors.black,
                       //   onTap: () {},
                       // ),
-                      CustomSocialButton(
-                        text: "Continue with Facebook",
-                        images: 'assets/images/facebook.png',
-                        iconColor: Colors.blue,
-                        onTap: () {},
-                      ),
-
                       // CustomSocialButton(
                       //   text: "Continue with X",
                       //   images:
@@ -363,11 +354,11 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                             await Get.find<AuthController>().initDeviceData();
 
                             showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (_) => PremiumBlurLoader(),
-                    );
-                            Get.find<AuthController>().sendOtp(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (_) => PremiumBlurLoader(),
+                            );
+                            await Get.find<AuthController>().sendOtp(
                               mobileNumber: "$mobile",
                               type: ApiConstants.UserRegister,
                               deviceToken:

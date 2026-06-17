@@ -52,16 +52,23 @@ class _SplashScreenState extends State<SplashScreen>
 
     customerId = userId.toString();
 
-    if (token != null && token.isNotEmpty
-    // &&
-    // apitoken != null &&
-    // apitoken.isNotEmpty
-    ) {
+    if (token != null && token.isNotEmpty) {
       if (bookingId.isNotEmpty) {
-        Get.find<BookingController>().TrackRideApi(
-          context: context,
-          bookingid: bookingId,
-        );
+        try {
+          await Get.find<BookingController>().TrackRideApi(
+            context: context,
+            bookingid: bookingId,
+          );
+        } catch (e) {
+          print("TrackRideApi error from splash: $e");
+          // Clear stale booking ID and navigate to main screen
+          await prefs.remove(ApiConstants.bookingid);
+          Get.offAll(
+            MainNavigation(),
+            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+            transition: Transition.rightToLeft,
+          );
+        }
       } else {
         Get.offAll(
           MainNavigation(),
@@ -69,12 +76,6 @@ class _SplashScreenState extends State<SplashScreen>
           transition: Transition.rightToLeft,
         );
       }
-
-      // Get.offAll(
-      //   MainNavigation(),
-      //   duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-      //   transition: Transition.rightToLeft,
-      // );
     } else {
       Get.toNamed(RouteHelper.getOnboardingRoute());
     }

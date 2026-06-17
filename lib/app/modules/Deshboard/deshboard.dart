@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -134,49 +134,84 @@ class _DashboardScreenState extends State<DashboardScreen> {
       isLoadingLocation = true; // Loader show
     });
 
-    await Future.delayed(const Duration(seconds: 2)); // 2 sec delay
+    try {
+      await Future.delayed(const Duration(seconds: 2)); // 2 sec delay
 
-    Position pos = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+      Position pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
-    currentLocation = LatLng(pos.latitude, pos.longitude);
+      currentLocation = LatLng(pos.latitude, pos.longitude);
 
-    generateNearbyCars();
+      generateNearbyCars();
 
-    mapController?.animateCamera(CameraUpdate.newLatLng(currentLocation!));
-
-    setState(() {
-      isLoadingLocation = false; // Loader hide
-    });
+      mapController?.animateCamera(CameraUpdate.newLatLng(currentLocation!));
+    } catch (e) {
+      debugPrint("Location Error: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoadingLocation = false; // Loader hide
+        });
+      }
+    }
   }
   // ================= LOCATION =================
 
   Future<void> checkLocationPermission() async {
-    LocationPermission permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever)
-      return;
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
 
-    getCurrentLocation();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          setState(() {
+            isLoadingLocation = false;
+          });
+        }
+        return;
+      }
+
+      await getCurrentLocation();
+    } catch (e) {
+      debugPrint("Location permission Error: $e");
+      if (mounted) {
+        setState(() {
+          isLoadingLocation = false;
+        });
+      }
+    }
   }
 
   LatLng? currentLatLng;
   Future<void> getCurrentLocation() async {
-    Position pos = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    try {
+      Position pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
-    currentLocation = LatLng(pos.latitude, pos.longitude);
-    Get.find<BookingController>().driverAvailableNearByApi(
-      context: Get.context!,
-      latitude: pos.latitude,
-      longitude: pos.longitude,
-    );
-    currentLatLng = LatLng(pos.latitude, pos.longitude);
-    generateNearbyCars();
+      currentLocation = LatLng(pos.latitude, pos.longitude);
+      await Get.find<BookingController>().driverAvailableNearByApi(
+        context: context,
+        latitude: pos.latitude,
+        longitude: pos.longitude,
+      );
+      currentLatLng = LatLng(pos.latitude, pos.longitude);
+      generateNearbyCars();
 
-    mapController?.animateCamera(CameraUpdate.newLatLng(currentLocation!));
+      mapController?.animateCamera(CameraUpdate.newLatLng(currentLocation!));
+    } catch (e) {
+      debugPrint("Current location Error: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoadingLocation = false;
+        });
+      }
+    }
 
     //   setState(() {});
   }
@@ -290,14 +325,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
             left: 0,
             right: 0,
             child: Container(
-              height: 200,
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                20,
+                20,
+                20 + MediaQuery.of(context).padding.bottom,
+              ),
               decoration: BoxDecoration(
                 color: ColorResources.whiteColor,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-                boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12)],
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(25),
+                ),
+                boxShadow: const [
+                  BoxShadow(blurRadius: 10, color: Colors.black12),
+                ],
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -325,8 +369,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Row(
                         children: [
                           Image.asset("assets/images/loaction.png"),
-                          // Icon(Icons.search),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
                             "Enter location",
                             style: PoppinsReguler.copyWith(
@@ -348,7 +391,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         }
 
                         if (controller.addressList.isEmpty) {
-                          return Center(child: Text("No Address"));
+                          return const Center(child: Text("No Address"));
                         }
 
                         return ListView.builder(

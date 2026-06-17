@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -489,7 +489,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
 
           /// ================= TOP LOCATION CARD =================
           Positioned(
-            top: 50,
+            top: MediaQuery.of(context).padding.top + 10,
             left: 16,
             right: 16,
             child: Obx(() {

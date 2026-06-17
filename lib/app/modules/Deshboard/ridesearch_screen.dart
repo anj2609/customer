@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 
 import 'package:myrideuser/config/utils/colors.dart';
@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:myrideuser/widgets/custom_loader.dart';
+import 'package:myrideuser/widgets/toaster_animation.dart';
 
 class RideOptionScreen extends StatefulWidget {
   final double pickup_lat;
@@ -217,7 +218,7 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
 
           /// ================= TOP LOCATION BAR =================
           Positioned(
-            top: 50,
+            top: MediaQuery.of(context).padding.top + 10,
             left: Dimensions.radiusSize,
             right: Dimensions.radiusSize,
             child: Container(
@@ -284,8 +285,14 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: MediaQuery.of(context).size.height * .45,
-              padding: const EdgeInsets.all(Dimensions.spacingSize16),
+              height: MediaQuery.of(context).size.height * .45 +
+                  MediaQuery.of(context).padding.bottom,
+              padding: EdgeInsets.fromLTRB(
+                Dimensions.spacingSize16,
+                Dimensions.spacingSize16,
+                Dimensions.spacingSize16,
+                Dimensions.spacingSize16 + MediaQuery.of(context).padding.bottom,
+              ),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(
@@ -328,8 +335,6 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                                       vehicle.vehicleTypeId?.toString() ?? "";
                                   pickupaddress = pickupAddress;
                                   dropaddress = dropAddress;
-
-                                  isschedule = isScheduled ? "1" : "0";
 
                                   ///scheduledatetime = formattedDateTime;
                                 });
@@ -503,15 +508,42 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                   const SizedBox(height: Dimensions.radiusSizeSmall),
                   CustomPrimaryDyanamicButton(
                     text: "Next",
-                    onTap: () {
-                      try {
-                        showDialog(
-                      context:Get.context!,
-                      barrierDismissible: false,
-                      builder: (_) => PremiumBlurLoader(),
-                    );
+                    onTap: () async {
+                      // Validate vehicle selection
+                      if (selectedIndex == -1 || vehicletypeid.isEmpty) {
+                        AnimatedTopToast.show(
+                          context: context,
+                          message: "Please select a vehicle type",
+                          backgroundColor: Colors.red,
+                          icon: Icons.error_outline,
+                        );
+                        return;
+                      }
 
-                        Get.find<BookingController>().CreateBooking(
+                      // Validate schedule date if scheduled
+                      if (isScheduled && formattedDateTime.isEmpty) {
+                        AnimatedTopToast.show(
+                          context: context,
+                          message: "Please select a schedule date & time",
+                          backgroundColor: Colors.red,
+                          icon: Icons.error_outline,
+                        );
+                        return;
+                      }
+
+                      try {
+                        final String scheduleFlag = isScheduled ? "1" : "0";
+                        final String scheduleDateTime = isScheduled
+                            ? formattedDateTime
+                            : "";
+
+                        showDialog(
+                          context: Get.context!,
+                          barrierDismissible: false,
+                          builder: (_) => PremiumBlurLoader(),
+                        );
+
+                        await Get.find<BookingController>().CreateBooking(
                           pickup_lat: widget.pickup_lat,
                           pickup_lng: widget.pickup_lng,
                           drop_lat: widget.drop_lat,
@@ -521,29 +553,16 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                           vehicle_type_id: vehicletypeid,
                           pickup_address: pickupaddress,
                           drop_address: dropaddress,
-                          is_schedule: isschedule,
-                          schedule_date_time: formattedDateTime,
+                          is_schedule: scheduleFlag,
+                          schedule_date_time: scheduleDateTime,
                         );
                       } catch (e) {
-                        debugPrint('updateVehicleDocument Error: $e');
+                        debugPrint('CreateBooking Error: $e');
                       } finally {
                         if (Get.isDialogOpen ?? false) {
                           Get.back();
                         }
                       }
-                      // Get.find<BookingController>().CreateBooking(
-                      //   pickup_lat: widget.pickup_lat,
-                      //   pickup_lng: widget.pickup_lng,
-                      //   drop_lat: widget.drop_lat,
-                      //   drop_lng: widget.drop_lng,
-                      //   context: context,
-                      //   estimated_price: estimated_price.toString(),
-                      //   vehicle_type_id: vehicletypeid,
-                      //   pickup_address: pickupaddress,
-                      //   drop_address: dropaddress,
-                      //   is_schedule: isschedule,
-                      //   schedule_date_time: formattedDateTime,
-                      // );
                     },
                   ),
                 ],
