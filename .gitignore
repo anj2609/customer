@@ -48,6 +48,7 @@ app.*.map.json
 **/google-services.json
 **/GoogleService-Info.plist
 firebase_options.dart
+**/notification_access_token.dart
 
 # Environment & secret files
 .env
