@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/gestures.dart';
+import 'package:myrideuser/app/modules/auth/terms_and_conditions_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/style.dart';
 import 'package:myrideuser/data/controller/auth_controller.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:myrideuser/widgets/custom_loader.dart';
+import 'package:myrideuser/widgets/toaster_animation.dart';
 import 'package:pinput/pinput.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -24,6 +26,8 @@ class _OtpScreenState extends State<OtpScreen> {
   Timer? _timer;
   bool _enableResend = false;
   bool _isResending = false;
+  bool _isVerifying = false;
+  bool _termsAccepted = false;
   final TextEditingController _otpController = TextEditingController();
 
   @override
@@ -125,11 +129,19 @@ class _OtpScreenState extends State<OtpScreen> {
                   keyboardType: TextInputType.number,
                   defaultPinTheme: defaultPinTheme,
                   onCompleted: (pin) async {
-                   showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (_) => PremiumBlurLoader(),
-                    );
+                    if (!_termsAccepted) {
+                      AnimatedTopToast.show(
+                        context: context,
+                        message: "Please accept the Terms & Conditions to continue.",
+                        backgroundColor: ColorResources.textColorBaclColor,
+                        icon: Icons.info_outline,
+                      );
+                      _otpController.clear();
+                      return;
+                    }
+
+                    if (_isVerifying) return;
+                    setState(() => _isVerifying = true);
 
                     try {
                       await Get.find<AuthController>().verifyOtpApi(
@@ -139,11 +151,14 @@ class _OtpScreenState extends State<OtpScreen> {
                         context: context,
                       );
                     } catch (e) {
-                      // Get.snackbar("Error", e.toString());
+                      AnimatedTopToast.show(
+                        context: context,
+                        message: "Verification failed. Please try again.",
+                        backgroundColor: ColorResources.textColorBaclColor,
+                        icon: Icons.error_outline,
+                      );
                     } finally {
-                      if (Get.isDialogOpen ?? false) {
-                        Get.back();
-                      }
+                      if (mounted) setState(() => _isVerifying = false);
                     }
                     // Get.find<AuthController>().verifyOtpApi(
                     //   mobileNumber: widget.phoneNumber.toString(),
@@ -155,7 +170,61 @@ class _OtpScreenState extends State<OtpScreen> {
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 24),
+
+              /// Terms & Conditions checkbox
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Checkbox(
+                    value: _termsAccepted,
+                    onChanged: (v) =>
+                        setState(() => _termsAccepted = v ?? false),
+                    activeColor: ColorResources.blueeebutton,
+                    checkColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        text: "I agree to My Ride ",
+                        style: PoppinsMedium.copyWith(
+                          fontSize: 13,
+                          color: ColorResources.blackcolor11,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: "Terms & Conditions",
+                            style: PoppinsMedium.copyWith(
+                              fontSize: 13,
+                              color: ColorResources.blueeebutton,
+                              decoration: TextDecoration.underline,
+                              decorationColor: ColorResources.blueeebutton,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => Get.to(
+                                    () => const TermsAndConditionsScreen(),
+                                    transition: Transition.rightToLeft,
+                                    duration:
+                                        const Duration(milliseconds: 300),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              if (_isVerifying)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                ),
+
+              const SizedBox(height: 16),
               Center(
                 child: CustomOtpButton(
                   text: _enableResend
@@ -165,15 +234,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   onTap: (_enableResend && !_isResending)
                       ? () async {
                           log('resend otp clicked |||||');
-                           setState(() {
-                            _isResending = true;
-                          });
-
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (_) =>  PremiumBlurLoader(),
-                          );
+                          setState(() => _isResending = true);
 
                           try {
                             await Get.find<AuthController>().reSendOtp(
@@ -185,21 +246,14 @@ class _OtpScreenState extends State<OtpScreen> {
                             _otpController.clear();
                             startTimer();
                           } catch (e) {
-                            // Get.snackbar(
-                            //   "",
-                            //   e.toString(),
-                            //   snackPosition: SnackPosition.TOP,
-                            // );
+                            AnimatedTopToast.show(
+                              context: context,
+                              message: "Failed to resend OTP. Please try again.",
+                              backgroundColor: ColorResources.textColorBaclColor,
+                              icon: Icons.error_outline,
+                            );
                           } finally {
-                            if (Navigator.canPop(context)) {
-                              Navigator.of(context, rootNavigator: true).pop();
-                            }
-
-                            if (mounted) {
-                              setState(() {
-                                _isResending = false;
-                              });
-                            }
+                            if (mounted) setState(() => _isResending = false);
                           }
 
                           // setState(() {

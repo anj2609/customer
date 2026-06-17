@@ -6,7 +6,7 @@ import 'package:myrideuser/config/utils/dimensions.dart';
 import 'package:myrideuser/config/utils/style.dart';
 import 'package:myrideuser/data/controller/auth_controller.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
-import 'package:myrideuser/widgets/custom_loader.dart';
+import 'package:myrideuser/widgets/toaster_animation.dart';
 
 class PhoneCheckScreen extends StatefulWidget {
   const PhoneCheckScreen({Key? key}) : super(key: key);
@@ -105,9 +105,7 @@ class _PhoneCheckScreenState extends State<PhoneCheckScreen> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: Stack(
-        children: [
-          SafeArea(
+      body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
@@ -253,9 +251,6 @@ class _PhoneCheckScreenState extends State<PhoneCheckScreen> {
             );
           },
         ),
-          ),
-          if (_isLoading) const PremiumBlurLoader(),
-        ],
       ),
     );
   }

@@ -12,7 +12,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:myrideuser/widgets/custom_loader.dart';
+import 'package:myrideuser/widgets/toaster_animation.dart';
 
 class ProfilePage extends StatefulWidget {
   final String? phonenumber;
@@ -38,6 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
   List<String> genderList = ["Male", "Female", "Other"];
 
   File? selectedImage;
+  bool _isSubmitting = false;
   final ImagePicker _picker = ImagePicker();
 
   void showImageSourceDialog() {
@@ -133,11 +134,17 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     CircleAvatar(
                       radius: 55,
-                      backgroundColor: Colors.grey.shade300,
+                      backgroundColor: Colors.grey.shade200,
                       backgroundImage: selectedImage != null
                           ? FileImage(selectedImage!)
-                          : const AssetImage("assets/images/profile.png")
-                                as ImageProvider,
+                          : null,
+                      child: selectedImage == null
+                          ? Icon(
+                              Icons.person,
+                              size: 55,
+                              color: Colors.grey.shade500,
+                            )
+                          : null,
                     ),
                     Positioned(
                       bottom: 5,
@@ -298,101 +305,86 @@ class _ProfilePageState extends State<ProfilePage> {
 
               const SizedBox(height: 40),
               CustomPrimaryButton(
-                text: "Continue",
+                text: _isSubmitting ? "Saving..." : "Continue",
                 onTap: () async {
-                  String phone = phoneController.text.trim();
-                  String email = emailController.text.trim();
-                  String dob = dobController.text.trim();
+                  if (_isSubmitting) return;
 
-                  //dobController
+                  final name = nameController.text.trim();
+                  final phone = phoneController.text.trim();
+                  final email = emailController.text.trim();
+                  final dob = dobController.text.trim();
+
+                  if (name.isEmpty) {
+                    AnimatedTopToast.show(
+                      context: context,
+                      message: "Please enter your full name.",
+                      backgroundColor: ColorResources.textColorBaclColor,
+                      icon: Icons.error_outline,
+                    );
+                    return;
+                  }
+
                   if (phone.isEmpty) {
-                    Get.snackbar(
-                      '',
-                      "Please enter phone number",
-                      backgroundColor: ColorResources.textColorRed,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.TOP,
+                    AnimatedTopToast.show(
+                      context: context,
+                      message: "Please enter your phone number.",
+                      backgroundColor: ColorResources.textColorBaclColor,
+                      icon: Icons.error_outline,
                     );
                     return;
                   }
 
                   if (email.isEmpty) {
-                    Get.snackbar(
-                      '',
-                      "Please enter email",
-                      backgroundColor: ColorResources.textColorRed,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.TOP,
+                    AnimatedTopToast.show(
+                      context: context,
+                      message: "Please enter your email address.",
+                      backgroundColor: ColorResources.textColorBaclColor,
+                      icon: Icons.error_outline,
                     );
                     return;
                   }
 
                   if (!GetUtils.isEmail(email)) {
-                    Get.snackbar(
-                      '',
-                      "Please enter valid email",
-                      backgroundColor: ColorResources.textColorRed,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.TOP,
-                    );
-                    return;
-                  }
-
-                  if (selectedGender.isEmpty ||
-                      selectedGender.toString().isEmpty) {
-                    Get.snackbar(
-                      '',
-                      "Please select gender",
-                      backgroundColor: ColorResources.textColorRed,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.TOP,
-                    );
-                    return;
-                  }
-                  if (dob.isEmpty) {
-                    Get.snackbar(
-                      '',
-                      "Please select Date of Birth",
-                      backgroundColor: ColorResources.textColorRed,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.TOP,
-                    );
-                    return;
-                  }
-
-                  ///dobController
-
-                  if (selectedImage == null) {
-                    Get.snackbar(
-                      '',
-                      "Please select profile image",
-                      backgroundColor: ColorResources.textColorRed,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.TOP,
-                    );
-                    return;
-                  }
-                  try {
-                    showDialog(
+                    AnimatedTopToast.show(
                       context: context,
-                      barrierDismissible: false,
-                      builder: (_) => PremiumBlurLoader(),
+                      message: "Please enter a valid email address.",
+                      backgroundColor: ColorResources.textColorBaclColor,
+                      icon: Icons.error_outline,
                     );
+                    return;
+                  }
 
+                  if (dob.isEmpty) {
+                    AnimatedTopToast.show(
+                      context: context,
+                      message: "Please select your date of birth.",
+                      backgroundColor: ColorResources.textColorBaclColor,
+                      icon: Icons.error_outline,
+                    );
+                    return;
+                  }
+
+                  setState(() => _isSubmitting = true);
+
+                  try {
                     await Get.find<AuthController>().fillPersonalInfoApi(
-                      name: nameController.text.trim(),
-                      email: emailController.text.trim(),
-                      gender: selectedGender.toString(),
+                      name: name,
+                      email: email,
+                      gender: selectedGender,
                       dob: dob,
                       profileimage: selectedImage,
                       context: context,
                     );
                   } catch (e) {
-                    debugPrint('updateVehicleDocument Error: $e');
+                    debugPrint('fillPersonalInfoApi Error: $e');
+                    AnimatedTopToast.show(
+                      context: context,
+                      message: "Something went wrong. Please try again.",
+                      backgroundColor: ColorResources.textColorBaclColor,
+                      icon: Icons.error_outline,
+                    );
                   } finally {
-                    if (Get.isDialogOpen ?? false) {
-                      Get.back();
-                    }
+                    if (mounted) setState(() => _isSubmitting = false);
                   }
                   // Get.find<AuthController>().fillPersonalInfoApi(
                   //   name: nameController.text.trim(),

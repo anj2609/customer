@@ -10,7 +10,7 @@ import 'package:myrideuser/data/controller/auth_controller.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:myrideuser/widgets/custom_loader.dart';
+import 'package:myrideuser/widgets/toaster_animation.dart';
 
 class UserSignInpScreen extends StatefulWidget {
   const UserSignInpScreen({Key? key}) : super(key: key);
@@ -21,6 +21,8 @@ class UserSignInpScreen extends StatefulWidget {
 
 class _UserSignInpScreenState extends State<UserSignInpScreen> {
   bool isChecked = false;
+  bool _isSendingOtp = false;
+  bool _isGoogleSignIn = false;
   final TextEditingController mobileController = TextEditingController();
 
   @override
@@ -277,34 +279,38 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
 
                       /// Social Buttons login===================================///////////
                       CustomSocialButton(
-                        text: "Continue with Google",
+                        text: _isGoogleSignIn
+                            ? "Signing in..."
+                            : "Continue with Google",
                         images: 'assets/images/google.png',
                         iconColor: Colors.red,
-
                         onTap: () async {
-                          showDialog(
-                            context: Get.context!,
-                            barrierDismissible: false,
-                            builder: (_) => PremiumBlurLoader(),
-                          );
-
+                          if (_isGoogleSignIn) return;
+                          if (!isChecked) {
+                            AnimatedTopToast.show(
+                              context: context,
+                              message: "Please accept the Terms & Conditions to continue.",
+                              backgroundColor: ColorResources.textColorBaclColor,
+                              icon: Icons.info_outline,
+                            );
+                            return;
+                          }
+                          setState(() => _isGoogleSignIn = true);
                           try {
                             await Get.find<AuthController>().signInWithGoogle(
                               provider: 'google',
-
                               context: context,
                             );
                           } catch (e) {
-                            debugPrint('Google sign-in Error: $e');
+                            AnimatedTopToast.show(
+                              context: context,
+                              message: "Google sign-in failed. Please try again.",
+                              backgroundColor: ColorResources.textColorBaclColor,
+                              icon: Icons.error_outline,
+                            );
                           } finally {
-                            if (Get.isDialogOpen ?? false) {
-                              Get.back();
-                            }
+                            if (mounted) setState(() => _isGoogleSignIn = false);
                           }
-                          //   Get.find<AuthController>().signInWithGoogle(
-                          //     provider: 'google',
-                          //  ///context: context,
-                          //   );
                         },
                       ),
 
@@ -325,63 +331,61 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
 
                       /// Sign Up Button
                       CustomPrimaryButton(
-                        text: "Sign up",
+                        text: _isSendingOtp ? "Sending OTP..." : "Sign up",
                         onTap: () async {
-                          String mobile = mobileController.text.trim();
+                          if (_isSendingOtp) return;
 
-                          /// 1️⃣ Mobile Empty Check
+                          final mobile = mobileController.text.trim();
+
                           if (mobile.isEmpty) {
-                            Get.snackbar(
-                              "Error",
-                              "Please enter mobile number",
-                              backgroundColor: ColorResources.textColorRed,
-                              colorText: ColorResources.whiteColor,
-                              duration: Duration(seconds: 2),
+                            AnimatedTopToast.show(
+                              context: context,
+                              message: "Please enter your mobile number.",
+                              backgroundColor: ColorResources.textColorBaclColor,
+                              icon: Icons.error_outline,
                             );
                             return;
                           }
 
-                          /// 2️⃣ Length Check (India 10 digit)
                           if (mobile.length != 10) {
-                            Get.snackbar(
-                              "Error",
-                              "Please enter valid 10 digit number",
-                              colorText: ColorResources.whiteColor,
-                              backgroundColor: ColorResources.textColorRed,
-                              duration: Duration(seconds: 2),
+                            AnimatedTopToast.show(
+                              context: context,
+                              message: "Please enter a valid 10-digit mobile number.",
+                              backgroundColor: ColorResources.textColorBaclColor,
+                              icon: Icons.error_outline,
                             );
                             return;
                           }
 
-                          /// 3️⃣ Checkbox Check
                           if (!isChecked) {
-                            Get.snackbar(
-                              "Error",
-                              "Please accept Terms & Conditions",
+                            AnimatedTopToast.show(
+                              context: context,
+                              message: "Please accept the Terms & Conditions to continue.",
+                              backgroundColor: ColorResources.textColorBaclColor,
+                              icon: Icons.info_outline,
                             );
                             return;
                           }
 
+                          setState(() => _isSendingOtp = true);
                           try {
                             await Get.find<AuthController>().initDeviceData();
-
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (_) => PremiumBlurLoader(),
-                            );
                             await Get.find<AuthController>().sendOtp(
-                              mobileNumber: "$mobile",
+                              mobileNumber: mobile,
                               type: ApiConstants.UserRegister,
                               deviceToken:
-                                  Get.find<AuthController>().deviceToken!,
-                              // 'register',
+                                  Get.find<AuthController>().deviceToken ?? "",
                               context: context,
                             );
+                          } catch (e) {
+                            AnimatedTopToast.show(
+                              context: context,
+                              message: "Failed to send OTP. Please try again.",
+                              backgroundColor: ColorResources.textColorBaclColor,
+                              icon: Icons.error_outline,
+                            );
                           } finally {
-                            if (Get.isDialogOpen ?? false) {
-                              Get.back();
-                            }
+                            if (mounted) setState(() => _isSendingOtp = false);
                           }
 
                           // Get.find<AuthController>().sendOtp(
