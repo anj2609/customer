@@ -30,6 +30,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
 
   String currentAddress = "Loading...";
   LatLng? currentLatLng;
+  String? _currentAdminArea;
 
   /// ================= CURRENT LOCATION =================
   Future<void> getCurrentLocation() async {
@@ -46,6 +47,8 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
     );
 
     Placemark place = placemarks.first;
+
+    _currentAdminArea = place.administrativeArea;
 
     setState(() {
       currentAddress = widget.addressdata?.isNotEmpty == true
@@ -117,16 +120,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
       var location = data["result"]["geometry"]["location"];
       LatLng selectedLatLng = LatLng(location["lat"], location["lng"]);
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        selectedLatLng.latitude,
-        selectedLatLng.longitude,
-      );
-
-      final state = placemarks.isNotEmpty
-          ? placemarks.first.administrativeArea
-          : null;
-
-      if (!_isLocationAllowed(state)) {
+      if (!_isLocationAllowed(_currentAdminArea)) {
         AnimatedTopToast.show(
           context: context,
           message:
