@@ -553,7 +553,20 @@ class AuthController extends GetxController implements GetxService {
     );
 
     if (response.body['code'] == "200") {
-     /// await EasyLoading.dismiss();
+      final String? token = response.body['data']?["token"]?.toString();
+      final String? userId = response.body['data']?['user']?['id']?.toString();
+
+      if (token == null || token.isEmpty || token == 'null' ||
+          userId == null || userId.isEmpty || userId == 'null') {
+        AnimatedTopToast.show(
+          context: context,
+          message: "Verification failed. Please try again.",
+          backgroundColor: ColorResources.textColorBaclColor,
+          icon: Icons.error_outline,
+        );
+        update();
+        return response;
+      }
 
       AnimatedTopToast.show(
         context: context,
@@ -562,16 +575,8 @@ class AuthController extends GetxController implements GetxService {
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
-      authRepo.saveUserToken(response.body['data']["token"].toString());
-      authRepo.saveUserprofileid(
-        response.body['data']['user']['id'].toString(),
-      );
-      log(
-        'login  user token ||||||||||||||| ====== ${response.body['data']["token"].toString()}',
-      );
-      log(
-        'login  user user Id ||||||||||||||| ====== ${response.body['data']['user']['id'].toString()}',
-      );
+      authRepo.saveUserToken(token);
+      authRepo.saveUserprofileid(userId);
 
       await Future.delayed(const Duration(milliseconds: 500));
       if (type == ApiConstants.UserRegister) {
@@ -583,8 +588,7 @@ class AuthController extends GetxController implements GetxService {
       } else {
         Get.toNamed(RouteHelper.getmainNavigationScreen());
       }
-    } else if (response.body['data'] == "401") {
-      
+    } else {
       AnimatedTopToast.show(
         context: context,
         message:
@@ -592,15 +596,6 @@ class AuthController extends GetxController implements GetxService {
         backgroundColor: ColorResources.textColorBaclColor,
         icon: Icons.error_outline,
       );
-    } else {
-     AnimatedTopToast.show(
-        context: context,
-        message:
-            _sanitizeBackendMessage(response.body['message'], "Verification failed. Please check your code and try again."),
-        backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.error_outline,
-      );
-      
     }
 
     update();

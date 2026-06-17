@@ -53,10 +53,7 @@ class ApiClient extends GetxService {
       try {
         if (Foundation.kDebugMode) {
           print('====> GetX Call: $uri');
-          print('====> GetX Body: $body');
-          print('====> GetX Body: ${ApiConstants.baseUrl}');
         }
-        print('====> GetX Basebodyy: $body');
         Http.Response _response = await Http.post(
           Uri.parse(ApiConstants.baseUrl + uri),
           body: jsonEncode(body),
@@ -66,15 +63,13 @@ class ApiClient extends GetxService {
           },
           //_mainHeaders,
         ).timeout(Duration(seconds: timeoutInSeconds));
-        print("++++++++++++>>>=====");
         Response response = handleResponse(_response, uri);
 
         if (Foundation.kDebugMode) {
           print(
-            '====> API Response: [${response.statusCode}] $uri\n${response.body}',
+            '====> API Response: [${response.statusCode}] $uri',
           );
         }
-        print('====>  respnosee : ${response.body}');
         return response;
       } catch (e) {
         return Response(statusCode: 1, statusText: noInternetMessage);
@@ -90,25 +85,20 @@ class ApiClient extends GetxService {
       try {
         if (Foundation.kDebugMode) {
           print('====> GetX Call: $uri');
-          print('====> GetX Body: $body');
-          print('====> GetX Body: ${ApiConstants.baseUrl}');
         }
-        print('====> GetX Basebodyy: $body');
         Http.Response _response = await Http.post(
           Uri.parse(ApiConstants.baseUrl + uri),
           body: jsonEncode(body),
           headers: _mainHeadersMain,
           //_mainHeaders,
         ).timeout(Duration(seconds: timeoutInSeconds));
-        print("++++++++++++>>>=====");
         Response response = handleResponse(_response, uri);
 
         if (Foundation.kDebugMode) {
           print(
-            '====> API Response: [${response.statusCode}] $uri\n${response.body}',
+            '====> API Response: [${response.statusCode}] $uri',
           );
         }
-        print('====>  respnosee : ${response.body}');
         return response;
       } catch (e) {
         return Response(statusCode: 1, statusText: noInternetMessage);
@@ -132,22 +122,16 @@ class ApiClient extends GetxService {
         "authorizationToken":
             "${sharedPreferences.getString(ApiConstants.token)}",
       };
-      print("testing mode: ${body}");
-
       Http.Response _response = await Http.post(
         Uri.parse(ApiConstants.baseUrl + uri),
         body: jsonEncode(body),
         headers: {...headerschat, "Content-Type": "application/json"},
       ).timeout(Duration(seconds: timeoutInSeconds));
 
-      print("STATUS CODE: ${_response.statusCode}");
-      print("RESPONSE BODY: ${_response.body}");
-
       Response response = handleResponse(_response, uri);
 
       return response;
     } catch (e) {
-      print("❌ ERROR: $e");
       return Response(statusCode: 1, statusText: noInternetMessage);
     }
   }
@@ -163,11 +147,6 @@ class ApiClient extends GetxService {
       String? profileId = prefs.getString(ApiConstants.profileid);
       String? token = prefs.getString(ApiConstants.token);
 
-      print("PROFILE ID: $profileId");
-      print("PROFILE ID: $token");
-      print("TOKEN: $token");
-      print("boyyy: $body");
-
       Http.Response httpResponse = await Http.post(
         Uri.parse(ApiConstants.baseUrl + uri),
         body: jsonEncode(body),
@@ -179,13 +158,12 @@ class ApiClient extends GetxService {
         },
       ).timeout(Duration(seconds: timeoutInSeconds));
 
-      print("STATUS: ${httpResponse.statusCode}");
-      print("BODY: ${httpResponse.body}");
+      if (Foundation.kDebugMode) {
+        print("STATUS: ${httpResponse.statusCode}");
+      }
 
       return handleResponse(httpResponse, uri);
-    } catch (e, s) {
-      print("ERROR: $e");
-      print("STACK: $s");
+    } catch (e) {
       return Response(statusCode: 1, statusText: noInternetMessage);
     }
   }
@@ -345,9 +323,7 @@ class ApiClient extends GetxService {
       try {
         if (Foundation.kDebugMode) {
           print('====> GetX Call: $uri');
-          print('====> GetX Body: $body');
         }
-        print('====> GetX Basebodyy: $body');
         Http.Response _response = await Http.post(
           Uri.parse(ApiConstants.baseUrl + uri),
           body: body,
@@ -355,15 +331,13 @@ class ApiClient extends GetxService {
 
           /// _mainHeaders,
         ).timeout(Duration(seconds: timeoutInSeconds));
-        print("++++++++++++>>>=====");
         Response response = handleResponse(_response, uri);
 
         if (Foundation.kDebugMode) {
           print(
-            '====> API Response: [${response.statusCode}] $uri\n${response.body}',
+            '====> API Response: [${response.statusCode}] $uri',
           );
         }
-        print('====>  respnosee : ${response.body}');
         return response;
       } catch (e) {
         return Response(statusCode: 1, statusText: noInternetMessage);
@@ -380,13 +354,9 @@ class ApiClient extends GetxService {
       return Response(statusCode: -1, statusText: 'you are using vpn');
     } else {
       try {
-        print('====> GetX Call : $uri');
-        print(
-          '====> GetX Call userrrr: ${sharedPreferences.getString(ApiConstants.token)}',
-        );
-        print(
-          '====> GetX Body user get profile: ${sharedPreferences.getString(ApiConstants.profileid)}',
-        );
+        if (Foundation.kDebugMode) {
+          print('====> GetX Call : $uri');
+        }
 
         Map<String, String> headers = {
           'Accept': 'application/json',
@@ -394,17 +364,12 @@ class ApiClient extends GetxService {
           'authorizationToken':
               '${sharedPreferences.getString(ApiConstants.token)}',
         };
-        debugPrint('====> API Call: $uri\nHeader: $_mainHeadersMain');
-        print(' Mainnnnnnn headers $_mainHeadersMain');
-        print(' url $uri');
         Http.Response _response = await Http.get(
           Uri.parse(ApiConstants.baseUrl + uri),
           headers: headers,
 
           /// _mainHeadersMain,
         ).timeout(Duration(seconds: timeoutInSeconds));
-        print(' Majannah headers $_mainHeadersMain');
-        debugPrint('====> API  Fund : - response data v${_response.body}');
         return handleResponse(_response, uri);
       } catch (e) {
         return Response(statusCode: 1, statusText: noInternetMessage);
@@ -417,15 +382,14 @@ class ApiClient extends GetxService {
       return Response(statusCode: -1, statusText: 'you are using vpn');
     } else {
       try {
-        print('====> GetX Call : $uri');
-
-        print(' url $uri');
+        if (Foundation.kDebugMode) {
+          print('====> GetX Call : $uri');
+        }
         Http.Response _response = await Http.get(
           Uri.parse(ApiConstants.baseUrl + uri),
           headers: {"Accept": 'application/json'},
         ).timeout(Duration(seconds: timeoutInSeconds));
 
-        debugPrint('====> API  Fund : - response data v${_response.body}');
         return handleResponse(_response, uri);
       } catch (e) {
         return Response(statusCode: 1, statusText: noInternetMessage);
@@ -438,17 +402,14 @@ class ApiClient extends GetxService {
       return Response(statusCode: -1, statusText: 'you are using vpn');
     } else {
       try {
-        // debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
-        // print(' Majannaha headers $_mainHeaders');
-        print(' url $uri');
-        print(' header $_mainHeadersMain');
+        if (Foundation.kDebugMode) {
+          print('====> GetX Call : $uri');
+        }
         Http.Response _response = await Http.get(
           Uri.parse(ApiConstants.baseUrl + uri),
           headers: _mainHeadersMain,
           // _mainHeaders,
         ).timeout(Duration(seconds: timeoutInSeconds));
-        //print(' Majannah headers $_mainHeaders');
-        debugPrint('====> API  Fund : - response data v${_response.body}');
         return handleResponse(_response, uri);
       } catch (e) {
         return Response(statusCode: 1, statusText: noInternetMessage);
@@ -491,9 +452,6 @@ class ApiClient extends GetxService {
     } else if (_response.statusCode != 200 && _response.body == null) {
       _response = Response(statusCode: 0, statusText: noInternetMessage);
     }
-    debugPrint(
-      '====> API Response: [${_response.statusCode}] $uri\n${_response.body}',
-    );
     return _response;
   }
 }
