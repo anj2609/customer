@@ -165,7 +165,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
   bool isSearching = false;
   bool _isCheckingLocation = false;
 
-  static const List<String> _allowedStates = ['delhi', 'telangana'];
+  static const List<String> _allowedStates = ['delhi', 'tripura'];
 
   bool _isLocationAllowed(String? administrativeArea) {
     if (administrativeArea == null || administrativeArea.isEmpty) return false;
