@@ -49,6 +49,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
     Placemark place = placemarks.first;
 
     _currentAdminArea = place.administrativeArea;
+    print('DEBUG: Current admin area detected: $_currentAdminArea');
 
     setState(() {
       currentAddress = widget.addressdata?.isNotEmpty == true
@@ -120,7 +121,44 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
       var location = data["result"]["geometry"]["location"];
       LatLng selectedLatLng = LatLng(location["lat"], location["lng"]);
 
-      if (!_isLocationAllowed(_currentAdminArea)) {
+      // If current location hasn't been determined yet, try to fetch it now
+      if (_currentAdminArea == null && currentLatLng == null) {
+        try {
+          await getCurrentLocation();
+        } catch (_) {}
+      }
+
+      // Check destination state from the selected place's address components
+      String? destAdminArea;
+      if (data["result"]["address_components"] != null) {
+        for (var component in data["result"]["address_components"]) {
+          List types = component["types"] ?? [];
+          if (types.contains("administrative_area_level_1")) {
+            destAdminArea = component["long_name"];
+            break;
+          }
+        }
+      }
+
+      // If we still don't have current location info, try reverse geocoding
+      if (_currentAdminArea == null && currentLatLng != null) {
+        try {
+          List<Placemark> placemarks = await placemarkFromCoordinates(
+            currentLatLng!.latitude,
+            currentLatLng!.longitude,
+          );
+          if (placemarks.isNotEmpty) {
+            _currentAdminArea = placemarks.first.administrativeArea;
+          }
+        } catch (_) {}
+      }
+
+      // Allow ride if either pickup or destination is in an allowed state
+      // If we couldn't determine the current area, don't block the user
+      final bool pickupAllowed = _currentAdminArea == null || _isLocationAllowed(_currentAdminArea);
+      final bool destAllowed = destAdminArea == null || _isLocationAllowed(destAdminArea);
+
+      if (!pickupAllowed && !destAllowed) {
         AnimatedTopToast.show(
           context: context,
           message:
@@ -171,10 +209,12 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(title: const Text("Where do you want to go?")),
       body: Column(
         children: [
+          /// ===== TOP: Input fields (fixed height) =====
           Container(
             margin: const EdgeInsets.all(Dimensions.spacingSize16),
             padding: const EdgeInsets.all(16),
@@ -183,99 +223,60 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
               borderRadius: BorderRadius.circular(Dimensions.spacingSize16),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (!isSearching)
-                      GestureDetector(
-                        onTap: () {
+                // Pickup location row / search field
+                if (!isSearching)
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isSearching = true;
+                        currentlocaController.text = currentAddress;
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(Icons.my_location, color: Colors.blue),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            currentAddress,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        const Icon(Icons.edit, size: 16, color: Colors.grey),
+                      ],
+                    ),
+                  ),
+
+                if (isSearching)
+                  TextField(
+                    controller: currentlocaController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: "Search pickup location...",
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
                           setState(() {
-                            isSearching = true;
-                            currentlocaController.text = currentAddress;
+                            isSearching = false;
+                            predictions.clear();
                           });
                         },
-                        child: Row(
-                          children: [
-                            const Icon(Icons.my_location, color: Colors.blue),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                currentAddress,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-                            const Icon(
-                              Icons.edit,
-                              size: 16,
-                              color: Colors.grey,
-                            ),
-                          ],
-                        ),
                       ),
-
-                    /// 🔍 SEARCH UI
-                    if (isSearching)
-                      Column(
-                        children: [
-                          TextField(
-                            controller: currentlocaController,
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              hintText: "Search location...",
-                              prefixIcon: Icon(Icons.search),
-                              suffixIcon: IconButton(
-                                icon: Icon(Icons.close),
-                                onPressed: () {
-                                  setState(() {
-                                    isSearching = false;
-                                  });
-                                },
-                              ),
-                            ),
-                            onChanged: (value) {
-                              if (value.length > 2) {
-                                searchPlaces(value);
-                              }
-                            },
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          /// 🔹 RESULT LIST
-                          ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: predictions.length,
-                            itemBuilder: (context, index) {
-                              final item = predictions[index];
-
-                              return ListTile(
-                                leading: Icon(Icons.location_on),
-                                title: Text(
-                                  item['structured_formatting']['main_text'],
-                                ),
-                                subtitle: Text(item['description']),
-                                onTap: () async {
-                                  await getPlaceDetails(item['place_id']);
-
-                                  setState(() {
-                                    currentAddress = item['description'];
-                                    isSearching = false;
-                                    predictions.clear();
-                                  });
-                                },
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
+                    ),
+                    onChanged: (value) {
+                      if (value.length > 2) {
+                        searchPlaces(value);
+                      }
+                    },
+                  ),
 
                 const Divider(),
 
-                /// SEARCH FIELD
+                // Destination search field
                 TextField(
                   controller: searchController,
                   onChanged: searchPlace,
@@ -284,9 +285,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                     filled: true,
                     fillColor: Colors.grey.shade200,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        Dimensions.spacingSize12,
-                      ),
+                      borderRadius: BorderRadius.circular(Dimensions.spacingSize12),
                       borderSide: BorderSide.none,
                     ),
                   ),
@@ -295,7 +294,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
             ),
           ),
 
-          /// ===== LIST =====
+          /// ===== BOTTOM: Results list (fills remaining space) =====
           if (_isCheckingLocation)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
@@ -316,16 +315,28 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
           else
             Expanded(
               child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 itemCount: predictions.length,
                 itemBuilder: (context, index) {
                   var place = predictions[index];
-
                   return ListTile(
                     leading: const Icon(Icons.location_on),
                     title: Text(place["structured_formatting"]["main_text"]),
                     subtitle: Text(place["description"]),
                     onTap: () {
-                      getPlaceDetail(place["place_id"]);
+                      if (isSearching) {
+                        // User is editing pickup location
+                        getPlaceDetails(place["place_id"]).then((_) {
+                          setState(() {
+                            currentAddress = place['description'];
+                            isSearching = false;
+                            predictions.clear();
+                          });
+                        });
+                      } else {
+                        // User is selecting destination
+                        getPlaceDetail(place["place_id"]);
+                      }
                     },
                   );
                 },
