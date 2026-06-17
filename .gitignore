@@ -43,3 +43,26 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase / Google Services (contains API keys & project secrets)
+**/google-services.json
+**/GoogleService-Info.plist
+firebase_options.dart
+
+# Environment & secret files
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.jks
+*.keystore
+
+# Android signing & local config
+**/local.properties
+**/key.properties
+*.keystore
+*.jks
+
+# VS Code
+.vscode/
