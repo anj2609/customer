@@ -503,8 +503,7 @@ class AuthController extends GetxController implements GetxService {
         icon: Icons.check_circle_rounded,
       );
 
-      // Remove all previous routes
-      Get.offAllNamed(RouteHelper.getLoginRoute());
+      Get.offAllNamed(RouteHelper.getLestMyRideStartedScreenRoute());
     } else if (response.statusCode == 500) {
     //  await EasyLoading.dismiss();
 

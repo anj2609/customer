@@ -44,6 +44,9 @@ class _OnBoardingSCreenState extends State<OnBoardingSCreen> {
   @override
   void initState() {
     super.initState();
+    SharedPreferences.getInstance().then(
+      (prefs) => prefs.setBool('has_seen_onboarding', true),
+    );
 
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (_currentIndex < onboardingData.length - 1) {
@@ -199,12 +202,8 @@ class _OnBoardingSCreenState extends State<OnBoardingSCreen> {
                             curve: Curves.easeInOut,
                           );
                         } else {
-                          SharedPreferences.getInstance().then(
-                            (prefs) => prefs.setBool('has_seen_onboarding', true),
-                          );
                           Get.toNamed(
-                            RouteHelper
-                                .getLestMyRideStartedScreenRoute(),
+                            RouteHelper.getLestMyRideStartedScreenRoute(),
                           );
                         }
                       },
