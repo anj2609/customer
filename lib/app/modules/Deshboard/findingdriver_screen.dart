@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -9,11 +9,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:myrideuser/config/route.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/dimensions.dart';
+import 'package:myrideuser/app/modules/Deshboard/completed_ride_sheet.dart';
 import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:myrideuser/data/controller/chat_controller.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:myrideuser/data/modal/trackride_model.dart';
-import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -32,18 +32,9 @@ class FindingDriverUI extends StatefulWidget {
 
 class _FindingDriverUIState extends State<FindingDriverUI> {
   Timer? _timer;
-  int selectedMood = -1;
   bool _isNavigating = false;
   bool addressLoaded = false;
   bool _isChatOpening = false;
-
-  final List<IconData> _moodIcons = [
-    Icons.sentiment_very_dissatisfied,
-    Icons.sentiment_dissatisfied,
-    Icons.sentiment_neutral,
-    Icons.sentiment_satisfied,
-    Icons.sentiment_very_satisfied,
-  ];
   Future<void> loadCarIcon() async {
     carIcon = await getCustomMarker();
     setState(() {});
@@ -615,7 +606,14 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                 //   // return const SizedBox();
                 // }
                 if (status == "completed") {
-                  return buildCompletedSheet(data, driverdata);
+                  return CompletedRideSheet(
+                    key: const ValueKey('completed_sheet'),
+                    bookingId: widget.booking_id,
+                    rideData: data,
+                    tripDetails: Map<String, dynamic>.from(driverdata),
+                    dropAddress: dropAddress,
+                    onTimerCancel: () => _timer?.cancel(),
+                  );
                 }
 
                 /// CANCELLED
@@ -1036,183 +1034,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     );
   }
 
-  /////======================== Complete ride =============
-
-  Widget buildCompletedSheet(DatTrackRideDetails? data, Map details) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      minChildSize: 0.75,
-      maxChildSize: 0.95,
-      builder: (context, scrollController) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-          ),
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                /// TOP RED LOCATION ICON
-                Container(
-                  height: 70,
-                  width: 70,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.location_on,
-                    color: Colors.white,
-                    size: 35,
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                /// TITLE
-                const Text(
-                  "You have arrived!",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                ),
-
-                const SizedBox(height: 14),
-                const Divider(),
-
-                const SizedBox(height: 10),
-
-                /// DESTINATION NAME
-                Text(
-                  data!.driverInfo!.name ?? "",
-
-                  /// "Larchmont Hotel",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-
-                const SizedBox(height: 4),
-
-                Text(
-                  dropAddress,
-
-                  //"27 W 11th St, New York, NY 10011, United States",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-
-                const SizedBox(height: 20),
-
-                /// TRIP INFO BOX
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _TripInfo(
-                        icon: Icons.access_time,
-                        title: details['estimated_time'] ?? "0.0",
-                        //"3 mins",
-                        subtitle: "Duration",
-                      ),
-                      _TripInfo(
-                        icon: Icons.route,
-                        title: details['total_fare'] ?? "1.1 km",
-                        subtitle: "Distance",
-                      ),
-                      _TripInfo(
-                        icon: Icons.speed,
-                        title: details['distance_km'] ?? "22 km/h",
-                        subtitle: "Avg. Speed",
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                const Text(
-                  "How was your mood during this trip?",
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-
-                const SizedBox(height: 16),
-
-                /// EMOJI ROW
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(
-                    5,
-                    (index) => GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedMood = index;
-                        });
-                      },
-                      child: CircleAvatar(
-                        radius: 22,
-                        backgroundColor: selectedMood == index
-                            ? Colors.blue.shade50
-                            : Colors.transparent,
-                        child: Icon(
-                          _moodIcons[index],
-                          color: selectedMood == index
-                              ? Colors.blue
-                              : Colors.black54,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                /// FINISH BUTTON
-                CustomPrimaryButton(
-                  text: "Finish",
-                  onTap: () {
-                    if (selectedMood == -1) {
-                      Get.snackbar(
-                        "Selection Required",
-                        "Please select your experience",
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
-                      );
-                      return;
-                    }
-                    _timer?.cancel();
-                    Get.offAndToNamed(
-                      RouteHelper.getdriverRatingScreen(),
-                      arguments: {
-                        'booking_id': widget.booking_id,
-                        'drivername': data!.driverInfo!.name ?? "",
-                        'details': details['distance_km'] ?? '0.0',
-                        'estimatetime': details['estimated_time'] ?? "0.0",
-                        'distance': details['total_fare'] ?? "1.1 km",
-                        'distancekillo': details['distance_km'] ?? "22 km/h",
-                        'base_fare': details['base_fare'],
-                        'discount': details['discount_fare'],
-                        'total': details['total_fare'],
-                        'profile':data.driverInfo!.profileImage,
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+  /////======================== Complete ride moved to CompletedRideSheet =============
 }
 
 ////// finding  loader ==============
@@ -1281,30 +1103,3 @@ class _RippleLoaderState extends State<RippleLoader>
   }
 }
 
-class _TripInfo extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const _TripInfo({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.black54),
-        const SizedBox(height: 6),
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 4),
-        Text(
-          subtitle,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-      ],
-    );
-  }
-}

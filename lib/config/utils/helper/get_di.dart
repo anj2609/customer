@@ -1,6 +1,6 @@
 import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:myrideuser/data/controller/chat_controller.dart';
-
+import 'package:myrideuser/data/controller/payment_controller.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 
 import 'package:myrideuser/data/repository/booking_repo.dart';
@@ -64,6 +64,11 @@ Future<Map<String, Map<String, String>>> init() async {
 
   Get.lazyPut<ChatController>(
     () => ChatController(chatRepo: Get.find()),
+    fenix: true,
+  );
+
+  Get.lazyPut<PaymentController>(
+    () => PaymentController(bookingRepo: Get.find()),
     fenix: true,
   );
 

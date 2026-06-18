@@ -56,6 +56,9 @@ class ApiConstants {
   static const String customerWallet = 'customer-wallet-balance';
    static const String topCreateAmount = 'create-topup-intent';
      static const String vehicalTypeList = 'vehical-type-list';
+   static const String paymentStatus = 'payment-status';
+   static const String generateQrPayment = 'generate-qr-payment';
+   static const String completeRide = 'complete-ride';
    /////vehical-type-list
 
 

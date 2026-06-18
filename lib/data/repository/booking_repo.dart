@@ -112,9 +112,19 @@ Future<Response> cancelRideApi({ required String bookingid, required String rese
 
 
 
-///booking_id , rating
+  Future<Response> getPaymentStatus({required String bookingId}) async {
+    return apiClient.getDataApi('${ApiConstants.paymentStatus}/$bookingId');
+  }
 
+  Future<Response> generateQrPayment({required String bookingId}) async {
+    return apiClient.myridepostData(ApiConstants.generateQrPayment, {
+      'booking_id': bookingId,
+    });
+  }
 
-//cancellation
-  ///cancellation
+  Future<Response> completeRide({required String bookingId}) async {
+    return apiClient.myridepostData(ApiConstants.completeRide, {
+      'booking_id': bookingId,
+    });
+  }
 }
