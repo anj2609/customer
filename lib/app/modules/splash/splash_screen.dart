@@ -77,7 +77,12 @@ class _SplashScreenState extends State<SplashScreen>
         );
       }
     } else {
-      Get.toNamed(RouteHelper.getOnboardingRoute());
+      final bool hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+      if (hasSeenOnboarding) {
+        Get.toNamed(RouteHelper.getLestMyRideStartedScreenRoute());
+      } else {
+        Get.toNamed(RouteHelper.getOnboardingRoute());
+      }
     }
   }
 

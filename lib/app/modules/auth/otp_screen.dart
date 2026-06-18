@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:flutter/gestures.dart';
-import 'package:myrideuser/app/modules/auth/terms_and_conditions_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/style.dart';
 import 'package:myrideuser/data/controller/auth_controller.dart';
@@ -27,7 +25,6 @@ class _OtpScreenState extends State<OtpScreen> {
   bool _enableResend = false;
   bool _isResending = false;
   bool _isVerifying = false;
-  bool _termsAccepted = false;
   final TextEditingController _otpController = TextEditingController();
 
   @override
@@ -129,17 +126,6 @@ class _OtpScreenState extends State<OtpScreen> {
                   keyboardType: TextInputType.number,
                   defaultPinTheme: defaultPinTheme,
                   onCompleted: (pin) async {
-                    if (!_termsAccepted) {
-                      AnimatedTopToast.show(
-                        context: context,
-                        message: "Please accept the Terms & Conditions to continue.",
-                        backgroundColor: ColorResources.textColorBaclColor,
-                        icon: Icons.info_outline,
-                      );
-                      _otpController.clear();
-                      return;
-                    }
-
                     if (_isVerifying) return;
                     setState(() => _isVerifying = true);
 
@@ -171,52 +157,6 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
 
               const SizedBox(height: 24),
-
-              /// Terms & Conditions checkbox
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Checkbox(
-                    value: _termsAccepted,
-                    onChanged: (v) =>
-                        setState(() => _termsAccepted = v ?? false),
-                    activeColor: ColorResources.blueeebutton,
-                    checkColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        text: "I agree to My Ride ",
-                        style: PoppinsMedium.copyWith(
-                          fontSize: 13,
-                          color: ColorResources.blackcolor11,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: "Terms & Conditions",
-                            style: PoppinsMedium.copyWith(
-                              fontSize: 13,
-                              color: ColorResources.blueeebutton,
-                              decoration: TextDecoration.underline,
-                              decorationColor: ColorResources.blueeebutton,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () => Get.to(
-                                    () => const TermsAndConditionsScreen(),
-                                    transition: Transition.rightToLeft,
-                                    duration:
-                                        const Duration(milliseconds: 300),
-                                  ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
 
               if (_isVerifying)
                 const Padding(

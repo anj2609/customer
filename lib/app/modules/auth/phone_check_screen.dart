@@ -1,6 +1,8 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:myrideuser/app/modules/auth/terms_and_conditions_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/dimensions.dart';
 import 'package:myrideuser/config/utils/style.dart';
@@ -18,6 +20,7 @@ class PhoneCheckScreen extends StatefulWidget {
 class _PhoneCheckScreenState extends State<PhoneCheckScreen> {
   final TextEditingController _phoneController = TextEditingController();
   bool _isLoading = false;
+  bool _termsAccepted = false;
   String? _errorMessage;
 
   @override
@@ -35,6 +38,15 @@ class _PhoneCheckScreenState extends State<PhoneCheckScreen> {
     }
     if (phone.length != 10) {
       setState(() => _errorMessage = 'Please enter a valid 10-digit number.');
+      return;
+    }
+    if (!_termsAccepted) {
+      AnimatedTopToast.show(
+        context: context,
+        message: 'Please accept the Terms & Conditions to continue.',
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.info_outline,
+      );
       return;
     }
 
@@ -223,7 +235,55 @@ class _PhoneCheckScreenState extends State<PhoneCheckScreen> {
                       ),
                     ],
 
-                    SizedBox(height: size.height * 0.05),
+                    SizedBox(height: size.height * 0.04),
+
+                    /// Terms & Conditions checkbox
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Checkbox(
+                          value: _termsAccepted,
+                          onChanged: (v) =>
+                              setState(() => _termsAccepted = v ?? false),
+                          activeColor: ColorResources.blueeebutton,
+                          checkColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              text: "I agree to My Ride ",
+                              style: PoppinsMedium.copyWith(
+                                fontSize: 13,
+                                color: ColorResources.blackcolor11,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: "Terms & Conditions",
+                                  style: PoppinsMedium.copyWith(
+                                    fontSize: 13,
+                                    color: ColorResources.blueeebutton,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: ColorResources.blueeebutton,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () => Get.to(
+                                          () => const TermsAndConditionsScreen(),
+                                          transition: Transition.rightToLeft,
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                        ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: size.height * 0.03),
 
                     CustomPrimaryButton(
                       text: 'Continue',

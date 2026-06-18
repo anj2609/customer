@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:myrideuser/config/route.dart';
@@ -198,6 +199,9 @@ class _OnBoardingSCreenState extends State<OnBoardingSCreen> {
                             curve: Curves.easeInOut,
                           );
                         } else {
+                          SharedPreferences.getInstance().then(
+                            (prefs) => prefs.setBool('has_seen_onboarding', true),
+                          );
                           Get.toNamed(
                             RouteHelper
                                 .getLestMyRideStartedScreenRoute(),

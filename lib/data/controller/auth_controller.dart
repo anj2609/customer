@@ -278,13 +278,6 @@ class AuthController extends GetxController implements GetxService {
 
     if (loginResp.body != null && loginResp.body['code'] == '200') {
       // Registered user
-      AnimatedTopToast.show(
-        context: context,
-        message: 'Your number is already registered. Signing you in...',
-        backgroundColor: ColorResources.appColor,
-        icon: Icons.check_circle_rounded,
-      );
-      await Future.delayed(const Duration(milliseconds: 600));
       RouteHelper.getOtpScreenRoute(
         phone,
         ApiConstants.UserLogin,
@@ -309,14 +302,6 @@ class AuthController extends GetxController implements GetxService {
 
     if (isNotFound) {
       // Not registered — send a register OTP.
-      AnimatedTopToast.show(
-        context: context,
-        message: 'Please create your account to continue.',
-        backgroundColor: ColorResources.blueeebutton,
-        icon: Icons.person_add_rounded,
-      );
-      await Future.delayed(const Duration(milliseconds: 600));
-
       final regResp = await authRepo.sendOtpApi(
         phone: phone,
         type: ApiConstants.UserRegister,

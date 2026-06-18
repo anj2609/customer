@@ -5,6 +5,12 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
 android {
     namespace = "com.myrideinfiniti"
 
@@ -17,10 +23,6 @@ android {
 
         // ✅ REQUIRED for flutter_local_notifications
         isCoreLibraryDesugaringEnabled = true
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
     }
 
     defaultConfig {
