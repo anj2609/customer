@@ -184,6 +184,22 @@ class ProfiileRepo extends GetxService {
     });
   }
 
+  Future<Response> verifyTopup({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+    required String amount,
+    required String idempotencyKey,
+  }) async {
+    return apiClient.myridepostData(ApiConstants.verifyTopup, {
+      "razorpay_order_id": orderId,
+      "razorpay_payment_id": paymentId,
+      "razorpay_signature": signature,
+      "amount": amount,
+      "idempotency_key": idempotencyKey,
+    });
+  }
+
   ///topCreateAmount
   /////// customerWallet
 }

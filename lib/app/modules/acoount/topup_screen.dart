@@ -1,4 +1,3 @@
-import 'package:myrideuser/app/modules/acoount/topuppaymentmethod_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/dimensions.dart';
 import 'package:myrideuser/config/utils/style.dart';
@@ -146,30 +145,27 @@ class _TopupScreenState extends State<TopupScreen> {
               right: Dimensions.spacingSize10,
               top: Dimensions.spacingSize40,
             ),
-            child: CustomPrimaryButton(
-              text: "Next",
-              onTap: () {
-                if (amountController.text.isNotEmpty) {
-                  Get.find<ProfileController>().createTopUpIntent(
-                    context: context,
-                    amount: amountController.text.toString(),
-                  );
-
-                  // Get.to(
-                  //   () => TopUpMethodScreen(
-                  //     paymentamount: '666',
-                  //   ),
-                  //   transition: Transition.leftToRight,
-                  //   duration: const Duration(milliseconds: 300),
-                  // );
-                } else {
-                  Get.snackbar(
-                    "Error",
-                    "Please enter amount",
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                }
-              },
+            child: GetBuilder<ProfileController>(
+              builder: (ctrl) => CustomOtpButton(
+                text: "Pay via Razorpay",
+                isLoading: ctrl.isTopUpIntentLoading,
+                onTap: ctrl.isTopUpIntentLoading
+                    ? null
+                    : () {
+                        if (amountController.text.isNotEmpty) {
+                          ctrl.createTopUpIntent(
+                            context: context,
+                            amount: amountController.text.toString(),
+                          );
+                        } else {
+                          Get.snackbar(
+                            "Error",
+                            "Please enter amount",
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        }
+                      },
+              ),
             ),
           ),
         ],

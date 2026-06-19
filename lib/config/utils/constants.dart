@@ -59,6 +59,7 @@ class ApiConstants {
    static const String paymentStatus = 'payment-status';
    static const String generateQrPayment = 'generate-qr-payment';
    static const String completeRide = 'complete-ride';
+   static const String verifyTopup = 'verify-topup';
    /////vehical-type-list
 
 

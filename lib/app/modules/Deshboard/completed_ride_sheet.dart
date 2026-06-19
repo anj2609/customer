@@ -61,7 +61,9 @@ class _CompletedRideSheetState extends State<CompletedRideSheet>
   }
 
   bool _isPaymentResolved(PaymentState state) =>
-      state == PaymentState.cashDone || state == PaymentState.onlinePaid;
+      state == PaymentState.cashDone ||
+      state == PaymentState.onlinePaid ||
+      state == PaymentState.walletDone;
 
   @override
   Widget build(BuildContext context) {
@@ -270,6 +272,127 @@ class _CompletedRideSheetState extends State<CompletedRideSheet>
               Text(
                 'Cash payment confirmed',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+              ),
+            ],
+          ),
+        );
+
+      case PaymentState.onlineComingSoon:
+        return Container(
+          margin: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.purple.shade50,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.purple.shade200),
+          ),
+          child: const Column(
+            children: [
+              Icon(Icons.smartphone_outlined, color: Colors.purple, size: 40),
+              SizedBox(height: 12),
+              Text(
+                'Online Payment',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'Coming Soon',
+                style: TextStyle(
+                  color: Colors.purple,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                ),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'Online payment will be available soon. Please use cash or wallet.',
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+
+      case PaymentState.wallet:
+        return Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.account_balance_wallet, color: Colors.blue, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Obx(() => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Wallet Payment',
+                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Available Balance: ₹${payCtrl.walletBalance.value.toStringAsFixed(2)}',
+                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                      ],
+                    )),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            CustomPrimaryButton(
+              text: 'Pay via Wallet',
+              onTap: () => payCtrl.confirmWalletPayment(),
+            ),
+            const SizedBox(height: 24),
+          ],
+        );
+
+      case PaymentState.walletConfirming:
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: CustomOtpButton(
+            text: 'Processing…',
+            onTap: null,
+            isLoading: true,
+          ),
+        );
+
+      case PaymentState.walletDone:
+        return Container(
+          margin: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.green.shade50,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.green.shade200),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 28),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Obx(() => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Wallet Payment Successful!',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Balance: ₹${payCtrl.walletBalance.value.toStringAsFixed(2)}',
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
+                )),
               ),
             ],
           ),

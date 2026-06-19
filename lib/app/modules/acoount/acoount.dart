@@ -233,73 +233,79 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
                     Divider(color: ColorResources.TextColorForGrey),
                     SizedBox(height: Dimensions.spacingSize10),
 
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(Dimensions.spacingSize10),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
+                    GetBuilder<ProfileController>(
+                      builder: (pc) => Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(Dimensions.spacingSize10),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: ColorResources.blueeebutton,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.account_balance_wallet,
                               color: ColorResources.blueeebutton,
                             ),
                           ),
-                          child: Icon(
-                            Icons.account_balance_wallet,
-                            color: ColorResources.blueeebutton,
+                          SizedBox(width: Dimensions.spacingSize12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                pc.isCustomerWalletLoading
+                                    ? const SizedBox(
+                                        height: 16,
+                                        width: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text(
+                                        '₹ ${pc.walletbalance ?? '0'}',
+                                        style: PoppinsMedium.copyWith(
+                                          color: ColorResources.blackcolor11,
+                                        ),
+                                      ),
+                                SizedBox(height: 3),
+                                Text(
+                                  "Available balance",
+                                  style: PoppinsReguler.copyWith(
+                                    color: ColorResources.blackcolor11,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        SizedBox(width: Dimensions.spacingSize12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '₹ ${profilecontroller.walletbalance ?? 0}',
-                                // profilecontroller.walletbalance!.isNotEmpty
-                                //     ? "₹ ${profilecontroller.walletbalance}"
-                                //     : "₹ 0",
-
-                                ///  profilecontroller.
-                                // "₹ 3582.67",
-                                style: PoppinsMedium.copyWith(
-                                  color: ColorResources.blackcolor11,
+                          GestureDetector(
+                            onTap: () {
+                              Get.to(
+                                () => const TopupScreen(),
+                                transition: Transition.rightToLeft,
+                                duration: const Duration(milliseconds: 0),
+                              )?.then((_) {
+                                Get.find<ProfileController>().customerWalletAmount();
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: Dimensions.spacingSize18,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  Dimensions.spacingSize25,
+                                ),
+                                border: Border.all(
+                                  color: ColorResources.TextColorForGrey,
                                 ),
                               ),
-                              SizedBox(height: 3),
-                              Text(
-                                "Available balance",
-                                style: PoppinsReguler.copyWith(
-                                  color: ColorResources.blackcolor11,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Get.to(
-                              Get.to(TopupScreen()),
-                              transition: Transition.rightToLeft,
-                              duration: Duration(milliseconds: 0),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: Dimensions.spacingSize18,
-                              vertical: 8,
+                              child: const Text("Top Up"),
                             ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(
-                                Dimensions.spacingSize25,
-                              ),
-                              border: Border.all(
-                                color: ColorResources.TextColorForGrey,
-                              ),
-                            ),
-                            child: const Text("Top Up"),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

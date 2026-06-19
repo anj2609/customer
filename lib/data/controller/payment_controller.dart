@@ -1,28 +1,35 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:myrideuser/data/repository/booking_repo.dart';
+import 'package:myrideuser/data/repository/profile_repo.dart';
 
 enum PaymentState {
   loading,
   cash,
   cashConfirming,
   cashDone,
+  onlineComingSoon,
   onlinePaid,
   onlineLoadingQr,
   onlineQrReady,
   onlineQrExpired,
+  wallet,
+  walletConfirming,
+  walletDone,
   error,
 }
 
 class PaymentController extends GetxController {
   final BookingRepo bookingRepo;
+  final ProfiileRepo profileRepo;
 
-  PaymentController({required this.bookingRepo});
+  PaymentController({required this.bookingRepo, required this.profileRepo});
 
   final Rx<PaymentState> state = PaymentState.loading.obs;
   final RxString errorMessage = ''.obs;
   final RxString qrImageUrl = ''.obs;
   final RxDouble amount = 0.0.obs;
+  final RxDouble walletBalance = 0.0.obs;
   final Rx<DateTime?> expiresAt = Rx<DateTime?>(null);
   final Rx<Duration> timeLeft = Duration.zero.obs;
 
@@ -50,13 +57,18 @@ class PaymentController extends GetxController {
         final data = response.body['data'] as Map<String, dynamic>? ?? {};
         final paymentType = data['payment_type']?.toString() ?? '';
         final isPaid = data['is_paid'] as bool? ?? false;
+        final amountVal = (data['amount'] as num?)?.toDouble();
+        if (amountVal != null && amountVal > 0) amount.value = amountVal;
 
         if (paymentType == 'online') {
           if (isPaid) {
             state.value = PaymentState.onlinePaid;
           } else {
-            await _generateQr();
+            // Online QR payment — coming soon
+            state.value = PaymentState.onlineComingSoon;
           }
+        } else if (paymentType == 'wallet') {
+          await _fetchWalletBalance();
         } else {
           // cash or any other type
           state.value = PaymentState.cash;
@@ -71,6 +83,19 @@ class PaymentController extends GetxController {
       errorMessage.value = 'Connection error. Please try again.';
       state.value = PaymentState.error;
     }
+  }
+
+  Future<void> _fetchWalletBalance() async {
+    try {
+      final response = await profileRepo.getCustomerWallet();
+      if (response.statusCode == 200 &&
+          response.body is Map &&
+          response.body['code']?.toString() == '200') {
+        final balance = response.body['data']?['balance'];
+        walletBalance.value = (balance as num?)?.toDouble() ?? 0.0;
+      }
+    } catch (_) {}
+    state.value = PaymentState.wallet;
   }
 
   Future<void> confirmCashPayment() async {
@@ -93,11 +118,40 @@ class PaymentController extends GetxController {
     }
   }
 
+  Future<void> confirmWalletPayment() async {
+    state.value = PaymentState.walletConfirming;
+    try {
+      final response = await bookingRepo.completeRide(bookingId: _bookingId!);
+      if (response.statusCode == 200 &&
+          response.body is Map &&
+          response.body['code']?.toString() == '200') {
+        // Refresh balance so walletDone card shows updated amount
+        try {
+          final walletResp = await profileRepo.getCustomerWallet();
+          if (walletResp.statusCode == 200 &&
+              walletResp.body is Map &&
+              walletResp.body['code']?.toString() == '200') {
+            final balance = walletResp.body['data']?['balance'];
+            walletBalance.value = (balance as num?)?.toDouble() ?? walletBalance.value;
+          }
+        } catch (_) {}
+        state.value = PaymentState.walletDone;
+      } else {
+        errorMessage.value = (response.body is Map)
+            ? (response.body['message']?.toString() ?? 'Failed to process wallet payment.')
+            : 'Failed to process wallet payment.';
+        state.value = PaymentState.wallet;
+      }
+    } catch (_) {
+      errorMessage.value = 'Connection error. Please try again.';
+      state.value = PaymentState.wallet;
+    }
+  }
+
+  // Kept for backward compatibility — not triggered anymore for online payment
   Future<void> _generateQr() async {
     state.value = PaymentState.onlineLoadingQr;
-    // Up to 4 attempts: immediate + 3 retries with increasing delay
     const retryDelays = [0, 1500, 3000, 5000];
-
     for (int attempt = 0; attempt < retryDelays.length; attempt++) {
       if (attempt > 0) {
         await Future.delayed(Duration(milliseconds: retryDelays[attempt]));
@@ -109,7 +163,6 @@ class PaymentController extends GetxController {
             response.body['code']?.toString() == '200') {
           final data = response.body['data'] as Map<String, dynamic>? ?? {};
           final imageUrl = data['image_url']?.toString();
-
           if (imageUrl != null && imageUrl.isNotEmpty && imageUrl != 'null') {
             qrImageUrl.value = imageUrl;
             amount.value = (data['amount'] as num?)?.toDouble() ?? 0.0;
@@ -124,7 +177,6 @@ class PaymentController extends GetxController {
             _startPolling();
             return;
           }
-          // image_url was null — fall through to retry
         } else {
           errorMessage.value = (response.body is Map)
               ? (response.body['message']?.toString() ?? 'Failed to generate QR code.')
@@ -140,7 +192,6 @@ class PaymentController extends GetxController {
         }
       }
     }
-
     errorMessage.value = 'QR code is not available. Please try again.';
     state.value = PaymentState.error;
   }

@@ -68,7 +68,7 @@ Future<Map<String, Map<String, String>>> init() async {
   );
 
   Get.lazyPut<PaymentController>(
-    () => PaymentController(bookingRepo: Get.find()),
+    () => PaymentController(bookingRepo: Get.find(), profileRepo: Get.find()),
     fenix: true,
   );
 

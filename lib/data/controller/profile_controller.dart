@@ -7,6 +7,7 @@ import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/data/modal/activitt_model.dart';
 import 'package:myrideuser/data/modal/activity_model.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import 'package:myrideuser/data/modal/address_Model.dart';
 import 'package:myrideuser/data/modal/cms_model.dart';
@@ -83,10 +84,30 @@ class ProfileController extends GetxController implements GetxService {
   bool isCustomerWalletLoading = false;
   bool isTopUpIntentLoading = false;
 
+  late final Razorpay _razorpay;
+  String? _pendingOrderId;
+  String? _pendingAmount;
+
 
 
   String currentSlug = "pending";
   NotificationSettingsModel? notificationModel;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void onClose() {
+    _razorpay.clear();
+    super.onClose();
+  }
+
   @override
   void onReady() {
     super.onReady();
@@ -1495,32 +1516,124 @@ class ProfileController extends GetxController implements GetxService {
     isTopUpIntentLoading = true;
     update();
 
-  ///  EasyLoading.show(status: "Please wait...");
-
     try {
       Response? response = await profileRepo.topCreateAmount(
         amount: amount.toString(),
       );
 
-     // await EasyLoading.dismiss();
+      if (response.statusCode == 200 &&
+          response.body['code'].toString() == "200") {
+        final data = response.body['data'];
+        final orderId = data?['order_id']?.toString();
+        final responseAmount = data?['amount']?.toString();
+
+        if (orderId != null && responseAmount != null) {
+          _pendingOrderId = orderId;
+          _pendingAmount = responseAmount;
+
+          final amountPaise = (double.tryParse(responseAmount) ?? 0.0) * 100;
+
+          final options = {
+            'key': 'rzp_test_T300vQB506EcW8',
+            'amount': amountPaise.toInt(),
+            'name': 'MyRide',
+            'order_id': orderId,
+            'description': 'Wallet Top Up',
+            'prefill': {
+              'contact': phoneController.text,
+              'email': emailController.text,
+            },
+            'theme': {'color': '#3077D3'},
+          };
+
+          _razorpay.open(options);
+        } else {
+          AnimatedTopToast.show(
+            context: context,
+            message: "Unable to initiate payment. Please try again.",
+            backgroundColor: ColorResources.textColorRed,
+            icon: Icons.error_outline,
+          );
+        }
+      } else {
+        AnimatedTopToast.show(
+          context: context,
+          message: _sanitizeBackendMessage(
+            response.body['message'],
+            "Unable to initiate payment. Please try again.",
+          ),
+          backgroundColor: ColorResources.textColorRed,
+          icon: Icons.error_outline,
+        );
+      }
+    } catch (e) {
+      AnimatedTopToast.show(
+        context: context,
+        message: "Oops! Something went wrong. Please try again.",
+        backgroundColor: ColorResources.textColorRed,
+        icon: Icons.error_outline,
+      );
+    } finally {
+      isTopUpIntentLoading = false;
+      update();
+    }
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    verifyTopUp(
+      orderId: response.orderId ?? _pendingOrderId ?? '',
+      paymentId: response.paymentId ?? '',
+      signature: response.signature ?? '',
+      amount: _pendingAmount ?? '0',
+      idempotencyKey: response.paymentId ?? '',
+    );
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    AnimatedTopToast.show(
+      context: Get.context!,
+      message: "Payment failed. Please try again.",
+      backgroundColor: ColorResources.textColorRed,
+      icon: Icons.error_outline,
+    );
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {}
+
+  Future<void> verifyTopUp({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+    required String amount,
+    required String idempotencyKey,
+  }) async {
+    isTopUpIntentLoading = true;
+    update();
+
+    try {
+      Response? response = await profileRepo.verifyTopup(
+        orderId: orderId,
+        paymentId: paymentId,
+        signature: signature,
+        amount: amount,
+        idempotencyKey: idempotencyKey,
+      );
 
       if (response.statusCode == 200 &&
           response.body['code'].toString() == "200") {
-       // await EasyLoading.dismiss();
-        // Get.snackbar(
-        //   '',
-        //   "${response.body['message']}",
-        //   backgroundColor: ColorResources.blueeebutton,
-        //   colorText: Colors.white,
-        //   snackPosition: SnackPosition.TOP,
-        //   duration: const Duration(seconds: 5),
-        // );
-         AnimatedTopToast.show(
-        context: context,
-        message: _sanitizeBackendMessage(response.body['message'], "OTP sent successfully."),
-        backgroundColor: ColorResources.appColor,
-        icon: Icons.check_circle_rounded,
-      );
+        final data = response.body['data'];
+        if (data?['balance'] != null) {
+          walletbalance = data['balance'].toString();
+        }
+        update();
+
+        AnimatedTopToast.show(
+          context: Get.context!,
+          message: "Wallet credited successfully!",
+          backgroundColor: ColorResources.appColor,
+          icon: Icons.check_circle_rounded,
+        );
+
         await Future.delayed(const Duration(milliseconds: 500));
         Get.offAll(
           MainNavigation(),
@@ -1528,20 +1641,20 @@ class ProfileController extends GetxController implements GetxService {
           transition: Transition.rightToLeft,
         );
       } else {
-       // Get.snackbar("Error", response.body['message']);
- AnimatedTopToast.show(
-        context: context,
-        message: _sanitizeBackendMessage(response.body['message'], "Unable to send OTP. Please try again."),
-        backgroundColor: ColorResources.textColorRed,
-        icon: Icons.check_circle_rounded,
-      );
-       
+        AnimatedTopToast.show(
+          context: Get.context!,
+          message: _sanitizeBackendMessage(
+            response.body['message'],
+            "Payment verification failed. Please contact support.",
+          ),
+          backgroundColor: ColorResources.textColorRed,
+          icon: Icons.error_outline,
+        );
       }
     } catch (e) {
-      await EasyLoading.dismiss();
-     AnimatedTopToast.show(
-        context: context,
-        message: "Oops! Something went wrong. Please try again.",
+      AnimatedTopToast.show(
+        context: Get.context!,
+        message: "Verification failed. Please try again.",
         backgroundColor: ColorResources.textColorRed,
         icon: Icons.error_outline,
       );
