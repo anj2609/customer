@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -188,6 +189,16 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
     }
   }
 
+  Future<void> _saveRecentSearch(String name, String description) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? stored = prefs.getString('recent_searches');
+    List<dynamic> list = stored != null ? jsonDecode(stored) : [];
+    list.removeWhere((item) => item['description'] == description);
+    list.insert(0, {'name': name, 'description': description});
+    if (list.length > 5) list = list.sublist(0, 5);
+    await prefs.setString('recent_searches', jsonEncode(list));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -335,6 +346,10 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                         });
                       } else {
                         // User is selecting destination
+                        _saveRecentSearch(
+                          place["structured_formatting"]["main_text"],
+                          place["description"],
+                        );
                         getPlaceDetail(place["place_id"]);
                       }
                     },

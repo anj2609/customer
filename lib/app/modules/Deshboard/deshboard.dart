@@ -16,7 +16,7 @@ import 'package:get/get.dart';
 
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
-import 'package:myrideuser/widgets/custom_loader.dart';
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -49,6 +49,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // Dummy nearby cars
   List<LatLng> carPositions = [];
+
+
 
   ///
   final ProfileController controller = Get.find<ProfileController>();
@@ -358,7 +360,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Get.toNamed(
                         RouteHelper.getsearchLocationScreen(),
                         arguments: {'addressdata': ''},
-                      );
+                      )?.then((_) {
+                        Get.find<ProfileController>().getAddressCustomer(context: context);
+                      });
                     },
                     child: Container(
                       padding: const EdgeInsets.all(14),
@@ -382,38 +386,128 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
 
                   const SizedBox(height: 15),
-                  SizedBox(
-                    height: 45,
-                    child: GetBuilder<ProfileController>(
-                      builder: (controller) {
-                        if (controller.isLoadings == true) {
-                          return Center(
+                  GetBuilder<ProfileController>(
+                    builder: (controller) {
+                      final visibleAddressList = controller.addressList
+                          .where((data) => !data.isNoAddressPlaceholder)
+                          .toList();
+
+                      if (controller.isLoadings == true) {
+                        return const SizedBox(
+                          height: 45,
+                          child: Center(
                             child: SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: ColorResources.blueeebutton,
+                              child: CircularProgressIndicator(strokeWidth: 2.5),
+                            ),
+                          ),
+                        );
+                      }
+
+                      // ── Address list from customer-address-list API ──
+                      if (visibleAddressList.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.location_off_rounded,
+                                  size: 32,
+                                  color: Colors.grey.shade400,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "No trips yet",
+                                  style: PoppinsMedium.copyWith(
+                                    fontSize: 14,
+                                    color: ColorResources.blackcolor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+
+                      return ListView.separated(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                        itemCount: visibleAddressList.length,
+                        separatorBuilder: (_, __) =>
+                            Divider(height: 1, color: Colors.grey.shade100),
+                        itemBuilder: (context, index) {
+                          final data = visibleAddressList[index];
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () {
+                              Get.toNamed(
+                                RouteHelper.getsearchLocationScreen(),
+                                arguments: {'addressdata': data.address ?? ''},
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: ColorResources.appColor
+                                          .withValues(alpha: 0.10),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      Icons.location_on_rounded,
+                                      size: 20,
+                                      color: ColorResources.appColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          data.label ?? "Saved Address",
+                                          style: PoppinsMedium.copyWith(
+                                            fontSize: 14,
+                                            color: ColorResources.blackcolor,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (data.address != null &&
+                                            data.address!.isNotEmpty)
+                                          Text(
+                                            data.address!,
+                                            style: PoppinsReguler.copyWith(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 14,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                ],
                               ),
                             ),
                           );
-                        }
-
-                        if (controller.addressList.isEmpty) {
-                          return const Center(child: Text("No Address"));
-                        }
-
-                        return ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: controller.addressList.length,
-                          itemBuilder: (context, index) {
-                            final data = controller.addressList[index];
-
-                            return locationItem(data.label ?? "Unknown", index);
-                          },
-                        );
-                      },
-                    ),
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
@@ -442,12 +536,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Get.toNamed(
           RouteHelper.getsearchLocationScreen(),
           arguments: {'addressdata': selectedAddress.address},
-        );
-        // Get.to(
-        //   SearchLocationScreen(addressdata: selectedAddress.address),
-        //   transition: Transition.leftToRight,
-        //   duration: Duration(milliseconds: 0),
-        // );
+        )?.then((_) {
+          Get.find<ProfileController>().getAddressCustomer(context: context);
+        });
         print("Selected Address: ${selectedAddress.address}");
       },
       child: Container(

@@ -37,9 +37,10 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
  @override
   void initState() {
     super.initState();
-    Get.find<ProfileController>().customerWalletAmount();
-    
-  }  
+    final pc = Get.find<ProfileController>();
+    pc.fetchProfile();
+    pc.customerWalletAmount();
+  }
  
   
   @override
@@ -190,23 +191,29 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
                           ),
                           SizedBox(width: Dimensions.spacingSize12),
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${profilecontroller.nameController.text}",
-                                  style: PoppinsBold.copyWith(
-                                    color: ColorResources.blackcolor11,
+                            child: GetBuilder<ProfileController>(
+                              builder: (pc) => Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    pc.nameController.text,
+                                    style: PoppinsBold.copyWith(
+                                      color: ColorResources.blackcolor11,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 3),
-                                Text(
-                                  "+91 ${profilecontroller.phoneController.text}",
-                                  style: PoppinsReguler.copyWith(
-                                    color: ColorResources.TextColorForGrey,
+                                  SizedBox(height: 3),
+                                  Text(
+                                    pc.phoneController.text.isNotEmpty
+                                        ? (pc.phoneController.text.startsWith('+')
+                                            ? pc.phoneController.text
+                                            : "+91 ${pc.phoneController.text}")
+                                        : "",
+                                    style: PoppinsReguler.copyWith(
+                                      color: ColorResources.TextColorForGrey,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                           InkWell(

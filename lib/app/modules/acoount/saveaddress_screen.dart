@@ -47,8 +47,6 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
             return Center(child: PremiumBlurLoader());
           }
 
-
-          
           if (controller.addressList.isEmpty) {
             return Center(
               child: Column(
@@ -57,7 +55,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                   Icon(Icons.location_off, size: 60, color: Colors.grey),
                   SizedBox(height: 12),
                   Text(
-                    "No Address Found",
+                    "No trips yet",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,

@@ -25,8 +25,8 @@ class AddressModels {
   AddressModels.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     userId = json['user_id'];
-    label = json['label'];
-    address = json['address'];
+    label = _cleanAddressValue(json['label']);
+    address = _cleanAddressValue(json['address']);
     lat = json['lat'];
     lng = json['lng'];
     isDefault = json['is_default'];
@@ -34,5 +34,21 @@ class AddressModels {
     updatedAt = json['updated_at'];
   }
 
-  
+  bool get isNoAddressPlaceholder =>
+      _isNoAddressValue(label) || _isNoAddressValue(address);
+
+  static String? _cleanAddressValue(dynamic value) {
+    final text = value?.toString().trim();
+    if (text == null || text.isEmpty || _isNoAddressValue(text)) {
+      return null;
+    }
+    return text;
+  }
+
+  static bool _isNoAddressValue(String? value) {
+    final normalized = value
+        ?.toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '');
+    return normalized == 'noaddress' || normalized == 'noaddressfound';
+  }
 }

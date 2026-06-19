@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -622,11 +622,11 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                     _isNavigating = true;
                     _timer?.cancel();
 
+                    // Driver/admin cancelled externally — clear the stack and
+                    // return home. (User-initiated cancel is handled in the
+                    // Cancel button via offAndToNamed → CancelRideScreen.)
                     Future.microtask(() {
-                      Get.toNamed(
-                        RouteHelper.getcancelRideScreen(),
-                        arguments: {'booking_id': widget.booking_id},
-                      );
+                      Get.offAllNamed(RouteHelper.getmainNavigationScreen());
                     });
                   }
 
@@ -660,11 +660,129 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   ////// ========== Ui Build  Finding you a nearby driver.... =============== //////////
 
   Widget buildPendingUI() {
-    return bottomContainer(
-      title: "Finding you a nearby driver....",
-      subtitle:
-          "The driver will pick you up as soon as possible after they confirm your order.",
-      showLoader: true,
+    final controller = Get.find<BookingController>();
+    final otp = controller.rideDetails?.otp?.toString().padLeft(4, '0') ?? '';
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          /// Handle bar
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+
+          const Text(
+            "Finding you a nearby driver....",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            "The driver will pick you up as soon as possible after they confirm your order.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey),
+          ),
+
+          const SizedBox(height: 20),
+
+          /// ── OTP Display ──
+          if (otp.isNotEmpty) ...[
+            const Text(
+              "Your Ride OTP",
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(otp.length, (index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  width: 48,
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.blue.shade200,
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Text(
+                    otp[index],
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              "Share this OTP with your driver to start the ride",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          /// ── Ripple loader ──
+          const RippleLoader(),
+
+          const SizedBox(height: 20),
+
+          /// ── Cancel Ride button ──
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton(
+              onPressed: () {
+                _timer?.cancel();
+                // offAndToNamed removes this screen before pushing cancel,
+                // so this FDU is disposed and its timer truly stops.
+                Get.offAndToNamed(
+                  RouteHelper.getcancelRideScreen(),
+                  arguments: {'booking_id': widget.booking_id},
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: const BorderSide(color: Colors.red, width: 1.2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                "Cancel Ride",
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

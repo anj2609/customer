@@ -58,7 +58,7 @@ class AuthController extends GetxController implements GetxService {
     if (msg.contains('data not found') || msg.contains('no data') || msg == 'not found') {
       return fallback;
     }
-    if (msg.contains('server') || msg.contains('internal') || msg.contains('exception')) {
+    if (msg.contains('server') || msg.contains('internal') || msg.contains('exception') || msg.contains('500')) {
       return "We're having trouble connecting. Please try again.";
     }
     if (msg.contains('unauthorized') || msg.contains('unauthenticated')) {
@@ -473,53 +473,29 @@ class AuthController extends GetxController implements GetxService {
     return response;
   }
 
-  Future<Response> userLogOut({
+  Future<void> userLogOut({
     required BuildContext context,
-
-    //reSendOtp
   }) async {
-   /// EasyLoading.show(status: "Please wait...");
-    update();
+    debugPrint('🟢 [SESSION] MANUAL LOGOUT — user tapped Logout button');
+    debugPrint('   Route: ${Get.currentRoute}');
 
-    Response response = await authRepo.logOut();
-
-    if (response.body['code'] == '200') {
-    //  await EasyLoading.dismiss();
-      logOut();
-
-      // Get.snackbar(
-      //   '',
-      //   response.body['message'] ?? "Logout Successfully",
-      //   backgroundColor: ColorResources.blueeebutton,
-      //   colorText: Colors.white,
-      //   snackPosition: SnackPosition.TOP,
-      //   duration: const Duration(seconds: 3),
-      // );
-       AnimatedTopToast.show(
-        context: context,
-        message:
-            _sanitizeBackendMessage(response.body['message'], "Logged out successfully."),
-        backgroundColor: ColorResources.appColor,
-        icon: Icons.check_circle_rounded,
-      );
-
-      Get.offAllNamed(RouteHelper.getLestMyRideStartedScreenRoute());
-    } else if (response.statusCode == 500) {
-    //  await EasyLoading.dismiss();
-
-      AnimatedTopToast.show(
-        context: context,
-        message:
-            _sanitizeBackendMessage(response.body['message'], "Unable to log out. Please try again."),
-        backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.error_outline,
-      );
-    } else {
-     // await EasyLoading.dismiss();
+    // Close any open dialogs/bottom sheets first
+    if (Get.isBottomSheetOpen ?? false) {
+      Get.back();
+    }
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
     }
 
-    update();
-    return response;
+    try {
+      await authRepo.logOut();
+      debugPrint('   Logout API call succeeded');
+    } catch (e) {
+      debugPrint('   Logout API error (non-blocking): $e');
+    }
+
+    logOut();
+    Get.offAllNamed(RouteHelper.getLestMyRideStartedScreenRoute());
   }
 
   Future<Response> verifyOtpApi({
@@ -889,8 +865,13 @@ class AuthController extends GetxController implements GetxService {
   }
 
   void logOut() {
-    Get.back();
-
-    return authRepo.removeUserToken();
+    debugPrint('🔑 [SESSION] Clearing auth tokens (token + profileid)');
+    try {
+      _googleSignIn.signOut();
+    } catch (e) {
+      debugPrint('   Google signOut error: $e');
+    }
+    authRepo.removeUserToken();
+    debugPrint('   Auth tokens removed successfully');
   }
 }

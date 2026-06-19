@@ -9,7 +9,7 @@ class AnimatedTopToast {
     Color backgroundColor = const Color(0xFF2E7D32),
     Color textColor = Colors.white,
     IconData icon = Icons.check_circle_rounded,
-    Duration duration = const Duration(seconds: 3),
+    Duration duration = const Duration(seconds: 4),
   }) {
     late OverlayEntry overlayEntry;
 

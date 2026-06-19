@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:myrideuser/app/modules/Deshboard/buttom_navigation.dart';
@@ -6,6 +7,7 @@ import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/data/modal/activitt_model.dart';
 import 'package:myrideuser/data/modal/activity_model.dart';
+
 import 'package:myrideuser/data/modal/address_Model.dart';
 import 'package:myrideuser/data/modal/cms_model.dart';
 import 'package:myrideuser/data/modal/contact_model.dart';
@@ -81,6 +83,8 @@ class ProfileController extends GetxController implements GetxService {
   bool isCustomerWalletLoading = false;
   bool isTopUpIntentLoading = false;
 
+
+
   String currentSlug = "pending";
   NotificationSettingsModel? notificationModel;
   @override
@@ -101,7 +105,7 @@ class ProfileController extends GetxController implements GetxService {
     if (msg.contains('data not found') || msg.contains('no data') || msg == 'not found') {
       return fallback;
     }
-    if (msg.contains('server') || msg.contains('internal') || msg.contains('exception')) {
+    if (msg.contains('server') || msg.contains('internal') || msg.contains('exception') || msg.contains('500')) {
       return "We're having trouble connecting. Please try again.";
     }
     if (msg.contains('unauthorized') || msg.contains('unauthenticated')) {
@@ -154,7 +158,6 @@ class ProfileController extends GetxController implements GetxService {
             genderController.text = userData.gender ?? "";
             profileimagee = userData.profileImage ?? "";
             dobController.text = userData.dateOfBirth ?? "";
-            //walletbalance = userData.
 
             await sharedPreferences.setString(
               ApiConstants.profile_image,
@@ -168,6 +171,7 @@ class ProfileController extends GetxController implements GetxService {
 
           log("Name: ${userData!.email}");
           log("Email: ${profileimagee}");
+          update();
         } else {
           // Silently ignore 'data not found' — profile may just be empty
           if (!_isDataNotFoundResponse(body)) {
@@ -614,13 +618,14 @@ class ProfileController extends GetxController implements GetxService {
               (body['data'] as List).isNotEmpty) {
             addressList = (body['data'] as List)
                 .map((e) => AddressModels.fromJson(e))
+                .where((address) => !address.isNoAddressPlaceholder)
                 .toList();
           } else {
             addressList.clear();
           }
         } else {
           addressList.clear();
-          // Silently handle — the UI will show "No Address" empty state
+          // Silently handle; the UI will show "No trips yet" empty state.
         }
 
         isLoadings = false;
@@ -1249,6 +1254,9 @@ class ProfileController extends GetxController implements GetxService {
       update();
     }
   }
+
+
+
   // Future<void> getActivityData({
   //   required String typeOfSlug,
   //   required BuildContext context,

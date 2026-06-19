@@ -234,6 +234,8 @@ class BookingController extends GetxController implements GetxService {
           ? body['message'].toString()
           : '';
 
+      debugPrint('CreateBooking Response: status=${response.statusCode}, body=$body');
+
       // Convert backend error messages to user-friendly text
       String userMessage = _getUserFriendlyMessage(rawMessage);
 
@@ -297,6 +299,9 @@ class BookingController extends GetxController implements GetxService {
   String _getUserFriendlyMessage(String backendMessage) {
     final msg = backendMessage.toLowerCase().trim();
 
+    if (msg.contains('server') || msg.contains('internal') || msg.contains('exception') || msg.contains('500')) {
+      return "We're having trouble connecting. Please try again.";
+    }
     if (msg.contains('vehicle') && msg.contains('required')) {
       return "Please select a vehicle type before booking.";
     }
@@ -317,6 +322,9 @@ class BookingController extends GetxController implements GetxService {
       return "Scheduled ride status is not configured on the server. Please try a regular ride or contact support.";
     }
     if (msg.contains('already') && msg.contains('booking')) {
+      return "You already have an active booking. Please complete or cancel it first.";
+    }
+    if (msg.contains('in process') || msg.contains('request is in')) {
       return "You already have an active booking. Please complete or cancel it first.";
     }
     if (msg.contains('unauthorized') || msg.contains('unauthenticated')) {
@@ -479,18 +487,9 @@ update();
 
         // await Future.delayed(Duration(milliseconds: 500));
 
-        if (rideStatus.value == "completed") {
-          // Get.offAll(
-          //   MainNavigation(),
-          //   duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-          //   transition: Transition.rightToLeft,
-          // );
-        } else {
-          Get.toNamed(
-            RouteHelper.getfindingDriverUI(),
-            arguments: {'booking_id': bookingid},
-          );
-        }
+        // State updated above; the FindingDriverUI widget reacts reactively.
+        // Do NOT navigate here — TrackRideApi2 is called on every poll and
+        // pushing FindingDriverUI on each tick stacks screens endlessly.
       }
     } else if (response.statusCode == 500) {}
 
