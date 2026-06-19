@@ -23,6 +23,7 @@ import 'package:myrideuser/app/modules/auth/user_ride_signin_screen.dart';
 import 'package:myrideuser/app/modules/chats/chat_screen.dart';
 import 'package:myrideuser/app/modules/profile/edit_profile.dart';
 import 'package:myrideuser/app/modules/profile/profile.dart';
+import 'package:myrideuser/app/modules/common/app_entry_router.dart';
 import 'package:myrideuser/app/modules/splash/onbording_screen.dart';
 import 'package:get/get.dart';
 import 'package:myrideuser/app/modules/auth/login_screen.dart';
@@ -67,8 +68,10 @@ class RouteHelper {
   static const String promoCodeScreen = '/promoCodeScreen';
   static const String customerChatScreen = '/customerChatScreen';
   static const String searchLocationScreen = '/searchLocationScreen';
+  static const String appEntryRouter = '/appEntryRouter';
   //SearchLocationScreen
   static getSplashRoute() => splash;
+  static getAppEntryRouter() => appEntryRouter;
   static getOnboardingRoute() => onbordingscreen;
   static getOtpScreenRoute(String? phoneNumber, String? type) {
     Get.toNamed(
@@ -117,6 +120,14 @@ class RouteHelper {
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => SplashScreen()),
+    GetPage(
+      name: appEntryRouter,
+      page: () => const AppEntryRouter(),
+      transitionDuration: const Duration(
+        milliseconds: ApiConstants.screenTransitionTime,
+      ),
+      transition: Transition.rightToLeft,
+    ),
     ///// ===== Route  the  main  screen =====
     GetPage(
       name: otpScreen,

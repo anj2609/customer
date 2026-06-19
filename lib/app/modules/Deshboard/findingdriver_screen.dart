@@ -660,9 +660,6 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   ////// ========== Ui Build  Finding you a nearby driver.... =============== //////////
 
   Widget buildPendingUI() {
-    final controller = Get.find<BookingController>();
-    final otp = controller.rideDetails?.otp?.toString().padLeft(4, '0') ?? '';
-
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       decoration: const BoxDecoration(
@@ -695,56 +692,6 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
           ),
 
           const SizedBox(height: 20),
-
-          /// ── OTP Display ──
-          if (otp.isNotEmpty) ...[
-            const Text(
-              "Your Ride OTP",
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(otp.length, (index) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  width: 48,
-                  height: 48,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Colors.blue.shade200,
-                      width: 1.2,
-                    ),
-                  ),
-                  child: Text(
-                    otp[index],
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.blue.shade700,
-                    ),
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              "Share this OTP with your driver to start the ride",
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade500,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-          ],
 
           /// ── Ripple loader ──
           const RippleLoader(),

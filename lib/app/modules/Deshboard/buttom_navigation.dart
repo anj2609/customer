@@ -3,6 +3,8 @@
 import 'package:myrideuser/app/modules/Promos/promos_screen.dart';
 import 'package:myrideuser/app/modules/acoount/acoount.dart';
 import 'package:myrideuser/app/modules/activity/activity.dart';
+import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -23,8 +25,10 @@ class MainNavigation extends StatefulWidget {
   State<MainNavigation> createState() => _MainNavigationState();
 }
 
-class _MainNavigationState extends State<MainNavigation> {
+class _MainNavigationState extends State<MainNavigation>
+    with WidgetsBindingObserver {
   int _currentIndex = 0;
+  bool _isCheckingActiveBooking = false;
 
   final controller = Get.find<ProfileController>();
 
@@ -47,6 +51,54 @@ class _MainNavigationState extends State<MainNavigation> {
       _currentIndex = widget.initialIndex;
     }
     controller.fetchProfile();
+    WidgetsBinding.instance.addObserver(this);
+    // Re-check on every entry: handles returning from a completed/cancelled ride.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkActiveBooking());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkActiveBooking();
+    }
+  }
+
+  Future<void> _checkActiveBooking() async {
+    if (_isCheckingActiveBooking) return;
+    _isCheckingActiveBooking = true;
+
+    try {
+      final bookingCtrl = Get.find<BookingController>();
+      await bookingCtrl.checkActiveBookingApi();
+
+      if (!mounted) return;
+
+      final active = bookingCtrl.activeBookingState.value;
+
+      switch (active.status) {
+        case BookingStatus.pending:
+        case BookingStatus.accepted:
+        case BookingStatus.arrived:
+        case BookingStatus.ongoing:
+          if (active.bookingId != null && active.bookingId!.isNotEmpty) {
+            Get.offAllNamed(
+              RouteHelper.getfindingDriverUI(),
+              arguments: {'booking_id': active.bookingId},
+            );
+          }
+          break;
+        default:
+          break; // No active booking — stay on home screen.
+      }
+    } finally {
+      _isCheckingActiveBooking = false;
+    }
   }
 
   @override

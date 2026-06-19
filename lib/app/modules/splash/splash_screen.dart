@@ -1,11 +1,9 @@
 import 'dart:async';
 
-import 'package:myrideuser/app/modules/Deshboard/buttom_navigation.dart';
 import 'package:myrideuser/config/route.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:get/get.dart';
-import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:myrideuser/config/utils/constants.dart';
@@ -43,47 +41,29 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _navigateAfterDelay() async {
     final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString("token");
-    String? apitoken = prefs.getString("usertoken");
+    final String? token = prefs.getString(ApiConstants.token);
+    final String? userId = prefs.getString(ApiConstants.profileid);
 
-    ///usertoken
-    String? userId = prefs.getString(ApiConstants.profileid);
-    String bookingId = prefs.getString(ApiConstants.bookingid) ?? "";
-
-    customerId = userId.toString();
+    customerId = userId?.toString();
 
     if (token != null && token.isNotEmpty) {
-      if (bookingId.isNotEmpty) {
-        try {
-          await Get.find<BookingController>().TrackRideApi(
-            context: context,
-            bookingid: bookingId,
-          );
-        } catch (e) {
-          print("TrackRideApi error from splash: $e");
-          // Clear stale booking ID and navigate to main screen
-          await prefs.remove(ApiConstants.bookingid);
-          Get.offAll(
-            MainNavigation(),
-            duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-            transition: Transition.rightToLeft,
-          );
-        }
-      } else {
-        Get.offAll(
-          MainNavigation(),
-          duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-          transition: Transition.rightToLeft,
-        );
-      }
+      // Always ask the server — never trust a stale local bookingid.
+      Get.offAllNamed(RouteHelper.getAppEntryRouter());
     } else {
-      final bool hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+      final bool hasSeenOnboarding =
+          prefs.getBool('has_seen_onboarding') ?? false;
       if (hasSeenOnboarding) {
         Get.toNamed(RouteHelper.getLestMyRideStartedScreenRoute());
       } else {
         Get.toNamed(RouteHelper.getOnboardingRoute());
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override

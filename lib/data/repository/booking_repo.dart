@@ -127,4 +127,8 @@ Future<Response> cancelRideApi({ required String bookingid, required String rese
       'booking_id': bookingId,
     });
   }
+
+  Future<Response> checkActiveBookingRepo() async {
+    return apiClient.getData(ApiConstants.activeBookingCustomer);
+  }
 }

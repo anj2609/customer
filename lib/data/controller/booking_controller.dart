@@ -23,6 +23,23 @@ import 'package:get/get.dart';
 import 'package:myrideuser/widgets/toaster_animation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum BookingStatus {
+  pending,
+  accepted,
+  arrived,
+  ongoing,
+  completed,
+  cancelled,
+  none,
+  unknown,
+}
+
+class BookingActiveState {
+  final String? bookingId;
+  final BookingStatus status;
+  const BookingActiveState({this.bookingId, this.status = BookingStatus.none});
+}
+
 class BookingController extends GetxController implements GetxService {
   final BookingRepo bookingRepo;
 
@@ -56,6 +73,9 @@ class BookingController extends GetxController implements GetxService {
   LatLng currentLatLng = const LatLng(28.5355, 77.3910);
   bool _isMapReady = false;
   bool _isDisposed = false;
+
+  final Rx<BookingActiveState> activeBookingState =
+      BookingActiveState().obs;
 
   @override
   void onInit() {
@@ -357,6 +377,69 @@ class BookingController extends GetxController implements GetxService {
     }
 
     return backendMessage;
+  }
+
+  /// Calls customer-booking-active and updates [activeBookingState].
+  /// Always checks that booking_id is present before setting any non-none status.
+  Future<void> checkActiveBookingApi() async {
+    try {
+      final Response response = await bookingRepo.checkActiveBookingRepo();
+
+      if (response.statusCode == 200 && response.body is Map) {
+        final String code = (response.body['code'] ?? '').toString();
+        final data = response.body['data'];
+
+        if (code == '200' && data != null && data is Map) {
+          final String? bookingId = data['booking_id']?.toString();
+          final String statusStr = (data['status'] ?? '').toString();
+
+          if (bookingId != null && bookingId.isNotEmpty) {
+            activeBookingState.value = BookingActiveState(
+              bookingId: bookingId,
+              status: _parseBookingStatus(statusStr),
+            );
+          } else {
+            // booking_id absent — treat as no active booking
+            activeBookingState.value =
+                const BookingActiveState(status: BookingStatus.none);
+          }
+        } else {
+          // code 401 "Data not found" or null data → no active booking
+          activeBookingState.value =
+              const BookingActiveState(status: BookingStatus.none);
+        }
+      } else {
+        activeBookingState.value =
+            const BookingActiveState(status: BookingStatus.none);
+      }
+    } catch (e) {
+      debugPrint('checkActiveBookingApi error: $e');
+      activeBookingState.value =
+          const BookingActiveState(status: BookingStatus.none);
+    }
+  }
+
+  BookingStatus _parseBookingStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return BookingStatus.pending;
+      case 'accepted':
+      case 'driver_assigned':
+        return BookingStatus.accepted;
+      case 'arrived':
+        return BookingStatus.arrived;
+      case 'ongoing':
+      case 'in_progress':
+      case 'started':
+        return BookingStatus.ongoing;
+      case 'completed':
+        return BookingStatus.completed;
+      case 'cancelled':
+      case 'canceled':
+        return BookingStatus.cancelled;
+      default:
+        return BookingStatus.unknown;
+    }
   }
 
   /////
