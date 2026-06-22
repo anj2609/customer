@@ -1517,56 +1517,39 @@ class ProfileController extends GetxController implements GetxService {
     update();
 
     try {
-      Response? response = await profileRepo.topCreateAmount(
-        amount: amount.toString(),
-      );
+      final amountStr = amount?.trim() ?? '0';
+      final amountValue = double.tryParse(amountStr) ?? 0.0;
 
-      if (response.statusCode == 200 &&
-          response.body['code'].toString() == "200") {
-        final data = response.body['data'];
-        final orderId = data?['order_id']?.toString();
-        final responseAmount = data?['amount']?.toString();
-
-        if (orderId != null && responseAmount != null) {
-          _pendingOrderId = orderId;
-          _pendingAmount = responseAmount;
-
-          final amountPaise = (double.tryParse(responseAmount) ?? 0.0) * 100;
-
-          final options = {
-            'key': 'rzp_test_T300vQB506EcW8',
-            'amount': amountPaise.toInt(),
-            'name': 'MyRide',
-            'order_id': orderId,
-            'description': 'Wallet Top Up',
-            'prefill': {
-              'contact': phoneController.text,
-              'email': emailController.text,
-            },
-            'theme': {'color': '#3077D3'},
-          };
-
-          _razorpay.open(options);
-        } else {
-          AnimatedTopToast.show(
-            context: context,
-            message: "Unable to initiate payment. Please try again.",
-            backgroundColor: ColorResources.textColorRed,
-            icon: Icons.error_outline,
-          );
-        }
-      } else {
+      if (amountValue <= 0) {
         AnimatedTopToast.show(
           context: context,
-          message: _sanitizeBackendMessage(
-            response.body['message'],
-            "Unable to initiate payment. Please try again.",
-          ),
+          message: "Please enter a valid amount.",
           backgroundColor: ColorResources.textColorRed,
           icon: Icons.error_outline,
         );
+        return;
       }
+
+      // Store amount for use after Razorpay payment completes
+      _pendingAmount = amountStr;
+      _pendingOrderId = null;
+
+      // Open Razorpay directly — backend credits wallet only after payment succeeds
+      final options = {
+        'key': 'rzp_test_T300vQB506EcW8',
+        'amount': (amountValue * 100).toInt(), // paise
+        'name': 'MyRide',
+        'description': 'Wallet Top Up',
+        'prefill': {
+          'contact': phoneController.text,
+          'email': emailController.text,
+        },
+        'theme': {'color': '#3077D3'},
+      };
+
+      _razorpay.open(options);
     } catch (e) {
+      debugPrint('RAZORPAY OPEN ERROR: $e');
       AnimatedTopToast.show(
         context: context,
         message: "Oops! Something went wrong. Please try again.",
@@ -1580,13 +1563,55 @@ class ProfileController extends GetxController implements GetxService {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    verifyTopUp(
-      orderId: response.orderId ?? _pendingOrderId ?? '',
-      paymentId: response.paymentId ?? '',
-      signature: response.signature ?? '',
-      amount: _pendingAmount ?? '0',
-      idempotencyKey: response.paymentId ?? '',
-    );
+    debugPrint('RAZORPAY SUCCESS: paymentId=${response.paymentId}  orderId=${response.orderId}');
+    _creditWalletAfterPayment();
+  }
+
+  Future<void> _creditWalletAfterPayment() async {
+    isTopUpIntentLoading = true;
+    update();
+
+    try {
+      final response = await profileRepo.topCreateAmount(
+        amount: _pendingAmount ?? '0',
+      );
+      debugPrint('CREDIT RESPONSE: ${response.body}');
+
+      if (response.statusCode == 200 &&
+          response.body is Map &&
+          response.body['code']?.toString() == "200") {
+        await customerWalletAmount();
+        AnimatedTopToast.show(
+          context: Get.context!,
+          message: response.body['message']?.toString() ?? 'Wallet credited successfully!',
+          backgroundColor: ColorResources.appColor,
+          icon: Icons.check_circle_rounded,
+        );
+        await Future.delayed(const Duration(milliseconds: 500));
+        Get.offAll(
+          MainNavigation(),
+          duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
+          transition: Transition.rightToLeft,
+        );
+      } else {
+        AnimatedTopToast.show(
+          context: Get.context!,
+          message: "Payment received but wallet credit failed. Please contact support.",
+          backgroundColor: ColorResources.textColorRed,
+          icon: Icons.error_outline,
+        );
+      }
+    } catch (e) {
+      AnimatedTopToast.show(
+        context: Get.context!,
+        message: "Payment received but wallet credit failed. Please contact support.",
+        backgroundColor: ColorResources.textColorRed,
+        icon: Icons.error_outline,
+      );
+    } finally {
+      isTopUpIntentLoading = false;
+      update();
+    }
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {

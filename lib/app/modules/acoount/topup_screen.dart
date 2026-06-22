@@ -86,10 +86,12 @@ class _TopupScreenState extends State<TopupScreen> {
 
                 SizedBox(height: 6),
 
-                Text(
-                  "Available balance: ₹2069.50",
-                  style: PoppinsReguler.copyWith(
-                    color: ColorResources.TextColorForGrey,
+                GetBuilder<ProfileController>(
+                  builder: (pc) => Text(
+                    "Available balance: ₹${pc.walletbalance ?? '0'}",
+                    style: PoppinsReguler.copyWith(
+                      color: ColorResources.TextColorForGrey,
+                    ),
                   ),
                 ),
               ],

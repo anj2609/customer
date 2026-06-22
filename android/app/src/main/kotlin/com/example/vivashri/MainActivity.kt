@@ -1,4 +1,4 @@
-package com.myrideinfiniti
+package online.nride.rider
 
 import io.flutter.embedding.android.FlutterActivity
 

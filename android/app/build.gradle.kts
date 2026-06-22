@@ -21,7 +21,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.myrideinfiniti"
+    namespace = "online.nride.rider"
 
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -35,7 +35,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.myrideinfiniti"
+        applicationId = "online.nride.rider"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

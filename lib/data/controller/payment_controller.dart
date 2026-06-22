@@ -64,8 +64,7 @@ class PaymentController extends GetxController {
           if (isPaid) {
             state.value = PaymentState.onlinePaid;
           } else {
-            // Online QR payment — coming soon
-            state.value = PaymentState.onlineComingSoon;
+            await _generateQr();
           }
         } else if (paymentType == 'wallet') {
           await _fetchWalletBalance();
@@ -148,7 +147,6 @@ class PaymentController extends GetxController {
     }
   }
 
-  // Kept for backward compatibility — not triggered anymore for online payment
   Future<void> _generateQr() async {
     state.value = PaymentState.onlineLoadingQr;
     const retryDelays = [0, 1500, 3000, 5000];
@@ -165,12 +163,14 @@ class PaymentController extends GetxController {
           final imageUrl = data['image_url']?.toString();
           if (imageUrl != null && imageUrl.isNotEmpty && imageUrl != 'null') {
             qrImageUrl.value = imageUrl;
-            amount.value = (data['amount'] as num?)?.toDouble() ?? 0.0;
-            final expiresAtStr = data['expires_at']?.toString();
-            if (expiresAtStr != null &&
-                expiresAtStr.isNotEmpty &&
-                expiresAtStr != 'null') {
-              expiresAt.value = DateTime.tryParse(expiresAtStr);
+            // amount comes as a string e.g. "32428.00"
+            amount.value = double.tryParse(data['amount']?.toString() ?? '') ?? amount.value;
+            // close_by is a Unix timestamp in seconds
+            final closeBy = data['close_by'];
+            if (closeBy != null) {
+              expiresAt.value = DateTime.fromMillisecondsSinceEpoch(
+                (closeBy as num).toInt() * 1000,
+              );
               _startCountdown();
             }
             state.value = PaymentState.onlineQrReady;

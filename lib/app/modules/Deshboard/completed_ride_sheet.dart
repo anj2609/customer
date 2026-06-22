@@ -5,6 +5,7 @@ import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/payment_controller.dart';
 import 'package:myrideuser/data/modal/trackride_model.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class CompletedRideSheet extends StatefulWidget {
   final String bookingId;
@@ -535,40 +536,27 @@ class _CompletedRideSheetState extends State<CompletedRideSheet>
         Obx(() {
           final url = payCtrl.qrImageUrl.value;
           if (url.isEmpty) return const SizedBox.shrink();
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              url,
-              width: 220,
-              height: 220,
-              fit: BoxFit.contain,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return const SizedBox(
-                  width: 220,
-                  height: 220,
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 220,
-                  height: 220,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.broken_image_outlined, size: 48, color: Colors.grey),
-                      SizedBox(height: 8),
-                      Text('Could not load QR image', style: TextStyle(color: Colors.grey)),
-                    ],
-                  ),
-                );
-              },
+          return Container(
+            width: 220,
+            height: 220,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            padding: const EdgeInsets.all(10),
+            child: QrImageView(
+              data: url,
+              version: QrVersions.auto,
+              size: 200,
+              eyeStyle: const QrEyeStyle(
+                eyeShape: QrEyeShape.square,
+                color: Colors.black,
+              ),
+              dataModuleStyle: const QrDataModuleStyle(
+                dataModuleShape: QrDataModuleShape.square,
+                color: Colors.black,
+              ),
             ),
           );
         }),
