@@ -149,7 +149,7 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
               polylineId: const PolylineId("route"),
               points: routePoints,
               width: 6,
-              color: Colors.blue,
+              color: ColorResources.blueeebutton,
               jointType: JointType.round,
               startCap: Cap.roundCap,
               endCap: Cap.roundCap,
@@ -261,7 +261,7 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                       Icon(
                         Icons.circle,
                         size: Dimensions.spacingSize10,
-                        color: Colors.red,
+                        color: ColorResources.textColorRed,
                       ),
                       SizedBox(width: Dimensions.spacingSize10),
 
@@ -516,7 +516,7 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                         AnimatedTopToast.show(
                           context: context,
                           message: "Please select a vehicle type",
-                          backgroundColor: Colors.red,
+                          backgroundColor: ColorResources.textColorRed,
                           icon: Icons.error_outline,
                         );
                         return;
@@ -527,7 +527,7 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                         AnimatedTopToast.show(
                           context: context,
                           message: "Please select a schedule date & time",
-                          backgroundColor: Colors.red,
+                          backgroundColor: ColorResources.textColorRed,
                           icon: Icons.error_outline,
                         );
                         return;
@@ -559,7 +559,7 @@ class _RideOptionScreenState extends State<RideOptionScreen> {
                           context: context,
                           message:
                               "Something went wrong. Please try again.",
-                          backgroundColor: Colors.red,
+                          backgroundColor: ColorResources.textColorRed,
                           icon: Icons.error_outline,
                         );
                       } finally {

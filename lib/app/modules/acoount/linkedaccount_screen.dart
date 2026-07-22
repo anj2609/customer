@@ -1,3 +1,4 @@
+import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -201,7 +202,7 @@ class _LinkedAccountScreenState extends State<LinkedAccountScreen> {
                 fontSize: width * 0.04,
                 color: connectedStatus[provider] == true
                     ? Colors.grey
-                    : Colors.blue,
+                    : ColorResources.blueeebutton,
                 fontWeight: FontWeight.w500,
               ),
             ),

@@ -80,7 +80,7 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
             children: [
               CircleAvatar(
                 radius: 35,
-                backgroundColor: Colors.teal,
+                backgroundColor: ColorResources.blueeebutton,
                 child: const Icon(Icons.check, color: Colors.white, size: 30),
               ),
               const SizedBox(height: 20),
@@ -108,7 +108,7 @@ class _PromoCodeScreenState extends State<PromoCodeScreen> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
+                        backgroundColor: ColorResources.blueeebutton,
                       ),
                       onPressed: () {},
                       child: const Text("Use Now"),

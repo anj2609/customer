@@ -1,6 +1,7 @@
 import 'package:myrideuser/app/modules/Deshboard/findingdriver_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 
 class PromoVoucherScreen extends StatefulWidget {
   const PromoVoucherScreen({super.key});
@@ -100,7 +101,7 @@ class _PromoVoucherScreenState extends State<PromoVoucherScreen> {
                                 horizontal: 20,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xff1BA7C9),
+                                color: ColorResources.blueeebutton,
                                 borderRadius: BorderRadius.circular(25),
                               ),
                               alignment: Alignment.center,
@@ -142,7 +143,7 @@ class _PromoVoucherScreenState extends State<PromoVoucherScreen> {
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: selected
-                                  ? const Color(0xff1BA7C9)
+                                  ? ColorResources.blueeebutton
                                   : Colors.transparent,
                               width: 1.5,
                             ),
@@ -153,9 +154,9 @@ class _PromoVoucherScreenState extends State<PromoVoucherScreen> {
                               Container(
                                 height: 44,
                                 width: 44,
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Color(0xff1BA7C9),
+                                  color: ColorResources.blueeebutton,
                                 ),
                                 child: const Icon(
                                   Icons.local_offer,
@@ -191,9 +192,9 @@ class _PromoVoucherScreenState extends State<PromoVoucherScreen> {
 
                               /// Tick Icon
                               if (selected)
-                                const Icon(
+                                Icon(
                                   Icons.check,
-                                  color: Color(0xff1BA7C9),
+                                  color: ColorResources.blueeebutton,
                                 ),
                             ],
                           ),
@@ -226,7 +227,7 @@ class _PromoVoucherScreenState extends State<PromoVoucherScreen> {
                 height: 55,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: const Color(0xff1BA7C9),
+                  color: ColorResources.blueeebutton,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 alignment: Alignment.center,

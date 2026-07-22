@@ -247,7 +247,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                     },
                     child: Row(
                       children: [
-                        const Icon(Icons.my_location, color: Colors.blue),
+                        Icon(Icons.my_location, color: ColorResources.blueeebutton),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(

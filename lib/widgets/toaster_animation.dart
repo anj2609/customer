@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 
 class AnimatedTopToast {
   static void show({
@@ -6,17 +7,19 @@ class AnimatedTopToast {
     required String message,
 
     /// Customizations
-    Color backgroundColor = const Color(0xFF2E7D32),
+    Color? backgroundColor,
     Color textColor = Colors.white,
     IconData icon = Icons.check_circle_rounded,
     Duration duration = const Duration(seconds: 4),
   }) {
+    final Color resolvedBackgroundColor =
+        backgroundColor ?? ColorResources.greencolor;
     late OverlayEntry overlayEntry;
 
     overlayEntry = OverlayEntry(
       builder: (_) => _ToastWidget(
         message: message,
-        backgroundColor: backgroundColor,
+        backgroundColor: resolvedBackgroundColor,
         textColor: textColor,
         icon: icon,
         duration: duration,

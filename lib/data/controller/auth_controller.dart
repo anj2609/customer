@@ -1,17 +1,13 @@
-import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:myrideuser/app/modules/Deshboard/buttom_navigation.dart';
-import 'package:myrideuser/app/modules/auth/login_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:myrideuser/config/route.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/data/repository/auth_repo.dart';
@@ -268,72 +264,85 @@ class AuthController extends GetxController implements GetxService {
   }) async {
     await initDeviceData();
 
-    // Step 1 — try a login OTP; if it succeeds the number is registered.
-    final loginResp = await authRepo.sendOtpApi(
-      phone: phone,
-      type: ApiConstants.UserLogin,
-      deviceToken: deviceToken ?? '',
-      devicetype: deviceType,
-    );
-
-    if (loginResp.body != null && loginResp.body['code'] == '200') {
-      // Registered user
-      RouteHelper.getOtpScreenRoute(
-        phone,
-        ApiConstants.UserLogin,
-      );
-      return;
-    }
-
-    // Step 2 — distinguish "user not found" errors from real server errors.
-    final int statusCode = loginResp.statusCode ?? 0;
-    final String msg = (loginResp.body?['message'] ?? '').toString().toLowerCase();
-
-    final bool isNotFound = statusCode == 404 ||
-        statusCode == 422 ||
-        msg.contains('not found') ||
-        msg.contains('not register') ||
-        msg.contains('does not exist') ||
-        msg.contains('no account') ||
-        msg.contains('invalid') ||
-        (loginResp.body?['code'] != null &&
-            loginResp.body['code'] != '200' &&
-            statusCode != 500);
-
-    if (isNotFound) {
-      // Not registered — send a register OTP.
-      final regResp = await authRepo.sendOtpApi(
+    try {
+      // Step 1 — try a login OTP; if it succeeds the number is registered.
+      final loginResp = await authRepo.sendOtpApi(
         phone: phone,
-        type: ApiConstants.UserRegister,
+        type: ApiConstants.UserLogin,
         deviceToken: deviceToken ?? '',
         devicetype: deviceType,
       );
 
-      if (regResp.body != null && regResp.body['code'] == '200') {
-        AnimatedTopToast.show(
-          context: context,
-          message: "OTP sent successfully.",
-          backgroundColor: ColorResources.appColor,
-          icon: Icons.check_circle_rounded,
-        );
-        await Future.delayed(const Duration(milliseconds: 500));
+      if (loginResp.body != null && loginResp.body['code'] == '200') {
+        // Registered user
         RouteHelper.getOtpScreenRoute(
           phone,
-          ApiConstants.UserRegister,
+          ApiConstants.UserLogin,
         );
         return;
       }
 
-      throw Exception(
-        regResp.body?['message'] ??
-            'Unable to verify your account at the moment. Please try again.',
-      );
-    }
+      // Step 2 — distinguish "user not found" errors from real server errors.
+      final int statusCode = loginResp.statusCode ?? 0;
+      final String msg = (loginResp.body?['message'] ?? '').toString().toLowerCase();
 
-    // Step 3 — real server / network error.
-    throw Exception(
-      'Unable to verify your account at the moment. Please try again.',
-    );
+      final bool isNotFound = statusCode == 404 ||
+          statusCode == 422 ||
+          msg.contains('not found') ||
+          msg.contains('not register') ||
+          msg.contains('does not exist') ||
+          msg.contains('no account') ||
+          msg.contains('invalid') ||
+          (loginResp.body?['code'] != null &&
+              loginResp.body['code'] != '200' &&
+              statusCode != 500);
+
+      if (isNotFound) {
+        // Not registered — send a register OTP.
+        final regResp = await authRepo.sendOtpApi(
+          phone: phone,
+          type: ApiConstants.UserRegister,
+          deviceToken: deviceToken ?? '',
+          devicetype: deviceType,
+        );
+
+        if (regResp.body != null && regResp.body['code'] == '200') {
+          AnimatedTopToast.show(
+            context: context,
+            message: "OTP sent successfully.",
+            backgroundColor: ColorResources.appColor,
+            icon: Icons.check_circle_rounded,
+          );
+          await Future.delayed(const Duration(milliseconds: 500));
+          RouteHelper.getOtpScreenRoute(
+            phone,
+            ApiConstants.UserRegister,
+          );
+          return;
+        }
+
+        throw Exception(
+          regResp.body?['message'] ??
+              'Unable to verify your account at the moment. Please try again.',
+        );
+      }
+
+      // Step 3 — real server error.
+      throw Exception(
+        'Unable to verify your account at the moment. Please try again.',
+      );
+    } catch (e) {
+      if (e is SocketException) {
+        throw Exception('Please check your internet connection and try again.');
+      }
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('TimeoutException') ||
+          e.toString().contains('Connection refused') ||
+          e.toString().contains('Failed host lookup')) {
+        throw Exception('Please check your internet connection and try again.');
+      }
+      rethrow;
+    }
   }
 
   Future<Response> sendOtp({
@@ -633,106 +642,6 @@ class AuthController extends GetxController implements GetxService {
     //await EasyLoading.dismiss();
     update();
     return response;
-  }
-
-  Future<void> registerEV({
-    String? evnumber,
-    String? password,
-    String? confirmpassword,
-    String? ownername,
-    String? address,
-    String? phone,
-    String? email,
-    String? evrccopy,
-    String? idproof,
-    String? vehiclephoto,
-  }) async {
-    try {
-      var uri = Uri.parse("https://evfuel.akslearning.in/api/register");
-      var request = http.MultipartRequest('POST', uri);
-
-      request.fields.addAll({
-        'ev_number': evnumber ?? '',
-        'password': password ?? '',
-        'confirm_password': confirmpassword ?? '',
-        'owner_name': ownername ?? '',
-        'address': address ?? '',
-        'phone': phone ?? '',
-        'email': email ?? '',
-      });
-
-      /// Files
-      if (evrccopy != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('ev_rc_copy', evrccopy),
-        );
-      }
-      if (idproof != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('id_proof', idproof),
-        );
-      }
-      if (vehiclephoto != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('vehicle_photo', vehiclephoto),
-        );
-      }
-
-      request.headers['Accept'] = 'application/json';
-
-      var response = await request.send();
-      var responseBody = await response.stream.bytesToString();
-      var decoded = jsonDecode(responseBody);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar(
-          'Success',
-          decoded['message'] ?? 'Registration successful',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-
-        Future.delayed(const Duration(seconds: 1), () {
-          Get.offAll(() => LoginScreen());
-        });
-      } else if (response.statusCode == 401 || response.statusCode == 422) {
-        if (decoded['error'] != null) {
-          /// show first validation error
-          String firstError = decoded['error'].values.first[0];
-
-          Get.snackbar(
-            'Error',
-            firstError,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
-        } else {
-          Get.snackbar(
-            'Error',
-            decoded['message'] ?? 'Validation failed',
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
-        }
-      }
-      /// SERVER ERROR
-      else {
-        Get.snackbar(
-          'Error',
-          decoded['message'] ?? 'Something went wrong',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Something went wrong. Please try again',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      debugPrint("Exception: $e");
-    }
   }
 
   Future<Response> subscribeadd({

@@ -8,7 +8,11 @@ Widget customHeader(GlobalKey<ScaffoldState> scaffoldKey) {
     width: double.infinity,
     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
     decoration: BoxDecoration(
-      color: ColorResources.primarycolor2,
+      gradient: LinearGradient(
+        colors: ColorResources.primaryGradient,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
       borderRadius: BorderRadius.only(
         bottomLeft: Radius.circular(20),
         bottomRight: Radius.circular(20),

@@ -10,6 +10,7 @@ import 'package:myrideuser/config/route.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/dimensions.dart';
 import 'package:myrideuser/app/modules/Deshboard/completed_ride_sheet.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:myrideuser/data/controller/chat_controller.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
@@ -230,7 +231,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
               polylineId: const PolylineId("route"),
               points: routePoints,
               width: 6,
-              color: Colors.blue,
+              color: ColorResources.blueeebutton,
               jointType: JointType.round,
               startCap: Cap.roundCap,
               endCap: Cap.roundCap,
@@ -517,9 +518,9 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                     /// Pickup
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on,
-                          color: Colors.blue,
+                          color: ColorResources.blueeebutton,
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -532,9 +533,9 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                     /// Drop
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on,
-                          color: Colors.red,
+                          color: ColorResources.textColorRed,
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -713,8 +714,8 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                 );
               },
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
-                side: const BorderSide(color: Colors.red, width: 1.2),
+                foregroundColor: ColorResources.textColorRed,
+                side: BorderSide(color: ColorResources.textColorRed, width: 1.2),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -816,7 +817,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
             title: Text(name),
             subtitle: Text(vehicle),
             trailing: IconButton(
-              icon: const Icon(Icons.call, color: Colors.blue),
+              icon: Icon(Icons.call, color: ColorResources.blueeebutton),
               onPressed: () {},
             ),
           ),
@@ -896,7 +897,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                           height: 45,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
+                            color: ColorResources.blueeebutton.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(otp[index]),
@@ -1039,12 +1040,12 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.red),
+                        border: Border.all(color: ColorResources.textColorRed),
                       ),
-                      child: const Text(
+                      child: Text(
                         "Cancel Ride",
                         style: TextStyle(
-                          color: Colors.red,
+                          color: ColorResources.textColorRed,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1148,15 +1149,15 @@ class _RippleLoaderState extends State<RippleLoader>
                 height: 60 + (value * 20),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.blue.withValues(alpha: 1 - value)),
+                  border: Border.all(color: ColorResources.blueeebutton.withValues(alpha: 1 - value)),
                 ),
               ),
 
               Container(
                 width: 12,
                 height: 12,
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
+                decoration: BoxDecoration(
+                  color: ColorResources.blueeebutton,
                   shape: BoxShape.circle,
                 ),
               ),

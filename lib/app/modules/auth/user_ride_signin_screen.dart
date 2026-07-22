@@ -283,7 +283,7 @@ class _UserSignInpScreenState extends State<UserSignInpScreen> {
                             ? "Signing in..."
                             : "Continue with Google",
                         images: 'assets/images/google.png',
-                        iconColor: Colors.red,
+                        iconColor: ColorResources.textColorRed,
                         onTap: () async {
                           if (_isGoogleSignIn) return;
                           if (!isChecked) {

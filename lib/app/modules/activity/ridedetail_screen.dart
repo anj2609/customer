@@ -96,7 +96,7 @@ class RideDetailsScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.blue.shade200),
+                        border: Border.all(color: ColorResources.blueeebutton.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         children: [
@@ -137,7 +137,7 @@ class RideDetailsScreen extends StatelessWidget {
                             children: [
                               Icon(
                                 Icons.location_on,
-                                color: Colors.blue,
+                                color: ColorResources.blueeebutton,
                                 size: 18,
                               ),
                               SizedBox(width: 10),
@@ -156,7 +156,7 @@ class RideDetailsScreen extends StatelessWidget {
                             children: [
                               Icon(
                                 Icons.location_on,
-                                color: Colors.red,
+                                color: ColorResources.textColorRed,
                                 size: 18,
                               ),
                               SizedBox(width: 10),
@@ -213,7 +213,7 @@ class RideDetailsScreen extends StatelessWidget {
                       height: 50,
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.blue),
+                          side: BorderSide(color: ColorResources.blueeebutton),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -221,9 +221,9 @@ class RideDetailsScreen extends StatelessWidget {
                         onPressed: () {
                           showDriverFoundSheet(context);
                         },
-                        child: const Text(
+                        child: Text(
                           "Share Receipt",
-                          style: TextStyle(color: Colors.blue),
+                          style: TextStyle(color: ColorResources.blueeebutton),
                         ),
                       ),
                     ),
@@ -236,15 +236,15 @@ class RideDetailsScreen extends StatelessWidget {
                       height: 50,
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.red),
+                          side: BorderSide(color: ColorResources.textColorRed),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
                         onPressed: () {},
-                        child: const Text(
+                        child: Text(
                           "Cancel Ride",
-                          style: TextStyle(color: Colors.red),
+                          style: TextStyle(color: ColorResources.textColorRed),
                         ),
                       ),
                     ),
@@ -417,12 +417,12 @@ class RideDetailsScreen extends StatelessWidget {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.blue),
+                    border: Border.all(color: ColorResources.blueeebutton),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     value,
-                    style: const TextStyle(color: Colors.blue, fontSize: 12),
+                    style: TextStyle(color: ColorResources.blueeebutton, fontSize: 12),
                   ),
                 )
               : Text(value),

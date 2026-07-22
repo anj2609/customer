@@ -83,7 +83,7 @@ class _CancelRideScreenState extends State<CancelRideScreen> {
                             Radio<int>(
                               value: index,
                               groupValue: selected,
-                              activeColor: const Color(0xFF1FA2C3),
+                              activeColor: ColorResources.blueeebutton,
                               onChanged: (value) {
                                 setState(() {
                                   selected = value;

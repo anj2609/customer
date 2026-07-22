@@ -153,9 +153,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: showImageSourceDialog,
                         child: Container(
                           padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.blue,
+                            color: ColorResources.blueeebutton,
                           ),
                           child: const Icon(
                             Icons.edit,

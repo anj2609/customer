@@ -4,6 +4,7 @@ import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myrideuser/widgets/custom_loader.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 
 class DriverRatingScreen extends StatefulWidget {
   final String bookingid;
@@ -203,7 +204,7 @@ class _DriverRatingScreenState extends State<DriverRatingScreen> {
                         "Rating Required",
                         "Please select a rating before continuing",
                         snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
+                        backgroundColor: ColorResources.textColorRed,
                         colorText: Colors.white,
                       );
                       return;

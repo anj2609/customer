@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 
 class CustomPopup {
 
@@ -21,8 +22,8 @@ class CustomPopup {
                 Container(
                   height: 70,
                   width: 70,
-                  decoration: const BoxDecoration(
-                    color: Color(0xff2FB8E6),
+                  decoration: BoxDecoration(
+                    color: ColorResources.blueeebutton,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.check,
@@ -52,7 +53,7 @@ class CustomPopup {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff2FB8E6),
+                      backgroundColor: ColorResources.blueeebutton,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -89,8 +90,8 @@ class CustomPopup {
                 Container(
                   height: 70,
                   width: 70,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
+                  decoration: BoxDecoration(
+                    color: ColorResources.textColorRed,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.close,
@@ -120,7 +121,7 @@ class CustomPopup {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: ColorResources.textColorRed,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),

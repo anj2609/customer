@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final Color textColor;
   final double borderRadius;
 
@@ -16,7 +16,7 @@ class CustomButton extends StatelessWidget {
     Key? key,
     required this.text,
     required this.onPressed,
-    this.backgroundColor = Colors.blue,
+    this.backgroundColor,
     this.textColor = Colors.white,
     this.borderRadius = 30,
   }) : super(key: key);
@@ -30,7 +30,7 @@ class CustomButton extends StatelessWidget {
         width: double.infinity,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: backgroundColor ?? ColorResources.blueeebutton,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
         child: Text(
@@ -135,7 +135,11 @@ class CustomPrimaryButton extends StatelessWidget {
         width: double.infinity,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: ColorResources.blueeebutton,
+          gradient: LinearGradient(
+            colors: ColorResources.brandGradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(30),
         ),
         child: Text(
@@ -203,7 +207,11 @@ class CustomPrimaryDyanamicButton extends StatelessWidget {
         width: double.infinity,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: ColorResources.blueeebutton,
+          gradient: LinearGradient(
+            colors: ColorResources.brandGradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
         ),
         child: Text(
@@ -327,7 +335,11 @@ class CustomMessageButton extends StatelessWidget {
       child: Container(
         height: MediaQuery.of(context).size.height * 0.06,
         decoration: BoxDecoration(
-          color: ColorResources.blueeebutton,
+          gradient: LinearGradient(
+            colors: ColorResources.brandGradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(Dimensions.spacingSize30),
         ),
         child: Row(
@@ -375,9 +387,14 @@ class CustomOtpButton extends StatelessWidget {
         width: double.infinity,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isEnabled
-              ? ColorResources.blueeebutton
-              : ColorResources.buttonColors,
+          gradient: isEnabled
+              ? LinearGradient(
+                  colors: ColorResources.brandGradient,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isEnabled ? null : ColorResources.buttonColors,
           borderRadius: BorderRadius.circular(30),
         ),
         child: isLoading

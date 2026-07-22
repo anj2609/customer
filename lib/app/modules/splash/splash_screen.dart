@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:myrideuser/config/utils/constants.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -69,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF2DA6C4),
+      backgroundColor: ColorResources.blueeebutton,
       body: Center(
         child: SlideTransition(
           position: _slideAnimation,

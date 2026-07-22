@@ -79,7 +79,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: data.isDefault == 1
-                      ? Colors.blue.shade50
+                      ? ColorResources.blueeebutton.withValues(alpha: 0.08)
                       : Colors.white,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
@@ -87,7 +87,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.location_on, color: Colors.blue, size: 22),
+                    Icon(Icons.location_on, color: ColorResources.blueeebutton, size: 22),
 
                     SizedBox(width: 12),
 
@@ -163,11 +163,11 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                           value: "delete",
                           child: Row(
                             children: [
-                              Icon(Icons.delete, size: 18, color: Colors.red),
+                              Icon(Icons.delete, size: 18, color: ColorResources.textColorRed),
                               SizedBox(width: 8),
                               Text(
                                 "Delete",
-                                style: TextStyle(color: Colors.red),
+                                style: TextStyle(color: ColorResources.textColorRed),
                               ),
                             ],
                           ),
@@ -221,12 +221,12 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               /// TITLE
-              const Text(
+              Text(
                 "Delete Address",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.red,
+                  color: ColorResources.textColorRed,
                 ),
               ),
 
@@ -252,7 +252,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.location_on, color: Colors.blue, size: 20),
+                    Icon(Icons.location_on, color: ColorResources.blueeebutton, size: 20),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
@@ -309,7 +309,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
                       height: 45,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: ColorResources.blueeebutton,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),

@@ -50,6 +50,7 @@ class _CanceledScreenState extends State<CanceledScreen> {
                             Image.asset(
                               "assets/images/notdatafound.png",
                               height: 150,
+                              color: ColorResources.blueeebutton,
                             ),
                             const SizedBox(height: 10),
                             const Text(
@@ -125,7 +126,7 @@ class _CanceledScreenState extends State<CanceledScreen> {
                   )
                 : CircleAvatar(
                     radius: width * 0.06,
-                    backgroundColor: Colors.blue.shade50,
+                    backgroundColor: ColorResources.blueeebutton.withValues(alpha: 0.08),
                     child: Image.asset(
                       "assets/images/cars.png",
                       width: width * 0.08,
@@ -161,7 +162,7 @@ class _CanceledScreenState extends State<CanceledScreen> {
                   const SizedBox(height: 4),
                   Text(
                     item.status ?? "",
-                    style: TextStyle(fontSize: width * 0.03, color: Colors.red),
+                    style: TextStyle(fontSize: width * 0.03, color: ColorResources.textColorRed),
                   ),
                 ],
               ),

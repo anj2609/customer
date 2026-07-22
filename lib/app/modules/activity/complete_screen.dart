@@ -31,7 +31,11 @@ class CompletedScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset("assets/images/notdatafound.png", height: 150),
+                    Image.asset(
+                      "assets/images/notdatafound.png",
+                      height: 150,
+                      color: ColorResources.blueeebutton,
+                    ),
                     const SizedBox(height: 10),
                     const Text(
                       "No Scheduled Rides",
@@ -117,7 +121,7 @@ class CompleteCard extends StatelessWidget {
                 )
               : CircleAvatar(
                   radius: width * 0.06,
-                  backgroundColor: Colors.blue.shade50,
+                  backgroundColor: ColorResources.blueeebutton.withValues(alpha: 0.08),
                   child: Image.asset(
                     "assets/images/cars.png",
                     width: width * 0.08,

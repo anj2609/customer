@@ -1,3 +1,4 @@
+import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:myrideuser/data/modal/address_Model.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
@@ -218,8 +219,8 @@ class _AddressUpdateScreenState extends State<AddressUpdateScreen> {
                   ),
                 ),
 
-                const Center(
-                  child: Icon(Icons.location_pin, size: 40, color: Colors.red),
+                Center(
+                  child: Icon(Icons.location_pin, size: 40, color: ColorResources.textColorRed),
                 ),
               ],
             ),
@@ -250,7 +251,7 @@ class _AddressUpdateScreenState extends State<AddressUpdateScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.location_on, color: Colors.blue),
+                        Icon(Icons.location_on, color: ColorResources.blueeebutton),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(

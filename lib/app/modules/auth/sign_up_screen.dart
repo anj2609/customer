@@ -65,7 +65,7 @@ class LatestMyRideLoginScreen extends StatelessWidget {
                         CustomSocialButton(
                           text: "Continue with Google",
                           images: 'assets/images/google.png',
-                          iconColor: Colors.red,
+                          iconColor: ColorResources.textColorRed,
                           onTap: () async {
                             showDialog(
                               context: Get.context!,

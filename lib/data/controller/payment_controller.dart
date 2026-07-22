@@ -1,40 +1,19 @@
 import 'dart:async';
 import 'package:get/get.dart';
+import 'package:myrideuser/config/route.dart';
 import 'package:myrideuser/data/repository/booking_repo.dart';
-import 'package:myrideuser/data/repository/profile_repo.dart';
 
-enum PaymentState {
-  loading,
-  cash,
-  cashConfirming,
-  cashDone,
-  onlineComingSoon,
-  onlinePaid,
-  onlineLoadingQr,
-  onlineQrReady,
-  onlineQrExpired,
-  wallet,
-  walletConfirming,
-  walletDone,
-  error,
-}
+enum PaymentState { loading, waiting, paid, error }
 
 class PaymentController extends GetxController {
   final BookingRepo bookingRepo;
-  final ProfiileRepo profileRepo;
 
-  PaymentController({required this.bookingRepo, required this.profileRepo});
+  PaymentController({required this.bookingRepo});
 
   final Rx<PaymentState> state = PaymentState.loading.obs;
   final RxString errorMessage = ''.obs;
-  final RxString qrImageUrl = ''.obs;
-  final RxDouble amount = 0.0.obs;
-  final RxDouble walletBalance = 0.0.obs;
-  final Rx<DateTime?> expiresAt = Rx<DateTime?>(null);
-  final Rx<Duration> timeLeft = Duration.zero.obs;
 
   Timer? _pollTimer;
-  Timer? _countdownTimer;
   String? _bookingId;
   bool _initialized = false;
 
@@ -43,7 +22,6 @@ class PaymentController extends GetxController {
     _bookingId = bookingId;
     _initialized = true;
     _pollTimer?.cancel();
-    _countdownTimer?.cancel();
     state.value = PaymentState.loading;
     await _checkPaymentStatus();
   }
@@ -55,22 +33,12 @@ class PaymentController extends GetxController {
           response.body is Map &&
           response.body['code']?.toString() == '200') {
         final data = response.body['data'] as Map<String, dynamic>? ?? {};
-        final paymentType = data['payment_type']?.toString() ?? '';
         final isPaid = data['is_paid'] as bool? ?? false;
-        final amountVal = (data['amount'] as num?)?.toDouble();
-        if (amountVal != null && amountVal > 0) amount.value = amountVal;
-
-        if (paymentType == 'online') {
-          if (isPaid) {
-            state.value = PaymentState.onlinePaid;
-          } else {
-            await _generateQr();
-          }
-        } else if (paymentType == 'wallet') {
-          await _fetchWalletBalance();
+        if (isPaid) {
+          _onPaid();
         } else {
-          // cash or any other type
-          state.value = PaymentState.cash;
+          state.value = PaymentState.waiting;
+          _startPolling();
         }
       } else {
         errorMessage.value = (response.body is Map)
@@ -84,182 +52,31 @@ class PaymentController extends GetxController {
     }
   }
 
-  Future<void> _fetchWalletBalance() async {
-    try {
-      final response = await profileRepo.getCustomerWallet();
-      if (response.statusCode == 200 &&
-          response.body is Map &&
-          response.body['code']?.toString() == '200') {
-        final balance = response.body['data']?['balance'];
-        walletBalance.value = (balance as num?)?.toDouble() ?? 0.0;
-      }
-    } catch (_) {}
-    state.value = PaymentState.wallet;
-  }
-
-  Future<void> confirmCashPayment() async {
-    state.value = PaymentState.cashConfirming;
-    try {
-      final response = await bookingRepo.completeRide(bookingId: _bookingId!);
-      if (response.statusCode == 200 &&
-          response.body is Map &&
-          response.body['code']?.toString() == '200') {
-        state.value = PaymentState.cashDone;
-      } else {
-        errorMessage.value = (response.body is Map)
-            ? (response.body['message']?.toString() ?? 'Failed to confirm payment.')
-            : 'Failed to confirm payment.';
-        state.value = PaymentState.cash;
-      }
-    } catch (_) {
-      errorMessage.value = 'Connection error. Please try again.';
-      state.value = PaymentState.cash;
-    }
-  }
-
-  Future<void> confirmWalletPayment() async {
-    state.value = PaymentState.walletConfirming;
-    try {
-      final response = await bookingRepo.completeRide(bookingId: _bookingId!);
-      if (response.statusCode == 200 &&
-          response.body is Map &&
-          response.body['code']?.toString() == '200') {
-        // Refresh balance so walletDone card shows updated amount
-        try {
-          final walletResp = await profileRepo.getCustomerWallet();
-          if (walletResp.statusCode == 200 &&
-              walletResp.body is Map &&
-              walletResp.body['code']?.toString() == '200') {
-            final balance = walletResp.body['data']?['balance'];
-            walletBalance.value = (balance as num?)?.toDouble() ?? walletBalance.value;
-          }
-        } catch (_) {}
-        state.value = PaymentState.walletDone;
-      } else {
-        errorMessage.value = (response.body is Map)
-            ? (response.body['message']?.toString() ?? 'Failed to process wallet payment.')
-            : 'Failed to process wallet payment.';
-        state.value = PaymentState.wallet;
-      }
-    } catch (_) {
-      errorMessage.value = 'Connection error. Please try again.';
-      state.value = PaymentState.wallet;
-    }
-  }
-
-  Future<void> _generateQr() async {
-    state.value = PaymentState.onlineLoadingQr;
-    const retryDelays = [0, 1500, 3000, 5000];
-    for (int attempt = 0; attempt < retryDelays.length; attempt++) {
-      if (attempt > 0) {
-        await Future.delayed(Duration(milliseconds: retryDelays[attempt]));
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 4), (_) async {
+      if (state.value != PaymentState.waiting) {
+        _pollTimer?.cancel();
+        return;
       }
       try {
-        final response = await bookingRepo.generateQrPayment(bookingId: _bookingId!);
+        final response = await bookingRepo.getPaymentStatus(bookingId: _bookingId!);
         if (response.statusCode == 200 &&
             response.body is Map &&
             response.body['code']?.toString() == '200') {
           final data = response.body['data'] as Map<String, dynamic>? ?? {};
-          final imageUrl = data['image_url']?.toString();
-          if (imageUrl != null && imageUrl.isNotEmpty && imageUrl != 'null') {
-            qrImageUrl.value = imageUrl;
-            // amount comes as a string e.g. "32428.00"
-            amount.value = double.tryParse(data['amount']?.toString() ?? '') ?? amount.value;
-            // close_by is a Unix timestamp in seconds
-            final closeBy = data['close_by'];
-            if (closeBy != null) {
-              expiresAt.value = DateTime.fromMillisecondsSinceEpoch(
-                (closeBy as num).toInt() * 1000,
-              );
-              _startCountdown();
-            }
-            state.value = PaymentState.onlineQrReady;
-            _startPolling();
-            return;
-          }
-        } else {
-          errorMessage.value = (response.body is Map)
-              ? (response.body['message']?.toString() ?? 'Failed to generate QR code.')
-              : 'Failed to generate QR code.';
-          state.value = PaymentState.error;
-          return;
+          final isPaid = data['is_paid'] as bool? ?? false;
+          if (isPaid) _onPaid();
         }
-      } catch (_) {
-        if (attempt == retryDelays.length - 1) {
-          errorMessage.value = 'Connection error. Please try again.';
-          state.value = PaymentState.error;
-          return;
-        }
-      }
-    }
-    errorMessage.value = 'QR code is not available. Please try again.';
-    state.value = PaymentState.error;
-  }
-
-  void _startPolling() {
-    _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (state.value == PaymentState.onlineQrReady) {
-        _pollPaymentStatus();
-      } else {
-        _pollTimer?.cancel();
-      }
+      } catch (_) {}
     });
   }
 
-  Future<void> _pollPaymentStatus() async {
-    try {
-      final response = await bookingRepo.getPaymentStatus(bookingId: _bookingId!);
-      if (response.statusCode == 200 &&
-          response.body is Map &&
-          response.body['code']?.toString() == '200') {
-        final data = response.body['data'] as Map<String, dynamic>? ?? {};
-        final isPaid = data['is_paid'] as bool? ?? false;
-        if (isPaid) {
-          _pollTimer?.cancel();
-          _countdownTimer?.cancel();
-          state.value = PaymentState.onlinePaid;
-        }
-      }
-    } catch (_) {}
-  }
-
-  void checkNowIfQrActive() {
-    if (state.value == PaymentState.onlineQrReady) {
-      _pollPaymentStatus();
-    }
-  }
-
-  void _startCountdown() {
-    _countdownTimer?.cancel();
-    if (expiresAt.value == null) return;
-    _updateCountdown();
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _updateCountdown();
-    });
-  }
-
-  void _updateCountdown() {
-    if (expiresAt.value == null) return;
-    final remaining = expiresAt.value!.difference(DateTime.now());
-    if (remaining.isNegative || remaining.inSeconds <= 0) {
-      _countdownTimer?.cancel();
-      _pollTimer?.cancel();
-      timeLeft.value = Duration.zero;
-      if (state.value == PaymentState.onlineQrReady) {
-        state.value = PaymentState.onlineQrExpired;
-      }
-    } else {
-      timeLeft.value = remaining;
-    }
-  }
-
-  Future<void> regenerateQr() async {
+  void _onPaid() async {
     _pollTimer?.cancel();
-    _countdownTimer?.cancel();
-    expiresAt.value = null;
-    timeLeft.value = Duration.zero;
-    await _generateQr();
+    state.value = PaymentState.paid;
+    await Future.delayed(const Duration(seconds: 2));
+    Get.offAllNamed(RouteHelper.getmainNavigationScreen());
   }
 
   Future<void> retryInit() async {
@@ -270,7 +87,6 @@ class PaymentController extends GetxController {
   @override
   void onClose() {
     _pollTimer?.cancel();
-    _countdownTimer?.cancel();
     super.onClose();
   }
 }

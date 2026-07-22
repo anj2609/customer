@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myrideuser/config/route.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:myrideuser/widgets/toaster_animation.dart';
 
@@ -68,7 +69,7 @@ class _AppEntryRouterState extends State<AppEntryRouter> {
             context: ctx,
             message:
                 "Couldn't check your ride status. Please check your connection.",
-            backgroundColor: Colors.orange,
+            backgroundColor: ColorResources.orangecoor,
             icon: Icons.wifi_off_rounded,
           );
         }
@@ -78,10 +79,18 @@ class _AppEntryRouterState extends State<AppEntryRouter> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFF2DA6C4),
-      body: Center(
-        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: ColorResources.primaryGradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+        ),
       ),
     );
   }

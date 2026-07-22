@@ -1,32 +1,44 @@
 import 'package:flutter/material.dart';
 
 class ColorResources {
-  static Color appColor = const Color(0xFF21ADE3);
-  static Color primarycolor = const Color(0xFF1F4B93);
-  static Color primarycolor2 = const Color(0xFFEB1D7B);
-  static Color primarycolor3 = const Color(0xFF28559E);
-  static Color blueeebutton = const Color(0xFF21ADE3);
-  static Color buttoncolor = const Color(0xFFF5FCFF);
-  static Color buttonColors = const Color(0xFFF5FCFF);
-  static Color TextColorForGrey = const Color(0xFFA0A0A0);
+  // ===== N RIDE brand palette =====
+  // N Ride Blue, Deep Royal Blue, Navy Blue, Light/Cool Gray, Slate Gray, Charcoal
+  static Color appColor = const Color(0xFF123EBC);
+  static Color primarycolor = const Color(0xFF0B2F8A);
+  static Color primarycolor2 = const Color(0xFF123EBC);
+  static Color primarycolor3 = const Color(0xFF08225F);
+  static Color blueeebutton = const Color(0xFF123EBC);
+  static Color buttoncolor = const Color(0xFFF5F7FA);
+  static Color buttonColors = const Color(0xFFF5F7FA);
+  static Color TextColorForGrey = const Color(0xFF6B7280);
   static Color discountColor = const Color(0xFFE78737);
   static Color whiteColor = const Color(0xFFFFFFFF);
-  static Color textdetailsColor = const Color(0xFF616161);
-  static Color backgroundColor = const Color(0xFFF5F6F8);
-  static Color textColorBaclColor = const Color(0xFF000000);
+  static Color textdetailsColor = const Color(0xFF6B7280);
+  static Color backgroundColor = const Color(0xFFF5F7FA);
+  static Color textColorBaclColor = const Color(0xFF1F2937);
   static Color textColorRed = const Color(0xFFF54646);
-  static Color greycolorborder = const Color(0xFFD9D9D9);
-  static Color appgroundcolor = const Color(0xFFF5F5F5);
+  static Color greycolorborder = const Color(0xFFD8DEE8);
+  static Color appgroundcolor = const Color(0xFFF5F7FA);
 
-  ////// F5F5F5
+  ////// F5F7FA
 
   static Color greencolor = const Color(0xFF00A41A);
   static Color orangecoor = const Color(0xFFE78737);
-  static Color blackcolor = const Color(0xFF262626);
-  static Color blackgrey = const Color(0xFF7A7A7A);
-  static Color blackhalka = const Color(0xFF323232);
-  static Color blackcolor11 = const Color(0xFF000000);
-  static Color blackhalkaa = const Color(0xFF202020);
-  static Color blacktext = const Color(0xFF3A3A3A);
-  static Color blkackvoor = const Color.fromARGB(255, 71, 94, 131);
+  static Color blackcolor = const Color(0xFF1F2937);
+  static Color blackgrey = const Color(0xFF6B7280);
+  static Color blackhalka = const Color(0xFF1F2937);
+  static Color blackcolor11 = const Color(0xFF1F2937);
+  static Color blackhalkaa = const Color(0xFF08225F);
+  static Color blacktext = const Color(0xFF1F2937);
+  static Color blkackvoor = const Color(0xFF0B2F8A);
+
+  // ===== Gradients =====
+  static const List<Color> primaryGradient = [
+    Color(0xFF08225F),
+    Color(0xFF123EBC),
+  ];
+  static const List<Color> brandGradient = [
+    Color(0xFF0B2F8A),
+    Color(0xFF2A5BFF),
+  ];
 }

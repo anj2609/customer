@@ -20,7 +20,11 @@ class OngoingScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset("assets/images/notdatafound.png", height: 150),
+                Image.asset(
+                  "assets/images/notdatafound.png",
+                  height: 150,
+                  color: ColorResources.blueeebutton,
+                ),
                 const SizedBox(height: 10),
                 Text(
                   "No Ongoing Rides",
@@ -67,7 +71,7 @@ class OngoingScreen extends StatelessWidget {
                         )
                       : CircleAvatar(
                           radius: width * 0.06,
-                          backgroundColor: Colors.blue.shade50,
+                          backgroundColor: ColorResources.blueeebutton.withValues(alpha: 0.08),
                           child: Image.asset(
                             "assets/images/cars.png",
                             width: width * 0.08,
@@ -148,7 +152,7 @@ class OngoingScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.location_on, color: Colors.blue, size: 18),
+                        Icon(Icons.location_on, color: ColorResources.blueeebutton, size: 18),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(data.pickupAddress ?? "Pickup Location"),
@@ -158,7 +162,7 @@ class OngoingScreen extends StatelessWidget {
                     Divider(),
                     Row(
                       children: [
-                        Icon(Icons.location_on, color: Colors.red, size: 18),
+                        Icon(Icons.location_on, color: ColorResources.textColorRed, size: 18),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(data.dropAddress ?? "Drop Location"),

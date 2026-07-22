@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myrideuser/app/modules/activity/activity.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:myrideuser/widgets/custom_loader.dart';
 
@@ -23,7 +24,11 @@ class ScheduledScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset("assets/images/notdatafound.png", height: 150),
+                Image.asset(
+                  "assets/images/notdatafound.png",
+                  height: 150,
+                  color: ColorResources.blueeebutton,
+                ),
                 const SizedBox(height: 10),
                 const Text(
                   "No Complete Rides",

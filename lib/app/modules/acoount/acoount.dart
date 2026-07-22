@@ -438,10 +438,10 @@ class LogoutTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.logout, color: Colors.red),
-      title: const Text(
+      leading: Icon(Icons.logout, color: ColorResources.textColorRed),
+      title: Text(
         "Logout",
-        style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+        style: TextStyle(color: ColorResources.textColorRed, fontWeight: FontWeight.w500),
       ),
       onTap: () {
         _showLogoutBottomSheet(context);

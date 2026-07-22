@@ -151,7 +151,7 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
                   Divider(),
                   Row(
                     children: [
-                      Icon(Icons.location_on, color: Colors.red),
+                      Icon(Icons.location_on, color: ColorResources.textColorRed),
                       SizedBox(width: 8),
                       Expanded(child: Text("Larchmont Hotel")),
                       Icon(Icons.add, color: ColorResources.blueeebutton),
@@ -347,12 +347,12 @@ class _DriverHeadingScreenState extends State<DriverHeadingScreen> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.red),
+                        border: Border.all(color: ColorResources.textColorRed),
                       ),
-                      child: const Text(
+                      child: Text(
                         "Cancel Ride",
                         style: TextStyle(
-                          color: Colors.red,
+                          color: ColorResources.textColorRed,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

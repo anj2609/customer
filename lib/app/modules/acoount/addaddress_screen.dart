@@ -1,3 +1,4 @@
+import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/addaddress_controller.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:myrideuser/data/modal/addaddress_model.dart';
@@ -203,8 +204,8 @@ class _AddAddresScreenState extends State<AddAddresScreen> {
                   ),
                 ),
 
-                const Center(
-                  child: Icon(Icons.location_pin, size: 40, color: Colors.red),
+                Center(
+                  child: Icon(Icons.location_pin, size: 40, color: ColorResources.textColorRed),
                 ),
               ],
             ),
@@ -236,7 +237,7 @@ class _AddAddresScreenState extends State<AddAddresScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.location_on, color: Colors.blue),
+                        Icon(Icons.location_on, color: ColorResources.blueeebutton),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(

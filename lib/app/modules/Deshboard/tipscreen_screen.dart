@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 
 class TipScreen extends StatefulWidget {
   const TipScreen({super.key});
@@ -25,7 +26,7 @@ class _TipScreenState extends State<TipScreen> {
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xff19A7CE) : Colors.transparent,
+          color: isSelected ? ColorResources.blueeebutton : Colors.transparent,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(color: Colors.grey.shade300),
         ),
@@ -113,10 +114,10 @@ class _TipScreenState extends State<TipScreen> {
                       showAmountField = !showAmountField;
                     });
                   },
-                  child: const Text(
+                  child: Text(
                     "Enter custom amount",
                     style: TextStyle(
-                      color: Colors.blue,
+                      color: ColorResources.blueeebutton,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -161,9 +162,9 @@ class _TipScreenState extends State<TipScreen> {
                           color: Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        child: const Text(
+                        child: Text(
                           "Skip",
-                          style: TextStyle(color: Colors.blue),
+                          style: TextStyle(color: ColorResources.blueeebutton),
                         ),
                       ),
                     ),
@@ -173,7 +174,7 @@ class _TipScreenState extends State<TipScreen> {
                         height: 48,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: const Color(0xff19A7CE),
+                          color: ColorResources.blueeebutton,
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: const Text(

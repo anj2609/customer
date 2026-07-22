@@ -98,7 +98,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     const size = 150.0;
 
-    final Paint paint = Paint()..color = Colors.blue;
+    final Paint paint = Paint()..color = ColorResources.blueeebutton;
 
     canvas.drawCircle(const Offset(size / 2, size / 2), size / 2, paint);
 

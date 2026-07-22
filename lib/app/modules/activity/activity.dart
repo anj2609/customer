@@ -211,7 +211,7 @@ class RideItem extends StatelessWidget {
                 )
               : CircleAvatar(
                   radius: width * 0.06,
-                  backgroundColor: Colors.blue.shade50,
+                  backgroundColor: ColorResources.blueeebutton.withValues(alpha: 0.08),
                   child: Image.asset(
                     "assets/images/cars.png",
                     width: width * 0.08,

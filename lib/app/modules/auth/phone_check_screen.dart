@@ -76,7 +76,7 @@ class _PhoneCheckScreenState extends State<PhoneCheckScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.error_outline, color: Colors.red.shade400),
+            Icon(Icons.error_outline, color: ColorResources.textColorRed),
             const SizedBox(width: 8),
             const Text('Verification Failed'),
           ],
@@ -164,7 +164,7 @@ class _PhoneCheckScreenState extends State<PhoneCheckScreen> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _errorMessage != null
-                              ? Colors.red.shade300
+                              ? ColorResources.textColorRed
                               : Colors.grey.shade300,
                         ),
                       ),
@@ -222,12 +222,12 @@ class _PhoneCheckScreenState extends State<PhoneCheckScreen> {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(Icons.info_outline, size: 14, color: Colors.red.shade400),
+                          Icon(Icons.info_outline, size: 14, color: ColorResources.textColorRed),
                           const SizedBox(width: 4),
                           Text(
                             _errorMessage!,
                             style: TextStyle(
-                              color: Colors.red.shade400,
+                              color: ColorResources.textColorRed,
                               fontSize: 12,
                             ),
                           ),
@@ -285,9 +285,10 @@ class _PhoneCheckScreenState extends State<PhoneCheckScreen> {
 
                     SizedBox(height: size.height * 0.03),
 
-                    CustomPrimaryButton(
-                      text: 'Continue',
-                      onTap: _onContinue,
+                    CustomOtpButton(
+                      text: _isLoading ? 'Sending OTP...' : 'Continue',
+                      isLoading: _isLoading,
+                      onTap: _isLoading ? null : _onContinue,
                     ),
 
                     const SizedBox(height: 24),

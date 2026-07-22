@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/data/controller/chat_controller.dart';
 import 'package:myrideuser/data/modal/trackride_model.dart';
@@ -321,7 +322,7 @@ class _CustomerChatScreenState extends State<CustomerChatScreen> {
                                             size: 15,
 
                                             color: controller.messagesSeen
-                                                ? Colors.blueAccent
+                                                ? ColorResources.blueeebutton
                                                 : Colors.white70,
                                           ),
                                         ),
@@ -392,8 +393,8 @@ class _CustomerChatScreenState extends State<CustomerChatScreen> {
                     await loadChats();
                   },
 
-                  child: const CircleAvatar(
-                    backgroundColor: Colors.blue,
+                  child: CircleAvatar(
+                    backgroundColor: ColorResources.blueeebutton,
 
                     child: Icon(Icons.send, color: Colors.white),
                   ),

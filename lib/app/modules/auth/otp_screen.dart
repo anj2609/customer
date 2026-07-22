@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/style.dart';
@@ -186,9 +187,16 @@ class _OtpScreenState extends State<OtpScreen> {
                             _otpController.clear();
                             startTimer();
                           } catch (e) {
+                            final isNoInternet = e is SocketException ||
+                                e.toString().contains('SocketException') ||
+                                e.toString().contains('Failed host lookup') ||
+                                e.toString().contains('Connection refused');
+                            final msg = isNoInternet
+                                ? 'Please check your internet connection and try again.'
+                                : 'Failed to resend OTP. Please try again.';
                             AnimatedTopToast.show(
                               context: context,
-                              message: "Failed to resend OTP. Please try again.",
+                              message: msg,
                               backgroundColor: ColorResources.textColorBaclColor,
                               icon: Icons.error_outline,
                             );

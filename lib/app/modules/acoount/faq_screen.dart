@@ -105,7 +105,7 @@ class _FaqScreenState extends State<FaqScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: selectedIndex == index
-                            ? Colors.blue
+                            ? ColorResources.blueeebutton
                             : Colors.white,
                         borderRadius: BorderRadius.circular(20),
                       ),
