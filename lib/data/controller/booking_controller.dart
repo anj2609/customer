@@ -11,10 +11,12 @@ import 'package:myrideuser/config/route.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 
+import 'package:myrideuser/data/modal/banner_model.dart';
 import 'package:myrideuser/data/modal/cancellation_model.dart';
 import 'package:myrideuser/data/modal/driveravailable_model.dart';
 import 'package:myrideuser/data/modal/trackride_model.dart';
 import 'package:myrideuser/data/modal/vehicle_model.dart';
+import 'package:myrideuser/data/modal/vehicle_type_model.dart';
 import 'package:myrideuser/data/repository/booking_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -51,6 +53,9 @@ class BookingController extends GetxController implements GetxService {
   //// ====== Google SignIn =============== //////////////
   ///final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   List<VehicleModel> vehicleList = [];
+  List<VehicleTypeModel> vehicleTypeList = [];
+  bool isVehicleTypeLoading = false;
+  BannerModel? homeBanner;
   RxString rideStatus = "pending".obs;
 //    RxString rideStatus = "pending".obs;
 
@@ -88,6 +93,50 @@ class BookingController extends GetxController implements GetxService {
 
     loadCarIcon();
     loadUserIcon();
+    getVehicleTypeList();
+    getHomeBanner();
+  }
+
+  /////==========  home screen promo banner (title/sub_title/image)  ======================///////
+  Future<void> getHomeBanner() async {
+    try {
+      Response response = await bookingRepo.getBannerApi();
+
+      if (response.statusCode == 200 &&
+          response.body is Map &&
+          response.body['code'].toString() == '200' &&
+          response.body['data'] != null) {
+        homeBanner = BannerModel.fromJson(response.body['data']);
+        update();
+      }
+    } catch (e) {
+      log('Home banner error: $e');
+    }
+  }
+
+  /////==========  vehicle type list (names + images shown on the home screen)  ======================///////
+  Future<void> getVehicleTypeList() async {
+    isVehicleTypeLoading = true;
+    update();
+
+    try {
+      Response response = await bookingRepo.vehicleTypeListApi();
+
+      if (response.statusCode == 200 &&
+          response.body is Map &&
+          response.body['code'].toString() == '200') {
+        vehicleTypeList.clear();
+        List<dynamic> dataList = response.body['data'] ?? [];
+        for (var item in dataList) {
+          vehicleTypeList.add(VehicleTypeModel.fromJson(item));
+        }
+      }
+    } catch (e) {
+      log('Vehicle type list error: $e');
+    } finally {
+      isVehicleTypeLoading = false;
+      update();
+    }
   }
 
   Future<void> getCurrentLocation() async {
@@ -131,6 +180,7 @@ class BookingController extends GetxController implements GetxService {
     double? pickup_lng,
     double? drop_lat,
     double? drop_lng,
+    bool navigateToRideOption = true,
   }) async {
   //  EasyLoading.show();
     update();
@@ -156,15 +206,17 @@ class BookingController extends GetxController implements GetxService {
 
        /// EasyLoading.dismiss();
 
-        Get.toNamed(
-          RouteHelper.getrideOptionScreen(),
-          arguments: {
-            "pickup_lat": pickup_lat,
-            "pickup_lng": pickup_lng,
-            "drop_lat": drop_lat,
-            "drop_lng": drop_lng,
-          },
-        );
+        if (navigateToRideOption) {
+          Get.toNamed(
+            RouteHelper.getrideOptionScreen(),
+            arguments: {
+              "pickup_lat": pickup_lat,
+              "pickup_lng": pickup_lng,
+              "drop_lat": drop_lat,
+              "drop_lng": drop_lng,
+            },
+          );
+        }
       } else {
        // EasyLoading.dismiss();
          AnimatedTopToast.show(

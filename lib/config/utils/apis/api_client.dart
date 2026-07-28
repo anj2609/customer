@@ -435,6 +435,8 @@ class ApiClient extends GetxService {
     'driver-availble-list',
     'vehical-type-list',
     'track-driver',
+    // Home screen content
+    'get-banner',
     // Booking flow (CRITICAL — must NOT auto-logout)
     'estimate-ride-list',
     'create-booking',

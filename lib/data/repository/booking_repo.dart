@@ -25,6 +25,16 @@ class BookingRepo extends GetxService {
     });
   }
 
+  /////==========  call home banner api  ======================///////
+  Future<Response> getBannerApi() async {
+    return apiClient.getData(ApiConstants.getBanner);
+  }
+
+  /////==========  call vehicle type list api  ======================///////
+  Future<Response> vehicleTypeListApi() async {
+    return apiClient.getData(ApiConstants.vehicalTypeList);
+  }
+
   /////==========  call create booking  api  ======================///////
   Future<Response> createBookingApi({
     required double pickup_lat,

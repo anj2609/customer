@@ -34,11 +34,11 @@ class ColorResources {
 
   // ===== Gradients =====
   static const List<Color> primaryGradient = [
-    Color(0xFF08225F),
-    Color(0xFF123EBC),
+    Color(0xFF292B84),
+    Color(0xFF0004CF),
   ];
   static const List<Color> brandGradient = [
-    Color(0xFF0B2F8A),
-    Color(0xFF2A5BFF),
+    Color(0xFF292B84),
+    Color(0xFF0004CF),
   ];
 }

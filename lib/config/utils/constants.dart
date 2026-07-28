@@ -60,6 +60,7 @@ class ApiConstants {
    static const String generateQrPayment = 'generate-qr-payment';
    static const String completeRide = 'complete-ride';
    static const String verifyTopup = 'verify-topup';
+   static const String getBanner = 'get-banner';
    /////vehical-type-list
 
 

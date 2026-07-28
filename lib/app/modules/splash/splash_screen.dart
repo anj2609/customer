@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:myrideuser/config/route.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_player/video_player.dart';
 
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/colors.dart';
@@ -16,31 +16,54 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _SplashScreenState extends State<SplashScreen> {
+  late VideoPlayerController _videoController;
+  bool _isVideoReady = false;
+  bool _hasNavigated = false;
 
-  late Animation<Offset> _slideAnimation;
+  /// Hard cap so a failed/slow video load can never strand the user on
+  /// the splash screen indefinitely.
+  static const Duration _maxSplashDuration = Duration(seconds: 8);
+
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 5),
+
+    _videoController = VideoPlayerController.asset(
+      'assets/images/nride_gif_cropped.mp4',
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 5),
-      end: const Offset(0, 0),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _videoController
+        .initialize()
+        .then((_) {
+          if (!mounted) return;
+          setState(() => _isVideoReady = true);
+          _videoController.setLooping(false);
+          _videoController.play();
+          _videoController.addListener(_onVideoProgress);
+        })
+        .catchError((e) {
+          debugPrint("Splash video error: $e");
+          _navigateAfterDelay();
+        });
 
-    _controller.forward();
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(_maxSplashDuration, _navigateAfterDelay);
+  }
+
+  void _onVideoProgress() {
+    final value = _videoController.value;
+    if (value.isInitialized &&
+        !value.isPlaying &&
+        value.position >= value.duration &&
+        value.duration > Duration.zero) {
       _navigateAfterDelay();
-    });
+    }
   }
 
   Future<void> _navigateAfterDelay() async {
+    if (_hasNavigated) return;
+    _hasNavigated = true;
+
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString(ApiConstants.token);
     final String? userId = prefs.getString(ApiConstants.profileid);
@@ -63,25 +86,36 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _videoController.removeListener(_onVideoProgress);
+    _videoController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorResources.blueeebutton,
-      body: Center(
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: Lottie.asset(
-            'assets/images/Animation - 1774346600606.json',
-            height: 250,
-            width: 250,
-            repeat: false,
-            animate: true,
-            fit: BoxFit.contain,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        // Matches the video's own background gradient so the letterboxing
+        // above/below the (wider-than-tall) clip blends in seamlessly
+        // instead of showing a visible video "frame" edge.
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: ColorResources.primaryGradient,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
+        ),
+        child: Center(
+          child: _isVideoReady
+              ? AspectRatio(
+                  // BoxFit.contain (never crops) — the clip is wider than
+                  // the screen, so this fits it to the full screen width.
+                  aspectRatio: _videoController.value.aspectRatio,
+                  child: VideoPlayer(_videoController),
+                )
+              : const SizedBox.shrink(),
         ),
       ),
     );

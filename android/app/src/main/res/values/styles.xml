@@ -10,6 +10,6 @@
     </style>
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <!-- App background after splash -->
-        <item name="android:windowBackground">#21ADE3</item>
+        <item name="android:windowBackground">#123EBC</item>
     </style>
 </resources>

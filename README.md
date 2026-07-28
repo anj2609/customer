@@ -1,4 +1,4 @@
-# N Ride
+# N ride
 
 A new Flutter project.
 
