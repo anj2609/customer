@@ -191,7 +191,16 @@ class _MainNavigationState extends State<MainNavigation>
       top: false,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 5),
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(
+          color: ColorResources.backgroundColor,
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
         child: Row(
           children: List.generate(items.length, (index) {
             final item = items[index];

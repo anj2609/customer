@@ -7,7 +7,10 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
+import 'package:myrideuser/app/modules/Deshboard/rentals_intro_screen.dart';
+import 'package:myrideuser/app/modules/Deshboard/outstation_trip_screen.dart';
 import 'package:myrideuser/app/modules/Promos/promos_screen.dart';
 import 'package:myrideuser/app/modules/acoount/notification_screen.dart';
 import 'package:myrideuser/config/route.dart';
@@ -900,6 +903,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 20),
           _recentPlacesSection(),
           const SizedBox(height: 20),
+          _forYouSection(),
+          const SizedBox(height: 20),
           _chooseRideSection(),
           const SizedBox(height: 8),
         ],
@@ -1283,6 +1288,74 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  /// "For you" — a small set of ride categories, matching the requested
+  /// reference layout (circular icon + label). Only the two categories that
+  /// actually exist as upcoming/placeholder concepts are shown; there's no
+  /// booking flow behind either yet, so they're non-interactive for now
+  /// rather than linking somewhere that doesn't exist.
+  Widget _forYouSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "For you",
+          style: PoppinsSemiBold.copyWith(
+            fontSize: 14,
+            color: ColorResources.blackcolor11,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            _forYouItem(
+              icon: Icons.time_to_leave_rounded,
+              label: "Rentals",
+              onTap: () => Get.to(() => const RentalsIntroScreen()),
+            ),
+            const SizedBox(width: 20),
+            _forYouItem(
+              icon: Icons.luggage_rounded,
+              label: "Outstation",
+              onTap: () => Get.to(() => const OutstationTripScreen()),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _forYouItem({
+    required IconData icon,
+    required String label,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: ColorResources.blueeebutton.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: ColorResources.blueeebutton, size: 26),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: PoppinsMedium.copyWith(
+              fontSize: 12,
+              color: ColorResources.blackcolor11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _chooseRideSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1297,27 +1370,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(height: 10),
         GetBuilder<BookingController>(
           builder: (bc) {
-            if (bc.isVehicleTypeLoading) {
-              return _vehicleSkeletonGrid();
+            if (bc.isVehicleTypeLoading || bc.vehicleTypeList.isEmpty) {
+              return _vehicleRowSkeletonList();
             }
-            if (bc.vehicleTypeList.isEmpty) {
-              return _vehicleSkeletonGrid();
-            }
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                const spacing = 10.0;
-                final cardWidth = (constraints.maxWidth - spacing * 2) / 3;
-                return Wrap(
-                  spacing: spacing,
-                  runSpacing: spacing,
-                  children: bc.vehicleTypeList.map((type) {
-                    return SizedBox(
-                      width: cardWidth,
-                      child: _idleVehicleTypeCard(type),
-                    );
-                  }).toList(),
-                );
-              },
+            return Column(
+              children: bc.vehicleTypeList
+                  .map((type) => _idleVehicleTypeRow(type))
+                  .toList(),
             );
           },
         ),
@@ -1328,35 +1387,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
   /// No destination yet, so no real price exists — show the real vehicle
   /// type's name/image from the backend with a branded loading placeholder
   /// where the price will appear once a destination is picked.
-  Widget _idleVehicleTypeCard(VehicleTypeModel type) {
+  Widget _idleVehicleTypeRow(VehicleTypeModel type) {
     return GestureDetector(
       onTap: _openSearch,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: ColorResources.greycolorborder),
         ),
-        child: Column(
+        child: Row(
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: _vehicleTypeImage(type.image),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              type.name ?? "",
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: PoppinsMedium.copyWith(
-                fontSize: 12,
-                color: ColorResources.blackcolor11,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(
+                width: 84,
+                height: 84 / _vehicleImageAspectRatio,
+                child: _vehicleTypeImage(type.image),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                type.name ?? "",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: PoppinsMedium.copyWith(
+                  fontSize: 14,
+                  color: ColorResources.blackcolor11,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
             Container(
               width: 40,
-              height: 10,
+              height: 12,
               decoration: BoxDecoration(
                 color: ColorResources.backgroundColor,
                 borderRadius: BorderRadius.circular(4),
@@ -1571,7 +1637,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _routeSummary(),
           const SizedBox(height: 14),
           if (_isLoadingEstimate)
-            _vehicleSkeletonGrid()
+            _vehicleRowSkeletonList()
           else
             GetBuilder<BookingController>(
               builder: (bc) {
@@ -1589,7 +1655,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   );
                 }
-                return _vehicleGrid(bc.vehicleList);
+                return _vehicleList(bc.vehicleList);
               },
             ),
           const SizedBox(height: 6),
@@ -1749,146 +1815,170 @@ class _DashboardScreenState extends State<DashboardScreen> {
   /// + the relative path), falling back to the local car icon when the API
   /// didn't provide one (e.g. "Sedan" in the sample response has image: null)
   /// or the network image fails to load.
-  /// The backend's vehicle-type photos are all the same template: a car
-  /// centered in a large gray canvas with the "N RIDE" door branding —
-  /// analysis of the live images shows the car+logo consistently occupies
-  /// only the middle ~52% of the photo's height. Shrinking the whole padded
-  /// photo down to icon size (the old behavior) made the logo illegible, so
-  /// instead we fill the card's full width and crop vertically (via a wider
-  /// aspect ratio + BoxFit.cover, centered) to zoom into just that band.
-  static const double _vehicleImageAspectRatio = 2.9;
+  ///
+  /// The backend serves at least two different photo templates: car photos
+  /// (e.g. Sedan/SUV) are ~1536x1024 with a lot of gray padding around the
+  /// car, while two-wheeler/auto photos (Bike, Scooty, the Auto variants,
+  /// E Rikshaw) are near-square (~1.0-1.3 aspect) transparent PNGs that
+  /// already fill most of their own frame. A single fixed BoxFit.cover crop
+  /// tuned for one family cropped into the vehicle itself for the other, so
+  /// this uses BoxFit.contain (which never crops, regardless of the source's
+  /// aspect ratio) inside a fixed-aspect box, with a neutral backdrop so any
+  /// letterboxing blends in instead of looking like empty space.
+  static const double _vehicleImageAspectRatio = 1.5;
 
   Widget _vehicleTypeImage(String? image) {
     if (image == null || image.isEmpty) {
-      return AspectRatio(
-        aspectRatio: _vehicleImageAspectRatio,
+      return Container(
+        color: ColorResources.backgroundColor,
         child: Center(
           child: Image.asset('assets/images/cart.png', height: 26),
         ),
       );
     }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: AspectRatio(
-        aspectRatio: _vehicleImageAspectRatio,
-        child: Image.network(
-          '${ApiConstants.imageurl}$image',
-          fit: BoxFit.cover,
-          alignment: Alignment.center,
-          loadingBuilder: (context, child, progress) {
-            if (progress == null) return child;
-            return const Center(
-              child: SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(strokeWidth: 1.6),
-              ),
-            );
-          },
-          errorBuilder: (context, error, stackTrace) {
-            return Center(
-              child: Image.asset('assets/images/cart.png', height: 26),
-            );
-          },
-        ),
+    return Container(
+      color: ColorResources.backgroundColor,
+      child: Image.network(
+        '${ApiConstants.imageurl}$image',
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return const Center(
+            child: SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(strokeWidth: 1.6),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Center(
+            child: Image.asset('assets/images/cart.png', height: 26),
+          );
+        },
       ),
     );
   }
 
-  /// Real vehicle cards, laid out in the exact same card "slots" as the
-  /// idle-stage Mini/Sedan/SUV preview — 3 per row, wrapping if there are more.
-  Widget _vehicleGrid(List<dynamic> vehicles) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const spacing = 10.0;
-        final cardWidth = (constraints.maxWidth - spacing * 2) / 3;
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          children: List.generate(vehicles.length, (index) {
-            final vehicle = vehicles[index];
-            final selected = _selectedVehicleIndex == index;
-            return SizedBox(
-              width: cardWidth,
-              child: _vehicleCard(
-                name: vehicle.name ?? "",
-                subtitle: vehicle.estimatedTime ?? "",
-                price: "₹ ${vehicle.price ?? 0}",
-                image: _imageForVehicleTypeId(vehicle.vehicleTypeId),
-                selected: selected,
-                onTap: () {
-                  setState(() {
-                    _selectedVehicleIndex = index;
-                    _estimatedPrice = vehicle.price?.toString() ?? "";
-                    _vehicleTypeId = vehicle.vehicleTypeId?.toString() ?? "";
-                  });
-                },
-              ),
-            );
-          }),
+  /// Real vehicle options, one per row — matches the requested Uber-style
+  /// list layout: avatar, name + time on the left, price on the right.
+  Widget _vehicleList(List<dynamic> vehicles) {
+    return Column(
+      children: List.generate(vehicles.length, (index) {
+        final vehicle = vehicles[index];
+        final selected = _selectedVehicleIndex == index;
+        return _vehicleListRow(
+          name: vehicle.name ?? "",
+          durationText: vehicle.estimatedTime,
+          price: "₹ ${vehicle.price ?? 0}",
+          image: _imageForVehicleTypeId(vehicle.vehicleTypeId),
+          selected: selected,
+          onTap: () {
+            setState(() {
+              _selectedVehicleIndex = index;
+              _estimatedPrice = vehicle.price?.toString() ?? "";
+              _vehicleTypeId = vehicle.vehicleTypeId?.toString() ?? "";
+            });
+          },
         );
-      },
+      }),
     );
   }
 
-  Widget _vehicleCard({
+  /// Combines the real trip duration (from the API) with a computed arrival
+  /// clock-time — e.g. "3:40 PM • 3 min". The clock-time is a derived
+  /// calculation (now + duration), not fabricated data; if the duration
+  /// string can't be parsed, we just fall back to showing it as-is.
+  String _formatRowTime(String? durationText) {
+    if (durationText == null || durationText.trim().isEmpty) return "";
+
+    final match = RegExp(r'\d+').firstMatch(durationText);
+    if (match == null) return durationText;
+
+    final minutes = int.tryParse(match.group(0)!);
+    if (minutes == null) return durationText;
+
+    final arrival = DateTime.now().add(Duration(minutes: minutes));
+    final clockLabel = DateFormat('h:mm a').format(arrival);
+    final durationLabel = durationText.toLowerCase().contains('min')
+        ? durationText
+        : "$durationText min";
+
+    return "$clockLabel • $durationLabel";
+  }
+
+  Widget _vehicleListRow({
     required String name,
-    required String subtitle,
+    required String? durationText,
     required String price,
     String? image,
     required bool selected,
     required VoidCallback onTap,
   }) {
+    final String timeLabel = _formatRowTime(durationText);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected
                 ? ColorResources.blueeebutton
                 : ColorResources.greycolorborder,
-            width: selected ? 1.4 : 1,
+            width: selected ? 1.6 : 1,
           ),
           color: selected
               ? ColorResources.blueeebutton.withValues(alpha: 0.05)
               : ColorResources.whiteColor,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: _vehicleTypeImage(image),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: PoppinsMedium.copyWith(
-                fontSize: 12,
-                color: ColorResources.blackcolor11,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(
+                width: 84,
+                height: 84 / _vehicleImageAspectRatio,
+                child: _vehicleRowAvatar(image),
               ),
             ),
-            if (subtitle.isNotEmpty) ...[
-              const SizedBox(height: 1),
-              Text(
-                subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: PoppinsReguler.copyWith(
-                  fontSize: 10,
-                  color: ColorResources.TextColorForGrey,
-                ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: PoppinsMedium.copyWith(
+                      fontSize: 14,
+                      color: ColorResources.blackcolor11,
+                    ),
+                  ),
+                  if (timeLabel.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      timeLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: PoppinsReguler.copyWith(
+                        fontSize: 12,
+                        color: ColorResources.TextColorForGrey,
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            ],
-            const SizedBox(height: 6),
+            ),
+            const SizedBox(width: 10),
             Text(
               price,
               style: PoppinsSemiBold.copyWith(
-                fontSize: 13,
+                fontSize: 15,
                 color: ColorResources.blackcolor11,
               ),
             ),
@@ -1898,57 +1988,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _vehicleSkeletonGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const spacing = 10.0;
-        final cardWidth = (constraints.maxWidth - spacing * 2) / 3;
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          children: List.generate(
-            3,
-            (_) => SizedBox(width: cardWidth, child: _vehicleCardSkeleton()),
-          ),
-        );
-      },
+  Widget _vehicleRowAvatar(String? image) {
+    if (image == null || image.isEmpty) {
+      return Container(
+        color: ColorResources.backgroundColor,
+        child: Center(child: Image.asset('assets/images/cart.png', height: 26)),
+      );
+    }
+    return Container(
+      color: ColorResources.backgroundColor,
+      child: Image.network(
+        '${ApiConstants.imageurl}$image',
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return const Center(
+            child: SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(strokeWidth: 1.6),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Center(
+            child: Image.asset('assets/images/cart.png', height: 26),
+          );
+        },
+      ),
     );
   }
 
-  Widget _vehicleCardSkeleton() {
+  Widget _vehicleRowSkeletonList() {
+    return Column(
+      children: List.generate(3, (_) => _vehicleRowSkeleton()),
+    );
+  }
+
+  Widget _vehicleRowSkeleton() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: ColorResources.greycolorborder),
       ),
-      child: Column(
+      child: Row(
         children: [
-          AspectRatio(
-            aspectRatio: _vehicleImageAspectRatio,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
             child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: ColorResources.blueeebutton.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(8),
-              ),
+              width: 84,
+              height: 84 / _vehicleImageAspectRatio,
+              color: ColorResources.blueeebutton.withValues(alpha: 0.08),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 90,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: ColorResources.blueeebutton.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  width: 120,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: ColorResources.backgroundColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Container(
             width: 44,
-            height: 10,
+            height: 14,
             decoration: BoxDecoration(
               color: ColorResources.blueeebutton.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Container(
-            width: 34,
-            height: 10,
-            decoration: BoxDecoration(
-              color: ColorResources.backgroundColor,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -1956,4 +2081,5 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+
 }
