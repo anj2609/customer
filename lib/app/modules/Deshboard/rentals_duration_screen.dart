@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:myrideuser/app/modules/Deshboard/rentals_vehicle_screen.dart';
+import 'package:myrideuser/app/modules/Deshboard/rentals_location_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/style.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
@@ -141,7 +141,7 @@ class _RentalsDurationScreenState extends State<RentalsDurationScreen> {
               padding: const EdgeInsets.all(20),
               child: CustomPrimaryDyanamicButton(
                 text: "Choose a ride",
-                onTap: () => Get.to(() => RentalsVehicleScreen(hours: _hours)),
+                onTap: () => Get.to(() => RentalsLocationScreen(hours: _hours)),
               ),
             ),
           ],

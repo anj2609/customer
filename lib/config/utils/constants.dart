@@ -61,6 +61,7 @@ class ApiConstants {
    static const String completeRide = 'complete-ride';
    static const String verifyTopup = 'verify-topup';
    static const String getBanner = 'get-banner';
+   static const String rentalEstimate = 'rental/estimate';
    /////vehical-type-list
 
 

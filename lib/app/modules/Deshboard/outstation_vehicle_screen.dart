@@ -149,9 +149,7 @@ class _OutstationVehicleScreenState extends State<OutstationVehicleScreen> {
                   GetBuilder<BookingController>(
                     builder: (bc) {
                       if (bc.isVehicleTypeLoading) {
-                        return Column(
-                          children: List.generate(3, (_) => _rowSkeleton()),
-                        );
+                        return _vehicleGrid(List.generate(4, (_) => _cardSkeleton()));
                       }
                       if (bc.vehicleTypeList.isEmpty) {
                         return Padding(
@@ -167,10 +165,10 @@ class _OutstationVehicleScreenState extends State<OutstationVehicleScreen> {
                           ),
                         );
                       }
-                      return Column(
-                        children: List.generate(bc.vehicleTypeList.length, (index) {
+                      return _vehicleGrid(
+                        List.generate(bc.vehicleTypeList.length, (index) {
                           final type = bc.vehicleTypeList[index];
-                          return _vehicleRow(type, index);
+                          return _vehicleCard(type, index);
                         }),
                       );
                     },
@@ -203,27 +201,30 @@ class _OutstationVehicleScreenState extends State<OutstationVehicleScreen> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            child: CustomPrimaryDyanamicButton(
-              text: "Review Ride",
-              onTap: () {
-                if (_selectedIndex == -1) {
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: CustomPrimaryDyanamicButton(
+                text: "Review Ride",
+                onTap: () {
+                  if (_selectedIndex == -1) {
+                    AnimatedTopToast.show(
+                      context: context,
+                      message: "Please select a vehicle",
+                      backgroundColor: ColorResources.textColorRed,
+                      icon: Icons.error_outline,
+                    );
+                    return;
+                  }
                   AnimatedTopToast.show(
                     context: context,
-                    message: "Please select a vehicle",
-                    backgroundColor: ColorResources.textColorRed,
-                    icon: Icons.error_outline,
+                    message: "N Ride Outstation is coming soon!",
+                    backgroundColor: ColorResources.blueeebutton,
+                    icon: Icons.access_time_filled_rounded,
                   );
-                  return;
-                }
-                AnimatedTopToast.show(
-                  context: context,
-                  message: "N Ride Outstation is coming soon!",
-                  backgroundColor: ColorResources.blueeebutton,
-                  icon: Icons.access_time_filled_rounded,
-                );
-              },
+                },
+              ),
             ),
           ),
         ],
@@ -231,13 +232,30 @@ class _OutstationVehicleScreenState extends State<OutstationVehicleScreen> {
     );
   }
 
-  Widget _vehicleRow(VehicleTypeModel type, int index) {
+  /// Lays real card widgets out in a responsive 2-column grid, sizing each
+  /// card to its own content instead of forcing a uniform GridView cell.
+  Widget _vehicleGrid(List<Widget> cards) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 12.0;
+        final itemWidth = (constraints.maxWidth - spacing) / 2;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: cards
+              .map((card) => SizedBox(width: itemWidth, child: card))
+              .toList(),
+        );
+      },
+    );
+  }
+
+  Widget _vehicleCard(VehicleTypeModel type, int index) {
     final selected = _selectedIndex == index;
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
@@ -250,35 +268,39 @@ class _OutstationVehicleScreenState extends State<OutstationVehicleScreen> {
               ? ColorResources.blueeebutton.withValues(alpha: 0.05)
               : ColorResources.whiteColor,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                width: 76,
-                height: 76 / 1.5,
-                child: _vehicleImage(type.image),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                type.name ?? "",
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: PoppinsMedium.copyWith(
-                  fontSize: 14,
-                  color: ColorResources.blackcolor11,
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: AspectRatio(
+                    aspectRatio: 1.5,
+                    child: _vehicleImage(type.image),
+                  ),
                 ),
-              ),
+                if (selected)
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Icon(
+                      Icons.check_circle_rounded,
+                      color: ColorResources.blueeebutton,
+                      size: 18,
+                    ),
+                  ),
+              ],
             ),
-            Icon(
-              selected
-                  ? Icons.radio_button_checked_rounded
-                  : Icons.radio_button_off_rounded,
-              color: selected
-                  ? ColorResources.blueeebutton
-                  : ColorResources.TextColorForGrey,
+            const SizedBox(height: 8),
+            Text(
+              type.name ?? "",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PoppinsMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackcolor11,
+              ),
             ),
           ],
         ),
@@ -323,33 +345,30 @@ class _OutstationVehicleScreenState extends State<OutstationVehicleScreen> {
     );
   }
 
-  Widget _rowSkeleton() {
+  Widget _cardSkeleton() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: ColorResources.greycolorborder),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Container(
-              width: 76,
-              height: 76 / 1.5,
-              color: ColorResources.blueeebutton.withValues(alpha: 0.08),
+            child: AspectRatio(
+              aspectRatio: 1.5,
+              child: Container(color: ColorResources.blueeebutton.withValues(alpha: 0.08)),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Container(
-              width: 90,
-              height: 12,
-              decoration: BoxDecoration(
-                color: ColorResources.blueeebutton.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(4),
-              ),
+          const SizedBox(height: 8),
+          Container(
+            width: 70,
+            height: 12,
+            decoration: BoxDecoration(
+              color: ColorResources.blueeebutton.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(4),
             ),
           ),
         ],

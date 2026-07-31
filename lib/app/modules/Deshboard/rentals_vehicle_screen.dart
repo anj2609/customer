@@ -6,19 +6,29 @@ import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/style.dart';
 import 'package:myrideuser/data/controller/booking_controller.dart';
-import 'package:myrideuser/data/modal/vehicle_type_model.dart';
+import 'package:myrideuser/data/modal/rental_estimate_model.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:myrideuser/widgets/toaster_animation.dart';
 
-/// Final step of the N Ride Rentals flow. There's no rentals booking
-/// endpoint yet, so this reuses the real vehicle catalog (name + image,
-/// same data already shown on the home screen) rather than inventing
-/// rental-specific tiers/pricing, and the CTA surfaces a "coming soon"
-/// message instead of pretending to create a real booking.
+/// Final step of the N Ride Rentals flow. Vehicle names, images, included km
+/// and price all come from the real `rental/estimate` endpoint for the
+/// chosen duration — nothing here is fabricated. Booking creation itself
+/// isn't wired up yet, so the CTA surfaces a "coming soon" message.
 class RentalsVehicleScreen extends StatefulWidget {
   final int hours;
+  final String fromAddress;
+  final String toAddress;
+  final LatLng? fromLatLng;
+  final LatLng? toLatLng;
 
-  const RentalsVehicleScreen({super.key, required this.hours});
+  const RentalsVehicleScreen({
+    super.key,
+    required this.hours,
+    required this.fromAddress,
+    required this.toAddress,
+    this.fromLatLng,
+    this.toLatLng,
+  });
 
   @override
   State<RentalsVehicleScreen> createState() => _RentalsVehicleScreenState();
@@ -27,6 +37,18 @@ class RentalsVehicleScreen extends StatefulWidget {
 class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
   final BookingController bookingController = Get.find<BookingController>();
   int _selectedIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    // getRentalEstimate() calls update() before its first await, which would
+    // otherwise try to rebuild GetBuilder<BookingController> while this
+    // screen's own widget tree is still mid-build (initState runs during
+    // mount), throwing "setState() or markNeedsBuild() called during build."
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      bookingController.getRentalEstimate(widget.hours);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,13 +78,29 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    widget.hours == 1
-                        ? "Rental · 1 hour"
-                        : "Rental · ${widget.hours} hours",
-                    style: PoppinsSemiBold.copyWith(
-                      fontSize: 15,
-                      color: ColorResources.blackcolor11,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.hours == 1
+                              ? "Rental · 1 hour"
+                              : "Rental · ${widget.hours} hours",
+                          style: PoppinsSemiBold.copyWith(
+                            fontSize: 15,
+                            color: ColorResources.blackcolor11,
+                          ),
+                        ),
+                        Text(
+                          "${widget.fromAddress} → ${widget.toAddress}",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: PoppinsReguler.copyWith(
+                            fontSize: 12,
+                            color: ColorResources.TextColorForGrey,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -74,9 +112,29 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
             width: double.infinity,
             child: GetBuilder<BookingController>(
               builder: (bc) {
+                final markers = <Marker>{};
+                if (widget.fromLatLng != null) {
+                  markers.add(Marker(
+                    markerId: const MarkerId('rentals_from'),
+                    position: widget.fromLatLng!,
+                    icon: BitmapDescriptor.defaultMarkerWithHue(
+                      BitmapDescriptor.hueAzure,
+                    ),
+                  ));
+                }
+                if (widget.toLatLng != null) {
+                  markers.add(Marker(
+                    markerId: const MarkerId('rentals_to'),
+                    position: widget.toLatLng!,
+                    icon: BitmapDescriptor.defaultMarkerWithHue(
+                      BitmapDescriptor.hueRed,
+                    ),
+                  ));
+                }
                 return GoogleMap(
+                  markers: markers,
                   initialCameraPosition: CameraPosition(
-                    target: bc.currentLatLng,
+                    target: widget.fromLatLng ?? bc.currentLatLng,
                     zoom: 14,
                   ),
                   myLocationEnabled: true,
@@ -103,12 +161,10 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
                   const SizedBox(height: 12),
                   GetBuilder<BookingController>(
                     builder: (bc) {
-                      if (bc.isVehicleTypeLoading) {
-                        return Column(
-                          children: List.generate(3, (_) => _rowSkeleton()),
-                        );
+                      if (bc.isRentalEstimateLoading) {
+                        return _vehicleGrid(List.generate(4, (_) => _cardSkeleton()));
                       }
-                      if (bc.vehicleTypeList.isEmpty) {
+                      if (bc.rentalEstimateList.isEmpty) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           child: Center(
@@ -122,10 +178,10 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
                           ),
                         );
                       }
-                      return Column(
-                        children: List.generate(bc.vehicleTypeList.length, (index) {
-                          final type = bc.vehicleTypeList[index];
-                          return _vehicleRow(type, index);
+                      return _vehicleGrid(
+                        List.generate(bc.rentalEstimateList.length, (index) {
+                          final estimate = bc.rentalEstimateList[index];
+                          return _vehicleCard(estimate, index);
                         }),
                       );
                     },
@@ -134,27 +190,51 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            child: CustomPrimaryDyanamicButton(
-              text: "Choose a ride",
-              onTap: () {
-                if (_selectedIndex == -1) {
-                  AnimatedTopToast.show(
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: CustomPrimaryDyanamicButton(
+                text: "Choose a ride",
+                onTap: () {
+                  if (_selectedIndex == -1) {
+                    AnimatedTopToast.show(
+                      context: context,
+                      message: "Please select a vehicle",
+                      backgroundColor: ColorResources.textColorRed,
+                      icon: Icons.error_outline,
+                    );
+                    return;
+                  }
+                  final estimate = bookingController.rentalEstimateList[_selectedIndex];
+                  if (widget.fromLatLng == null ||
+                      widget.toLatLng == null ||
+                      estimate.vehicleTypeId == null ||
+                      estimate.packageId == null ||
+                      estimate.price == null) {
+                    AnimatedTopToast.show(
+                      context: context,
+                      message: "Something went wrong. Please try again.",
+                      backgroundColor: ColorResources.textColorRed,
+                      icon: Icons.error_outline,
+                    );
+                    return;
+                  }
+                  bookingController.CreateRentalBooking(
                     context: context,
-                    message: "Please select a vehicle",
-                    backgroundColor: ColorResources.textColorRed,
-                    icon: Icons.error_outline,
+                    pickupLat: widget.fromLatLng!.latitude,
+                    pickupLng: widget.fromLatLng!.longitude,
+                    dropLat: widget.toLatLng!.latitude,
+                    dropLng: widget.toLatLng!.longitude,
+                    estimatedPrice: estimate.price!,
+                    vehicleTypeId: estimate.vehicleTypeId!,
+                    pickupAddress: widget.fromAddress,
+                    dropAddress: widget.toAddress,
+                    packageId: estimate.packageId!,
+                    finalHour: widget.hours,
                   );
-                  return;
-                }
-                AnimatedTopToast.show(
-                  context: context,
-                  message: "N Ride Rentals is coming soon!",
-                  backgroundColor: ColorResources.blueeebutton,
-                  icon: Icons.access_time_filled_rounded,
-                );
-              },
+                },
+              ),
             ),
           ),
         ],
@@ -162,13 +242,30 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
     );
   }
 
-  Widget _vehicleRow(VehicleTypeModel type, int index) {
+  /// Lays real card widgets out in a responsive 2-column grid, sizing each
+  /// card to its own content instead of forcing a uniform GridView cell.
+  Widget _vehicleGrid(List<Widget> cards) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 12.0;
+        final itemWidth = (constraints.maxWidth - spacing) / 2;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: cards
+              .map((card) => SizedBox(width: itemWidth, child: card))
+              .toList(),
+        );
+      },
+    );
+  }
+
+  Widget _vehicleCard(RentalEstimateModel estimate, int index) {
     final selected = _selectedIndex == index;
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
@@ -181,35 +278,57 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
               ? ColorResources.blueeebutton.withValues(alpha: 0.05)
               : ColorResources.whiteColor,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                width: 76,
-                height: 76 / 1.5,
-                child: _vehicleImage(type.image),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                type.name ?? "",
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: PoppinsMedium.copyWith(
-                  fontSize: 14,
-                  color: ColorResources.blackcolor11,
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: AspectRatio(
+                    aspectRatio: 1.5,
+                    child: _vehicleImage(estimate.vehicleImage),
+                  ),
                 ),
+                if (selected)
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Icon(
+                      Icons.check_circle_rounded,
+                      color: ColorResources.blueeebutton,
+                      size: 18,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              estimate.vehicleName ?? "",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PoppinsMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackcolor11,
               ),
             ),
-            Icon(
-              selected
-                  ? Icons.radio_button_checked_rounded
-                  : Icons.radio_button_off_rounded,
-              color: selected
-                  ? ColorResources.blueeebutton
-                  : ColorResources.TextColorForGrey,
+            const SizedBox(height: 3),
+            Text(
+              "${estimate.includedKm ?? 0} km included",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PoppinsReguler.copyWith(
+                fontSize: 11,
+                color: ColorResources.TextColorForGrey,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "₹${estimate.price ?? '--'}",
+              style: PoppinsSemiBold.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackcolor11,
+              ),
             ),
           ],
         ),
@@ -254,33 +373,30 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
     );
   }
 
-  Widget _rowSkeleton() {
+  Widget _cardSkeleton() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: ColorResources.greycolorborder),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Container(
-              width: 76,
-              height: 76 / 1.5,
-              color: ColorResources.blueeebutton.withValues(alpha: 0.08),
+            child: AspectRatio(
+              aspectRatio: 1.5,
+              child: Container(color: ColorResources.blueeebutton.withValues(alpha: 0.08)),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Container(
-              width: 90,
-              height: 12,
-              decoration: BoxDecoration(
-                color: ColorResources.blueeebutton.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(4),
-              ),
+          const SizedBox(height: 8),
+          Container(
+            width: 70,
+            height: 12,
+            decoration: BoxDecoration(
+              color: ColorResources.blueeebutton.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(4),
             ),
           ),
         ],

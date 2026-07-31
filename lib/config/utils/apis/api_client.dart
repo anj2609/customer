@@ -440,6 +440,7 @@ class ApiClient extends GetxService {
     // Booking flow (CRITICAL — must NOT auto-logout)
     'estimate-ride-list',
     'create-booking',
+    'rental/estimate',
     'track-ride',
     'trip-detail',
     'cancel-ride',

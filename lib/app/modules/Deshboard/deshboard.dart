@@ -1371,12 +1371,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         GetBuilder<BookingController>(
           builder: (bc) {
             if (bc.isVehicleTypeLoading || bc.vehicleTypeList.isEmpty) {
-              return _vehicleRowSkeletonList();
+              return _vehicleGrid(List.generate(4, (_) => _vehicleCardSkeleton()));
             }
-            return Column(
-              children: bc.vehicleTypeList
-                  .map((type) => _idleVehicleTypeRow(type))
-                  .toList(),
+            return _vehicleGrid(
+              bc.vehicleTypeList.map((type) => _idleVehicleTypeCard(type)).toList(),
             );
           },
         ),
@@ -1387,39 +1385,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
   /// No destination yet, so no real price exists — show the real vehicle
   /// type's name/image from the backend with a branded loading placeholder
   /// where the price will appear once a destination is picked.
-  Widget _idleVehicleTypeRow(VehicleTypeModel type) {
+  Widget _idleVehicleTypeCard(VehicleTypeModel type) {
     return GestureDetector(
       onTap: _openSearch,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: ColorResources.greycolorborder),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                width: 84,
-                height: 84 / _vehicleImageAspectRatio,
+              child: AspectRatio(
+                aspectRatio: _vehicleImageAspectRatio,
                 child: _vehicleTypeImage(type.image),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                type.name ?? "",
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: PoppinsMedium.copyWith(
-                  fontSize: 14,
-                  color: ColorResources.blackcolor11,
-                ),
+            const SizedBox(height: 8),
+            Text(
+              type.name ?? "",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PoppinsMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackcolor11,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(height: 6),
             Container(
               width: 40,
               height: 12,
@@ -1430,6 +1425,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Lays real card widgets out in a responsive 2-column grid without
+  /// forcing a fixed aspect ratio per cell (card content height varies
+  /// slightly between the idle/vehicle-select stages), so each card sizes
+  /// to its own content instead of GridView's uniform-cell constraint.
+  Widget _vehicleGrid(List<Widget> cards) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 12.0;
+        final itemWidth = (constraints.maxWidth - spacing) / 2;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: cards
+              .map((card) => SizedBox(width: itemWidth, child: card))
+              .toList(),
+        );
+      },
+    );
+  }
+
+  Widget _vehicleCardSkeleton() {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: ColorResources.greycolorborder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: AspectRatio(
+              aspectRatio: _vehicleImageAspectRatio,
+              child: Container(color: ColorResources.blueeebutton.withValues(alpha: 0.08)),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: 70,
+            height: 12,
+            decoration: BoxDecoration(
+              color: ColorResources.blueeebutton.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1637,7 +1683,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _routeSummary(),
           const SizedBox(height: 14),
           if (_isLoadingEstimate)
-            _vehicleRowSkeletonList()
+            _vehicleGrid(List.generate(4, (_) => _vehicleCardSkeleton()))
           else
             GetBuilder<BookingController>(
               builder: (bc) {
@@ -1861,14 +1907,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// Real vehicle options, one per row — matches the requested Uber-style
-  /// list layout: avatar, name + time on the left, price on the right.
+  /// Real vehicle options laid out as selectable grid cards.
   Widget _vehicleList(List<dynamic> vehicles) {
-    return Column(
-      children: List.generate(vehicles.length, (index) {
+    return _vehicleGrid(
+      List.generate(vehicles.length, (index) {
         final vehicle = vehicles[index];
         final selected = _selectedVehicleIndex == index;
-        return _vehicleListRow(
+        return _vehicleListCard(
           name: vehicle.name ?? "",
           durationText: vehicle.estimatedTime,
           price: "₹ ${vehicle.price ?? 0}",
@@ -1908,7 +1953,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return "$clockLabel • $durationLabel";
   }
 
-  Widget _vehicleListRow({
+  Widget _vehicleListCard({
     required String name,
     required String? durationText,
     required String price,
@@ -1921,8 +1966,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
@@ -1935,50 +1979,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ? ColorResources.blueeebutton.withValues(alpha: 0.05)
               : ColorResources.whiteColor,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                width: 84,
-                height: 84 / _vehicleImageAspectRatio,
-                child: _vehicleRowAvatar(image),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: PoppinsMedium.copyWith(
-                      fontSize: 14,
-                      color: ColorResources.blackcolor11,
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: AspectRatio(
+                    aspectRatio: _vehicleImageAspectRatio,
+                    child: _vehicleRowAvatar(image),
+                  ),
+                ),
+                if (selected)
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Icon(
+                      Icons.check_circle_rounded,
+                      color: ColorResources.blueeebutton,
+                      size: 18,
                     ),
                   ),
-                  if (timeLabel.isNotEmpty) ...[
-                    const SizedBox(height: 3),
-                    Text(
-                      timeLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: PoppinsReguler.copyWith(
-                        fontSize: 12,
-                        color: ColorResources.TextColorForGrey,
-                      ),
-                    ),
-                  ],
-                ],
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PoppinsMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackcolor11,
               ),
             ),
-            const SizedBox(width: 10),
+            if (timeLabel.isNotEmpty) ...[
+              const SizedBox(height: 3),
+              Text(
+                timeLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: PoppinsReguler.copyWith(
+                  fontSize: 11,
+                  color: ColorResources.TextColorForGrey,
+                ),
+              ),
+            ],
+            const SizedBox(height: 4),
             Text(
               price,
               style: PoppinsSemiBold.copyWith(
-                fontSize: 15,
+                fontSize: 14,
                 color: ColorResources.blackcolor11,
               ),
             ),
@@ -2016,68 +2067,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Image.asset('assets/images/cart.png', height: 26),
           );
         },
-      ),
-    );
-  }
-
-  Widget _vehicleRowSkeletonList() {
-    return Column(
-      children: List.generate(3, (_) => _vehicleRowSkeleton()),
-    );
-  }
-
-  Widget _vehicleRowSkeleton() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: ColorResources.greycolorborder),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              width: 84,
-              height: 84 / _vehicleImageAspectRatio,
-              color: ColorResources.blueeebutton.withValues(alpha: 0.08),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 90,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: ColorResources.blueeebutton.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  width: 120,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: ColorResources.backgroundColor,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: 44,
-            height: 14,
-            decoration: BoxDecoration(
-              color: ColorResources.blueeebutton.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-        ],
       ),
     );
   }

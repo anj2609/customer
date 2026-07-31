@@ -17,6 +17,7 @@ import 'package:myrideuser/data/modal/driveravailable_model.dart';
 import 'package:myrideuser/data/modal/trackride_model.dart';
 import 'package:myrideuser/data/modal/vehicle_model.dart';
 import 'package:myrideuser/data/modal/vehicle_type_model.dart';
+import 'package:myrideuser/data/modal/rental_estimate_model.dart';
 import 'package:myrideuser/data/repository/booking_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -135,6 +136,33 @@ class BookingController extends GetxController implements GetxService {
       log('Vehicle type list error: $e');
     } finally {
       isVehicleTypeLoading = false;
+      update();
+    }
+  }
+
+  /////==========  rental vehicle + price estimate for N hours  ======================///////
+  List<RentalEstimateModel> rentalEstimateList = [];
+  bool isRentalEstimateLoading = false;
+
+  Future<void> getRentalEstimate(int hours) async {
+    isRentalEstimateLoading = true;
+    rentalEstimateList = [];
+    update();
+
+    try {
+      Response response = await bookingRepo.rentalEstimateApi(hours: hours);
+
+      if (response.statusCode == 200 &&
+          response.body is Map &&
+          response.body['code'].toString() == '200') {
+        List<dynamic> dataList = response.body['data'] ?? [];
+        rentalEstimateList =
+            dataList.map((item) => RentalEstimateModel.fromJson(item)).toList();
+      }
+    } catch (e) {
+      log('Rental estimate error: $e');
+    } finally {
+      isRentalEstimateLoading = false;
       update();
     }
   }
@@ -354,6 +382,99 @@ class BookingController extends GetxController implements GetxService {
       return response;
     } catch (e) {
       debugPrint('CreateBooking Error: $e');
+
+      AnimatedTopToast.show(
+        context: context,
+        message: "Something went wrong. Please check your connection and try again.",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
+      );
+
+      update();
+      rethrow;
+    }
+  }
+
+  Future<Response> CreateRentalBooking({
+    required BuildContext context,
+    required double pickupLat,
+    required double pickupLng,
+    required double dropLat,
+    required double dropLng,
+    required num estimatedPrice,
+    required int vehicleTypeId,
+    required String pickupAddress,
+    required String dropAddress,
+    required int packageId,
+    required int finalHour,
+  }) async {
+    update();
+
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      Response response = await bookingRepo.createRentalBookingApi(
+        pickupLat: pickupLat,
+        pickupLng: pickupLng,
+        dropLat: dropLat,
+        dropLng: dropLng,
+        estimatedPrice: estimatedPrice,
+        vehicleTypeId: vehicleTypeId,
+        pickupAddress: pickupAddress,
+        dropAddress: dropAddress,
+        packageId: packageId,
+        finalHour: finalHour,
+      );
+
+      final body = response.body;
+      final String code = (body is Map && body['code'] != null)
+          ? body['code'].toString()
+          : '';
+      final String rawMessage = (body is Map && body['message'] != null)
+          ? body['message'].toString()
+          : '';
+
+      debugPrint('CreateRentalBooking Response: status=${response.statusCode}, body=$body');
+
+      String userMessage = _getUserFriendlyMessage(rawMessage);
+
+      if (code == '200') {
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+
+        AnimatedTopToast.show(
+          context: context,
+          message: userMessage.isNotEmpty ? userMessage : "Rental booked successfully!",
+          backgroundColor: ColorResources.appColor,
+          icon: Icons.check_circle_rounded,
+        );
+
+        var bookingid = body['data']['booking_id'].toString();
+
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        Get.toNamed(
+          RouteHelper.getfindingDriverUI(),
+          arguments: {'booking_id': bookingid},
+        );
+
+        await prefs.setString(ApiConstants.bookingid, bookingid);
+      } else {
+        AnimatedTopToast.show(
+          context: context,
+          message: userMessage.isNotEmpty
+              ? userMessage
+              : "Unable to book rental. Please try again.",
+          backgroundColor: ColorResources.textColorBaclColor,
+          icon: Icons.error_outline,
+        );
+      }
+
+      update();
+      return response;
+    } catch (e) {
+      debugPrint('CreateRentalBooking Error: $e');
 
       AnimatedTopToast.show(
         context: context,
