@@ -955,13 +955,10 @@ update();
         setMarkers();
       }
     } else if (response.statusCode == 500) {
-       AnimatedTopToast.show(
-        context: context,
-        message:
-            "Unable to find nearby drivers. Please try again.",
-        backgroundColor: ColorResources.textColorBaclColor,
-        icon: Icons.error_outline,
-      );
+      // Background call fired automatically on launch — fail silently like
+      // the other automatic startup calls (address list, activity, wallet,
+      // vehicle types, banner) instead of surfacing an error toast.
+      log('Nearby drivers unavailable (500)');
     } else {}
 
     update();

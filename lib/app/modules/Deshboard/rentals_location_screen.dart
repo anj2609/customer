@@ -34,6 +34,7 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
   LatLng? _fromLatLng;
   LatLng? _toLatLng;
   bool _loadingCurrentLocation = true;
+  GoogleMapController? _mapController;
 
   _ActiveField _activeField = _ActiveField.none;
   List predictions = [];
@@ -88,11 +89,54 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
           }
           _loadingCurrentLocation = false;
         });
+        _updateCamera();
       }
     } catch (e) {
       debugPrint("Rentals current location error: $e");
       if (mounted) setState(() => _loadingCurrentLocation = false);
     }
+  }
+
+  /// Pins the map on whatever is currently known — just pickup, just
+  /// drop-off, or both (fit to bounds) once the user has set both.
+  void _updateCamera() {
+    if (_mapController == null) return;
+    if (_fromLatLng != null && _toLatLng != null) {
+      final southwest = LatLng(
+        _fromLatLng!.latitude < _toLatLng!.latitude ? _fromLatLng!.latitude : _toLatLng!.latitude,
+        _fromLatLng!.longitude < _toLatLng!.longitude ? _fromLatLng!.longitude : _toLatLng!.longitude,
+      );
+      final northeast = LatLng(
+        _fromLatLng!.latitude > _toLatLng!.latitude ? _fromLatLng!.latitude : _toLatLng!.latitude,
+        _fromLatLng!.longitude > _toLatLng!.longitude ? _fromLatLng!.longitude : _toLatLng!.longitude,
+      );
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngBounds(LatLngBounds(southwest: southwest, northeast: northeast), 60),
+      );
+    } else if (_fromLatLng != null) {
+      _mapController!.animateCamera(CameraUpdate.newLatLngZoom(_fromLatLng!, 14));
+    } else if (_toLatLng != null) {
+      _mapController!.animateCamera(CameraUpdate.newLatLngZoom(_toLatLng!, 14));
+    }
+  }
+
+  Set<Marker> _buildMarkers() {
+    final markers = <Marker>{};
+    if (_fromLatLng != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('rentals_pickup'),
+        position: _fromLatLng!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+      ));
+    }
+    if (_toLatLng != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('rentals_dropoff'),
+        position: _toLatLng!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      ));
+    }
+    return markers;
   }
 
   void _startEditing(_ActiveField field) {
@@ -149,6 +193,7 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
         _activeField = _ActiveField.none;
         predictions = [];
       });
+      _updateCamera();
     } catch (e) {
       debugPrint("Rentals place select error: $e");
     } finally {
@@ -303,6 +348,27 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
                           },
                         ),
                     ],
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: SizedBox(
+                        height: 180,
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: _fromLatLng ?? const LatLng(28.5355, 77.3910),
+                            zoom: 14,
+                          ),
+                          markers: _buildMarkers(),
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: false,
+                          zoomControlsEnabled: false,
+                          onMapCreated: (controller) {
+                            _mapController = controller;
+                            _updateCamera();
+                          },
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
                   ],
                 ),

@@ -193,15 +193,13 @@ class ProfileController extends GetxController implements GetxService {
           log("Name: ${userData!.email}");
           log("Email: ${profileimagee}");
           update();
-        } else {
-          // Silently ignore 'data not found' — profile may just be empty
-          if (!_isDataNotFoundResponse(body)) {
-            Get.snackbar("Notice", _sanitizeBackendMessage(body['message'], "Unable to load your profile. Please try again."));
-          }
         }
-      } else {
-        Get.snackbar("Notice", "We're having trouble connecting. Please try again.");
+        // Non-200 'code' (including 'data not found') — background call
+        // fired automatically on launch, fail silently like the app's
+        // other automatic startup calls.
       }
+      // Non-200 status — background call fired automatically on launch,
+      // fail silently.
     } catch (e) {
       // /Get.snackbar("Error", e.toString());
     } finally {
@@ -1140,34 +1138,13 @@ class ProfileController extends GetxController implements GetxService {
           selectedCategory = promoCategoryList.first.name ?? "";
         }
       } else {
-        // If API just means "no data", handle silently
-        final rawMsg = (response.body?['message'] ?? '').toString().toLowerCase();
-        if (rawMsg.contains('data not found') || rawMsg.contains('no data') || rawMsg.contains('not found')) {
-          promoCategoryList.clear();
-        } else {
-          AnimatedTopToast.show(
-            context: context,
-            message: _sanitizeBackendMessage(response.body?['message'], "Oops! Something went wrong. Please try again."),
-            backgroundColor: ColorResources.textColorRed,
-            icon: Icons.error_outline,
-          );
-        }
+        // Background call fired automatically on launch — fail silently
+        // like the other automatic startup calls instead of surfacing an
+        // error toast.
+        promoCategoryList.clear();
       }
     } catch (e) {
-        AnimatedTopToast.show(
-        context: context,
-        message:"Oops! Something went wrong. Please try again.",
-        backgroundColor: ColorResources.textColorRed,
-        icon: Icons.error_outline,
-      );
-      // await EasyLoading.dismiss();
-      // Get.snackbar(
-      //   'Error',
-      //   "Something went wrong: $e",
-      //   backgroundColor: ColorResources.whiteColor,
-      //   colorText: ColorResources.textColorRed,
-      //   snackPosition: SnackPosition.TOP,
-      // );
+      // Background call fired automatically on launch — fail silently.
     } finally {
       isCategoryLoading = false;
       update();
