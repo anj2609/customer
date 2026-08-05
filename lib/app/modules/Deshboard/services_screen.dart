@@ -40,13 +40,7 @@ class ServicesScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 25,
-                    backgroundColor: ColorResources.blueeebutton,
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.asset('assets/images/splashscreen.png'),
-                      ),
-                    ),
+                    backgroundImage: const AssetImage('assets/images/app logo.png'),
                   ),
                   const Spacer(),
                   Text(
