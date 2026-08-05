@@ -43,23 +43,21 @@ class _ActivityScreenState extends State<ActivityScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: CircleAvatar(
-                      radius: 18,
-                      backgroundColor: ColorResources.blueeebutton,
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Image.asset('assets/images/splashscreen.png'),
-                        ),
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundColor: ColorResources.blueeebutton,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.asset('assets/images/splashscreen.png'),
                       ),
                     ),
                   ),
                   const Spacer(),
                   Text(
                     "Activity",
-                    style: PoppinsMedium.copyWith(
+                    style: PoppinsSemiBold.copyWith(
+                      fontSize: 16,
                       color: ColorResources.blackcolor11,
                     ),
                   ),

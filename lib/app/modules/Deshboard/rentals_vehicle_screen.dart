@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/constants.dart';
@@ -37,6 +41,8 @@ class RentalsVehicleScreen extends StatefulWidget {
 class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
   final BookingController bookingController = Get.find<BookingController>();
   int _selectedIndex = -1;
+  Set<Polyline> _polylines = {};
+  final String _directionsApiKey = "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU";
 
   @override
   void initState() {
@@ -47,7 +53,59 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
     // mount), throwing "setState() or markNeedsBuild() called during build."
     WidgetsBinding.instance.addPostFrameCallback((_) {
       bookingController.getRentalEstimate(widget.hours);
+      _drawRoute();
     });
+  }
+
+  /// Real driving route (same Directions API + polyline pattern used on the
+  /// home screen) between the fixed pickup/drop-off chosen on the previous
+  /// screen — the map should show the actual road path, not just the pins.
+  Future<void> _drawRoute() async {
+    if (widget.fromLatLng == null || widget.toLatLng == null) return;
+    try {
+      final origin = "${widget.fromLatLng!.latitude},${widget.fromLatLng!.longitude}";
+      final destination = "${widget.toLatLng!.latitude},${widget.toLatLng!.longitude}";
+      final url =
+          "https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&mode=driving&key=$_directionsApiKey";
+
+      final response = await http.get(Uri.parse(url));
+      final data = jsonDecode(response.body);
+
+      final routePoints = <LatLng>[];
+      final routes = data["routes"];
+      if (routes != null && routes is List && routes.isNotEmpty) {
+        final legs = routes[0]["legs"];
+        if (legs != null && legs is List) {
+          for (var leg in legs) {
+            for (var step in leg["steps"]) {
+              final polyline = step["polyline"]["points"];
+              final decoded = PolylinePoints.decodePolyline(polyline);
+              for (var point in decoded) {
+                routePoints.add(LatLng(point.latitude, point.longitude));
+              }
+            }
+          }
+        }
+      }
+
+      if (mounted && routePoints.isNotEmpty) {
+        setState(() {
+          _polylines = {
+            Polyline(
+              polylineId: const PolylineId("rentals_route"),
+              points: routePoints,
+              width: 6,
+              color: ColorResources.blueeebutton,
+              jointType: JointType.round,
+              startCap: Cap.roundCap,
+              endCap: Cap.roundCap,
+            ),
+          };
+        });
+      }
+    } catch (e) {
+      debugPrint("Rentals vehicle screen route draw error: $e");
+    }
   }
 
   @override
@@ -133,6 +191,7 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
                 }
                 return GoogleMap(
                   markers: markers,
+                  polylines: _polylines,
                   initialCameraPosition: CameraPosition(
                     target: widget.fromLatLng ?? bc.currentLatLng,
                     zoom: 14,
@@ -162,7 +221,7 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
                   GetBuilder<BookingController>(
                     builder: (bc) {
                       if (bc.isRentalEstimateLoading) {
-                        return _vehicleGrid(List.generate(4, (_) => _cardSkeleton()));
+                        return _vehicleGrid(List.generate(6, (_) => _cardSkeleton()));
                       }
                       if (bc.rentalEstimateList.isEmpty) {
                         return Padding(
@@ -247,8 +306,8 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
   Widget _vehicleGrid(List<Widget> cards) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        const spacing = 12.0;
-        final itemWidth = (constraints.maxWidth - spacing) / 2;
+        const spacing = 10.0;
+        final itemWidth = (constraints.maxWidth - spacing * 2) / 3;
         return Wrap(
           spacing: spacing,
           runSpacing: spacing,

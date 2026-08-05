@@ -90,6 +90,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
     Get.find<ProfileController>().customerWalletAmount();
     _loadCurrentAddress();
+
+    // Arriving here from a "Services" tab vehicle tap — open destination
+    // search once this screen is actually mounted.
+    if (bookingController.pendingOpenSearch.value) {
+      bookingController.pendingOpenSearch.value = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _openSearch());
+    }
   }
 
   @override
@@ -364,7 +371,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Marker(
           markerId: const MarkerId("pickup"),
           position: _pickupLatLng!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
         ),
         Marker(
           markerId: const MarkerId("drop"),
@@ -392,8 +401,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         for (var leg in legs) {
           for (var step in leg["steps"]) {
             final polyline = step["polyline"]["points"];
-            List<PointLatLng> decoded =
-                PolylinePoints.decodePolyline(polyline);
+            List<PointLatLng> decoded = PolylinePoints.decodePolyline(polyline);
             for (var point in decoded) {
               routePoints.add(LatLng(point.latitude, point.longitude));
             }
@@ -474,7 +482,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         pickedTime.hour,
         pickedTime.minute,
       );
-      _formattedDateTime = "${_selectedDateTime!.year}-"
+      _formattedDateTime =
+          "${_selectedDateTime!.year}-"
           "${_selectedDateTime!.month.toString().padLeft(2, '0')}-"
           "${_selectedDateTime!.day.toString().padLeft(2, '0')} "
           "${_selectedDateTime!.hour.toString().padLeft(2, '0')}:"
@@ -620,15 +629,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         body: Column(
           children: [
             SafeArea(bottom: false, child: _buildHeader()),
-            Expanded(
-              child: Stack(
-                children: [
-                  _buildMap(),
-                  if (_stage == _SheetStage.idle) _buildNearbyCarsBanner(),
-                  _buildSheet(),
-                ],
-              ),
-            ),
+            Expanded(child: Stack(children: [_buildMap(), _buildSheet()])),
           ],
         ),
       ),
@@ -760,75 +761,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ---------- "X cars available near you" banner ----------
-
-  Widget _buildNearbyCarsBanner() {
-    return Positioned(
-      top: 12,
-      left: 16,
-      right: 16,
-      child: GetBuilder<BookingController>(
-        builder: (bc) {
-          final count = bc.driverAvailableNearBy.length;
-          return GestureDetector(
-            onTap: _openSearch,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: ColorResources.brandGradient,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: ColorResources.blueeebutton.withValues(alpha: 0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          count > 0
-                              ? "$count cars available near you"
-                              : "Searching cars near you…",
-                          style: PoppinsSemiBold.copyWith(
-                            fontSize: 14,
-                            color: ColorResources.whiteColor,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          "Tap to book your ride",
-                          style: PoppinsReguler.copyWith(
-                            fontSize: 12,
-                            color: ColorResources.whiteColor.withValues(alpha: 0.85),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 14,
-                    color: ColorResources.whiteColor,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   // ---------- The single bottom sheet ----------
 
   Widget _buildSheet() {
@@ -844,30 +776,79 @@ class _DashboardScreenState extends State<DashboardScreen> {
           decoration: BoxDecoration(
             color: ColorResources.whiteColor,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            boxShadow: const [
-              BoxShadow(blurRadius: 16, color: Colors.black12),
+            boxShadow: const [BoxShadow(blurRadius: 16, color: Colors.black12)],
+          ),
+          child: _stage == _SheetStage.idle
+              ? _buildIdleScrollable(scrollController)
+              : SingleChildScrollView(
+                  controller: scrollController,
+                  physics: const ClampingScrollPhysics(),
+                  padding: EdgeInsets.only(
+                    bottom: 16 + MediaQuery.of(context).padding.bottom,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _dragHandle(),
+                      switch (_stage) {
+                        _SheetStage.searching => _searchContent(),
+                        _SheetStage.vehicleSelect => _vehicleContent(),
+                        _SheetStage.idle => const SizedBox.shrink(),
+                      },
+                    ],
+                  ),
+                ),
+        );
+      },
+    );
+  }
+
+  /// Idle stage only: the "Where to?" bar (+ drag handle) is a fixed-height
+  /// Column child above an Expanded SingleChildScrollView carrying the rest
+  /// of the idle content — still driven by the same scrollController the
+  /// DraggableScrollableSheet needs for its drag-to-resize gesture.
+  Widget _buildIdleScrollable(ScrollController scrollController) {
+    return Column(
+      children: [
+        Container(
+          color: ColorResources.whiteColor,
+          child: Column(
+            children: [
+              _dragHandle(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+                child: _whereToBar(),
+              ),
             ],
           ),
+        ),
+        Expanded(
           child: SingleChildScrollView(
             controller: scrollController,
             physics: const ClampingScrollPhysics(),
             padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
               bottom: 16 + MediaQuery.of(context).padding.bottom,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _dragHandle(),
-                switch (_stage) {
-                  _SheetStage.idle => _idleContent(),
-                  _SheetStage.searching => _searchContent(),
-                  _SheetStage.vehicleSelect => _vehicleContent(),
-                },
+                _quickActionsRow(),
+                const SizedBox(height: 18),
+                _promoBanner(),
+                const SizedBox(height: 20),
+                _recentPlacesSection(),
+                const SizedBox(height: 20),
+                _forYouSection(),
+                const SizedBox(height: 20),
+                _chooseRideSection(),
+                const SizedBox(height: 8),
               ],
             ),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 
@@ -889,29 +870,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // IDLE STAGE
   // ===================================================================
 
-  Widget _idleContent() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _whereToBar(),
-          const SizedBox(height: 18),
-          _quickActionsRow(),
-          const SizedBox(height: 18),
-          _promoBanner(),
-          const SizedBox(height: 20),
-          _recentPlacesSection(),
-          const SizedBox(height: 20),
-          _forYouSection(),
-          const SizedBox(height: 20),
-          _chooseRideSection(),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
   Widget _whereToBar() {
     return Row(
       children: [
@@ -926,7 +884,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.search, color: ColorResources.TextColorForGrey, size: 20),
+                  Icon(
+                    Icons.search,
+                    color: ColorResources.TextColorForGrey,
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Text(
                     "Where to?",
@@ -961,7 +923,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.access_time_rounded, size: 16, color: ColorResources.whiteColor),
+                Icon(
+                  Icons.access_time_rounded,
+                  size: 16,
+                  color: ColorResources.whiteColor,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   _isScheduled ? "Scheduled" : "Now",
@@ -970,7 +936,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: ColorResources.whiteColor,
                   ),
                 ),
-                const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Colors.white),
+                const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 16,
+                  color: Colors.white,
+                ),
               ],
             ),
           ),
@@ -986,13 +956,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _quickActionItem(
           icon: Icons.home_rounded,
           label: "Home",
-          subtitle: _findAddressByLabel('home') != null ? "Go home" : "Set location",
+          subtitle: _findAddressByLabel('home') != null
+              ? "Go home"
+              : "Set location",
           onTap: () => _onQuickAction('home'),
         ),
         _quickActionItem(
           icon: Icons.work_rounded,
           label: "Work",
-          subtitle: _findAddressByLabel('work') != null ? "Go to work" : "Set location",
+          subtitle: _findAddressByLabel('work') != null
+              ? "Go to work"
+              : "Set location",
           onTap: () => _onQuickAction('work'),
         ),
         _quickActionItem(
@@ -1093,7 +1067,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 // Scrim so text stays readable over an arbitrary photo.
                 if (image != null && image.isNotEmpty)
                   Positioned.fill(
-                    child: Container(color: Colors.black.withValues(alpha: 0.25)),
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.25),
+                    ),
                   ),
                 Padding(
                   padding: const EdgeInsets.all(18),
@@ -1119,12 +1095,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         subTitle,
                         style: PoppinsReguler.copyWith(
                           fontSize: 12,
-                          color: ColorResources.whiteColor.withValues(alpha: 0.85),
+                          color: ColorResources.whiteColor.withValues(
+                            alpha: 0.85,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: ColorResources.whiteColor,
                           borderRadius: BorderRadius.circular(20),
@@ -1235,7 +1216,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: ColorResources.blueeebutton.withValues(alpha: 0.08),
+                              color: ColorResources.blueeebutton.withValues(
+                                alpha: 0.08,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
@@ -1258,7 +1241,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                if (data.address != null && data.address!.isNotEmpty)
+                                if (data.address != null &&
+                                    data.address!.isNotEmpty)
                                   Text(
                                     data.address!,
                                     style: PoppinsReguler.copyWith(
@@ -1371,10 +1355,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         GetBuilder<BookingController>(
           builder: (bc) {
             if (bc.isVehicleTypeLoading || bc.vehicleTypeList.isEmpty) {
-              return _vehicleGrid(List.generate(4, (_) => _vehicleCardSkeleton()));
+              return _vehicleGrid(
+                List.generate(6, (_) => _vehicleCardSkeleton()),
+              );
             }
             return _vehicleGrid(
-              bc.vehicleTypeList.map((type) => _idleVehicleTypeCard(type)).toList(),
+              bc.vehicleTypeList
+                  .map((type) => _idleVehicleTypeCard(type))
+                  .toList(),
             );
           },
         ),
@@ -1429,15 +1417,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// Lays real card widgets out in a responsive 2-column grid without
+  /// Lays real card widgets out in a responsive 3-column grid without
   /// forcing a fixed aspect ratio per cell (card content height varies
   /// slightly between the idle/vehicle-select stages), so each card sizes
   /// to its own content instead of GridView's uniform-cell constraint.
   Widget _vehicleGrid(List<Widget> cards) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        const spacing = 12.0;
-        final itemWidth = (constraints.maxWidth - spacing) / 2;
+        const spacing = 10.0;
+        final itemWidth = (constraints.maxWidth - spacing * 2) / 3;
         return Wrap(
           spacing: spacing,
           runSpacing: spacing,
@@ -1463,7 +1451,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             borderRadius: BorderRadius.circular(10),
             child: AspectRatio(
               aspectRatio: _vehicleImageAspectRatio,
-              child: Container(color: ColorResources.blueeebutton.withValues(alpha: 0.08)),
+              child: Container(
+                color: ColorResources.blueeebutton.withValues(alpha: 0.08),
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -1494,7 +1484,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               GestureDetector(
                 onTap: _closeSearch,
-                child: Icon(Icons.arrow_back_rounded, color: ColorResources.blackcolor11),
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  color: ColorResources.blackcolor11,
+                ),
               ),
               const SizedBox(width: 12),
               Text(
@@ -1526,7 +1519,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
                     child: Row(
                       children: [
-                        Icon(Icons.my_location, size: 18, color: ColorResources.blueeebutton),
+                        Icon(
+                          Icons.my_location,
+                          size: 18,
+                          color: ColorResources.blueeebutton,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -1538,7 +1535,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                         ),
-                        Icon(Icons.edit, size: 14, color: ColorResources.TextColorForGrey),
+                        Icon(
+                          Icons.edit,
+                          size: 14,
+                          color: ColorResources.TextColorForGrey,
+                        ),
                       ],
                     ),
                   )
@@ -1585,8 +1586,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       fontSize: 14,
                       color: ColorResources.TextColorForGrey,
                     ),
-                    prefixIcon: Icon(Icons.location_on_outlined,
-                        size: 20, color: ColorResources.textColorRed),
+                    prefixIcon: Icon(
+                      Icons.location_on_outlined,
+                      size: 20,
+                      color: ColorResources.textColorRed,
+                    ),
                     border: InputBorder.none,
                   ),
                 ),
@@ -1628,8 +1632,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 final place = predictions[index];
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.location_on_outlined,
-                      color: ColorResources.TextColorForGrey),
+                  leading: Icon(
+                    Icons.location_on_outlined,
+                    color: ColorResources.TextColorForGrey,
+                  ),
                   title: Text(
                     place["structured_formatting"]["main_text"],
                     style: PoppinsMedium.copyWith(
@@ -1667,7 +1673,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               GestureDetector(
                 onTap: _backToIdleFromVehicleSelect,
-                child: Icon(Icons.arrow_back_rounded, color: ColorResources.blackcolor11),
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  color: ColorResources.blackcolor11,
+                ),
               ),
               const SizedBox(width: 12),
               Text(
@@ -1683,7 +1692,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _routeSummary(),
           const SizedBox(height: 14),
           if (_isLoadingEstimate)
-            _vehicleGrid(List.generate(4, (_) => _vehicleCardSkeleton()))
+            _vehicleGrid(List.generate(6, (_) => _vehicleCardSkeleton()))
           else
             GetBuilder<BookingController>(
               builder: (bc) {
@@ -1754,7 +1763,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: ColorResources.blackcolor11,
                       ),
                     ),
-                    Icon(Icons.calendar_today, size: 16, color: ColorResources.TextColorForGrey),
+                    Icon(
+                      Icons.calendar_today,
+                      size: 16,
+                      color: ColorResources.TextColorForGrey,
+                    ),
                   ],
                 ),
               ),
@@ -1877,9 +1890,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (image == null || image.isEmpty) {
       return Container(
         color: ColorResources.backgroundColor,
-        child: Center(
-          child: Image.asset('assets/images/cart.png', height: 26),
-        ),
+        child: Center(child: Image.asset('assets/images/cart.png', height: 26)),
       );
     }
     return Container(
@@ -2070,5 +2081,4 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
 }

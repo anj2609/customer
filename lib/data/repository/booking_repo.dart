@@ -74,6 +74,67 @@ class BookingRepo extends GetxService {
     });
   }
 
+  /////==========  call outstation estimate api (vehicles + price for a trip)  ======================///////
+  Future<Response> outstationEstimateApi({
+    required String tripType,
+    required double pickupLat,
+    required double pickupLng,
+    required double dropLat,
+    required double dropLng,
+  }) async {
+    return apiClient.myridepostData(ApiConstants.outstationEstimate, {
+      "trip_type": tripType,
+      "pickup_lat": pickupLat,
+      "pickup_lng": pickupLng,
+      "drop_lat": dropLat,
+      "drop_lng": dropLng,
+    });
+  }
+
+  /////==========  call create booking api for outstation  ======================///////
+  Future<Response> createOutstationBookingApi({
+    required double pickupLat,
+    required double pickupLng,
+    required double dropLat,
+    required double dropLng,
+    required num estimatedPrice,
+    required int vehicleTypeId,
+    required String pickupAddress,
+    required String dropAddress,
+    required int isSchedule,
+    required String scheduleDateTime,
+    required int outstationPricingId,
+    required String tripType,
+    required num estimatedDistance,
+    required num estimatedDuration,
+    required num billableDistance,
+    required int estimatedDays,
+    required num driverAllowance,
+  }) async {
+    return apiClient.myridepostData(ApiConstants.createBooking, {
+      "pickup_lat": pickupLat,
+      "pickup_lng": pickupLng,
+      "drop_lat": dropLat,
+      "drop_lng": dropLng,
+      "estimated_price": estimatedPrice,
+      "vehicle_type_id": vehicleTypeId,
+      "pickup_address": pickupAddress,
+      "drop_address": dropAddress,
+      "is_schedule": isSchedule,
+      "schedule_date_time": scheduleDateTime,
+      "is_wallet": 0,
+      "promo_code": "",
+      "ride_type": "outstation",
+      "outstation_pricing_id": outstationPricingId,
+      "trip_type": tripType,
+      "estimated_distance": estimatedDistance,
+      "estimated_duration": estimatedDuration,
+      "billable_distance": billableDistance,
+      "estimated_days": estimatedDays,
+      "driver_allowance": driverAllowance,
+    });
+  }
+
   /////==========  call create booking  api  ======================///////
   Future<Response> createBookingApi({
     required double pickup_lat,

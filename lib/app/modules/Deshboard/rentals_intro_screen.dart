@@ -21,7 +21,7 @@ class RentalsIntroScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(left: 16, top: 8, right: 16, bottom: 12),
               child: GestureDetector(
                 onTap: () => Get.back(),
                 child: Container(
@@ -38,52 +38,53 @@ class RentalsIntroScreen extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
-              width: double.infinity,
-              height: 200,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: ColorResources.brandGradient,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.time_to_leave_rounded,
-                  size: 90,
-                  color: ColorResources.whiteColor,
-                ),
+            // Matches the banner's own aspect ratio (1920x916) instead of a
+            // fixed height, so BoxFit.cover never needs to crop the sides
+            // to fill a differently-shaped box.
+            AspectRatio(
+              aspectRatio: 1920 / 916,
+              child: Image.asset(
+                'assets/images/Banner.jpg.jpeg',
+                width: double.infinity,
+                fit: BoxFit.cover,
               ),
             ),
             Expanded(
-              child: SingleChildScrollView(
+              child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       "N Ride Rentals",
-                      style: PoppinsBold.copyWith(
-                        fontSize: 28,
+                      style: PoppinsSemiBold.copyWith(
+                        fontSize: 24,
                         color: ColorResources.blackcolor11,
                       ),
                     ),
-                    const SizedBox(height: 44),
-                    _bullet(
-                      Icons.hourglass_bottom_rounded,
-                      "Keep a car and driver for up to 12 hours",
-                    ),
-                    const SizedBox(height: 32),
-                    _bullet(
-                      Icons.work_outline_rounded,
-                      "Ideal for business meetings, tourist travel and "
-                          "multiple stop trips",
-                    ),
-                    const SizedBox(height: 32),
-                    _bullet(
-                      Icons.bolt_rounded,
-                      "Book now and get going instantly",
+                    const SizedBox(height: 16),
+                    // Fills the remaining space instead of clustering at the
+                    // top with large fixed gaps under it.
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _bullet(
+                            Icons.hourglass_bottom_rounded,
+                            "Keep a car and driver for up to 12 hours",
+                          ),
+                          _bullet(
+                            Icons.work_outline_rounded,
+                            "Ideal for business meetings, tourist travel and "
+                            "multiple stop trips",
+                          ),
+                          _bullet(
+                            Icons.bolt_rounded,
+                            "Book now and get going instantly",
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

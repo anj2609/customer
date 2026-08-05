@@ -18,6 +18,7 @@ import 'package:myrideuser/data/modal/trackride_model.dart';
 import 'package:myrideuser/data/modal/vehicle_model.dart';
 import 'package:myrideuser/data/modal/vehicle_type_model.dart';
 import 'package:myrideuser/data/modal/rental_estimate_model.dart';
+import 'package:myrideuser/data/modal/outstation_estimate_model.dart';
 import 'package:myrideuser/data/repository/booking_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -82,6 +83,12 @@ class BookingController extends GetxController implements GetxService {
 
   final Rx<BookingActiveState> activeBookingState =
       BookingActiveState().obs;
+
+  /// Cross-tab navigation signal: which bottom-nav tab is active, and
+  /// whether the Home tab should auto-open its destination search as soon
+  /// as it mounts (set when a vehicle is tapped on the Services tab).
+  final RxInt bottomNavIndex = 0.obs;
+  final RxBool pendingOpenSearch = false.obs;
 
   @override
   void onInit() {
@@ -167,6 +174,53 @@ class BookingController extends GetxController implements GetxService {
     }
   }
 
+  /////==========  outstation vehicle + price estimate for a trip  ======================///////
+  List<OutstationEstimateModel> outstationEstimateList = [];
+  bool isOutstationEstimateLoading = false;
+  // Non-null only when the backend rejects the trip itself (e.g. under the
+  // 150km minimum) — distinct from "no vehicles", since that's a real
+  // reason from the server, not an empty catalog.
+  String? outstationEstimateError;
+
+  Future<void> getOutstationEstimate({
+    required String tripType,
+    required double pickupLat,
+    required double pickupLng,
+    required double dropLat,
+    required double dropLng,
+  }) async {
+    isOutstationEstimateLoading = true;
+    outstationEstimateList = [];
+    outstationEstimateError = null;
+    update();
+
+    try {
+      Response response = await bookingRepo.outstationEstimateApi(
+        tripType: tripType,
+        pickupLat: pickupLat,
+        pickupLng: pickupLng,
+        dropLat: dropLat,
+        dropLng: dropLng,
+      );
+
+      if (response.statusCode == 200 &&
+          response.body is Map &&
+          response.body['code'].toString() == '200') {
+        List<dynamic> dataList = response.body['data'] ?? [];
+        outstationEstimateList = dataList
+            .map((item) => OutstationEstimateModel.fromJson(item))
+            .toList();
+      } else if (response.body is Map && response.body['message'] != null) {
+        outstationEstimateError = response.body['message'].toString();
+      }
+    } catch (e) {
+      log('Outstation estimate error: $e');
+    } finally {
+      isOutstationEstimateLoading = false;
+      update();
+    }
+  }
+
   Future<void> getCurrentLocation() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
@@ -189,6 +243,13 @@ class BookingController extends GetxController implements GetxService {
 
       print("Lat: ${currentLatLng.latitude}");
       print("Lng: ${currentLatLng.longitude}");
+
+      // Show the current-location pin immediately — setMarkers() otherwise
+      // only ran after the nearby-drivers call below succeeded, so a slow
+      // or failed call left the map with no clear marker, just the default
+      // (subtle) blue "my location" dot. setMarkers() re-adds the driver
+      // markers too once that call resolves, so this is safe to call twice.
+      setMarkers();
 
       await driverAvailableNearByApi(
         context: Get.context!,
@@ -475,6 +536,113 @@ class BookingController extends GetxController implements GetxService {
       return response;
     } catch (e) {
       debugPrint('CreateRentalBooking Error: $e');
+
+      AnimatedTopToast.show(
+        context: context,
+        message: "Something went wrong. Please check your connection and try again.",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
+      );
+
+      update();
+      rethrow;
+    }
+  }
+
+  Future<Response> CreateOutstationBooking({
+    required BuildContext context,
+    required double pickupLat,
+    required double pickupLng,
+    required double dropLat,
+    required double dropLng,
+    required num estimatedPrice,
+    required int vehicleTypeId,
+    required String pickupAddress,
+    required String dropAddress,
+    required int isSchedule,
+    required String scheduleDateTime,
+    required int outstationPricingId,
+    required String tripType,
+    required num estimatedDistance,
+    required num estimatedDuration,
+    required num billableDistance,
+    required int estimatedDays,
+    required num driverAllowance,
+  }) async {
+    update();
+
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      Response response = await bookingRepo.createOutstationBookingApi(
+        pickupLat: pickupLat,
+        pickupLng: pickupLng,
+        dropLat: dropLat,
+        dropLng: dropLng,
+        estimatedPrice: estimatedPrice,
+        vehicleTypeId: vehicleTypeId,
+        pickupAddress: pickupAddress,
+        dropAddress: dropAddress,
+        isSchedule: isSchedule,
+        scheduleDateTime: scheduleDateTime,
+        outstationPricingId: outstationPricingId,
+        tripType: tripType,
+        estimatedDistance: estimatedDistance,
+        estimatedDuration: estimatedDuration,
+        billableDistance: billableDistance,
+        estimatedDays: estimatedDays,
+        driverAllowance: driverAllowance,
+      );
+
+      final body = response.body;
+      final String code = (body is Map && body['code'] != null)
+          ? body['code'].toString()
+          : '';
+      final String rawMessage = (body is Map && body['message'] != null)
+          ? body['message'].toString()
+          : '';
+
+      debugPrint('CreateOutstationBooking Response: status=${response.statusCode}, body=$body');
+
+      String userMessage = _getUserFriendlyMessage(rawMessage);
+
+      if (code == '200') {
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        }
+
+        AnimatedTopToast.show(
+          context: context,
+          message: userMessage.isNotEmpty ? userMessage : "Outstation ride booked successfully!",
+          backgroundColor: ColorResources.appColor,
+          icon: Icons.check_circle_rounded,
+        );
+
+        var bookingid = body['data']['booking_id'].toString();
+
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        Get.toNamed(
+          RouteHelper.getfindingDriverUI(),
+          arguments: {'booking_id': bookingid},
+        );
+
+        await prefs.setString(ApiConstants.bookingid, bookingid);
+      } else {
+        AnimatedTopToast.show(
+          context: context,
+          message: userMessage.isNotEmpty
+              ? userMessage
+              : "Unable to book outstation ride. Please try again.",
+          backgroundColor: ColorResources.textColorBaclColor,
+          icon: Icons.error_outline,
+        );
+      }
+
+      update();
+      return response;
+    } catch (e) {
+      debugPrint('CreateOutstationBooking Error: $e');
 
       AnimatedTopToast.show(
         context: context,

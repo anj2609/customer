@@ -441,6 +441,7 @@ class ApiClient extends GetxService {
     'estimate-ride-list',
     'create-booking',
     'rental/estimate',
+    'outstation/estimate',
     'track-ride',
     'trip-detail',
     'cancel-ride',

@@ -121,16 +121,15 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
                     ),
                   ),
 
-                  //  // Spacer(),
-                  SizedBox(width: Dimensions.spacingSize60),
+                  const Spacer(),
                   Text(
                     "Account",
-                    style: PoppinsExtrabold.copyWith(
+                    style: PoppinsSemiBold.copyWith(
                       color: ColorResources.blackcolor11,
-                      fontSize: Dimensions.spacingSize16,
+                      fontSize: 16,
                     ),
                   ),
-                  // Spacer(),
+                  const Spacer(),
                   // Icon(Icons.more_vert),
                 ],
               ),

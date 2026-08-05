@@ -29,6 +29,8 @@ class OutstationTripScreen extends StatefulWidget {
 class _OutstationTripScreenState extends State<OutstationTripScreen> {
   bool _oneWay = true;
   bool _leaveNow = true;
+  int _days = 1;
+  DateTime? _scheduledDateTime;
 
   final TextEditingController _fromController = TextEditingController();
   final TextEditingController _toController = TextEditingController();
@@ -157,6 +159,53 @@ class _OutstationTripScreenState extends State<OutstationTripScreen> {
     }
   }
 
+  Future<void> _pickSchedule() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+    if (pickedDate == null) return;
+    if (!mounted) return;
+
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (pickedTime == null) return;
+
+    setState(() {
+      _leaveNow = false;
+      _scheduledDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
+  }
+
+  String get _scheduleApiFormat {
+    final dt = _scheduledDateTime;
+    if (dt == null) return "";
+    return "${dt.year}-"
+        "${dt.month.toString().padLeft(2, '0')}-"
+        "${dt.day.toString().padLeft(2, '0')} "
+        "${dt.hour.toString().padLeft(2, '0')}:"
+        "${dt.minute.toString().padLeft(2, '0')}:00";
+  }
+
+  String get _scheduleDisplayLabel {
+    final dt = _scheduledDateTime;
+    if (dt == null) return "Later";
+    final hour12 = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final period = dt.hour >= 12 ? "PM" : "AM";
+    final minute = dt.minute.toString().padLeft(2, '0');
+    return "${dt.day}/${dt.month} · $hour12:$minute $period";
+  }
+
   void _onSearchRides() {
     if (_fromLatLng == null || _fromController.text.trim().isEmpty) {
       AnimatedTopToast.show(
@@ -176,11 +225,24 @@ class _OutstationTripScreenState extends State<OutstationTripScreen> {
       );
       return;
     }
+    if (!_leaveNow && _scheduledDateTime == null) {
+      AnimatedTopToast.show(
+        context: context,
+        message: "Please pick a date & time",
+        backgroundColor: ColorResources.textColorRed,
+        icon: Icons.error_outline,
+      );
+      return;
+    }
     Get.to(() => OutstationVehicleScreen(
           fromAddress: _fromController.text,
           toAddress: _toController.text,
           fromLatLng: _fromLatLng,
           toLatLng: _toLatLng,
+          tripType: _oneWay ? 'one_way' : 'round_trip',
+          estimatedDays: _oneWay ? 1 : _days,
+          isSchedule: !_leaveNow,
+          scheduleDateTime: _scheduleApiFormat,
         ));
   }
 
@@ -241,6 +303,10 @@ class _OutstationTripScreenState extends State<OutstationTripScreen> {
                         ],
                       ),
                     ),
+                    if (!_oneWay) ...[
+                      const SizedBox(height: 14),
+                      _dayStepper(),
+                    ],
                     const SizedBox(height: 20),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -333,9 +399,9 @@ class _OutstationTripScreenState extends State<OutstationTripScreen> {
                         const SizedBox(width: 10),
                         _timeOption(
                           icon: Icons.calendar_month_rounded,
-                          label: "Later",
+                          label: _scheduleDisplayLabel,
                           selected: !_leaveNow,
-                          onTap: () => setState(() => _leaveNow = false),
+                          onTap: _pickSchedule,
                         ),
                       ],
                     ),
@@ -353,6 +419,70 @@ class _OutstationTripScreenState extends State<OutstationTripScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Shown only for Round trip — how many days the outstation trip spans,
+  /// sent to the backend as estimated_days.
+  Widget _dayStepper() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: ColorResources.backgroundColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.date_range_rounded, size: 18, color: ColorResources.TextColorForGrey),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _days == 1 ? "1 day" : "$_days days",
+              style: PoppinsMedium.copyWith(
+                fontSize: 14,
+                color: ColorResources.blackcolor11,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: _days > 1 ? () => setState(() => _days--) : null,
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: ColorResources.whiteColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.remove_rounded,
+                size: 18,
+                color: _days > 1
+                    ? ColorResources.blackcolor11
+                    : ColorResources.TextColorForGrey,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: _days < 30 ? () => setState(() => _days++) : null,
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: ColorResources.whiteColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.add_rounded,
+                size: 18,
+                color: _days < 30
+                    ? ColorResources.blackcolor11
+                    : ColorResources.TextColorForGrey,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -35,12 +36,14 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
   LatLng? _toLatLng;
   bool _loadingCurrentLocation = true;
   GoogleMapController? _mapController;
+  Set<Polyline> _polylines = {};
 
   _ActiveField _activeField = _ActiveField.none;
   List predictions = [];
   bool _isSearching = false;
 
   final String _placesApiKey = "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU";
+  final String _directionsApiKey = "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU";
 
   @override
   void initState() {
@@ -90,6 +93,7 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
           _loadingCurrentLocation = false;
         });
         _updateCamera();
+        _drawRoute();
       }
     } catch (e) {
       debugPrint("Rentals current location error: $e");
@@ -117,6 +121,60 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
       _mapController!.animateCamera(CameraUpdate.newLatLngZoom(_fromLatLng!, 14));
     } else if (_toLatLng != null) {
       _mapController!.animateCamera(CameraUpdate.newLatLngZoom(_toLatLng!, 14));
+    }
+  }
+
+  /// Real driving route (same Directions API + polyline pattern used on the
+  /// home screen) once both pickup and drop-off are set — the map should
+  /// show the actual road path connecting the two pins, not just the pins.
+  Future<void> _drawRoute() async {
+    if (_fromLatLng == null || _toLatLng == null) {
+      if (mounted) setState(() => _polylines = {});
+      return;
+    }
+    try {
+      final origin = "${_fromLatLng!.latitude},${_fromLatLng!.longitude}";
+      final destination = "${_toLatLng!.latitude},${_toLatLng!.longitude}";
+      final url =
+          "https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&mode=driving&key=$_directionsApiKey";
+
+      final response = await http.get(Uri.parse(url));
+      final data = jsonDecode(response.body);
+
+      final routePoints = <LatLng>[];
+      final routes = data["routes"];
+      if (routes != null && routes is List && routes.isNotEmpty) {
+        final legs = routes[0]["legs"];
+        if (legs != null && legs is List) {
+          for (var leg in legs) {
+            for (var step in leg["steps"]) {
+              final polyline = step["polyline"]["points"];
+              final decoded = PolylinePoints.decodePolyline(polyline);
+              for (var point in decoded) {
+                routePoints.add(LatLng(point.latitude, point.longitude));
+              }
+            }
+          }
+        }
+      }
+
+      if (mounted && routePoints.isNotEmpty) {
+        setState(() {
+          _polylines = {
+            Polyline(
+              polylineId: const PolylineId("rentals_route"),
+              points: routePoints,
+              width: 6,
+              color: ColorResources.blueeebutton,
+              jointType: JointType.round,
+              startCap: Cap.roundCap,
+              endCap: Cap.roundCap,
+            ),
+          };
+        });
+      }
+    } catch (e) {
+      debugPrint("Rentals route draw error: $e");
     }
   }
 
@@ -194,6 +252,7 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
         predictions = [];
       });
       _updateCamera();
+      _drawRoute();
     } catch (e) {
       debugPrint("Rentals place select error: $e");
     } finally {
@@ -238,7 +297,7 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(left: 16, top: 8, right: 16, bottom: 8),
               child: GestureDetector(
                 onTap: () => Get.back(),
                 child: Container(
@@ -255,125 +314,119 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
                 ),
               ),
             ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                "Pickup & drop-off",
+                style: PoppinsBold.copyWith(
+                  fontSize: 24,
+                  color: ColorResources.blackcolor11,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: ColorResources.backgroundColor,
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Pickup & drop-off",
-                      style: PoppinsBold.copyWith(
-                        fontSize: 24,
-                        color: ColorResources.blackcolor11,
-                      ),
+                    _locationRow(
+                      field: _ActiveField.from,
+                      controller: _fromController,
+                      icon: Icons.radio_button_checked_rounded,
+                      iconColor: ColorResources.blueeebutton,
+                      hint: "Where from?",
+                      loading: _loadingCurrentLocation,
                     ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: ColorResources.backgroundColor,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Column(
-                        children: [
-                          _locationRow(
-                            field: _ActiveField.from,
-                            controller: _fromController,
-                            icon: Icons.radio_button_checked_rounded,
-                            iconColor: ColorResources.blueeebutton,
-                            hint: "Where from?",
-                            loading: _loadingCurrentLocation,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Divider(height: 1, color: ColorResources.greycolorborder),
-                          ),
-                          _locationRow(
-                            field: _ActiveField.to,
-                            controller: _toController,
-                            icon: Icons.square_rounded,
-                            iconColor: ColorResources.textColorRed,
-                            hint: "Where to?",
-                            loading: false,
-                          ),
-                        ],
-                      ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Divider(height: 1, color: ColorResources.greycolorborder),
                     ),
-                    if (_activeField != _ActiveField.none) ...[
-                      const SizedBox(height: 8),
-                      if (_isSearching)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ),
-                        )
-                      else
-                        ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          padding: EdgeInsets.zero,
-                          itemCount: predictions.length,
-                          itemBuilder: (context, index) {
-                            final place = predictions[index];
-                            return ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              leading: Icon(
-                                Icons.location_on_outlined,
-                                color: ColorResources.TextColorForGrey,
-                              ),
-                              title: Text(
-                                place["structured_formatting"]?["main_text"] ??
-                                    place["description"] ??
-                                    "",
-                                style: PoppinsMedium.copyWith(
-                                  fontSize: 14,
-                                  color: ColorResources.blackcolor11,
-                                ),
-                              ),
-                              subtitle: Text(
-                                place["description"] ?? "",
-                                style: PoppinsReguler.copyWith(
-                                  fontSize: 12,
-                                  color: ColorResources.TextColorForGrey,
-                                ),
-                              ),
-                              onTap: () => _selectPrediction(place),
-                            );
-                          },
-                        ),
-                    ],
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: SizedBox(
-                        height: 180,
-                        child: GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                            target: _fromLatLng ?? const LatLng(28.5355, 77.3910),
-                            zoom: 14,
-                          ),
-                          markers: _buildMarkers(),
-                          myLocationEnabled: true,
-                          myLocationButtonEnabled: false,
-                          zoomControlsEnabled: false,
-                          onMapCreated: (controller) {
-                            _mapController = controller;
-                            _updateCamera();
-                          },
-                        ),
-                      ),
+                    _locationRow(
+                      field: _ActiveField.to,
+                      controller: _toController,
+                      icon: Icons.square_rounded,
+                      iconColor: ColorResources.textColorRed,
+                      hint: "Where to?",
+                      loading: false,
                     ),
-                    const SizedBox(height: 24),
                   ],
                 ),
               ),
             ),
+            const SizedBox(height: 8),
+            if (_activeField != _ActiveField.none)
+              Expanded(
+                child: _isSearching
+                    ? const Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: predictions.length,
+                        itemBuilder: (context, index) {
+                          final place = predictions[index];
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Icon(
+                              Icons.location_on_outlined,
+                              color: ColorResources.TextColorForGrey,
+                            ),
+                            title: Text(
+                              place["structured_formatting"]?["main_text"] ??
+                                  place["description"] ??
+                                  "",
+                              style: PoppinsMedium.copyWith(
+                                fontSize: 14,
+                                color: ColorResources.blackcolor11,
+                              ),
+                            ),
+                            subtitle: Text(
+                              place["description"] ?? "",
+                              style: PoppinsReguler.copyWith(
+                                fontSize: 12,
+                                color: ColorResources.TextColorForGrey,
+                              ),
+                            ),
+                            onTap: () => _selectPrediction(place),
+                          );
+                        },
+                      ),
+              )
+            else
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: _fromLatLng ?? const LatLng(28.5355, 77.3910),
+                        zoom: 14,
+                      ),
+                      markers: _buildMarkers(),
+                      polylines: _polylines,
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: false,
+                      zoomControlsEnabled: false,
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                        _updateCamera();
+                        _drawRoute();
+                      },
+                    ),
+                  ),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.all(20),
               child: CustomPrimaryDyanamicButton(
