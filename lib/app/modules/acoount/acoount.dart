@@ -108,14 +108,17 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
               ////////////////////////////////////////////////////////////
               /// 🔹 TOP BAR
               ////////////////////////////////////////////////////////////
-              Row(
+              Stack(
+                alignment: Alignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: Dimensions.spacingSize25,
-                    backgroundImage: const AssetImage('assets/images/app logo.png'),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Image.asset(
+                      'assets/images/splashscreen.png',
+                      height: 20,
+                      color: ColorResources.blueeebutton,
+                    ),
                   ),
-
-                  const Spacer(),
                   Text(
                     "Account",
                     style: PoppinsSemiBold.copyWith(
@@ -123,8 +126,6 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
                       fontSize: 16,
                     ),
                   ),
-                  const Spacer(),
-                  // Icon(Icons.more_vert),
                 ],
               ),
 

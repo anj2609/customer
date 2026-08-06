@@ -1,6 +1,7 @@
+import 'package:myrideuser/app/modules/activity/activity_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:myrideuser/app/modules/activity/activity.dart';
+import 'package:myrideuser/app/modules/activity/ridedetail_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:myrideuser/widgets/custom_loader.dart';
@@ -11,6 +12,7 @@ class ScheduledScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ProfileController>();
+    final width = MediaQuery.of(context).size.width;
 
     return GetBuilder<ProfileController>(
       builder: (_) {
@@ -31,7 +33,7 @@ class ScheduledScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "No Complete Rides",
+                  "No Scheduled Rides",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               ],
@@ -39,31 +41,23 @@ class ScheduledScreen extends StatelessWidget {
           );
         }
 
+        /// List — every scheduled booking, same card format shared across
+        /// all Activity filters.
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
+          padding: EdgeInsets.symmetric(horizontal: width * 0.04),
           itemCount: controller.bookingActivityList!.length,
           itemBuilder: (context, index) {
             final item = controller.bookingActivityList![index];
 
-            return GestureDetector(
+            return ActivityRideCard(
+              item: item,
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (_) => RideDetailsScreen(
-                //       bookingId: item.id.toString(),
-                //     ),
-                //   ),
-                // );
+                Get.to(
+                  () => RideDetailsScreen(item: item),
+                  transition: Transition.leftToRight,
+                  duration: const Duration(milliseconds: 0),
+                );
               },
-              child: RideItem(
-                title: item.dropAddress ?? "N/A",
-                imageUrl: item.image ?? "",
-                // time: item!.runtimeType ?? "N/A",
-                subTitle: item.createdAt ?? "",
-                
-                //rightDate: item.createdAt ?? "",
-              ),
             );
           },
         );

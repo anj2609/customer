@@ -36,13 +36,17 @@ class ServicesScreen extends StatelessWidget {
             // title centered in the row via matching Spacers on both sides.
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              child: Row(
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 25,
-                    backgroundImage: const AssetImage('assets/images/app logo.png'),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Image.asset(
+                      'assets/images/splashscreen.png',
+                      height: 20,
+                      color: ColorResources.blueeebutton,
+                    ),
                   ),
-                  const Spacer(),
                   Text(
                     "Services",
                     style: PoppinsSemiBold.copyWith(
@@ -50,7 +54,6 @@ class ServicesScreen extends StatelessWidget {
                       color: ColorResources.blackcolor11,
                     ),
                   ),
-                  const Spacer(),
                 ],
               ),
             ),

@@ -1,11 +1,9 @@
-import 'package:intl/intl.dart';
+import 'package:myrideuser/app/modules/activity/activity_card.dart';
+import 'package:myrideuser/app/modules/activity/ridedetail_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
-import 'package:myrideuser/config/utils/constants.dart';
-import 'package:myrideuser/config/utils/style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
-import 'package:myrideuser/data/modal/activity_model.dart';
 import 'package:myrideuser/widgets/custom_loader.dart';
 
 class CanceledScreen extends StatefulWidget {
@@ -65,13 +63,23 @@ class _CanceledScreenState extends State<CanceledScreen> {
                       );
                     }
 
-                    /// List
+                    /// List — every canceled booking, same card format
+                    /// shared across all Activity filters.
                     return ListView.builder(
                       itemCount: controller.bookingActivityList!.length,
                       itemBuilder: (context, index) {
                         final item = controller.bookingActivityList![index];
 
-                        return _activityCard(item, width, height);
+                        return ActivityRideCard(
+                          item: item,
+                          onTap: () {
+                            Get.to(
+                              () => RideDetailsScreen(item: item),
+                              transition: Transition.leftToRight,
+                              duration: const Duration(milliseconds: 0),
+                            );
+                          },
+                        );
                       },
                     );
                   },
@@ -82,115 +90,5 @@ class _CanceledScreenState extends State<CanceledScreen> {
         ),
       ),
     );
-  }
-
-  Widget _activityCard(
-    ActivityDataMainModel item,
-    double width,
-    double height,
-  ) {
-    return GestureDetector(
-      onTap: () {},
-
-      child: Container(
-        margin: EdgeInsets.only(bottom: height * 0.015),
-        padding: EdgeInsets.all(width * 0.04),
-        decoration: BoxDecoration(
-          color: ColorResources.whiteColor,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Row(
-          children: [
-            /// Icon
-            (item.image != null && item.image!.isNotEmpty)
-                ? CircleAvatar(
-                    radius: width * 0.09,
-                    backgroundColor: ColorResources.whiteColor,
-                    child: ClipOval(
-                      child: Image.network(
-                        '${ApiConstants.imageurl}${item.image.toString()}',
-                        width: width * 0.16,
-                        height: width * 0.16,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.asset(
-                            "assets/images/cars.png",
-                            width: width * 0.14,
-                            height: width * 0.14,
-                            fit: BoxFit.cover,
-                            color: ColorResources.blueeebutton,
-                          );
-                        },
-                      ),
-                    ),
-                  )
-                : CircleAvatar(
-                    radius: width * 0.06,
-                    backgroundColor: ColorResources.blueeebutton.withValues(alpha: 0.08),
-                    child: Image.asset(
-                      "assets/images/cars.png",
-                      width: width * 0.08,
-                      height: width * 0.08,
-                      fit: BoxFit.cover,
-                      color: ColorResources.blueeebutton,
-                    ),
-                  ),
-
-            SizedBox(width: width * 0.04),
-
-            /// Title & Date
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item.dropAddress ?? "", style: PoppinsSemiBold),
-                  const SizedBox(height: 4),
-                  Text(
-                    formatDate(item.createdAt!),
-                    style: TextStyle(
-                      fontSize: width * 0.03,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  // Text(
-                  //   item.createdAt ?? "",
-                  //   style: TextStyle(
-                  //     fontSize: width * 0.03,
-                  //     color: Colors.grey,
-                  //   ),
-                  // ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.status ?? "",
-                    style: TextStyle(fontSize: width * 0.03, color: ColorResources.textColorRed),
-                  ),
-                ],
-              ),
-            ),
-
-            /// Amount
-            Text(
-              item.totalFare.toString() ?? "",
-              style: TextStyle(
-                fontSize: width * 0.038,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String formatDate(String dateString) {
-    DateTime dateTime = DateTime.parse(dateString);
-
-    // 2026-04-27
-    String fullDate = DateFormat('yyyy-MM-dd').format(dateTime);
-
-    // 27 April
-    String dayMonth = DateFormat('dd MMMM').format(dateTime);
-
-    return "$fullDate  $dayMonth";
   }
 }

@@ -52,7 +52,6 @@ class _MainNavigationState extends State<MainNavigation>
     } else {
       _currentIndex = widget.initialIndex;
     }
-    bookingController.bottomNavIndex.value = _currentIndex;
 
     // Lets other screens (e.g. Services, tapping a vehicle) switch the tab
     // from outside this widget without a bigger navigation refactor.
@@ -64,6 +63,18 @@ class _MainNavigationState extends State<MainNavigation>
       if (mounted && value != _currentIndex) {
         setState(() => _currentIndex = value);
       }
+    });
+
+    // Deferred to after this frame: flows like Get.offAll(MainNavigation())
+    // (login, OTP verify, wallet top-up) mount this new instance while the
+    // previous one may still be mid-teardown. Setting the shared Rx value
+    // synchronously here fired the *old* instance's still-registered
+    // listener above (before its own dispose() had run) and called its
+    // setState() while this new tree was still building — crashing with
+    // "setState() or markNeedsBuild() called during build". Waiting a
+    // frame lets the old instance finish disposing first.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      bookingController.bottomNavIndex.value = _currentIndex;
     });
 
     controller.fetchProfile();

@@ -1,26 +1,31 @@
-
-
+import 'package:intl/intl.dart';
 import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/style.dart';
-import 'package:myrideuser/widgets/custom_button.dart';
+import 'package:myrideuser/data/modal/activity_model.dart';
 import 'package:flutter/material.dart';
 
+/// Ride detail screen — shows the real data for whichever ride was tapped
+/// (passed in via [item]). No fabricated fields: anything the API doesn't
+/// return (e.g. a fare breakdown, ETA, passenger count) is simply not shown
+/// rather than guessed.
 class RideDetailsScreen extends StatelessWidget {
-  const RideDetailsScreen({super.key});
+  final ActivityDataMainModel item;
+
+  const RideDetailsScreen({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: ColorResources.whiteColor,
       appBar: AppBar(
-        leading: Icon(Icons.arrow_back),
-        actions: [Icon(Icons.more_vert, color: ColorResources.blackcolor)],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Text(
           "Ride Details",
-
           style: PoppinsSemiBold.copyWith(color: ColorResources.blackcolor11),
         ),
-        //flexibleSpace:
         elevation: 0,
         backgroundColor: ColorResources.whiteColor,
       ),
@@ -44,68 +49,67 @@ class RideDetailsScreen extends StatelessWidget {
                     /// TITLE
                     Center(
                       child: Text(
-                        "Your Scheduled Ride",
+                        item.vehicleType?.name ?? "Your Ride",
                         style: PoppinsSemiBold.copyWith(
                           color: ColorResources.blackcolor11,
                         ),
-                        //  TextStyle(
-                        //   fontSize: 16,
-                        //   fontWeight: FontWeight.w600,
-                        // ),
                       ),
                     ),
 
                     const SizedBox(height: 4),
 
-                    Center(
-                      child: Text(
-                        "Monday, Mar 21 - 16:00 PM",
-                        style: PoppinsMedium.copyWith(
-                          color: ColorResources.TextColorForGrey,
+                    if (item.createdAt != null && item.createdAt!.isNotEmpty)
+                      Center(
+                        child: Text(
+                          _formatDateTime(item.createdAt!),
+                          style: PoppinsMedium.copyWith(
+                            color: ColorResources.TextColorForGrey,
+                          ),
                         ),
                       ),
-                    ),
 
                     const SizedBox(height: 15),
-
-                    // /// 🔹 BLUE INFO BAR
-                    // Container(
-                    //   padding: const EdgeInsets.all(10),
-                    //   decoration: BoxDecoration(
-                    //     color: Colors.blue,
-                    //     borderRadius: BorderRadius.circular(8),
-                    //   ),
-                    //   child:  Row(
-                    //     children: [
-                    //       Icon(Icons.info, color: Colors.white, size: 18),
-                    //       SizedBox(width: 8),
-                    //       Expanded(
-                    //         child: Text(
-                    //           "We'll notify you when a driver's found",
-                    //           style: PoppinsSemiBold.copyWith(color: ColorResources.blackcolor11),
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
-
-                    // const SizedBox(height: 15),
 
                     /// 🔹 CAB DETAIL BOX
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: ColorResources.blueeebutton.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: ColorResources.blueeebutton.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          Image.asset("assets/images/cab.png", height: 40),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              color: ColorResources.backgroundColor,
+                              child:
+                                  (item.image != null && item.image!.isNotEmpty)
+                                  ? Image.network(
+                                      '${ApiConstants.imageurl}${item.image}',
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Image.asset(
+                                          "assets/images/cab.png",
+                                          fit: BoxFit.contain,
+                                        );
+                                      },
+                                    )
+                                  : Image.asset(
+                                      "assets/images/cab.png",
+                                      fit: BoxFit.contain,
+                                    ),
+                            ),
+                          ),
                           const SizedBox(width: 10),
 
                           Expanded(
                             child: Text(
-                              "Cab Economy (Non-AC)\n3-5 mins  •  4 passengers",
+                              item.vehicleType?.name ?? "Cab",
                               style: PoppinsReguler.copyWith(
                                 color: ColorResources.blackcolor11,
                               ),
@@ -113,7 +117,7 @@ class RideDetailsScreen extends StatelessWidget {
                           ),
 
                           Text(
-                            "₹ 448",
+                            "₹ ${item.totalFare ?? 0}",
                             style: PoppinsSemiBold.copyWith(
                               color: ColorResources.blackcolor11,
                             ),
@@ -140,10 +144,10 @@ class RideDetailsScreen extends StatelessWidget {
                                 color: ColorResources.blueeebutton,
                                 size: 18,
                               ),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "Bobst Library",
+                                  item.pickupAddress ?? "N/A",
                                   style: PoppinsReguler.copyWith(
                                     color: ColorResources.blackcolor11,
                                   ),
@@ -151,7 +155,7 @@ class RideDetailsScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          Divider(),
+                          const Divider(),
                           Row(
                             children: [
                               Icon(
@@ -159,11 +163,10 @@ class RideDetailsScreen extends StatelessWidget {
                                 color: ColorResources.textColorRed,
                                 size: 18,
                               ),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "Larchmont Hotel",
-
+                                  item.dropAddress ?? "N/A",
                                   style: PoppinsReguler.copyWith(
                                     color: ColorResources.blackcolor11,
                                   ),
@@ -177,77 +180,93 @@ class RideDetailsScreen extends StatelessWidget {
 
                     const SizedBox(height: 15),
 
+                    /// 🔹 DRIVER (only if one is assigned to this ride)
+                    if (item.driver != null &&
+                        (item.driver!.name ?? "").isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: ColorResources.blueeebutton
+                                  .withValues(alpha: 0.08),
+                              child: Icon(
+                                Icons.person,
+                                color: ColorResources.blueeebutton,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.driver!.name!,
+                                    style: PoppinsSemiBold.copyWith(
+                                      color: ColorResources.blackcolor11,
+                                    ),
+                                  ),
+                                  if ((item.driver!.phone ?? "").isNotEmpty)
+                                    Text(
+                                      item.driver!.phone!,
+                                      style: PoppinsReguler.copyWith(
+                                        color: ColorResources.TextColorForGrey,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                    ],
+
                     /// 🔹 DETAILS CARD
-                    _infoRow("Status", "Scheduled", isBadge: true),
-                    _infoRow("Payment", "MyRide Wallet"),
-                    _infoRow("Date", "Mar 21, 2026"),
-                    _infoRow("Time", "16:00 PM"),
-                    _infoRow("Transaction ID", "TRX12222240941"),
-                    _infoRow("Booking ID", "BKG720469"),
+                    _infoRow("Status", item.status ?? "N/A", isBadge: true),
+                    _infoRow("Payment", item.paymentType ?? "N/A"),
+                    if (item.createdAt != null && item.createdAt!.isNotEmpty)
+                      _infoRow("Date", _formatDateTime(item.createdAt!)),
+                    if (item.id != null)
+                      _infoRow("Booking ID", item.id.toString()),
+                    if ((item.pickupOtp ?? "").isNotEmpty)
+                      _infoRow("Pickup OTP", item.pickupOtp!),
 
                     const SizedBox(height: 15),
 
-                    /// 🔹 FARE SUMMARY
+                    /// 🔹 FARE
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey.shade300),
                       ),
-                      child: const Column(
+                      child: Row(
                         children: [
-                          _FareRow("Trip Fair", "₹ 560"),
-                          Divider(),
-                          _FareRow("Discount (25%)", "₹ 112"),
-                          Divider(),
-                          _FareRow("Total Paid", "₹ 448", bold: true),
+                          Expanded(
+                            child: Text(
+                              "Total Fare",
+                              style: PoppinsSemiBold.copyWith(
+                                color: ColorResources.blackcolor11,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "₹ ${item.totalFare ?? 0}",
+                            style: PoppinsSemiBold.copyWith(
+                              color: ColorResources.blackcolor11,
+                            ),
+                          ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 20),
-
-                    /// 🔹 SHARE BUTTON
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: ColorResources.blueeebutton),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        onPressed: () {
-                          showDriverFoundSheet(context);
-                        },
-                        child: Text(
-                          "Share Receipt",
-                          style: TextStyle(color: ColorResources.blueeebutton),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    /// 🔹 CANCEL BUTTON
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: ColorResources.textColorRed),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        onPressed: () {},
-                        child: Text(
-                          "Cancel Ride",
-                          style: TextStyle(color: ColorResources.textColorRed),
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
@@ -255,149 +274,6 @@ class RideDetailsScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  void showDriverFoundSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) {
-        return Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            /// MAIN CONTAINER
-            Container(
-              margin: const EdgeInsets.only(top: 60),
-              padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    "We’ve found the driver!",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-
-                  const SizedBox(height: 15),
-                  Divider(color: Colors.grey.shade300),
-
-                  const SizedBox(height: 15),
-
-                  /// DRIVER ROW
-                  Row(
-                    children: [
-                      /// DRIVER IMAGE
-                      const CircleAvatar(
-                        radius: 28,
-                        backgroundImage: AssetImage(
-                          "assets/images/profile.png",
-                        ),
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      /// DRIVER DETAILS
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Troska Sangam  ⭐ 4.8",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              "Tata Tigor, White  ·  TR 05 CB 2446",
-                              style: PoppinsReguler.copyWith(
-                                color: ColorResources.TextColorForGrey,
-                              ),
-                              //  TextStyle(
-                              //   color: Colors.grey,
-                              //   fontSize: 12,
-                              // ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      /// CHAT BUTTON
-                      Container(
-                        height: 45,
-                        width: 45,
-                        decoration:  BoxDecoration(
-                          color:ColorResources.blueeebutton,
-                          shape: BoxShape.circle,
-                        ),
-                        child:Image.asset("assets/images/circle.png")
-                        //  const Icon(
-                        //   Icons.chat_bubble_outline,
-                        //   color: Colors.white,
-                        // ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 25),
-                  CustomPrimaryButton(
-                    text: "Share Receipt",
-                    onTap: () {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => OtpScreen(type: "Sign in"),
-                      //   ),
-                      // );
-                    },
-                  ),
-
-                  /// SHARE BUTTON
-                  // SizedBox(
-                  //   width: double.infinity,
-                  //   height: 55,
-                  //   child: ElevatedButton(
-                  //     style: ElevatedButton.styleFrom(
-                  //       backgroundColor: Colors.blue,
-                  //       shape: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(30),
-                  //       ),
-                  //     ),
-                  //     onPressed: () {},
-                  //     child:  Text(
-                  //       "Share Receipt",
-                  //       style:PoppinsSemiBold.copyWith(
-                  //   color: ColorResources.whiteColor,
-                  // ),
-                  //       // TextStyle(fontSize: 16),
-                  //     ),
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
-
-            /// TOP FLOATING ICON
-            Container(
-              height: 80,
-              width: 80,
-              decoration: BoxDecoration(
-                color: ColorResources.blueeebutton,
-                shape: BoxShape.circle,
-              ),
-              child: Image.asset("assets/images/useraccount.png"),
-
-              /// Icon(Icons.person, color: Colors.white, size: 55),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -422,7 +298,10 @@ class RideDetailsScreen extends StatelessWidget {
                   ),
                   child: Text(
                     value,
-                    style: TextStyle(color: ColorResources.blueeebutton, fontSize: 12),
+                    style: TextStyle(
+                      color: ColorResources.blueeebutton,
+                      fontSize: 12,
+                    ),
                   ),
                 )
               : Text(value),
@@ -430,27 +309,13 @@ class RideDetailsScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-class _FareRow extends StatelessWidget {
-  final String title;
-  final String price;
-  final bool bold;
-
-  const _FareRow(this.title, this.price, {this.bold = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: Text(title)),
-        Text(
-          price,
-          style: TextStyle(
-            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ],
-    );
+  String _formatDateTime(String dateString) {
+    try {
+      final dateTime = DateTime.parse(dateString);
+      return DateFormat('dd MMM yyyy  •  hh:mm a').format(dateTime);
+    } catch (_) {
+      return dateString;
+    }
   }
 }

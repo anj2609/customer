@@ -1,11 +1,9 @@
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:myrideuser/app/modules/activity/canceled_screen.dart';
 import 'package:myrideuser/app/modules/activity/complete_screen.dart';
 import 'package:myrideuser/app/modules/activity/ongoing_screen.dart';
 import 'package:myrideuser/app/modules/activity/scheduled_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
-import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/style.dart';
 import 'package:flutter/material.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
@@ -41,13 +39,17 @@ class _ActivityScreenState extends State<ActivityScreen> {
             /// ✅ TOP BAR
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              child: Row(
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 25,
-                    backgroundImage: const AssetImage('assets/images/app logo.png'),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Image.asset(
+                      'assets/images/splashscreen.png',
+                      height: 20,
+                      color: ColorResources.blueeebutton,
+                    ),
                   ),
-                  const Spacer(),
                   Text(
                     "Activity",
                     style: PoppinsSemiBold.copyWith(
@@ -55,8 +57,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       color: ColorResources.blackcolor11,
                     ),
                   ),
-                  const Spacer(),
-                  //const Icon(Icons.more_vert),
                 ],
               ),
             ),
@@ -150,134 +150,5 @@ class _ActivityScreenState extends State<ActivityScreen> {
         ),
       ),
     );
-  }
-}
-
-class RideItem extends StatelessWidget {
-  final String title;
-  final String subTitle;
-  //  final String time;
-  // final String rightDate;
-  final String imageUrl;
-
-  const RideItem({
-    super.key,
-    required this.title,
-    required this.subTitle,
-
-    required this.imageUrl,
-    
-  });
-
-  @override
-  Widget build(BuildContext context) {
-     final width = MediaQuery.of(context).size.width;
-    return Column(
-      children: [
-        const SizedBox(height: 12),
-
-        Row(
-          children: [
-            /// LEFT CIRCLE ICON
-          (imageUrl != null &&imageUrl!.isNotEmpty)
-              ? CircleAvatar(
-                  radius: width * 0.09,
-                  backgroundColor: ColorResources.whiteColor,
-                  child: ClipOval(
-                    child: Image.network(
-                      '${ApiConstants.imageurl}${imageUrl.toString()}',
-                      width: width * 0.16,
-                      height: width * 0.16,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          "assets/images/cars.png",
-                          width: width * 0.14,
-                          height: width * 0.14,
-                          fit: BoxFit.cover,
-                          color: ColorResources.blueeebutton,
-                        );
-                      },
-                    ),
-                  ),
-                )
-              : CircleAvatar(
-                  radius: width * 0.06,
-                  backgroundColor: ColorResources.blueeebutton.withValues(alpha: 0.08),
-                  child: Image.asset(
-                    "assets/images/cars.png",
-                    width: width * 0.08,
-                    height: width * 0.08,
-                    fit: BoxFit.cover,
-                    color: ColorResources.blueeebutton,
-                  ),
-                ),
-
-            const SizedBox(width: 12),
-
-            /// TITLE + SUBTITLE
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    overflow: TextOverflow.ellipsis,
-                    style: PoppinsReguler.copyWith(
-                      color: ColorResources.blackcolor11,
-                    ),
-                  ),
-                  // const SizedBox(height: 5),
-                  // Text(
-                  //   subTitle,
-                  //   style: TextStyle(
-                  //     color: ColorResources.TextColorForGrey,
-                  //     fontSize: 12,
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
-
-            /// RIGHT SIDE TIME + DATE
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // Text(
-                //   time,
-                //   style: PoppinsMedium.copyWith(
-                //     color: ColorResources.blackcolor11,
-                //   ),
-                // ),
-                const SizedBox(height: 6),
-                Text(
-                  formatDate(subTitle),
-                  // rightDate,
-                  style: TextStyle(
-                    color: ColorResources.TextColorForGrey,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 12),
-        Divider(color: ColorResources.TextColorForGrey),
-      ],
-    );
-  }
-
-  String formatDate(String dateString) {
-    DateTime dateTime = DateTime.parse(dateString);
-
-    // 2026-04-27
-    String fullDate = DateFormat('yyyy-MM-dd').format(dateTime);
-
-    // 27 April
-    String dayMonth = DateFormat('dd MMMM').format(dateTime);
-
-    return "$fullDate  $dayMonth";
   }
 }

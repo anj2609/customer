@@ -1233,13 +1233,16 @@ class ProfileController extends GetxController implements GetxService {
           response.body['data'],
         );
 
+        // Always clear first, then repopulate with this filter's results —
+        // previously this only happened when the response had data, so a
+        // tab with zero matching rides (e.g. "no ongoing rides right now")
+        // kept showing whatever list was left over from the last tab that
+        // was viewed. The "ongoing" slug additionally skipped clearing
+        // entirely and just appended, compounding the same bug.
+        bookingActivityList ??= [];
+        bookingActivityList!.clear();
         if (model.data != null && model.data!.isNotEmpty) {
-          if (typeOfSlug == "ongoing") {
-            bookingActivityList!.add(model.data!.first);
-          } else {
-            bookingActivityList?.clear();
-            bookingActivityList!.addAll(model.data!);
-          }
+          bookingActivityList!.addAll(model.data!);
         }
 
         update();
@@ -1507,13 +1510,40 @@ class ProfileController extends GetxController implements GetxService {
         return;
       }
 
-      // Store amount for use after Razorpay payment completes
-      _pendingAmount = amountStr;
-      _pendingOrderId = null;
+      // create-topup-intent only creates a Razorpay order server-side — it
+      // does NOT credit the wallet. The order_id it returns has to be
+      // handed to Razorpay checkout so the payment is tied to it; only
+      // then does Razorpay's success response carry a verifiable
+      // signature, which verify-topup checks before actually crediting
+      // the wallet. (Confirmed against the live API: calling
+      // create-topup-intent alone leaves the wallet balance unchanged —
+      // that mismatch was why top-ups never showed up on screen.)
+      final intentResponse = await profileRepo.topCreateAmount(
+        amount: amountStr,
+      );
 
-      // Open Razorpay directly — backend credits wallet only after payment succeeds
+      if (intentResponse.statusCode != 200 ||
+          intentResponse.body is! Map ||
+          intentResponse.body['code']?.toString() != "200" ||
+          intentResponse.body['data']?['order_id'] == null) {
+        AnimatedTopToast.show(
+          context: context,
+          message: "Couldn't start the top-up. Please try again.",
+          backgroundColor: ColorResources.textColorRed,
+          icon: Icons.error_outline,
+        );
+        return;
+      }
+
+      final orderId = intentResponse.body['data']['order_id'].toString();
+
+      // Store for after Razorpay payment completes
+      _pendingAmount = amountStr;
+      _pendingOrderId = orderId;
+
       final options = {
         'key': 'rzp_test_T300vQB506EcW8',
+        'order_id': orderId,
         'amount': (amountValue * 100).toInt(), // paise
         'name': 'MyRide',
         'description': 'Wallet Top Up',
@@ -1540,55 +1570,31 @@ class ProfileController extends GetxController implements GetxService {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    debugPrint('RAZORPAY SUCCESS: paymentId=${response.paymentId}  orderId=${response.orderId}');
-    _creditWalletAfterPayment();
-  }
+    debugPrint(
+      'RAZORPAY SUCCESS: paymentId=${response.paymentId}  orderId=${response.orderId}  signature=${response.signature}',
+    );
 
-  Future<void> _creditWalletAfterPayment() async {
-    isTopUpIntentLoading = true;
-    update();
+    final orderId = response.orderId ?? _pendingOrderId;
+    final paymentId = response.paymentId;
+    final signature = response.signature;
 
-    try {
-      final response = await profileRepo.topCreateAmount(
-        amount: _pendingAmount ?? '0',
-      );
-      debugPrint('CREDIT RESPONSE: ${response.body}');
-
-      if (response.statusCode == 200 &&
-          response.body is Map &&
-          response.body['code']?.toString() == "200") {
-        await customerWalletAmount();
-        AnimatedTopToast.show(
-          context: Get.context!,
-          message: response.body['message']?.toString() ?? 'Wallet credited successfully!',
-          backgroundColor: ColorResources.appColor,
-          icon: Icons.check_circle_rounded,
-        );
-        await Future.delayed(const Duration(milliseconds: 500));
-        Get.offAll(
-          MainNavigation(),
-          duration: Duration(milliseconds: ApiConstants.screenTransitionTime),
-          transition: Transition.rightToLeft,
-        );
-      } else {
-        AnimatedTopToast.show(
-          context: Get.context!,
-          message: "Payment received but wallet credit failed. Please contact support.",
-          backgroundColor: ColorResources.textColorRed,
-          icon: Icons.error_outline,
-        );
-      }
-    } catch (e) {
+    if (orderId == null || paymentId == null || signature == null) {
       AnimatedTopToast.show(
         context: Get.context!,
-        message: "Payment received but wallet credit failed. Please contact support.",
+        message: "Payment received but couldn't be verified. Please contact support.",
         backgroundColor: ColorResources.textColorRed,
         icon: Icons.error_outline,
       );
-    } finally {
-      isTopUpIntentLoading = false;
-      update();
+      return;
     }
+
+    verifyTopUp(
+      orderId: orderId,
+      paymentId: paymentId,
+      signature: signature,
+      amount: _pendingAmount ?? '0',
+      idempotencyKey: paymentId,
+    );
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -1628,6 +1634,11 @@ class ProfileController extends GetxController implements GetxService {
           walletbalance = data['balance'].toString();
         }
         update();
+        // Re-fetch from customer-wallet-balance too, regardless of what
+        // verify-topup's own response contained — this is the same call
+        // every other screen uses to display the balance, so it's the
+        // source of truth for what the user will actually see next.
+        await customerWalletAmount();
 
         AnimatedTopToast.show(
           context: Get.context!,

@@ -1,8 +1,11 @@
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' show LatLng;
+import 'package:myrideuser/app/modules/activity/activity_card.dart';
+import 'package:myrideuser/app/modules/activity/ridedetail_screen.dart';
+import 'package:myrideuser/app/modules/activity/track_route_screen.dart';
 import 'package:myrideuser/config/utils/colors.dart';
-import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/data/modal/activity_model.dart';
 import 'package:flutter/material.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 
@@ -37,147 +40,26 @@ class OngoingScreen extends StatelessWidget {
           );
         }
 
-        final data = controller.bookingActivityList!.first;
+        /// List — every ongoing booking, same card format shared across
+        /// all Activity filters, plus a functional "Track Route" button.
+        return ListView.builder(
+          padding: EdgeInsets.symmetric(horizontal: width * 0.04, vertical: 12),
+          itemCount: controller.bookingActivityList!.length,
+          itemBuilder: (context, index) {
+            final item = controller.bookingActivityList![index];
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            children: [
-              /// TOP INFO
-              Row(
-                children: [
-                  (data.vehicleType!.image != null &&
-                          data.vehicleType!.image!.isNotEmpty)
-                      ? CircleAvatar(
-                          radius: width * 0.09,
-                          backgroundColor: ColorResources.whiteColor,
-                          child: ClipOval(
-                            child: Image.network(
-                              '${ApiConstants.imageurl}${data.vehicleType!.image.toString()}',
-                              width: width * 0.16,
-                              height: width * 0.16,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  "assets/images/cars.png",
-                                  width: width * 0.14,
-                                  height: width * 0.14,
-                                  fit: BoxFit.cover,
-                                  color: ColorResources.blueeebutton,
-                                );
-                              },
-                            ),
-                          ),
-                        )
-                      : CircleAvatar(
-                          radius: width * 0.06,
-                          backgroundColor: ColorResources.blueeebutton.withValues(alpha: 0.08),
-                          child: Image.asset(
-                            "assets/images/cars.png",
-                            width: width * 0.08,
-                            height: width * 0.08,
-                            fit: BoxFit.cover,
-                            color: ColorResources.blueeebutton,
-                          ),
-                        ),
-
-                  // Container(
-                  //   padding: EdgeInsets.all(12),
-                  //   decoration: BoxDecoration(
-                  //     shape: BoxShape.circle,
-                  //     border: Border.all(
-                  //       color: ColorResources.TextColorForGrey,
-                  //     ),
-                  //   ),
-                  //   child: Icon(
-                  //     Icons.directions_car,
-                  //     color: ColorResources.blueeebutton,
-                  //   ),
-                  // ),
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          data.dropAddress ?? "Larchmont Hotel",
-                          style: PoppinsReguler.copyWith(
-                            color: ColorResources.blackcolor,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          formatDate(data.createdAt.toString()),
-                          //data.createdAt ?? "",
-                          style: PoppinsSemiBold.copyWith(
-                            color: ColorResources.TextColorForGrey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        "₹ ${data.totalFare ?? 0}",
-                        style: PoppinsSemiBold.copyWith(
-                          color: ColorResources.blackcolor,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        "MyRide Wallet",
-                        style: PoppinsSemiBold.copyWith(
-                          color: ColorResources.blackcolor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 15),
-
-              /// ROUTE BOX
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: ColorResources.TextColorForGrey),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.location_on, color: ColorResources.blueeebutton, size: 18),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(data.pickupAddress ?? "Pickup Location"),
-                        ),
-                      ],
-                    ),
-                    Divider(),
-                    Row(
-                      children: [
-                        Icon(Icons.location_on, color: ColorResources.textColorRed, size: 18),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(data.dropAddress ?? "Drop Location"),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 25),
-
-              SizedBox(
+            return ActivityRideCard(
+              item: item,
+              onTap: () {
+                Get.to(
+                  () => RideDetailsScreen(item: item),
+                  transition: Transition.leftToRight,
+                  duration: const Duration(milliseconds: 0),
+                );
+              },
+              footer: SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 44,
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: ColorResources.blueeebutton),
@@ -185,7 +67,7 @@ class OngoingScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () => _trackRoute(item),
                   child: Text(
                     "Track Route",
                     style: PoppinsSemiBold.copyWith(
@@ -194,22 +76,44 @@ class OngoingScreen extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
 
-  String formatDate(String dateString) {
-    DateTime dateTime = DateTime.parse(dateString);
+  /// Opens the real pickup → drop route for this ride inside the app
+  /// (no external Maps app/browser), using the ride's actual coordinates
+  /// from the API.
+  void _trackRoute(ActivityDataMainModel item) {
+    final pickupLat = item.pickupLat;
+    final pickupLng = item.pickupLng;
+    final dropLat = item.dropLat;
+    final dropLng = item.dropLng;
 
-    // 2026-04-27
-    String fullDate = DateFormat('yyyy-MM-dd').format(dateTime);
+    if (pickupLat == null ||
+        pickupLng == null ||
+        dropLat == null ||
+        dropLng == null ||
+        (pickupLat == 0.0 && pickupLng == 0.0) ||
+        (dropLat == 0.0 && dropLng == 0.0)) {
+      Get.snackbar(
+        "Route unavailable",
+        "This ride doesn't have location data to track.",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
 
-    // 27 April
-    String dayMonth = DateFormat('dd MMMM').format(dateTime);
-
-    return "$fullDate  $dayMonth";
+    Get.to(
+      () => TrackRouteScreen(
+        pickup: LatLng(pickupLat, pickupLng),
+        drop: LatLng(dropLat, dropLng),
+        pickupAddress: item.pickupAddress ?? "Pickup",
+        dropAddress: item.dropAddress ?? "Drop",
+      ),
+      transition: Transition.rightToLeft,
+    );
   }
 }
