@@ -286,19 +286,27 @@ class AuthController extends GetxController implements GetxService {
       final int statusCode = loginResp.statusCode ?? 0;
       final String msg = (loginResp.body?['message'] ?? '').toString().toLowerCase();
 
-      final bool isNotFound = statusCode == 404 ||
-          statusCode == 422 ||
-          msg.contains('not found') ||
-          msg.contains('not register') ||
-          msg.contains('does not exist') ||
-          msg.contains('no account') ||
-          msg.contains('invalid') ||
-          (loginResp.body?['code'] != null &&
-              loginResp.body['code'] != '200' &&
-              statusCode != 500);
+      // A 500 means the server crashed — never a legitimate "not
+      // registered" business response, so it must never reach the
+      // message-substring checks below. It used to: a backend crash
+      // whose exception message happened to contain "not found" (e.g.
+      // PHP's "Class \"X\" not found" fatal-error format) was matched by
+      // msg.contains('not found') and misread as "user not registered",
+      // sending this down the register-OTP path instead of surfacing the
+      // real server error.
+      final bool isNotFound = statusCode != 500 &&
+          (statusCode == 404 ||
+              statusCode == 422 ||
+              msg.contains('not found') ||
+              msg.contains('not register') ||
+              msg.contains('does not exist') ||
+              msg.contains('no account') ||
+              msg.contains('invalid') ||
+              (loginResp.body?['code'] != null &&
+                  loginResp.body['code'] != '200'));
 
       if (isNotFound) {
-        // Not registered — send a register OTP.
+        // Not registered (per the login attempt above) — send a register OTP.
         final regResp = await authRepo.sendOtpApi(
           phone: phone,
           type: ApiConstants.UserRegister,
@@ -321,10 +329,46 @@ class AuthController extends GetxController implements GetxService {
           return;
         }
 
-        throw Exception(
-          regResp.body?['message'] ??
-              'Unable to verify your account at the moment. Please try again.',
-        );
+        // The "not found" guess above was wrong — the register attempt
+        // itself now reports this number as already registered (code 401,
+        // "This phone already in use."). Rather than dead-ending on that
+        // (it used to surface as a raw "Verification Failed" popup),
+        // recover by sending a proper login OTP and proceeding there.
+        final String regMsg =
+            (regResp.body?['message'] ?? '').toString().toLowerCase();
+        final bool isAlreadyRegistered =
+            regResp.body?['code']?.toString() == '401' &&
+            regMsg.contains('already in use');
+
+        if (isAlreadyRegistered) {
+          final retryLoginResp = await authRepo.sendOtpApi(
+            phone: phone,
+            type: ApiConstants.UserLogin,
+            deviceToken: deviceToken ?? '',
+            devicetype: deviceType,
+          );
+
+          if (retryLoginResp.body != null &&
+              retryLoginResp.body['code'] == '200') {
+            AnimatedTopToast.show(
+              context: context,
+              message:
+                  "This number is already registered. Sending login OTP instead.",
+              backgroundColor: ColorResources.appColor,
+              icon: Icons.info_outline,
+            );
+            await Future.delayed(const Duration(milliseconds: 500));
+            RouteHelper.getOtpScreenRoute(
+              phone,
+              ApiConstants.UserLogin,
+            );
+            return;
+          }
+
+          throw Exception(_userFacingMessage(retryLoginResp));
+        }
+
+        throw Exception(_userFacingMessage(regResp));
       }
 
       // Step 3 — real server error.
@@ -345,6 +389,23 @@ class AuthController extends GetxController implements GetxService {
     }
   }
 
+  /// A response's `message` is only safe to show a user when it's a
+  /// deliberate application-level error (backend chose those words for a
+  /// human to read). A 500 means the server crashed — its "message" is
+  /// whatever an uncaught exception's text happened to be (a PHP class
+  /// name, a stack trace fragment, etc.), so that case always falls back
+  /// to a generic message instead of leaking raw backend internals into
+  /// the UI.
+  String _userFacingMessage(Response response) {
+    if (response.statusCode == 500) {
+      return 'Unable to verify your account at the moment. Please try again.';
+    }
+    final message = response.body is Map ? response.body['message'] : null;
+    return (message == null || message.toString().trim().isEmpty)
+        ? 'Unable to verify your account at the moment. Please try again.'
+        : message.toString();
+  }
+
   Future<Response> sendOtp({
     required BuildContext context,
     required String mobileNumber,
@@ -360,6 +421,53 @@ class AuthController extends GetxController implements GetxService {
       deviceToken: Get.find<AuthController>().deviceToken!,
       devicetype: deviceType,
     );
+
+    // A signup attempt (type: register) on an already-registered number
+    // comes back as code 401 "This phone already in use." — rather than
+    // dead-ending the user on a raw error, silently retry the exact same
+    // request as a login OTP instead. Only applies when we weren't
+    // already trying a login (avoids retrying forever if the backend
+    // ever reuses this code/message for a genuine login failure).
+    final String bodyCode = response.body?["code"]?.toString() ?? '';
+    final String bodyMessage =
+        (response.body?["message"] ?? '').toString().toLowerCase();
+    final bool isPhoneAlreadyInUse = bodyCode == "401" &&
+        bodyMessage.contains('already in use') &&
+        type != ApiConstants.UserLogin;
+
+    if (isPhoneAlreadyInUse) {
+      AnimatedTopToast.show(
+        context: context,
+        message: "This number is already registered. Sending login OTP instead.",
+        backgroundColor: ColorResources.appColor,
+        icon: Icons.info_outline,
+      );
+
+      response = await authRepo.sendOtpApi(
+        phone: mobileNumber,
+        type: ApiConstants.UserLogin,
+        deviceToken: Get.find<AuthController>().deviceToken!,
+        devicetype: deviceType,
+      );
+
+      if (response.body?["code"] == "200") {
+        await Future.delayed(const Duration(milliseconds: 500));
+        RouteHelper.getOtpScreenRoute(
+          mobileNumber,
+          ApiConstants.UserLogin,
+        );
+      } else {
+        AnimatedTopToast.show(
+          context: context,
+          message: "Unable to send verification code. Please try again.",
+          backgroundColor: ColorResources.textColorBaclColor,
+          icon: Icons.error_outline,
+        );
+      }
+
+      update();
+      return response;
+    }
 
     if (response.body["code"] == "200") {
     ///  await EasyLoading.dismiss();
@@ -394,7 +502,18 @@ class AuthController extends GetxController implements GetxService {
         icon: Icons.error_outline,
       );
     } else {
-     // await EasyLoading.dismiss();
+      // Any other non-200/500 response (e.g. a genuine validation error
+      // unrelated to "already in use") — surface it instead of failing
+      // silently, mirroring the 500 case above.
+      AnimatedTopToast.show(
+        context: context,
+        message: (response.body is Map
+                ? response.body['message']?.toString()
+                : null) ??
+            "Unable to send verification code. Please try again.",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.error_outline,
+      );
     }
 
     update();

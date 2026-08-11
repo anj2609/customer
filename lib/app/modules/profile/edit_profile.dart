@@ -35,6 +35,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String selectedGender = "Male";
   List<String> genderList = ["Male", "Female", "Other"];
 
+  // Guards the one-time copy from ProfileController's saved values into
+  // this screen's local editable state. Without this, every setState()
+  // in this screen (picking a gender, a date, or a photo) re-ran the sync
+  // below on the next Obx build and overwrote whatever the user had just
+  // picked/typed back to the original server values — which is why the
+  // gender dropdown looked "unselectable": it visually reset itself right
+  // after every choice.
+  bool _formInitialized = false;
+
   File? selectedImage;
   final ImagePicker _picker = ImagePicker();
 
@@ -141,18 +150,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             if (controller.isLoading.value) {
               return Center(child: PremiumBlurLoader());
             }
-            nameController.text = controller.nameController.text;
-            emailController.text = controller.emailController.text;
-            phoneController.text = controller.phoneController.text;
-            dobController.text = controller.dobController.text;
+            if (!_formInitialized) {
+              nameController.text = controller.nameController.text;
+              emailController.text = controller.emailController.text;
+              phoneController.text = controller.phoneController.text;
+              dobController.text = controller.dobController.text;
 
-            // Gender safe set
-            String apiGender = controller.genderController.text;
-
-            if (genderList.contains(apiGender)) {
-              selectedGender = apiGender;
-            } else {
-              selectedGender = "Male"; // default fallback
+              // Gender safe set
+              String apiGender = controller.genderController.text;
+              if (genderList.contains(apiGender)) {
+                selectedGender = apiGender;
+              } else {
+                selectedGender = "Male"; // default fallback
+              }
+              _formInitialized = true;
             }
             // DateTime date = DateTime.parse(controller.dobController.text);
             // dobController.text = DateFormat('yyyy-MM-dd').format(date);

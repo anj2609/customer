@@ -1,18 +1,42 @@
 import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/style.dart';
+import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:myrideuser/data/modal/activity_model.dart';
+import 'package:myrideuser/widgets/price_breakdown_card.dart';
 import 'package:flutter/material.dart';
 
 /// Ride detail screen — shows the real data for whichever ride was tapped
 /// (passed in via [item]). No fabricated fields: anything the API doesn't
-/// return (e.g. a fare breakdown, ETA, passenger count) is simply not shown
-/// rather than guessed.
-class RideDetailsScreen extends StatelessWidget {
+/// return is simply not shown rather than guessed. The full price
+/// breakdown (base fare, platform fee, CGST, SGST, final amount, etc.) is
+/// fetched live from /trip-detail using this ride's real booking id.
+class RideDetailsScreen extends StatefulWidget {
   final ActivityDataMainModel item;
 
   const RideDetailsScreen({super.key, required this.item});
+
+  @override
+  State<RideDetailsScreen> createState() => _RideDetailsScreenState();
+}
+
+class _RideDetailsScreenState extends State<RideDetailsScreen> {
+  ActivityDataMainModel get item => widget.item;
+
+  @override
+  void initState() {
+    super.initState();
+    if (item.id != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.find<BookingController>().TripRideDetailsApi(
+          context: context,
+          bookingid: item.id.toString(),
+        );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -239,31 +263,47 @@ class RideDetailsScreen extends StatelessWidget {
 
                     const SizedBox(height: 15),
 
-                    /// 🔹 FARE
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              "Total Fare",
-                              style: PoppinsSemiBold.copyWith(
-                                color: ColorResources.blackcolor11,
+                    /// 🔹 FARE — full breakdown once /trip-detail loads for
+                    /// this exact booking; a plain total fare row (from the
+                    /// list API, already known immediately) until then.
+                    GetBuilder<BookingController>(
+                      builder: (bc) {
+                        final tripData = bc.tripDetailModel.value?.data;
+                        final matchesThisBooking = tripData?.bookingId == item.id;
+                        final hasPaymentData = matchesThisBooking &&
+                            (tripData?.priceBreakdown != null ||
+                                tripData?.payment != null);
+
+                        if (hasPaymentData) {
+                          return PriceBreakdownCard(tripData: tripData!);
+                        }
+
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  "Total Fare",
+                                  style: PoppinsSemiBold.copyWith(
+                                    color: ColorResources.blackcolor11,
+                                  ),
+                                ),
                               ),
-                            ),
+                              Text(
+                                "₹ ${item.totalFare ?? 0}",
+                                style: PoppinsSemiBold.copyWith(
+                                  color: ColorResources.blackcolor11,
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            "₹ ${item.totalFare ?? 0}",
-                            style: PoppinsSemiBold.copyWith(
-                              color: ColorResources.blackcolor11,
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 10),

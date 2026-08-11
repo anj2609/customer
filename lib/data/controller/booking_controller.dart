@@ -15,6 +15,8 @@ import 'package:myrideuser/data/modal/banner_model.dart';
 import 'package:myrideuser/data/modal/cancellation_model.dart';
 import 'package:myrideuser/data/modal/driveravailable_model.dart';
 import 'package:myrideuser/data/modal/trackride_model.dart';
+import 'package:myrideuser/data/modal/trip_detail_model.dart';
+import 'package:myrideuser/data/services/nearby_drivers_search.dart';
 import 'package:myrideuser/data/modal/vehicle_model.dart';
 import 'package:myrideuser/data/modal/vehicle_type_model.dart';
 import 'package:myrideuser/data/modal/rental_estimate_model.dart';
@@ -57,6 +59,7 @@ class BookingController extends GetxController implements GetxService {
   List<VehicleModel> vehicleList = [];
   List<VehicleTypeModel> vehicleTypeList = [];
   bool isVehicleTypeLoading = false;
+  bool isHomeBannerLoading = false;
   BannerModel? homeBanner;
   RxString rideStatus = "pending".obs;
 //    RxString rideStatus = "pending".obs;
@@ -64,12 +67,16 @@ class BookingController extends GetxController implements GetxService {
   // RxMap rideData = {}.obs;
   RxString tridRideDetails = "pending".obs;
   RxMap tridRideDetailsData = {}.obs;
+  // Typed parse of the same /trip-detail response above — used for the
+  // real price breakdown (base fare, platform fee, CGST, SGST, final
+  // amount, etc.) wherever a booking actually exists. The raw Map above
+  // is left as-is since other code already reads other fields off it.
+  Rx<TripDetailModel?> tripDetailModel = Rx<TripDetailModel?>(null);
   TrackRideModel? trackRideModel;
   DatTrackRideDetails? rideDetails;
   DriverInfo? driverInfo;
 
   List<CancelationModelData> cancelationList = [];
-  List<DriverAvailableDataModel> driverAvailableNearBy = [];
   int selectedReason = -1;
   int? selectedReasonId;
   Set<Marker> markers = {};
@@ -80,6 +87,14 @@ class BookingController extends GetxController implements GetxService {
   LatLng currentLatLng = const LatLng(28.5355, 77.3910);
   bool _isMapReady = false;
   bool _isDisposed = false;
+
+  /// Owns the whole "find nearby drivers" flow (location capture, the
+  /// backend request, auto-refresh, and every resulting state — loading /
+  /// found / empty / denied / timed out / failed). Replaces the old
+  /// one-shot getCurrentLocation()-does-everything approach, which fetched
+  /// location and nearby drivers exactly once at app startup and never
+  /// again, and silently showed nothing on any kind of failure.
+  late final NearbyDriversSearch nearbyDriversSearch;
 
   final Rx<BookingActiveState> activeBookingState =
       BookingActiveState().obs;
@@ -99,26 +114,63 @@ class BookingController extends GetxController implements GetxService {
     //       "816050400087-4pv5deujt52p78pv3u785cf32f9cv269.apps.googleusercontent.com",
     // );
 
+    nearbyDriversSearch = NearbyDriversSearch(
+      locationClient: const GeolocatorLocationClient(),
+      fetchNearbyDrivers: (lat, lng) =>
+          bookingRepo.driverAvailbledata(latitude: lat, longitude: lng),
+    );
+    // Redraw markers on every state change (loading/found/empty/error) —
+    // setMarkers() itself decides what (if anything) to show for each.
+    ever<NearbyDriversState>(nearbyDriversSearch.state, (_) => setMarkers());
+    nearbyDriversSearch.search();
+    nearbyDriversSearch.startAutoRefresh();
+
     loadCarIcon();
     loadUserIcon();
     getVehicleTypeList();
     getHomeBanner();
   }
 
+  @override
+  void onClose() {
+    nearbyDriversSearch.dispose();
+    super.onClose();
+  }
+
+  /// Manual retry/refresh — wired to the "tap to retry" and "no drivers
+  /// nearby" UI states, and to a pull-to-refresh if one is added later.
+  Future<void> refreshNearbyDrivers() => nearbyDriversSearch.search();
+
   /////==========  home screen promo banner (title/sub_title/image)  ======================///////
   Future<void> getHomeBanner() async {
+    isHomeBannerLoading = true;
+    update();
+
     try {
       Response response = await bookingRepo.getBannerApi();
 
-      if (response.statusCode == 200 &&
-          response.body is Map &&
-          response.body['code'].toString() == '200' &&
-          response.body['data'] != null) {
-        homeBanner = BannerModel.fromJson(response.body['data']);
-        update();
+      if (response.statusCode == 200 && response.body is Map) {
+        final body = Map<String, dynamic>.from(response.body);
+        final data = body['data'];
+
+        // The API has returned both a single object and a list of banners.
+        // Accept either shape so an otherwise valid response does not leave
+        // the UI on its static fallback.
+        final dynamic bannerData = data is List && data.isNotEmpty
+            ? data.first
+            : data;
+
+        if (bannerData is Map) {
+          homeBanner = BannerModel.fromJson(
+            Map<String, dynamic>.from(bannerData),
+          );
+        }
       }
     } catch (e) {
       log('Home banner error: $e');
+    } finally {
+      isHomeBannerLoading = false;
+      update();
     }
   }
 
@@ -244,18 +296,12 @@ class BookingController extends GetxController implements GetxService {
       print("Lat: ${currentLatLng.latitude}");
       print("Lng: ${currentLatLng.longitude}");
 
-      // Show the current-location pin immediately — setMarkers() otherwise
-      // only ran after the nearby-drivers call below succeeded, so a slow
-      // or failed call left the map with no clear marker, just the default
-      // (subtle) blue "my location" dot. setMarkers() re-adds the driver
-      // markers too once that call resolves, so this is safe to call twice.
+      // Show the current-location pin immediately. The nearby-drivers
+      // search (location capture + timeout/permission handling + the
+      // actual API call) is owned entirely by nearbyDriversSearch now —
+      // see onInit() — so this method only needs to place the "you are
+      // here" pin for map-centering purposes elsewhere in the app.
       setMarkers();
-
-      await driverAvailableNearByApi(
-        context: Get.context!,
-        latitude: currentLatLng.latitude,
-        longitude: currentLatLng.longitude,
-      );
 
       update();
     } catch (e) {
@@ -938,6 +984,13 @@ update();
       if (body['code'] == "200") {
         tridRideDetails.value = body['data']['status'];
         tridRideDetailsData.value = body['data'];
+        try {
+          tripDetailModel.value = TripDetailModel.fromJson(
+            Map<String, dynamic>.from(body as Map),
+          );
+        } catch (e) {
+          debugPrint('TripDetailModel parse error: $e');
+        }
       }
     } else if (response.statusCode == 500) {
       //  await EasyLoading.dismiss();
@@ -1099,39 +1152,10 @@ update();
     }
   }
 
-  Future<Response> driverAvailableNearByApi({
-    required BuildContext context,
-    required dynamic latitude,
-    required dynamic longitude,
-  }) async {
-    //EasyLoading.show(status: "Please wait...");
-    update();
-
-    Response response = await bookingRepo.driverAvailbledata(
-      latitude: latitude!,
-      longitude: longitude!,
-    );
-
-    if (response.statusCode == 200) {
-      final body = response.body;
-      print('all car::::::${body}');
-
-      if (body['code'] == "200") {
-        DriverAvailableModel model = DriverAvailableModel.fromJson(body);
-
-        driverAvailableNearBy = model.data ?? [];
-        setMarkers();
-      }
-    } else if (response.statusCode == 500) {
-      // Background call fired automatically on launch — fail silently like
-      // the other automatic startup calls (address list, activity, wallet,
-      // vehicle types, banner) instead of surfacing an error toast.
-      log('Nearby drivers unavailable (500)');
-    } else {}
-
-    update();
-    return response;
-  }
+  // Nearby-drivers fetching now lives entirely in nearbyDriversSearch (see
+  // onInit()) — it used to be a one-shot call made only from
+  // getCurrentLocation(), fetched exactly once at app startup, silently
+  // swallowing any failure past a debug log.
 
   // Future<BitmapDescriptor> resizeMarker(String path, int width) async {
   //   final ByteData data = await rootBundle.load(path);
@@ -1215,9 +1239,15 @@ update();
 
     allPositions.add(currentLatLng);
 
-    /// DRIVER MARKERS
-    for (int i = 0; i < driverAvailableNearBy.length; i++) {
-      var driver = driverAvailableNearBy[i];
+    /// DRIVER MARKERS — only meaningful once a search has actually
+    /// succeeded; loading/empty/error states just show the "You" pin.
+    final nearbyDrivers = nearbyDriversSearch.state.value.phase ==
+            NearbyDriversPhase.success
+        ? nearbyDriversSearch.state.value.drivers
+        : const <DriverAvailableDataModel>[];
+
+    for (int i = 0; i < nearbyDrivers.length; i++) {
+      var driver = nearbyDrivers[i];
 
       double? lat = double.tryParse(driver.latitude.toString());
       double? lng = double.tryParse(driver.longitude.toString());

@@ -1,6 +1,7 @@
+import 'package:myrideuser/app/modules/acoount/aboutus_model.dart';
 import 'package:myrideuser/app/modules/acoount/help_support.dart';
-import 'package:myrideuser/app/modules/acoount/linkedaccount_screen.dart';
-import 'package:myrideuser/app/modules/acoount/notification_screen.dart';
+import 'package:myrideuser/app/modules/acoount/privacypolicy_screen.dart';
+import 'package:myrideuser/app/modules/acoount/terms_services_screen.dart';
 import 'package:myrideuser/app/modules/acoount/topup_screen.dart';
 import 'package:myrideuser/config/route.dart';
 import 'package:myrideuser/config/utils/colors.dart';
@@ -53,9 +54,19 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
         onTap: () => _open(context, "Saved Addresses"),
       ),
       SettingModel(
-        icon: Icons.notifications_none,
-        title: "Notifications",
-        onTap: () => _open(context, "Notifications"),
+        icon: Icons.info_outline,
+        title: "About Us",
+        onTap: () => _open(context, "About Us"),
+      ),
+      SettingModel(
+        icon: Icons.description_outlined,
+        title: "Terms and Service",
+        onTap: () => _open(context, "Terms and Service"),
+      ),
+      SettingModel(
+        icon: Icons.privacy_tip_outlined,
+        title: "Privacy Policy",
+        onTap: () => _open(context, "Privacy Policy"),
       ),
       // SettingModel(
       //   icon: Icons.credit_card,
@@ -67,11 +78,6 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
       //   title: "Account & Security",
       //   onTap: () => _open(context, "Account & Security"),
       // ),
-      SettingModel(
-        icon: Icons.sync_alt,
-        title: "Linked Accounts",
-        onTap: () => _open(context, "Linked Accounts"),
-      ),
       // SettingModel(
       //   icon: Icons.remove_red_eye_outlined,
       //   title: "App Appearance",
@@ -171,15 +177,17 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
                                       height: double.infinity,
                                       errorBuilder:
                                           (context, error, stackTrace) {
-                                            return Image.asset(
-                                              "assets/images/profile.png",
-                                              fit: BoxFit.cover,
+                                            return Icon(
+                                              Icons.person,
+                                              size: Dimensions.spacingSize25,
+                                              color: Colors.grey.shade500,
                                             );
                                           },
                                     )
-                                  : Image.asset(
-                                      "assets/images/profile.png",
-                                      fit: BoxFit.cover,
+                                  : Icon(
+                                      Icons.person,
+                                      size: Dimensions.spacingSize25,
+                                      color: Colors.grey.shade500,
                                     ),
                             ),
                           ),
@@ -190,9 +198,13 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    pc.nameController.text,
+                                    pc.nameController.text.isNotEmpty
+                                        ? pc.nameController.text
+                                        : "Add your name",
                                     style: PoppinsBold.copyWith(
-                                      color: ColorResources.blackcolor11,
+                                      color: pc.nameController.text.isNotEmpty
+                                          ? ColorResources.blackcolor11
+                                          : ColorResources.TextColorForGrey,
                                     ),
                                   ),
                                   SizedBox(height: 3),
@@ -342,21 +354,32 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
       //   binding: AddressBinding(),
       //   duration: const Duration(milliseconds: 300),
       // );
-    } else if (title == "Notifications") {
+    } else if (title == "About Us") {
       Get.to(
-        () => NotificationsScreen(),
+        () => const AboutUsScreen(),
         transition: Transition.leftToRight,
-
-        duration: const Duration(milliseconds: 00),
+        duration: const Duration(milliseconds: 0),
       );
-    } else if (title == "Payment Methods") {
+    } else if (title == "Terms and Service") {
       Get.to(
-        () => NotificationsScreen(),
+        () => const TermsOfServiceScreen(),
         transition: Transition.leftToRight,
-
-        duration: const Duration(milliseconds: 00),
+        duration: const Duration(milliseconds: 0),
+      );
+    } else if (title == "Privacy Policy") {
+      Get.to(
+        () => const PrivacyPolicyScreen(),
+        transition: Transition.leftToRight,
+        duration: const Duration(milliseconds: 0),
       );
     }
+    //  else if (title == "Payment Methods") {
+    //   Get.to(
+    //     () => NotificationsScreen(),
+    //     transition: Transition.leftToRight,
+    //     duration: const Duration(milliseconds: 00),
+    //   );
+    // }
     //  else if (title == "Account & Security") {
     //   Get.to(
     //     () => AccountSecurityScreen(),
@@ -364,14 +387,7 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
     //     duration: const Duration(milliseconds: 00),
     //   );
     // }
-    else if (title == "Linked Accounts") {
-      Get.to(
-        () => LinkedAccountScreen(),
-        transition: Transition.leftToRight,
-
-        duration: const Duration(milliseconds: 00),
-      );
-    } else if (title == "Help & Support") {
+    else if (title == "Help & Support") {
       Get.to(
         () => HelpSupportScreen(),
         transition: Transition.leftToRight,

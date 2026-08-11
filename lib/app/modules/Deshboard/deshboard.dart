@@ -11,7 +11,6 @@ import 'package:intl/intl.dart';
 
 import 'package:myrideuser/app/modules/Deshboard/rentals_intro_screen.dart';
 import 'package:myrideuser/app/modules/Deshboard/outstation_trip_screen.dart';
-import 'package:myrideuser/app/modules/Promos/promos_screen.dart';
 import 'package:myrideuser/app/modules/acoount/notification_screen.dart';
 import 'package:myrideuser/config/route.dart';
 import 'package:myrideuser/config/utils/colors.dart';
@@ -21,6 +20,7 @@ import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:myrideuser/data/modal/address_Model.dart';
 import 'package:myrideuser/data/modal/vehicle_type_model.dart';
+import 'package:myrideuser/data/services/nearby_drivers_search.dart';
 import 'package:myrideuser/widgets/toaster_animation.dart';
 
 /// Which section the single bottom sheet is currently showing.
@@ -626,10 +626,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
       child: Scaffold(
         backgroundColor: ColorResources.whiteColor,
+        // Keep the map and draggable sheet at a stable height while the
+        // destination keyboard is open. The sheet itself gets bottom inset
+        // padding below, so its search results remain scrollable.
+        resizeToAvoidBottomInset: false,
         body: Column(
           children: [
             SafeArea(bottom: false, child: _buildHeader()),
-            Expanded(child: Stack(children: [_buildMap(), _buildSheet()])),
+            Expanded(
+              child: Stack(
+                children: [
+                  _buildMap(),
+                  _buildNearbyDriversStatus(),
+                  _buildSheet(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -737,6 +749,128 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  // ---------- Nearby-drivers status banner ----------
+  //
+  // Distinct UI for every state the search can be in — loading, found
+  // (no banner, the map markers are the UI), explicitly empty ("no
+  // drivers nearby" — not an error), and the three failure modes
+  // (permission denied, GPS timeout, request failed), each with a retry.
+  // Must be a direct Stack child (Positioned only works there) — the
+  // reactive GetBuilder goes inside it, not the other way round.
+  Widget _buildNearbyDriversStatus() {
+    return Positioned(
+      top: 12,
+      left: 16,
+      right: 16,
+      child: GetBuilder<BookingController>(
+        builder: (bc) {
+          final state = bc.nearbyDriversSearch.state.value;
+
+          if (state.phase == NearbyDriversPhase.idle ||
+              state.phase == NearbyDriversPhase.success) {
+            return const SizedBox.shrink();
+          }
+
+          String message;
+          IconData icon;
+          Color color;
+          bool showRetry = false;
+          bool showLoading = false;
+
+          switch (state.phase) {
+            case NearbyDriversPhase.locating:
+              message = "Finding your location...";
+              icon = Icons.my_location;
+              color = ColorResources.blueeebutton;
+              showLoading = true;
+              break;
+            case NearbyDriversPhase.searching:
+              message = "Looking for nearby drivers...";
+              icon = Icons.directions_car;
+              color = ColorResources.blueeebutton;
+              showLoading = true;
+              break;
+            case NearbyDriversPhase.empty:
+              message = "No drivers nearby right now";
+              icon = Icons.info_outline;
+              color = ColorResources.TextColorForGrey;
+              break;
+            case NearbyDriversPhase.locationDenied:
+              message = state.message ?? "Location permission needed";
+              icon = Icons.location_off;
+              color = ColorResources.textColorRed;
+              showRetry = true;
+              break;
+            case NearbyDriversPhase.locationTimeout:
+              message = state.message ?? "Couldn't get your location";
+              icon = Icons.gps_off;
+              color = ColorResources.textColorRed;
+              showRetry = true;
+              break;
+            case NearbyDriversPhase.requestFailed:
+              message = state.message ?? "Couldn't load nearby drivers";
+              icon = Icons.error_outline;
+              color = ColorResources.textColorRed;
+              showRetry = true;
+              break;
+            case NearbyDriversPhase.idle:
+            case NearbyDriversPhase.success:
+              return const SizedBox.shrink();
+          }
+
+          return Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: ColorResources.whiteColor,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: const [
+                  BoxShadow(blurRadius: 10, color: Colors.black12),
+                ],
+              ),
+              child: Row(
+                children: [
+                  showLoading
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: color,
+                          ),
+                        )
+                      : Icon(icon, color: color, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: PoppinsMedium.copyWith(
+                        fontSize: 12.5,
+                        color: ColorResources.blackcolor11,
+                      ),
+                    ),
+                  ),
+                  if (showRetry)
+                    GestureDetector(
+                      onTap: () => bc.refreshNearbyDrivers(),
+                      child: Text(
+                        "Retry",
+                        style: PoppinsSemiBold.copyWith(
+                          fontSize: 12.5,
+                          color: ColorResources.blueeebutton,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   // ---------- Map ----------
 
   Widget _buildMap() {
@@ -784,7 +918,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   controller: scrollController,
                   physics: const ClampingScrollPhysics(),
                   padding: EdgeInsets.only(
-                    bottom: 16 + MediaQuery.of(context).padding.bottom,
+                    bottom: 16 +
+                        MediaQuery.of(context).padding.bottom +
+                        MediaQuery.of(context).viewInsets.bottom,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1037,9 +1173,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         final String title = banner?.title ?? "Get ₹100 OFF";
         final String subTitle = banner?.subTitle ?? "On your first 3 rides";
         final String? image = banner?.image;
+        final String? imageUrl = image == null || image.isEmpty
+            ? null
+            : (Uri.tryParse(image)?.hasScheme ?? false)
+                ? image
+                : '${ApiConstants.imageurl}$image';
 
         return GestureDetector(
-          onTap: () => Get.to(() => PromoScreen()),
+          onTap: _openSearch,
           child: Container(
             width: double.infinity,
             clipBehavior: Clip.antiAlias,
@@ -1055,17 +1196,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: Stack(
               children: [
-                if (image != null && image.isNotEmpty)
+                if (imageUrl != null)
                   Positioned.fill(
                     child: Image.network(
-                      '${ApiConstants.imageurl}$image',
+                      imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const SizedBox.shrink(),
                     ),
                   ),
                 // Scrim so text stays readable over an arbitrary photo.
-                if (image != null && image.isNotEmpty)
+                if (imageUrl != null)
                   Positioned.fill(
                     child: Container(
                       color: Colors.black.withValues(alpha: 0.25),
@@ -1575,12 +1716,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 TextField(
                   controller: _destinationController,
                   autofocus: !_isEditingPickup,
+                  maxLines: 1,
+                  textAlignVertical: TextAlignVertical.center,
                   style: PoppinsReguler.copyWith(fontSize: 14),
                   onChanged: (value) {
                     if (!_isEditingPickup) _searchPlaces(value);
                   },
                   decoration: InputDecoration(
                     isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
                     hintText: "Where to?",
                     hintStyle: PoppinsReguler.copyWith(
                       fontSize: 14,
@@ -1590,6 +1734,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Icons.location_on_outlined,
                       size: 20,
                       color: ColorResources.textColorRed,
+                    ),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 24,
                     ),
                     border: InputBorder.none,
                   ),

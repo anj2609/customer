@@ -1,7 +1,7 @@
 class ApiConstants {
   //==== base url =====
 
-  static const String baseUrl = 'https://myride.infinititechsolution.com/api/';
+  static const String baseUrl = 'https://app.nride.in/api/';
 
   ////========= api End Point ==================================
   static const String sendOtpUrl = 'send-otp';
@@ -54,21 +54,18 @@ class ApiConstants {
   static const String messageList = 'chat/list';
   static const String chatRead = 'chat/read';
   static const String customerWallet = 'customer-wallet-balance';
-   static const String topCreateAmount = 'create-topup-intent';
-     static const String vehicalTypeList = 'vehical-type-list';
-   static const String paymentStatus = 'payment-status';
-   static const String generateQrPayment = 'generate-qr-payment';
-   static const String completeRide = 'complete-ride';
-   static const String verifyTopup = 'verify-topup';
-   static const String getBanner = 'get-banner';
-   static const String rentalEstimate = 'rental/estimate';
-   static const String outstationEstimate = 'outstation/estimate';
-   /////vehical-type-list
+  static const String topCreateAmount = 'create-topup-intent';
+  static const String vehicalTypeList = 'vehical-type-list';
+  static const String paymentStatus = 'payment-status';
+  static const String generateQrPayment = 'generate-qr-payment';
+  static const String completeRide = 'complete-ride';
+  static const String verifyTopup = 'verify-topup';
+  static const String getBanner = 'get-banner';
+  static const String rentalEstimate = 'rental/estimate';
+  static const String outstationEstimate = 'outstation/estimate';
+  /////vehical-type-list
 
-
-
-
-///create-topup-intent
+  ///create-topup-intent
   ///////========= local store data ====================================//////////
 
   static const String otpapi = 'subscription-add';
@@ -91,15 +88,15 @@ class ApiConstants {
   static const String UserLogin = 'login';
   static const String UserRegister = 'register';
   static const String profile_image = 'profile_image';
-   static const String bookingid = 'bookingid';
-   static String userIdSocial = "";
+  static const String bookingid = 'bookingid';
+  static String userIdSocial = "";
   static String userTokenSocial = "";
   static String provider = "";
   static String usernames = "";
-  static String emailAddress= "";
-    static String profileImage = "";
+  static String emailAddress = "";
+  static String profileImage = "";
 
-  //// usernames / profileImage 
+  //// usernames / profileImage
   //
   static const String imageurl = 'https://myride.infinititechsolution.com/';
 }

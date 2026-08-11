@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/payment_controller.dart';
 import 'package:myrideuser/data/modal/trackride_model.dart';
+import 'package:myrideuser/data/modal/trip_detail_model.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
+import 'package:myrideuser/widgets/price_breakdown_card.dart';
 
 class CompletedRideSheet extends StatefulWidget {
   final String bookingId;
@@ -124,6 +126,30 @@ class _CompletedRideSheetState extends State<CompletedRideSheet> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 20),
+
+                /// PRICE/PAYMENT — real figures from /trip-detail. A live
+                /// completed booking was found to return a "payment"
+                /// object (total/final fare, discounts, wallet used), not
+                /// the richer "price_breakdown" the UI originally only
+                /// looked for — PriceBreakdownCard now renders whichever
+                /// one is actually present, nothing if neither is.
+                Builder(
+                  builder: (_) {
+                    final tripData = TripDetailData.fromJson(
+                      Map<String, dynamic>.from(widget.tripDetails),
+                    );
+                    if (tripData.priceBreakdown == null &&
+                        tripData.payment == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: PriceBreakdownCard(tripData: tripData),
+                    );
+                  },
+                ),
+
                 const SizedBox(height: 24),
                 const Divider(),
                 const SizedBox(height: 16),

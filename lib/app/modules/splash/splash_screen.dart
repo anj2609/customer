@@ -9,6 +9,15 @@ import 'package:video_player/video_player.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/colors.dart';
 
+/// Splash animation on the brand gradient (#292B84 → #0004CF). The source
+/// clip ("transparent final.mov") is ProRes 4444 with a real alpha
+/// channel — a format Android's video player can't decode at all, so it
+/// can't be played directly (it would fail to load and skip straight
+/// past the splash). Since the background here is always this exact
+/// gradient anyway, the alpha video was composited onto it once (ffmpeg,
+/// baked frame-by-frame) and re-exported as a normal H.264 MP4
+/// (splash_animation.mp4) — pixel-identical to true transparency on
+/// screen, but a format every device can actually decode.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -30,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
 
     _videoController = VideoPlayerController.asset(
-      'assets/images/nride_gif_cropped.mp4',
+      'assets/images/splash_animation.mp4',
     );
 
     _videoController
@@ -97,9 +106,9 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        // Matches the video's own background gradient so the letterboxing
-        // above/below the (wider-than-tall) clip blends in seamlessly
-        // instead of showing a visible video "frame" edge.
+        // Matches the video's own baked-in gradient so any letterboxing
+        // (if the screen's aspect ratio differs from the video's 9:16)
+        // blends in seamlessly instead of showing a visible video edge.
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: ColorResources.primaryGradient,
@@ -110,8 +119,8 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Center(
           child: _isVideoReady
               ? AspectRatio(
-                  // BoxFit.contain (never crops) — the clip is wider than
-                  // the screen, so this fits it to the full screen width.
+                  // BoxFit.contain (never crops) — fits the video to the
+                  // full screen width/height without cutting anything off.
                   aspectRatio: _videoController.value.aspectRatio,
                   child: VideoPlayer(_videoController),
                 )

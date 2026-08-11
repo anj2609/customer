@@ -400,71 +400,18 @@ class ApiClient extends GetxService {
   /// Debounce flag to prevent multiple simultaneous logout redirects.
   bool _isHandlingSessionExpiry = false;
 
-  /// Non-critical endpoints whose 401s should NOT trigger a forced logout.
-  /// Essentially every endpoint except the auth endpoints (login, register,
-  /// OTP, social, logout) is listed here.  This means the ONLY way a user
-  /// gets auto-logged-out is if one of those auth endpoints itself returns 401.
-  static const List<String> _nonCriticalEndpoints = [
-    // Profile & account
-    'get-profile',
-    'update-profile',
-    'basic-info',
-    // Addresses
-    'customer-address-list',
-    'customer-add-address',
-    'customer-address-update',
-    'customer-address-delete',
-    // Promos
-    'promos-list',
-    'promos-category-list',
-    'promos-details',
-    'customer-promo-list',
-    'customer-add-promo',
-    // Wallet
-    'customer-wallet-balance',
-    'create-topup-intent',
-    // Notifications & social & security
-    'customer-notification-settings',
-    'customer-notification-settings-update',
-    'customer-social-accounts',
-    'customer-connect-social',
-    'customer-disconnect-social',
-    'customer-account-security',
-    'customer-account-security-update',
-    // Drivers / vehicles
-    'driver-availble-list',
-    'vehical-type-list',
-    'track-driver',
-    // Home screen content
-    'get-banner',
-    // Booking flow (CRITICAL — must NOT auto-logout)
-    'estimate-ride-list',
-    'create-booking',
-    'rental/estimate',
-    'outstation/estimate',
-    'track-ride',
-    'trip-detail',
-    'cancel-ride',
-    'cancellation-type-list',
-    'rate-driver',
-    'complete-ride',
-    'payment-status',
-    'generate-qr-payment',
-    'customer-booking-active',
-    'customer-booking-list',
-    // Chat
-    'chat/start',
-    'chat/send',
-    'chat/list',
-    'chat/messages',
-    'chat/read',
-    // Misc content
-    'faq-list',
-    'cms-details',
-    'setting-details',
-  ];
-
   /// Returns true if the response indicates an expired session and navigates to login.
+  ///
+  /// Every authenticated endpoint now goes through the same genuine-expiry
+  /// check below and triggers the same auto-logout — there used to be a
+  /// long exemption list here (profile, banner, wallet, bookings, etc.)
+  /// that silently swallowed 401/402s on almost everything, which meant a
+  /// real expired session just looked like broken/blank screens (banner
+  /// not loading, profile fields empty) with no indication anything was
+  /// wrong and no way to recover except manually finding Logout. Only the
+  /// raw auth endpoints (login/register/OTP/social/logout) are still
+  /// skipped, since a failed login attempt isn't a "session expired"
+  /// event — there's no session yet to expire.
   bool _handleSessionExpiry(Response response, String uri) {
     // ── 1. Skip auth-related endpoints (login, register, OTP, etc.) ──
     if (uri.contains('login') || uri.contains('register') ||
@@ -473,21 +420,7 @@ class ApiClient extends GetxService {
       return false;
     }
 
-    // ── 2. Skip non-critical background endpoints ──
-    final bool isNonCritical = _nonCriticalEndpoints.any(
-      (endpoint) => uri.contains(endpoint),
-    );
-    if (isNonCritical) {
-      if (response.statusCode == 401 || response.statusCode == 402) {
-        debugPrint(
-          '⚠️ [SESSION] 401 on NON-CRITICAL endpoint "$uri" — '
-          'ignoring, user stays logged in.',
-        );
-      }
-      return false;
-    }
-
-    // ── 3. Determine if this is a genuine session expiry ──
+    // ── 2. Determine if this is a genuine session expiry ──
     bool isExpired = false;
     String reason = '';
 
@@ -512,7 +445,7 @@ class ApiClient extends GetxService {
       }
     }
 
-    // ── 4. Ignore "Header User id is required" — this is a missing header,
+    // ── 3. Ignore "Header User id is required" — this is a missing header,
     //       not an expired token. Happens during app init race conditions. ──
     if (isExpired && response.body != null && response.body is Map) {
       final message = (response.body['message'] ?? '').toString().toLowerCase();
@@ -525,7 +458,7 @@ class ApiClient extends GetxService {
       }
     }
 
-    // ── 5. Fire logout (with debounce) ──
+    // ── 4. Fire logout (with debounce) ──
     if (isExpired) {
       if (_isHandlingSessionExpiry) {
         debugPrint(

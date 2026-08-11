@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:myrideuser/widgets/custom_loader.dart';
+import 'package:myrideuser/widgets/price_breakdown_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
@@ -113,11 +114,16 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     dynamic droplat,
     dynamic droplong,
   ) async {
-    /// PICKUP ADDRESS
-    List<Placemark> pick = await placemarkFromCoordinates(pickuplat, picklong);
-
-    /// DROP ADDRESS
-    List<Placemark> drop = await placemarkFromCoordinates(droplat, droplong);
+    final pickupLat = _coordinate(pickuplat);
+    final pickupLng = _coordinate(picklong);
+    final dropLat = _coordinate(droplat);
+    final dropLng = _coordinate(droplong);
+    if (pickupLat == null ||
+        pickupLng == null ||
+        dropLat == null ||
+        dropLng == null) {
+      return;
+    }
 
     String formatAddress(Placemark place) {
       return [
@@ -131,10 +137,60 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
       ].where((e) => e != null && e!.isNotEmpty).join(", ");
     }
 
+    try {
+      final addresses = await Future.wait([
+        placemarkFromCoordinates(pickupLat, pickupLng),
+        placemarkFromCoordinates(dropLat, dropLng),
+      ]);
+      if (!mounted) return;
+
+      final pickup = addresses[0];
+      final drop = addresses[1];
+      setState(() {
+        if (pickup.isNotEmpty) pickupAddress = formatAddress(pickup.first);
+        if (drop.isNotEmpty) dropAddress = formatAddress(drop.first);
+      });
+    } catch (error) {
+      // The API-provided address remains visible if reverse geocoding fails.
+      log('Could not resolve ride addresses: $error');
+    }
+  }
+
+  String _bookingAddress(
+    Map<dynamic, dynamic> booking,
+    List<String> keys,
+    String fallback,
+  ) {
+    for (final key in keys) {
+      final rawValue = booking[key];
+      final value = rawValue is Map
+          ? rawValue['address']?.toString().trim() ?? ''
+          : rawValue?.toString().trim() ?? '';
+      if (value.isNotEmpty && value.toLowerCase() != 'null') return value;
+    }
+    return fallback;
+  }
+
+  Future<void> _loadBookingAddresses(Map<dynamic, dynamic> booking) async {
+    if (!mounted) return;
     setState(() {
-      pickupAddress = formatAddress(pick.first);
-      dropAddress = formatAddress(drop.first);
+      pickupAddress = _bookingAddress(
+        booking,
+        const ['pickup_address', 'pickup_location', 'pickup'],
+        'Pickup location',
+      );
+      dropAddress = _bookingAddress(
+        booking,
+        const ['drop_address', 'destination_address', 'drop_location', 'drop'],
+        'Destination',
+      );
     });
+    await getAddress(
+      _locationCoordinate(booking, 'pickup_lat', 'pickup'),
+      _locationCoordinate(booking, 'pickup_lng', 'pickup'),
+      _locationCoordinate(booking, 'drop_lat', 'drop'),
+      _locationCoordinate(booking, 'drop_lng', 'drop'),
+    );
   }
 
   //pickupAddress  pickupAddress
@@ -185,7 +241,13 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     setState(() {});
   }
 
-  final String googleApiKey = "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldUs";
+  // Was "...CVMldUs" (trailing typo'd 's') — a different, invalid key from
+  // the one used everywhere else in the app (drawRoute1(), _drawBookingRoute(),
+  // rentals_vehicle_screen.dart, etc.), which silently broke this screen's
+  // own route drawing (drawRoute() below) — every Directions API call
+  // through this key failed with 400/403 and got swallowed by the
+  // `if (response.statusCode != 200) { print(...); return; }` below.
+  final String googleApiKey = "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU";
 
   Future<void> drawRoute() async {
     try {
@@ -300,10 +362,18 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   }
 
   void updateMarkers() {
-    markers.clear();
+    // Keep the booking's pickup and destination pins when the device or
+    // driver position refreshes.
+    final updatedMarkers = markers
+        .where(
+          (marker) =>
+              marker.markerId.value != 'user' &&
+              marker.markerId.value != 'driver',
+        )
+        .toSet();
 
     if (currentLocation != null) {
-      markers.add(
+      updatedMarkers.add(
         Marker(
           markerId: const MarkerId("user"),
           position: currentLocation!,
@@ -313,7 +383,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     }
 
     if (driverLocation != null) {
-      markers.add(
+      updatedMarkers.add(
         Marker(
           markerId: const MarkerId("driver"),
           position: driverLocation!,
@@ -322,7 +392,171 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
         ),
       );
     }
-    setState(() {});
+    markers.assignAll(updatedMarkers);
+  }
+
+  double? _coordinate(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '');
+  }
+
+  Map<dynamic, dynamic>? _locationData(
+    Map<dynamic, dynamic> booking,
+    String key,
+  ) {
+    final location = booking[key];
+    return location is Map ? location : null;
+  }
+
+  dynamic _locationCoordinate(
+    Map<dynamic, dynamic> booking,
+    String legacyKey,
+    String locationKey,
+  ) {
+    final legacyValue = booking[legacyKey];
+    if (legacyValue != null && legacyValue.toString().isNotEmpty) {
+      return legacyValue;
+    }
+    return _locationData(booking, locationKey)?[
+        legacyKey.endsWith('_lat') ? 'lat' : 'lng'];
+  }
+
+  String _bookingLocationKey(Map<dynamic, dynamic> booking) {
+    return '${_locationCoordinate(booking, 'pickup_lat', 'pickup')},'
+        '${_locationCoordinate(booking, 'pickup_lng', 'pickup')},'
+        '${_locationCoordinate(booking, 'drop_lat', 'drop')},'
+        '${_locationCoordinate(booking, 'drop_lng', 'drop')}';
+  }
+
+  String? _visibleBookingLocationKey;
+  String? _visibleDriverLocationKey;
+
+  void _showBookingLocations(Map<dynamic, dynamic> booking) {
+    final pickupLat = _coordinate(
+      _locationCoordinate(booking, 'pickup_lat', 'pickup'),
+    );
+    final pickupLng = _coordinate(
+      _locationCoordinate(booking, 'pickup_lng', 'pickup'),
+    );
+    final dropLat = _coordinate(
+      _locationCoordinate(booking, 'drop_lat', 'drop'),
+    );
+    final dropLng = _coordinate(
+      _locationCoordinate(booking, 'drop_lng', 'drop'),
+    );
+    if (pickupLat == null ||
+        pickupLng == null ||
+        dropLat == null ||
+        dropLng == null) {
+      return;
+    }
+
+    final locationKey = _bookingLocationKey(booking);
+    final pickup = LatLng(pickupLat, pickupLng);
+    final destination = LatLng(dropLat, dropLng);
+    if (_visibleBookingLocationKey != locationKey) {
+      _visibleBookingLocationKey = locationKey;
+      final retainedLiveMarkers = markers
+          .where(
+            (marker) =>
+                marker.markerId.value == 'user' ||
+                marker.markerId.value == 'driver',
+          )
+          .toSet();
+      retainedLiveMarkers.addAll({
+        Marker(
+          markerId: const MarkerId('pickup'),
+          position: pickup,
+          infoWindow: const InfoWindow(title: 'Pickup location'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
+        ),
+        Marker(
+          markerId: const MarkerId('destination'),
+          position: destination,
+          infoWindow: const InfoWindow(title: 'Destination'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueRed,
+          ),
+        ),
+      });
+      markers.assignAll(retainedLiveMarkers);
+      _drawBookingRoute(pickup, destination);
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || mapController == null) return;
+      if (pickup.latitude == destination.latitude &&
+          pickup.longitude == destination.longitude) {
+        mapController?.animateCamera(CameraUpdate.newLatLngZoom(pickup, 15));
+        return;
+      }
+      mapController?.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          LatLngBounds(
+            southwest: LatLng(
+              pickup.latitude < destination.latitude
+                  ? pickup.latitude
+                  : destination.latitude,
+              pickup.longitude < destination.longitude
+                  ? pickup.longitude
+                  : destination.longitude,
+            ),
+            northeast: LatLng(
+              pickup.latitude > destination.latitude
+                  ? pickup.latitude
+                  : destination.latitude,
+              pickup.longitude > destination.longitude
+                  ? pickup.longitude
+                  : destination.longitude,
+            ),
+          ),
+          80,
+        ),
+      );
+    });
+  }
+
+  Future<void> _drawBookingRoute(LatLng pickup, LatLng destination) async {
+    try {
+      final result = await PolylinePoints(apiKey: googleApiKey)
+          .getRouteBetweenCoordinates(
+            request: PolylineRequest(
+              origin: PointLatLng(pickup.latitude, pickup.longitude),
+              destination: PointLatLng(
+                destination.latitude,
+                destination.longitude,
+              ),
+              mode: TravelMode.driving,
+            ),
+          );
+      final points = result.points
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
+      if (!mounted) return;
+      polylines.assignAll({
+        Polyline(
+          polylineId: const PolylineId('booking_route'),
+          points: points.length >= 2 ? points : [pickup, destination],
+          width: 5,
+          color: ColorResources.blueeebutton,
+          geodesic: points.length < 2,
+        ),
+      });
+    } catch (_) {
+      // Still show a direct connector if Directions is temporarily unavailable.
+      if (!mounted) return;
+      polylines.assignAll({
+        Polyline(
+          polylineId: const PolylineId('booking_route'),
+          points: [pickup, destination],
+          width: 5,
+          color: ColorResources.blueeebutton,
+          geodesic: true,
+        ),
+      });
+    }
   }
 
   void updateDriverLocation(double latitude, double longitude) {
@@ -352,10 +586,42 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Obx(() {
-              final controller = Get.find<BookingController>();
+            // Was Obx() watching only rideStatus + tridRideDetailsData (both
+            // Rx) — the live driver GPS (driverInfo.lat/lng, set by
+            // TrackRideApi2 on every 3s poll) is a plain field updated via
+            // update(), which Obx never reacts to, so the driver marker
+            // was placed once and then frozen for the rest of the ride.
+            // GetBuilder reacts to the same update() call both polling
+            // functions already fire every tick, so this now also picks
+            // up live position changes, not just status/trip-detail ones.
+            child: GetBuilder<BookingController>(builder: (controller) {
               final status = controller.rideStatus.value;
               final driverdata = controller.tridRideDetailsData;
+              if (driverdata.isNotEmpty) {
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _showBookingLocations(driverdata),
+                );
+              }
+
+              // Real live driver GPS — from /track-ride's
+              // driver_info.lat/lng. Confirmed live against the actual
+              // backend: this updates within seconds of the driver
+              // sending a location update, unlike the booking's pickup
+              // point (which never moves). Falls back to null until the
+              // driver has sent at least one location update after
+              // accepting.
+              final liveDriverLat = _coordinate(controller.driverInfo?.lat);
+              final liveDriverLng = _coordinate(controller.driverInfo?.lng);
+              if (liveDriverLat != null && liveDriverLng != null) {
+                final key = '$liveDriverLat,$liveDriverLng';
+                if (_visibleDriverLocationKey != key) {
+                  _visibleDriverLocationKey = key;
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => updateDriverLocation(liveDriverLat, liveDriverLng),
+                  );
+                }
+              }
+
               print('sttaus::::::::${status}');
               return status == "pending"
                   ? GoogleMap(
@@ -372,8 +638,11 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                       markers: markers.value,
                       polylines: polylines.value,
                       onMapCreated: (GoogleMapController controller) {
-                        getCurrentLocation();
-                        drawRoute();
+                        mapController = controller;
+                        getCurrentLocation1();
+                        if (driverdata.isNotEmpty) {
+                          _showBookingLocations(driverdata);
+                        }
                       },
                     )
                   : GoogleMap(
@@ -390,6 +659,10 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                       onMapCreated: (controllerMap) async {
                         mapController = controllerMap;
 
+                        if (driverdata.isNotEmpty) {
+                          _showBookingLocations(driverdata);
+                        }
+
                         await getCurrentLocation1();
 
                         if (currentLocation != null) {
@@ -402,11 +675,29 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                             ),
                           );
                         }
-                        // 9090909090 ye daloo na okk
-                        updateDriverLocation(
-                          driverdata['pickup_lat'],
-                          driverdata['pickup_lng'],
-                        );
+                        // Initial marker placement. Prefer the real live
+                        // GPS (driver_info.lat/lng from /track-ride,
+                        // confirmed live above) — only fall back to the
+                        // booking's pickup point (was previously reading
+                        // driverdata['pickup_lat']/['pickup_lng'] as flat
+                        // keys, which don't exist in the real /trip-detail
+                        // response — they're nested under pickup: {lat,
+                        // lng} — so this always read null and the "driver"
+                        // marker never appeared at all) for the brief
+                        // window before the driver's first location update
+                        // lands.
+                        final driverLat = liveDriverLat ??
+                            _coordinate(
+                              _locationCoordinate(driverdata, 'pickup_lat', 'pickup'),
+                            );
+                        final driverLng = liveDriverLng ??
+                            _coordinate(
+                              _locationCoordinate(driverdata, 'pickup_lng', 'pickup'),
+                            );
+                        if (driverLat != null && driverLng != null) {
+                          updateDriverLocation(driverLat, driverLng);
+                          _visibleDriverLocationKey = '$driverLat,$driverLng';
+                        }
                       },
                     );
             }),
@@ -492,12 +783,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                 addressLoaded = true;
 
                 Future.microtask(() {
-                  getAddress(
-                    driverdata['pickup_lat'],
-                    driverdata['pickup_lng'],
-                    driverdata['drop_lat'],
-                    driverdata['drop_lng'],
-                  );
+                  _loadBookingAddresses(driverdata);
                 });
               }
 
@@ -524,7 +810,15 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                           size: 18,
                         ),
                         const SizedBox(width: 8),
-                        Expanded(child: Text(pickupAddress)),
+                        Expanded(
+                          child: Text(
+                            pickupAddress.isEmpty
+                                ? 'Pickup location'
+                                : pickupAddress,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
 
@@ -539,7 +833,13 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                           size: 18,
                         ),
                         const SizedBox(width: 8),
-                        Expanded(child: Text(dropAddress)),
+                        Expanded(
+                          child: Text(
+                            dropAddress.isEmpty ? 'Destination' : dropAddress,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -767,31 +1067,6 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
 
   ////// ========== driverBottomContainer =============== //////////
 
-  Widget _rowItem(
-    String title,
-    String value, {
-    bool isBold = false,
-    Color? valueColor,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: isBold ? FontWeight.w600 : FontWeight.w500,
-            color: valueColor ?? Colors.black,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget driverBottomContainer({
     required String title,
     required String name,
@@ -1014,9 +1289,19 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
 
                 const SizedBox(height: 20),
 
-                /// EXTRA DETAILS (only ongoing)
+                /// EXTRA DETAILS (only ongoing) — real breakdown from
+                /// /trip-detail; nothing shown until it's actually loaded.
                 if (status == "ongoing")
-                  buildFareSection(driverstatus, drivercollection),
+                  Builder(
+                    builder: (_) {
+                      final tripData = Get.find<BookingController>()
+                          .tripDetailModel
+                          .value
+                          ?.data;
+                      if (tripData == null) return const SizedBox.shrink();
+                      return PriceBreakdownCard(tripData: tripData);
+                    },
+                  ),
 
                 const SizedBox(height: 20),
 
@@ -1072,33 +1357,12 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     }
   }
 
-  Widget buildFareSection(String? status, Map details) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          // _rowItem("Ride", "Economy"),
-          // const SizedBox(height: 8),
-          // _rowItem("Payment", "Wallet"),
-          _rowItem("Trip Fare", "₹ ${details['base_fare']}", isBold: true),
-          const Divider(),
-          _rowItem(
-            "Discount (20%)",
-            "₹ ${details['discount_fare']}",
-            isBold: true,
-          ),
-          const Divider(),
-          _rowItem("Total", "₹ ${details['total_fare']}", isBold: true),
-
-          ///driver['profile_image']
-        ],
-      ),
-    );
-  }
+  /// Replaced by PriceBreakdownCard fed from BookingController's typed
+  /// tripDetailModel — this used to read details['base_fare'],
+  /// details['discount_fare'] and details['total_fare'] directly off the
+  /// raw /trip-detail map, but those fields don't exist at that level
+  /// (base_fare lives under price_breakdown, and there is no
+  /// discount_fare field at all) so it always rendered "₹ null".
 
   /////======================== Complete ride moved to CompletedRideSheet =============
 }
