@@ -123,7 +123,23 @@ class BookingController extends GetxController implements GetxService {
     // setMarkers() itself decides what (if anything) to show for each.
     ever<NearbyDriversState>(nearbyDriversSearch.state, (_) => setMarkers());
     nearbyDriversSearch.search();
-    nearbyDriversSearch.startAutoRefresh();
+
+    // Was started here unconditionally — since BookingController itself is a
+    // fenix:true singleton alive for the whole app session (created on first
+    // Get.find(), never disposed just for navigating away), that meant
+    // driver-availble-list was polled every 20s continuously for as long as
+    // the app was open, on every screen — chat, profile, promos, even mid-ride
+    // — not just the home/map tab that actually shows these markers. The
+    // service's own doc comment already says it's meant to run "while the
+    // rider is on a screen that shows nearby drivers"; this wires it to
+    // actually do that instead of running unconditionally for the app's
+    // entire lifetime.
+    _syncNearbyDriversAutoRefresh();
+    ever<int>(bottomNavIndex, (_) => _syncNearbyDriversAutoRefresh());
+    ever<BookingActiveState>(
+      activeBookingState,
+      (_) => _syncNearbyDriversAutoRefresh(),
+    );
 
     loadCarIcon();
     loadUserIcon();
@@ -140,6 +156,26 @@ class BookingController extends GetxController implements GetxService {
   /// Manual retry/refresh — wired to the "tap to retry" and "no drivers
   /// nearby" UI states, and to a pull-to-refresh if one is added later.
   Future<void> refreshNearbyDrivers() => nearbyDriversSearch.search();
+
+  /// Starts or stops the nearby-drivers 20s poll to match whether its
+  /// markers are actually visible: the Home tab, with no ride already booked
+  /// (once a ride is active the rider has a driver — there's nothing left to
+  /// search for, and findingdriver_screen has its own 3s tracking poll for
+  /// that). Re-run on every relevant state change via the `ever` workers in
+  /// onInit — a plain if-check at those call sites, rather than a bigger
+  /// rework of nearbyDriversSearch's own lifecycle, since it already exposes
+  /// exactly the start/stop calls this needs.
+  void _syncNearbyDriversAutoRefresh() {
+    final bool onHomeTab = bottomNavIndex.value == 0;
+    final bool hasActiveBooking =
+        activeBookingState.value.status != BookingStatus.none;
+
+    if (onHomeTab && !hasActiveBooking) {
+      nearbyDriversSearch.startAutoRefresh();
+    } else {
+      nearbyDriversSearch.stopAutoRefresh();
+    }
+  }
 
   /////==========  home screen promo banner (title/sub_title/image)  ======================///////
   Future<void> getHomeBanner() async {
@@ -926,45 +962,61 @@ class BookingController extends GetxController implements GetxService {
   }) async {
     update();
 
-    Response response = await bookingRepo.trackRideApi(
-      bookingId: bookingid.toString(),
-    );
+    // Was entirely unguarded — TrackRideApi2 is polled every 3s from
+    // findingdriver_screen.dart (the rider's live in-ride map/status
+    // screen) for the whole duration of a ride. Any exception out of
+    // fromJson() below (malformed response, a field arriving in an
+    // unexpected shape) used to propagate straight out of this function
+    // uncaught, every single poll — rideDetails/driverInfo/rideStatus
+    // never got updated, which is exactly what leaves that screen frozen
+    // (no live driver position, no status change) the instant a ride
+    // starts, instead of just skipping the one bad poll and trying again
+    // in 3s like every other poller in this app already does.
+    try {
+      Response response = await bookingRepo.trackRideApi(
+        bookingId: bookingid.toString(),
+      );
 
-    print("Status Code : ${response.statusCode}");
-    print("Response : ${response.body}");
+      print("Status Code : ${response.statusCode}");
+      print("Response : ${response.body}");
 
-    if (response.statusCode == 200) {
-      trackRideModel = TrackRideModel.fromJson(response.body);
+      if (response.statusCode == 200) {
+        trackRideModel = TrackRideModel.fromJson(response.body);
 
-      if (trackRideModel?.code == "200") {
-        // full ride details
-        rideDetails = trackRideModel?.data;
-update();
-        // driver details
-        driverInfo = trackRideModel?.data?.driverInfo;
-        rideStatus.value = rideDetails?.status ?? "pending";
+        if (trackRideModel?.code == "200") {
+          // full ride details
+          rideDetails = trackRideModel?.data;
+          update();
+          // driver details
+          driverInfo = trackRideModel?.data?.driverInfo;
+          rideStatus.value = rideDetails?.status ?? "pending";
 
-        print("Ride Status : ${rideStatus.value}");
+          print("Ride Status : ${rideStatus.value}");
 
-        print("Booking Id: ${rideDetails?.bookingId}");
-        print("Ride Status: ${rideDetails?.status}");
-        print("OTP: ${rideDetails?.otp}");
+          print("Booking Id: ${rideDetails?.bookingId}");
+          print("Ride Status: ${rideDetails?.status}");
+          print("OTP: ${rideDetails?.otp}");
 
-        print("Driver Name: ${driverInfo?.name}");
-        print("Driver Phone: ${driverInfo?.phone}");
-        print("Vehicle: ${driverInfo?.vehicalName}");
-        print("Vehicle Number: ${driverInfo?.vehicalNumber}");
+          print("Driver Name: ${driverInfo?.name}");
+          print("Driver Phone: ${driverInfo?.phone}");
+          print("Vehicle: ${driverInfo?.vehicalName}");
+          print("Vehicle Number: ${driverInfo?.vehicalNumber}");
 
-        // await Future.delayed(Duration(milliseconds: 500));
+          // await Future.delayed(Duration(milliseconds: 500));
 
-        // State updated above; the FindingDriverUI widget reacts reactively.
-        // Do NOT navigate here — TrackRideApi2 is called on every poll and
-        // pushing FindingDriverUI on each tick stacks screens endlessly.
-      }
-    } else if (response.statusCode == 500) {}
+          // State updated above; the FindingDriverUI widget reacts reactively.
+          // Do NOT navigate here — TrackRideApi2 is called on every poll and
+          // pushing FindingDriverUI on each tick stacks screens endlessly.
+        }
+      } else if (response.statusCode == 500) {}
 
-    update();
-    return response;
+      update();
+      return response;
+    } catch (e) {
+      debugPrint('[TrackRideApi2] error: $e');
+      update();
+      return Response(statusCode: 0, statusText: e.toString());
+    }
   }
 
   Future<Response> TripRideDetailsApi({
