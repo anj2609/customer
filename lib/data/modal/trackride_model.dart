@@ -6,7 +6,13 @@ class TrackRideModel {
   TrackRideModel({this.code, this.message, this.data});
 
   TrackRideModel.fromJson(Map<String, dynamic> json) {
-    code = json['code'];
+    // Was `code = json['code'];` — a raw assignment into a String? field.
+    // Throws a TypeError if this backend ever sends "code" as a JSON
+    // number (200) rather than a string ("200"), which the rest of this
+    // app has repeatedly turned out to need to tolerate (see the
+    // `?.toString() == '200'` comparisons used elsewhere). toString()
+    // makes the assignment itself safe either way.
+    code = json['code']?.toString();
     message = json['message'];
     data = json['data'] != null ? new DatTrackRideDetails.fromJson(json['data']) : null;
   }
@@ -46,10 +52,20 @@ class DatTrackRideDetails {
     bookingId = json['booking_id'];
     status = json['status'];
     otp = json['otp'];
-    lat = json['lat'];
-    lng = json['lng'];
-    dropLat = json['drop_lat'];
-    dropLng = json['drop_lng'];
+    // Was a raw dynamic assignment (`lat = json['lat'];`) into a `double?`
+    // field — throws a TypeError the instant the backend sends lat/lng as
+    // a numeric-looking string (or even a whole-number JSON int, since
+    // Dart doesn't implicitly widen int to double on assignment either).
+    // TrackRideApi2() — the only live caller, polled every 3s from
+    // findingdriver_screen.dart — has no try/catch around this fromJson()
+    // call at all, so a throw here became an uncaught exception on every
+    // single poll: rideDetails/driverInfo/rideStatus never got updated,
+    // which is exactly what leaves the rider's live tracking map/ride
+    // status frozen the instant a ride starts.
+    lat = double.tryParse(json['lat']?.toString() ?? '');
+    lng = double.tryParse(json['lng']?.toString() ?? '');
+    dropLat = double.tryParse(json['drop_lat']?.toString() ?? '');
+    dropLng = double.tryParse(json['drop_lng']?.toString() ?? '');
     driverInfo = json['driver_info'] != null
         ? new DriverInfo.fromJson(json['driver_info'])
         : null;
@@ -102,8 +118,15 @@ class DriverInfo {
     vehicalName = json['vehical_name'];
     vehicalNumber = json['vehical_number'];
     vehicalColor = json['vehical_color'];
-    lat = json['lat'];
-    lng = json['lng'];
+    // These are declared String? but read via findingdriver_screen.dart's
+    // own _coordinate() helper, which already handles either a numeric or
+    // string value — so the risk here is purely the *assignment* throwing
+    // if the backend sends lat/lng as a JSON number rather than a string
+    // (raw `json['lat']` into a String? field throws a TypeError on a
+    // non-null num). ?.toString() makes the assignment itself safe
+    // regardless of which shape the backend actually sends.
+    lat = json['lat']?.toString();
+    lng = json['lng']?.toString();
   }
 
   Map<String, dynamic> toJson() {

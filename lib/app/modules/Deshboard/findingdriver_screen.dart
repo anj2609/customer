@@ -14,7 +14,9 @@ import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:myrideuser/data/controller/chat_controller.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
+import 'package:myrideuser/data/modal/driveravailable_model.dart';
 import 'package:myrideuser/data/modal/trackride_model.dart';
+import 'package:myrideuser/data/services/nearby_drivers_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -992,7 +994,14 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
             style: TextStyle(color: Colors.grey),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+
+          /// ── Nearby drivers (informational only — the backend still
+          /// does the actual matching/assignment; this just shows the
+          /// rider who's around while that happens) ──
+          _nearbyDriversPreview(),
+
+          const SizedBox(height: 16),
 
           /// ── Ripple loader ──
           const RippleLoader(),
@@ -1029,6 +1038,107 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  /// Read-only "who's around" strip — the rider does not pick from this
+  /// list, the backend still auto-assigns the driver exactly as before.
+  /// Sourced from BookingController.nearbyDriversSearch, which already
+  /// polls driver-availble-list every 20s (see nearby_drivers_search.dart);
+  /// this just surfaces that existing data here instead of only feeding
+  /// map markers on the home screen. Deliberately renders nothing outside
+  /// the "search succeeded with at least one driver" state — a locating/
+  /// searching/empty/error message here would just duplicate or contradict
+  /// the ripple loader and "Finding you a nearby driver...." text already
+  /// on screen for those states.
+  Widget _nearbyDriversPreview() {
+    return Obx(() {
+      final state = Get.find<BookingController>().nearbyDriversSearch.state.value;
+      if (state.phase != NearbyDriversPhase.success || state.drivers.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      final drivers = state.drivers;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "${drivers.length} driver${drivers.length == 1 ? '' : 's'} nearby",
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Was 72 — a horizontal ListView gives each item a *tight* height
+          // equal to this box (not just a max), so _nearbyDriverChip's
+          // actual content (36px avatar + 4px gap + a line of name text +
+          // a line of distance text + 16px of vertical padding, ~86-90px
+          // depending on font metrics) never fit — "BOTTOM OVERFLOWED BY
+          // n PIXELS" on every chip, every time a driver is nearby. Sized
+          // with real margin instead of the bare minimum so small device-
+          // font differences can't reopen the same overflow.
+          SizedBox(
+            height: 100,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: drivers.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, index) =>
+                  _nearbyDriverChip(drivers[index]),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _nearbyDriverChip(DriverAvailableDataModel driver) {
+    final name = (driver.name?.isNotEmpty == true) ? driver.name! : "Driver";
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : "?";
+    final hasImage = driver.profileImage != null && driver.profileImage!.isNotEmpty;
+
+    return Container(
+      width: 74,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: ColorResources.blueeebutton.withValues(alpha: 0.15),
+            backgroundImage: hasImage
+                ? NetworkImage(ApiConstants.imageurl + driver.profileImage!)
+                : null,
+            child: hasImage
+                ? null
+                : Text(
+                    initial,
+                    style: TextStyle(
+                      color: ColorResources.blueeebutton,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+          ),
+          if (driver.distance != null)
+            Text(
+              "${driver.distance!.toStringAsFixed(1)} km",
+              style: const TextStyle(fontSize: 10, color: Colors.grey),
+            ),
         ],
       ),
     );

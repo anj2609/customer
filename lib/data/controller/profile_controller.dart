@@ -291,6 +291,19 @@ class ProfileController extends GetxController implements GetxService {
       //   duration: const Duration(seconds: 5),
       // );
 
+      // Was missing entirely — a successful update-profile call never
+      // refreshed profileimagee/profile.value from the server, it only
+      // showed a toast and navigated to the main screen. Every screen
+      // reading profileimagee (e.g. the account screen's avatar) kept
+      // showing whatever was loaded at app start — i.e. a freshly uploaded
+      // photo would never appear until the app was fully restarted and
+      // fetchProfile() ran again from onReady(). fetchProfile() is
+      // fire-and-forget (declared `void`, not `Future<void>`) but it calls
+      // update() itself once the refetch lands, so every
+      // GetBuilder<ProfileController> picks up the new image as soon as it
+      // resolves, regardless of which screen is on screen by then.
+      fetchProfile();
+
       await Future.delayed(const Duration(milliseconds: 500));
       Get.back();
       Get.offAndToNamed(RouteHelper.getmainNavigationScreen());
@@ -1542,7 +1555,7 @@ class ProfileController extends GetxController implements GetxService {
       _pendingOrderId = orderId;
 
       final options = {
-        'key': 'rzp_test_T300vQB506EcW8',
+        'key': 'rzp_live_TOTCxhsFSNJuPe',
         'order_id': orderId,
         'amount': (amountValue * 100).toInt(), // paise
         'name': 'MyRide',

@@ -154,41 +154,56 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
                       },
                       child: Row(
                         children: [
-                          CircleAvatar(
-                            radius: Dimensions.spacingSize25,
-                            backgroundColor: Colors.grey.shade200,
-                            child: ClipOval(
-                              child:
-                                  profilecontroller.profileImage.value != null
-                                  ? Image.file(
-                                      profilecontroller.profileImage.value!,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                    )
-                                  : (profilecontroller.profileimagee != null &&
-                                        profilecontroller
-                                            .profileimagee!
-                                            .isNotEmpty)
-                                  ? Image.network(
-                                      '${ApiConstants.imageurl}${profilecontroller.profileimagee}',
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                            return Icon(
-                                              Icons.person,
-                                              size: Dimensions.spacingSize25,
-                                              color: Colors.grey.shade500,
-                                            );
-                                          },
-                                    )
-                                  : Icon(
-                                      Icons.person,
-                                      size: Dimensions.spacingSize25,
-                                      color: Colors.grey.shade500,
-                                    ),
+                          // Was a bare CircleAvatar reading
+                          // profilecontroller.profileimagee directly in this
+                          // screen's own (non-reactive) build() — profileimagee
+                          // is a plain field only updated via update() inside
+                          // fetchProfile(), which resolves *after* this
+                          // screen's first frame (fetchProfile() is fired from
+                          // ProfileController.onReady(), not before this
+                          // widget's first build). Nothing here was listening
+                          // for that update(), so the avatar was permanently
+                          // stuck on whatever profileimagee was at first
+                          // build — null, i.e. the placeholder icon — even
+                          // once the real image URL had loaded. Wrapping in
+                          // GetBuilder (same pattern already used for the
+                          // name/details column right next to it) makes it
+                          // rebuild when fetchProfile()/pickImage() call
+                          // update().
+                          GetBuilder<ProfileController>(
+                            builder: (pc) => CircleAvatar(
+                              radius: Dimensions.spacingSize25,
+                              backgroundColor: Colors.grey.shade200,
+                              child: ClipOval(
+                                child: pc.profileImage.value != null
+                                    ? Image.file(
+                                        pc.profileImage.value!,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                      )
+                                    : (pc.profileimagee != null &&
+                                          pc.profileimagee!.isNotEmpty)
+                                    ? Image.network(
+                                        '${ApiConstants.imageurl}${pc.profileimagee}',
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Icon(
+                                                Icons.person,
+                                                size: Dimensions.spacingSize25,
+                                                color: Colors.grey.shade500,
+                                              );
+                                            },
+                                      )
+                                    : Icon(
+                                        Icons.person,
+                                        size: Dimensions.spacingSize25,
+                                        color: Colors.grey.shade500,
+                                      ),
+                              ),
                             ),
                           ),
                           SizedBox(width: Dimensions.spacingSize12),
