@@ -54,8 +54,13 @@ class BookingRepo extends GetxService {
     required String dropAddress,
     required int packageId,
     required int finalHour,
+    num? finalDistance,
+    num? basePrice,
+    num? platformFee,
+    num? gstPercent,
+    num? gstAmount,
   }) async {
-    return apiClient.myridepostData(ApiConstants.createBooking, {
+    final Map<String, dynamic> body = {
       "pickup_lat": pickupLat,
       "pickup_lng": pickupLng,
       "drop_lat": dropLat,
@@ -71,7 +76,18 @@ class BookingRepo extends GetxService {
       "ride_type": "rental",
       "package_id": packageId,
       "final_hour": finalHour,
-    });
+    };
+
+    // Fare breakdown carried over from /rental/estimate — same omit-when-null
+    // rule as createBookingApi: a missing value must not become a zero that
+    // overwrites the backend's own pricing.
+    if (finalDistance != null) body["final_distance"] = finalDistance;
+    if (basePrice != null) body["base_price"] = basePrice;
+    if (platformFee != null) body["platform_fee"] = platformFee;
+    if (gstPercent != null) body["gst_percent"] = gstPercent;
+    if (gstAmount != null) body["gst_amount"] = gstAmount;
+
+    return apiClient.myridepostData(ApiConstants.createBooking, body);
   }
 
   /////==========  call outstation estimate api (vehicles + price for a trip)  ======================///////
@@ -110,8 +126,12 @@ class BookingRepo extends GetxService {
     required num billableDistance,
     required int estimatedDays,
     required num driverAllowance,
+    num? basePrice,
+    num? platformFee,
+    num? gstPercent,
+    num? gstAmount,
   }) async {
-    return apiClient.myridepostData(ApiConstants.createBooking, {
+    final Map<String, dynamic> body = {
       "pickup_lat": pickupLat,
       "pickup_lng": pickupLng,
       "drop_lat": dropLat,
@@ -132,7 +152,16 @@ class BookingRepo extends GetxService {
       "billable_distance": billableDistance,
       "estimated_days": estimatedDays,
       "driver_allowance": driverAllowance,
-    });
+    };
+
+    // Fare breakdown carried over from /outstation/estimate — same
+    // omit-when-null rule as the city-ride and rental bookings.
+    if (basePrice != null) body["base_price"] = basePrice;
+    if (platformFee != null) body["platform_fee"] = platformFee;
+    if (gstPercent != null) body["gst_percent"] = gstPercent;
+    if (gstAmount != null) body["gst_amount"] = gstAmount;
+
+    return apiClient.myridepostData(ApiConstants.createBooking, body);
   }
 
   /////==========  call create booking  api  ======================///////
@@ -147,9 +176,16 @@ class BookingRepo extends GetxService {
     required String drop_address,
     required String is_schedule,
     required String schedule_date_time,
+    num? estimated_distance,
+    num? estimated_duration,
+    num? base_price,
+    num? platform_fee,
+    num? gst_percent,
+    num? gst_amount,
   }) async {
     log(' booking $pickup_lat');
-    return apiClient.myridepostData(ApiConstants.createBooking, {
+
+    final Map<String, dynamic> body = {
       "pickup_lat": pickup_lat,
       "pickup_lng": pickup_lng,
       "drop_lat": drop_lat,
@@ -163,7 +199,30 @@ class BookingRepo extends GetxService {
       "schedule_date_time": schedule_date_time,
       "is_wallet": 0,
       "promo_code": "",
-    });
+    };
+
+    // Trip size, carried over from the same estimate. A city booking used to
+    // send neither, while outstation sent both — so anything downstream
+    // showing a normal ride's distance or duration (the driver app's ride
+    // details, the receipt) had nothing to read and fell back to 0 or a
+    // blank. The estimate has had both values all along.
+    if (estimated_distance != null) {
+      body["estimated_distance"] = estimated_distance;
+    }
+    if (estimated_duration != null) {
+      body["estimated_duration"] = estimated_duration;
+    }
+
+    // Fare breakdown carried over from /estimate-ride-list. Only sent when the
+    // estimate actually supplied it — an empty string here reads as 0 server
+    // side, which would silently zero out the platform fee / GST on the
+    // booking rather than letting the backend fall back to its own pricing.
+    if (base_price != null) body["base_price"] = base_price;
+    if (platform_fee != null) body["platform_fee"] = platform_fee;
+    if (gst_percent != null) body["gst_percent"] = gst_percent;
+    if (gst_amount != null) body["gst_amount"] = gst_amount;
+
+    return apiClient.myridepostData(ApiConstants.createBooking, body);
   }
 
   /////==========  call track Ride api  ======================///////

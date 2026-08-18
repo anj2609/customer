@@ -239,6 +239,11 @@ class _OutstationTripScreenState extends State<OutstationTripScreen> {
           toAddress: _toController.text,
           fromLatLng: _fromLatLng,
           toLatLng: _toLatLng,
+          // Verified against the live API, not assumed: outstation/estimate
+          // accepts exactly "one_way" and "round_trip". Every other spelling
+          // tried — two_way, twoway, two-way, roundtrip, return_trip, round —
+          // comes back {"code":"401","message":"The selected trip type is
+          // invalid."} Do not "correct" this to two_way.
           tripType: _oneWay ? 'one_way' : 'round_trip',
           estimatedDays: _oneWay ? 1 : _days,
           isSchedule: !_leaveNow,

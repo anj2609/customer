@@ -19,6 +19,7 @@ import 'package:myrideuser/data/modal/promocategory_model.dart';
 import 'package:myrideuser/data/modal/promodetail_model.dart';
 import 'package:myrideuser/data/modal/promolist_model.dart';
 import 'package:myrideuser/data/modal/promomodel.dart';
+import 'package:myrideuser/data/modal/ride_location_model.dart';
 import 'package:myrideuser/data/repository/profile_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -83,6 +84,18 @@ class ProfileController extends GetxController implements GetxService {
   String? walletbalance;
   bool isCustomerWalletLoading = false;
   bool isTopUpIntentLoading = false;
+
+  /// Recent pickup/drop-off addresses pulled from completed ride history,
+  /// backing [RecentLocationsList]. Kept separate from [bookingActivityList]
+  /// — that one belongs to the Activity screen and is cleared per status
+  /// filter, so sharing it would make the two wipe each other's results.
+  List<RideLocation> recentLocations = [];
+  bool isRecentLocationsLoading = false;
+
+  /// Non-null only when the fetch actually failed, which the widget renders
+  /// as a retry prompt. An empty [recentLocations] with a null error is the
+  /// ordinary "no trips yet" case, not a failure.
+  String? recentLocationsError;
 
   late final Razorpay _razorpay;
   String? _pendingOrderId;
@@ -1267,6 +1280,96 @@ class ProfileController extends GetxController implements GetxService {
       isPromoLoading = false;
       update();
     }
+  }
+
+  /// Builds the "Recent" list from completed rides: every drop-off and pickup
+  /// address the rider has actually used, newest first, deduplicated by
+  /// address string (RideLocation's == and hashCode are address-based, so a
+  /// LinkedHashSet dedups while preserving that order).
+  ///
+  /// Drop-off is added before pickup for each booking because the list feeds
+  /// destination search — where someone went is the more likely re-selection
+  /// than where they were picked up.
+  Future<void> fetchRecentLocations({int limit = 5}) async {
+    isRecentLocationsLoading = true;
+    recentLocationsError = null;
+    update();
+
+    try {
+      final Response response = await profileRepo.getBookingdata(
+        typeSlug: ApiConstants.completedBooking,
+      );
+
+      if (response.statusCode == 200 &&
+          response.body is Map &&
+          response.body['code'].toString() == "200") {
+        final ActivityDataModel model = ActivityDataModel.fromJson(
+          response.body['data'],
+        );
+
+        final Set<RideLocation> unique = {};
+        for (final booking in model.data ?? <ActivityDataMainModel>[]) {
+          _collectLocation(
+            unique,
+            bookingId: booking.id,
+            address: booking.dropAddress,
+            lat: booking.dropLat,
+            lng: booking.dropLng,
+            createdAt: booking.createdAt,
+          );
+          _collectLocation(
+            unique,
+            bookingId: booking.id,
+            address: booking.pickupAddress,
+            lat: booking.pickupLat,
+            lng: booking.pickupLng,
+            createdAt: booking.createdAt,
+          );
+        }
+
+        recentLocations = unique.take(limit).toList();
+      } else {
+        recentLocationsError = (response.body is Map &&
+                response.body['message'] != null)
+            ? response.body['message'].toString()
+            : "Couldn't load your recent trips.";
+      }
+    } catch (e) {
+      log('Recent locations error: $e');
+      recentLocationsError = "Couldn't load your recent trips.";
+    } finally {
+      isRecentLocationsLoading = false;
+      update();
+    }
+  }
+
+  /// Adds one address to the accumulator, skipping blanks. A missing or 0/0
+  /// coordinate is stored as null rather than as a real point — the widget
+  /// falls back to searching by address text, which is right, whereas 0,0
+  /// would silently place the pin in the Gulf of Guinea.
+  void _collectLocation(
+    Set<RideLocation> into, {
+    required int? bookingId,
+    required String? address,
+    required double? lat,
+    required double? lng,
+    required String? createdAt,
+  }) {
+    final String trimmed = (address ?? '').trim();
+    if (trimmed.isEmpty) return;
+
+    final bool hasCoordinates =
+        lat != null && lng != null && !(lat == 0 && lng == 0);
+
+    into.add(
+      RideLocation(
+        bookingId: bookingId,
+        address: trimmed,
+        lat: hasCoordinates ? lat : null,
+        lng: hasCoordinates ? lng : null,
+        createdAt: createdAt,
+      ),
+    );
   }
 
 

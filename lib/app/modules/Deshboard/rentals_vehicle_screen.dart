@@ -16,8 +16,8 @@ import 'package:myrideuser/widgets/toaster_animation.dart';
 
 /// Final step of the N Ride Rentals flow. Vehicle names, images, included km
 /// and price all come from the real `rental/estimate` endpoint for the
-/// chosen duration — nothing here is fabricated. Booking creation itself
-/// isn't wired up yet, so the CTA surfaces a "coming soon" message.
+/// chosen duration — nothing here is fabricated. The CTA creates the booking
+/// with ride_type "rental", carrying that estimate's fare breakdown through.
 class RentalsVehicleScreen extends StatefulWidget {
   final int hours;
   final String fromAddress;
@@ -42,6 +42,14 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
   final BookingController bookingController = Get.find<BookingController>();
   int _selectedIndex = -1;
   Set<Polyline> _polylines = {};
+
+  /// Road distance of the pickup → drop-off route, in km, taken from the same
+  /// Directions response that draws the polyline. Sent to create-booking as
+  /// `final_distance`; /rental/estimate doesn't return it (its `included_km`
+  /// is the package allowance, not this trip's distance). Stays null until
+  /// that request comes back, in which case the field is left out of the
+  /// booking body and the backend derives the distance itself.
+  double? _routeDistanceKm;
   final String _directionsApiKey = "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU";
 
   @override
@@ -72,11 +80,17 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
       final data = jsonDecode(response.body);
 
       final routePoints = <LatLng>[];
+      // Google reports distance per leg in metres; a direct pickup → drop-off
+      // route is a single leg, but sum them so the total stays right if a
+      // waypoint is ever added.
+      double distanceMetres = 0;
       final routes = data["routes"];
       if (routes != null && routes is List && routes.isNotEmpty) {
         final legs = routes[0]["legs"];
         if (legs != null && legs is List) {
           for (var leg in legs) {
+            final legDistance = leg["distance"]?["value"];
+            if (legDistance is num) distanceMetres += legDistance;
             for (var step in leg["steps"]) {
               final polyline = step["polyline"]["points"];
               final decoded = PolylinePoints.decodePolyline(polyline);
@@ -88,8 +102,13 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
         }
       }
 
-      if (mounted && routePoints.isNotEmpty) {
-        setState(() {
+      if (!mounted) return;
+      setState(() {
+        if (distanceMetres > 0) {
+          _routeDistanceKm =
+              double.parse((distanceMetres / 1000).toStringAsFixed(2));
+        }
+        if (routePoints.isNotEmpty) {
           _polylines = {
             Polyline(
               polylineId: const PolylineId("rentals_route"),
@@ -101,8 +120,8 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
               endCap: Cap.roundCap,
             ),
           };
-        });
-      }
+        }
+      });
     } catch (e) {
       debugPrint("Rentals vehicle screen route draw error: $e");
     }
@@ -291,6 +310,7 @@ class _RentalsVehicleScreenState extends State<RentalsVehicleScreen> {
                     dropAddress: widget.toAddress,
                     packageId: estimate.packageId!,
                     finalHour: widget.hours,
+                    finalDistance: _routeDistanceKm,
                   );
                 },
               ),

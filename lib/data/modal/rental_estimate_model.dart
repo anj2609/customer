@@ -38,10 +38,15 @@ class RentalEstimateModel {
   }
 }
 
+/// The `fare_details` block on each rental estimate row. `base_price`,
+/// `platform_fee`, `gst_percent` and `gst_amount` are carried straight back
+/// into the create-booking body for a rental ride, so they are parsed as
+/// numbers here — `platform_fee` arrives as a string ("30.00") and would
+/// otherwise be posted as text.
 class RentalFareDetails {
   num? basePrice;
   num? timeCharge;
-  String? platformFee;
+  num? platformFee;
   num? surgeMultiplier;
   num? gstPercent;
   num? gstAmount;
@@ -57,12 +62,20 @@ class RentalFareDetails {
 
   factory RentalFareDetails.fromJson(Map<String, dynamic> json) {
     return RentalFareDetails(
-      basePrice: json['base_price'],
-      timeCharge: json['time_charge'],
-      platformFee: json['platform_fee']?.toString(),
-      surgeMultiplier: json['surge_multiplier'],
-      gstPercent: json['gst_percent'],
-      gstAmount: json['gst_amount'],
+      basePrice: _toNum(json['base_price']),
+      timeCharge: _toNum(json['time_charge']),
+      platformFee: _toNum(json['platform_fee']),
+      surgeMultiplier: _toNum(json['surge_multiplier']),
+      gstPercent: _toNum(json['gst_percent']),
+      gstAmount: _toNum(json['gst_amount']),
     );
   }
+}
+
+/// Fee fields come back as a mix of numbers and numeric strings within the
+/// same object, so normalise before anything reads them as num.
+num? _toNum(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value;
+  return num.tryParse(value.toString());
 }

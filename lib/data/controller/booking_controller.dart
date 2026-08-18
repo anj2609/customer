@@ -262,6 +262,15 @@ class BookingController extends GetxController implements GetxService {
     }
   }
 
+  /// The /rental/estimate row for a given package, or null if the estimate has
+  /// since been refreshed for a different duration and no longer holds it.
+  RentalEstimateModel? rentalEstimateFor(int packageId) {
+    for (final estimate in rentalEstimateList) {
+      if (estimate.packageId == packageId) return estimate;
+    }
+    return null;
+  }
+
   /////==========  outstation vehicle + price estimate for a trip  ======================///////
   List<OutstationEstimateModel> outstationEstimateList = [];
   bool isOutstationEstimateLoading = false;
@@ -307,6 +316,16 @@ class BookingController extends GetxController implements GetxService {
       isOutstationEstimateLoading = false;
       update();
     }
+  }
+
+  /// The /outstation/estimate row for a given pricing id, or null if the
+  /// estimate has since been re-run for a different trip and no longer holds
+  /// it.
+  OutstationEstimateModel? outstationEstimateFor(int outstationPricingId) {
+    for (final estimate in outstationEstimateList) {
+      if (estimate.outstationPricingId == outstationPricingId) return estimate;
+    }
+    return null;
   }
 
   Future<void> getCurrentLocation() async {
@@ -425,6 +444,19 @@ class BookingController extends GetxController implements GetxService {
     return response;
   }
 
+  /// The /estimate-ride-list row for a given vehicle type, or null if the
+  /// estimate has since been cleared or never returned that vehicle. Callers
+  /// treat a null as "let the backend price it" rather than sending zeros.
+  VehicleModel? selectedEstimateFor(String vehicleTypeId) {
+    final String id = vehicleTypeId.trim();
+    if (id.isEmpty) return null;
+
+    for (final vehicle in vehicleList) {
+      if (vehicle.vehicleTypeId?.toString() == id) return vehicle;
+    }
+    return null;
+  }
+
   Future<Response> CreateBooking({
     required BuildContext context,
     required double? pickup_lat,
@@ -455,6 +487,11 @@ class BookingController extends GetxController implements GetxService {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
+      // The fare breakdown belongs to the vehicle row the rider picked on the
+      // estimate screen, so it is read back out of the stored estimate here
+      // rather than threaded through every booking screen by hand.
+      final VehicleModel? estimate = selectedEstimateFor(vehicle_type_id);
+
       Response response = await bookingRepo.createBookingApi(
         pickup_lat: pickup_lat!,
         pickup_lng: pickup_lng!,
@@ -466,6 +503,12 @@ class BookingController extends GetxController implements GetxService {
         drop_address: drop_address,
         is_schedule: is_schedule,
         schedule_date_time: schedule_date_time,
+        estimated_distance: estimate?.distanceKm,
+        estimated_duration: estimate?.estimatedMinutes,
+        base_price: estimate?.basePrice,
+        platform_fee: estimate?.platformFee,
+        gst_percent: estimate?.gstPercent,
+        gst_amount: estimate?.gstAmount,
       );
 
       // Safe-read the response body
@@ -550,11 +593,17 @@ class BookingController extends GetxController implements GetxService {
     required String dropAddress,
     required int packageId,
     required int finalHour,
+    num? finalDistance,
   }) async {
     update();
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      // Fare breakdown for the package the rider picked, read back out of the
+      // stored /rental/estimate result — same approach as CreateBooking.
+      final RentalFareDetails? fare =
+          rentalEstimateFor(packageId)?.fareDetails;
 
       Response response = await bookingRepo.createRentalBookingApi(
         pickupLat: pickupLat,
@@ -567,6 +616,11 @@ class BookingController extends GetxController implements GetxService {
         dropAddress: dropAddress,
         packageId: packageId,
         finalHour: finalHour,
+        finalDistance: finalDistance,
+        basePrice: fare?.basePrice,
+        platformFee: fare?.platformFee,
+        gstPercent: fare?.gstPercent,
+        gstAmount: fare?.gstAmount,
       );
 
       final body = response.body;
@@ -656,6 +710,12 @@ class BookingController extends GetxController implements GetxService {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
+      // Fare breakdown for the pricing row the rider picked, read back out of
+      // the stored /outstation/estimate result — same approach as the
+      // city-ride and rental bookings.
+      final OutstationFareDetails? fare =
+          outstationEstimateFor(outstationPricingId)?.fareDetails;
+
       Response response = await bookingRepo.createOutstationBookingApi(
         pickupLat: pickupLat,
         pickupLng: pickupLng,
@@ -674,6 +734,10 @@ class BookingController extends GetxController implements GetxService {
         billableDistance: billableDistance,
         estimatedDays: estimatedDays,
         driverAllowance: driverAllowance,
+        basePrice: fare?.basePrice,
+        platformFee: fare?.platformFee,
+        gstPercent: fare?.gstPercent,
+        gstAmount: fare?.gstAmount,
       );
 
       final body = response.body;

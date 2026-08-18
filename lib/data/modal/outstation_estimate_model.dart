@@ -41,13 +41,18 @@ class OutstationEstimateModel {
   }
 }
 
+/// The `fare_details` block on each outstation estimate row. `base_price`,
+/// `platform_fee`, `gst_percent` and `gst_amount` go straight back into the
+/// create-booking body for an outstation ride, so they are parsed as numbers
+/// — `base_price` ("2449.00") and `platform_fee` ("20.00") arrive as strings
+/// and would otherwise be posted as text.
 class OutstationFareDetails {
-  String? basePrice;
-  String? baseDistanceKm;
+  num? basePrice;
+  num? baseDistanceKm;
   num? extraDistance;
-  String? perKmCharge;
+  num? perKmCharge;
   num? driverAllowance;
-  String? platformFee;
+  num? platformFee;
   num? surgeMultiplier;
   num? gstPercent;
   num? gstAmount;
@@ -66,15 +71,23 @@ class OutstationFareDetails {
 
   factory OutstationFareDetails.fromJson(Map<String, dynamic> json) {
     return OutstationFareDetails(
-      basePrice: json['base_price']?.toString(),
-      baseDistanceKm: json['base_distance_km']?.toString(),
-      extraDistance: json['extra_distance'],
-      perKmCharge: json['per_km_charge']?.toString(),
-      driverAllowance: json['driver_allowance'],
-      platformFee: json['platform_fee']?.toString(),
-      surgeMultiplier: json['surge_multiplier'],
-      gstPercent: json['gst_percent'],
-      gstAmount: json['gst_amount'],
+      basePrice: _toNum(json['base_price']),
+      baseDistanceKm: _toNum(json['base_distance_km']),
+      extraDistance: _toNum(json['extra_distance']),
+      perKmCharge: _toNum(json['per_km_charge']),
+      driverAllowance: _toNum(json['driver_allowance']),
+      platformFee: _toNum(json['platform_fee']),
+      surgeMultiplier: _toNum(json['surge_multiplier']),
+      gstPercent: _toNum(json['gst_percent']),
+      gstAmount: _toNum(json['gst_amount']),
     );
   }
+}
+
+/// Fee fields come back as a mix of numbers and numeric strings within the
+/// same object, so normalise before anything reads them as num.
+num? _toNum(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value;
+  return num.tryParse(value.toString());
 }
