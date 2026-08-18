@@ -492,6 +492,21 @@ class BookingController extends GetxController implements GetxService {
       // rather than threaded through every booking screen by hand.
       final VehicleModel? estimate = selectedEstimateFor(vehicle_type_id);
 
+      // Diagnostic: if this logs "estimate=NULL", the fare/distance/duration
+      // fields are being omitted because no matching row was found in
+      // vehicleList (its length and the id searched are printed so the
+      // mismatch is obvious) — not because the repo isn't sending them. If it
+      // logs a real row but the server still receives none of the extra
+      // fields, the running build is stale.
+      debugPrint(
+        '[CreateBooking] vehicle_type_id=$vehicle_type_id '
+        'vehicleList=${vehicleList.length} '
+        'estimate=${estimate == null ? "NULL" : "found "
+            "dist=${estimate.distanceKm} min=${estimate.estimatedMinutes} "
+            "base=${estimate.basePrice} plat=${estimate.platformFee} "
+            "gstP=${estimate.gstPercent} gstA=${estimate.gstAmount}"}',
+      );
+
       Response response = await bookingRepo.createBookingApi(
         pickup_lat: pickup_lat!,
         pickup_lng: pickup_lng!,

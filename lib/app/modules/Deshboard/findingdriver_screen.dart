@@ -39,6 +39,53 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   bool _isNavigating = false;
   bool addressLoaded = false;
   bool _isChatOpening = false;
+
+  /// The booking's drop-off, remembered when the pins are first placed so the
+  /// route and camera can switch to it once the ride is under way.
+  LatLng? _dropLatLng;
+
+  /// Whether the camera should keep following the driver.
+  ///
+  /// Every driver location update used to re-centre the map unconditionally,
+  /// so a rider who dragged the map to look around was pulled straight back
+  /// within a second or two and effectively could not pan at all. Panning now
+  /// hands control to the rider and follow resumes on its own after
+  /// [_refollowDelay] — no button to find, and no fighting the map.
+  bool _followMode = true;
+
+  /// Distinguishes our own animateCamera calls from a real finger drag, since
+  /// onCameraMoveStarted fires for both.
+  bool _programmaticCameraMove = false;
+
+  Timer? _refollowTimer;
+  static const Duration _refollowDelay = Duration(seconds: 8);
+
+  /// Called when the rider drags the map: stop following, and start the clock
+  /// on resuming.
+  void _onUserPannedMap() {
+    _refollowTimer?.cancel();
+    if (_followMode && mounted) setState(() => _followMode = false);
+    _refollowTimer = Timer(_refollowDelay, () {
+      if (!mounted) return;
+      setState(() => _followMode = true);
+      _recentreOnRide();
+    });
+  }
+
+  /// Frames whatever matters at this point in the ride: the driver on their
+  /// way in, or the road ahead once the rider is aboard.
+  void _recentreOnRide() {
+    final target = _isRideUnderway ? (_dropLatLng ?? driverLocation) : driverLocation;
+    if (target == null || mapController == null) return;
+    _programmaticCameraMove = true;
+    mapController?.animateCamera(CameraUpdate.newLatLng(target));
+  }
+
+  /// True once the rider is in the car, when the journey being shown stops
+  /// being "driver coming to me" and becomes "us going to the destination".
+  bool get _isRideUnderway =>
+      Get.find<BookingController>().rideStatus.value.toLowerCase() == 'ongoing';
+
   Future<void> loadCarIcon() async {
     carIcon = await getCustomMarker();
     setState(() {});
@@ -86,6 +133,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   @override
   void dispose() {
     _timer?.cancel();
+    _refollowTimer?.cancel();
     super.dispose();
   }
 
@@ -320,17 +368,22 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
         apiKey: 'AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU',
       );
 
+      // Which journey to draw depends on where the rider is in the trip.
+      // Before pickup the useful line is the driver closing in on them; once
+      // they are aboard it is the road to the destination. This used to be
+      // hardcoded to "me → driver", so for the whole ride the rider watched a
+      // line to a car they were already sitting in.
+      final bool underway = _isRideUnderway;
+      final LatLng routeStart = underway
+          ? driverLocation!
+          : currentLocation!;
+      final LatLng? routeEnd = underway ? _dropLatLng : driverLocation;
+      if (routeEnd == null) return;
+
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        // apiKey: "YOUR_GOOGLE_MAP_KEY",
         request: PolylineRequest(
-          origin: PointLatLng(
-            currentLocation!.latitude,
-            currentLocation!.longitude,
-          ),
-          destination: PointLatLng(
-            driverLocation!.latitude,
-            driverLocation!.longitude,
-          ),
+          origin: PointLatLng(routeStart.latitude, routeStart.longitude),
+          destination: PointLatLng(routeEnd.latitude, routeEnd.longitude),
           mode: TravelMode.driving,
         ),
       );
@@ -456,6 +509,8 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     final locationKey = _bookingLocationKey(booking);
     final pickup = LatLng(pickupLat, pickupLng);
     final destination = LatLng(dropLat, dropLng);
+    // Kept so the route and camera can aim here once the ride starts.
+    _dropLatLng = destination;
     if (_visibleBookingLocationKey != locationKey) {
       _visibleBookingLocationKey = locationKey;
       final retainedLiveMarkers = markers
@@ -567,7 +622,9 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     updateMarkers();
     drawRoute1();
 
-    mapController?.animateCamera(CameraUpdate.newLatLng(driverLocation!));
+    // Only if the rider hasn't taken the map over — see [_followMode].
+    if (!_followMode) return;
+    _recentreOnRide();
   }
 
   Future<void> getCurrentLocation1() async {
@@ -658,6 +715,16 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                       zoomControlsEnabled: false,
                       markers: markers.value,
                       polylines: polylines.value,
+                      // Fires for our own animateCamera calls as well as real
+                      // drags, so the flag set alongside those calls is what
+                      // separates the two.
+                      onCameraMoveStarted: () {
+                        if (_programmaticCameraMove) {
+                          _programmaticCameraMove = false;
+                          return;
+                        }
+                        _onUserPannedMap();
+                      },
                       onMapCreated: (controllerMap) async {
                         mapController = controllerMap;
 
@@ -1134,7 +1201,10 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
           ),
-          if (driver.distance != null)
+          // Only when there is a real figure — a zero here meant the backend
+          // sent no distance, and "0.0 km" reads as a driver already at the
+          // kerb.
+          if (driver.distance != null && driver.distance! > 0)
             Text(
               "${driver.distance!.toStringAsFixed(1)} km",
               style: const TextStyle(fontSize: 10, color: Colors.grey),
