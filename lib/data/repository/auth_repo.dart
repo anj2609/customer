@@ -21,7 +21,6 @@ class AuthRepo extends GetxService {
     log('send   otp number $phone');
     return apiClient.postsignUpData(ApiConstants.sendOtpUrl, {
       "phone": phone!.trim(),
-      "type": type.toString(),
       "user_type": ApiConstants.customer,
       "device_type": devicetype,
       "device_token": deviceToken,
@@ -50,6 +49,7 @@ class AuthRepo extends GetxService {
   }
 
   Future<Response> fillPersonalApi({
+    String? phone,
     String? name,
     String? email,
     String? gender,
@@ -58,16 +58,36 @@ class AuthRepo extends GetxService {
   }) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     dynamic userId = prefs.getString(ApiConstants.profileid);
+    // A new user has no user_id yet — they are identified by the signup_token
+    // verify-otp handed back. Existing-but-incomplete users still have a
+    // user_id, so both are sent and the backend uses whichever applies.
+    final String signupToken = prefs.getString(ApiConstants.signupToken) ?? "";
 
-    return apiClient.postMultipartData(ApiConstants.basicInfo, {
+    // user_id was always sent, even as an empty string for a brand-new user
+    // who has no account yet — signup_token is what identifies them at this
+    // point, and a reference request confirmed working against the live
+    // backend omits user_id entirely in exactly that case. Only include it
+    // when there's a real value (an existing-but-incomplete user resuming
+    // basic-info), rather than sending an empty field the backend has to
+    // second-guess.
+    final String resolvedUserId = ApiConstants.userIdSocial.isNotEmpty
+        ? ApiConstants.userIdSocial
+        : (userId ?? "");
+
+    final Map<String, String> body = {
+      "phone": phone ?? "",
+      "user_type": ApiConstants.customer,
+      "signup_token": signupToken,
       "name": name ?? "",
       "email": email ?? "",
       "gender": gender ?? "",
       "date_of_birth": dob ?? "",
-      "user_id": ApiConstants.userIdSocial.isNotEmpty
-          ? ApiConstants.userIdSocial
-          : userId ?? "",
-    }, profile_image);
+    };
+    if (resolvedUserId.isNotEmpty) {
+      body["user_id"] = resolvedUserId;
+    }
+
+    return apiClient.postMultipartData(ApiConstants.basicInfo, body, profile_image);
   }
 
   Future<Response> usersignup({String? evnumber, String? passsowrd}) async {
@@ -121,6 +141,13 @@ class AuthRepo extends GetxService {
     return await sharedPreferences.setString(
       ApiConstants.token,
       token.toString(),
+    );
+  }
+
+  Future<bool> saveSignupToken(String signupToken) async {
+    return await sharedPreferences.setString(
+      ApiConstants.signupToken,
+      signupToken,
     );
   }
 

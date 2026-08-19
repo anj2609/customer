@@ -368,6 +368,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   try {
                     await Get.find<AuthController>().fillPersonalInfoApi(
+                      phone: widget.phonenumber,
                       name: name,
                       email: email,
                       gender: selectedGender,

@@ -9,6 +9,10 @@ class ApiConstants {
   static const String reSendOtp = 're-send';
   static const String loginapi = 'login';
   static const String basicInfo = 'basic-info';
+  // Short-lived token from verify-otp for a brand-new user, used to
+  // authenticate their one basic-info submission before they have a real
+  // session token.
+  static const String signupToken = 'signup_token';
   static const String getUserProfileUrl = 'get-profile';
   static const String editProfileUrl = 'update-profile';
   static const String logOutUrl = 'logout';
@@ -98,7 +102,17 @@ class ApiConstants {
 
   //// usernames / profileImage
   //
-  static const String imageurl = 'https://myride.infinititechsolution.com/';
+  // Uploaded files (vehicle photos, profile photos, documents) are served by
+  // the same deployment as [baseUrl] — anything uploaded through the API
+  // lands there. This previously pointed at myride.infinititechsolution.com,
+  // a separate server: requesting the same path from each host returns a
+  // different file (confirmed via curl — different byte length, different
+  // Server header, hcdn vs the API's own nginx), so it's a distinct
+  // deployment with its own storage, not a CDN edge in front of this one.
+  // Every vehicle/cab image on this app is built from this constant, so
+  // cab images were being looked up on a host that never received them —
+  // the same bug already fixed on the driver app's equivalent constant.
+  static const String imageurl = 'https://app.nride.in/';
 }
 
 dynamic? customerId;

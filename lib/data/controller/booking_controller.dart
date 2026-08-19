@@ -1341,9 +1341,12 @@ class BookingController extends GetxController implements GetxService {
     print("Stored Image Path: $userProfile");
 
     if (userProfile != null && userProfile.isNotEmpty) {
+      // Same wrong-host bug as ApiConstants.imageurl — this one just had the
+      // old domain typed directly instead of referencing the constant, so
+      // fixing the constant alone didn't fix this call site.
       String imageUrl = userProfile.startsWith("http")
           ? userProfile
-          : "https://myride.infinititechsolution.com/$userProfile";
+          : "${ApiConstants.imageurl}$userProfile";
 
       print("Final Image URL: $imageUrl");
 

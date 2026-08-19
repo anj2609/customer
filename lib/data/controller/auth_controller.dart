@@ -641,20 +641,11 @@ class AuthController extends GetxController implements GetxService {
     );
 
     if (response.body['code'] == "200") {
-      final String? token = response.body['data']?["token"]?.toString();
-      final String? userId = response.body['data']?['user']?['id']?.toString();
-
-      if (token == null || token.isEmpty || token == 'null' ||
-          userId == null || userId.isEmpty || userId == 'null') {
-        AnimatedTopToast.show(
-          context: context,
-          message: "Verification failed. Please try again.",
-          backgroundColor: ColorResources.textColorBaclColor,
-          icon: Icons.error_outline,
-        );
-        update();
-        return response;
-      }
+      final data = response.body['data'];
+      // The backend now states outright whether this is a first-time user, so
+      // the branch is taken from is_new_user rather than from the login-vs-
+      // register guess the client used to carry through `type`.
+      final bool isNewUser = data?['is_new_user'] == true;
 
       AnimatedTopToast.show(
         context: context,
@@ -663,17 +654,41 @@ class AuthController extends GetxController implements GetxService {
         backgroundColor: ColorResources.appColor,
         icon: Icons.check_circle_rounded,
       );
-      authRepo.saveUserToken(token);
-      authRepo.saveUserprofileid(userId);
 
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (type == ApiConstants.UserRegister) {
-        Get.toNamed(RouteHelper.getprofileScreenRoute(),
-        arguments: {
-        'phonenumber': mobileNumber.toString()
-        }
+      if (isNewUser) {
+        // No session token yet — a new user is carried by the signup_token
+        // until they finish basic info, which is where the real token is
+        // issued. Save it and send them to fill their details.
+        final String signupToken = data?['signup_token']?.toString() ?? '';
+        await authRepo.saveSignupToken(signupToken);
+
+        await Future.delayed(const Duration(milliseconds: 500));
+        Get.toNamed(
+          RouteHelper.getprofileScreenRoute(),
+          arguments: {'phonenumber': mobileNumber.toString()},
         );
       } else {
+        // Existing user: verify-otp returns the real token and user record, so
+        // save them and go straight into the app.
+        final String? token = data?["token"]?.toString();
+        final String? userId = data?['user']?['id']?.toString();
+
+        if (token == null || token.isEmpty || token == 'null' ||
+            userId == null || userId.isEmpty || userId == 'null') {
+          AnimatedTopToast.show(
+            context: context,
+            message: "Verification failed. Please try again.",
+            backgroundColor: ColorResources.textColorBaclColor,
+            icon: Icons.error_outline,
+          );
+          update();
+          return response;
+        }
+
+        authRepo.saveUserToken(token);
+        authRepo.saveUserprofileid(userId);
+
+        await Future.delayed(const Duration(milliseconds: 500));
         Get.toNamed(RouteHelper.getmainNavigationScreen());
       }
     } else {
@@ -693,6 +708,7 @@ class AuthController extends GetxController implements GetxService {
   ///// ========= Api  First Sig-Up Api Call  =========
   Future<Response> fillPersonalInfoApi({
     required BuildContext context,
+    String? phone,
     String? name,
     String? email,
     String? gender,
@@ -703,6 +719,7 @@ class AuthController extends GetxController implements GetxService {
     update();
 
     Response response = await authRepo.fillPersonalApi(
+      phone: phone?.trim(),
       name: name!.trim(),
       email: email!.trim(),
       gender: gender!.trim(),
@@ -711,16 +728,22 @@ class AuthController extends GetxController implements GetxService {
     );
 
     if (response.body['code'] == "200") {
-    //  await EasyLoading.dismiss();
+      // A new user reaches basic-info with only a signup_token; the real
+      // session token is issued here, on completion. Capture token + user id
+      // if the response carries them, so the user is properly logged in for
+      // every call after this — without it they would land on Home
+      // unauthenticated.
+      final data = response.body['data'];
+      final String? token = data?['token']?.toString();
+      final String? userId =
+          (data?['user']?['id'] ?? data?['user_id'])?.toString();
+      if (token != null && token.isNotEmpty && token != 'null') {
+        authRepo.saveUserToken(token);
+      }
+      if (userId != null && userId.isNotEmpty && userId != 'null') {
+        authRepo.saveUserprofileid(userId);
+      }
 
-      // Get.snackbar(
-      //   'Success',
-      //   "${response.body['message']}",
-      //   backgroundColor: ColorResources.blueeebutton,
-      //   colorText: Colors.white,
-      //   snackPosition: SnackPosition.TOP,
-      //   duration: const Duration(seconds: 5),
-      // );
       AnimatedTopToast.show(
         context: context,
         message:
@@ -733,27 +756,29 @@ class AuthController extends GetxController implements GetxService {
 
       Get.toNamed(RouteHelper.getmainNavigationScreen());
     } else if (response.body['data'] == "401") {
-     // await EasyLoading.dismiss();
-      // Get.snackbar(
-      //   '',
-      //   response.body['message'] ?? "Something went wrong",
-      //   backgroundColor: ColorResources.textColorRed,
-      //   colorText: Colors.white,
-      //   snackPosition: SnackPosition.TOP,
-      // );
-       AnimatedTopToast.show(
+      // Was always this same fixed string regardless of what the backend
+      // actually said — same fix as the success path three lines up, and
+      // the equivalent fix already made on the driver app's basic-info
+      // failure handling: a specific, actionable rejection (an account that
+      // already exists, a validation error on one field) looked identical
+      // to a transient failure, and "Please try again" was the only
+      // guidance offered for an error retrying can never fix.
+      AnimatedTopToast.show(
         context: context,
-        message:
-             "Unable to save your details. Please try again.",
+        message: _sanitizeBackendMessage(
+          response.body['message'],
+          "Unable to save your details. Please try again.",
+        ),
         backgroundColor: ColorResources.textColorBaclColor,
         icon: Icons.error_outline,
       );
     } else {
-      
-        AnimatedTopToast.show(
+      AnimatedTopToast.show(
         context: context,
-        message:
-            "Unable to save your details. Please try again.",
+        message: _sanitizeBackendMessage(
+          response.body['message'],
+          "Unable to save your details. Please try again.",
+        ),
         backgroundColor: ColorResources.textColorBaclColor,
         icon: Icons.error_outline,
       );
