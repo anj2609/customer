@@ -40,6 +40,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
 
+  // GoogleMap had no `padding`, so "centered" meant centered in the map
+  // widget's full bounds — including the portion permanently covered by the
+  // bottom sheet (never less than _minSize, 30% of the screen). The blue
+  // location dot rendered at that geometric center, which sits behind the
+  // sheet, reading as "my location is stuck low and half-hidden" rather than
+  // actually centered in the visible map area above the sheet. Kept in sync
+  // with the sheet's actual live extent (it resizes between 0.3 and 0.92
+  // depending on stage and drag), rather than a fixed value that would only
+  // be correct at one sheet size.
+  double _mapBottomPadding = 0;
+
+  void _syncMapPaddingToSheet() {
+    if (!_sheetController.isAttached) return;
+    final height = MediaQuery.of(context).size.height;
+    final padding = _sheetController.size * height;
+    if ((padding - _mapBottomPadding).abs() < 1) return;
+    setState(() => _mapBottomPadding = padding);
+  }
+
   _SheetStage _stage = _SheetStage.idle;
 
   // Sheet sizes (fraction of screen height) per stage.
@@ -83,6 +102,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _sheetController.addListener(_syncMapPaddingToSheet);
+    // The sheet isn't attached yet on this very first frame — its own
+    // builder hasn't run — so the initial padding (idle size) is set once
+    // that first frame lands rather than left at 0 until the first drag.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncMapPaddingToSheet());
     controller.getAddressCustomer(context: context);
     Get.find<ProfileController>().getActivityData(
       context: context,
@@ -101,6 +125,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void dispose() {
+    _sheetController.removeListener(_syncMapPaddingToSheet);
     _sheetController.dispose();
     _destinationController.dispose();
     _pickupEditController.dispose();
@@ -883,6 +908,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           myLocationEnabled: true,
           myLocationButtonEnabled: false,
+          // Without this, "centered" meant centered in the map widget's full
+          // bounds, including the portion the bottom sheet permanently
+          // covers — see _syncMapPaddingToSheet for the full story.
+          padding: EdgeInsets.only(bottom: _mapBottomPadding),
           markers: _stage == _SheetStage.vehicleSelect
               ? _routeMarkers
               : bc.markers,

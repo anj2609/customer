@@ -888,23 +888,31 @@ class ProfileController extends GetxController implements GetxService {
     isPromoDataLoading = true;
     update();
 
-    Response response = await profileRepo.customerpromocard(
-      cattype: Cattype.toString(),
-    );
+    // Was no try/catch at all — both resets below sat past the await, so a
+    // network failure or a parse exception in PromoModel.fromJson skipped
+    // both and left isPromoDataLoading stuck true forever, spinning the
+    // promos screen indefinitely.
+    try {
+      Response response = await profileRepo.customerpromocard(
+        cattype: Cattype.toString(),
+      );
 
-    if (response.body['code'].toString() == "200") {
-      PromoModel model = PromoModel.fromJson(response.body);
+      if (response.body['code'].toString() == "200") {
+        PromoModel model = PromoModel.fromJson(response.body);
 
-      promoList = model.data ?? [];
-      filteredList = promoList;
-    } else {
-      if (!_isDataNotFoundResponse(response.body)) {
-        Get.snackbar("Notice", _sanitizeBackendMessage(response.body['message'], "Unable to load offers."));
+        promoList = model.data ?? [];
+        filteredList = promoList;
+      } else {
+        if (!_isDataNotFoundResponse(response.body)) {
+          Get.snackbar("Notice", _sanitizeBackendMessage(response.body['message'], "Unable to load offers."));
+        }
       }
+    } catch (e) {
+      Get.snackbar("Notice", "Unable to load offers. Please try again.");
+    } finally {
+      isPromoDataLoading = false;
+      update();
     }
-
-    isPromoDataLoading = false;
-    update();
   }
 
   Future<Response?> privacyPolicy({required BuildContext context}) async {
