@@ -182,19 +182,28 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
         },
       ),
 
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.all(Dimensions.spacingSize25),
-        child: CustomPrimaryButton(
-          text: "Add Address",
-          onTap: () async {
-            final result = await Get.toNamed(
-              RouteHelper.getaddAddressScreens(),
-            );
+      // SafeArea(top: false) because the app runs edge-to-edge
+      // (SystemUiMode.edgeToEdge in main.dart), so even the
+      // bottomNavigationBar slot extends under the system navigation bar —
+      // leaving this button sitting behind the gesture pill / nav buttons.
+      // top: false since a bottom bar has no business reserving status-bar
+      // space.
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.all(Dimensions.spacingSize25),
+          child: CustomPrimaryButton(
+            text: "Add Address",
+            onTap: () async {
+              final result = await Get.toNamed(
+                RouteHelper.getaddAddressScreens(),
+              );
 
-            if (result == true) {
-              controller.getAddressCustomer(context: context);
-            }
-          },
+              if (result == true) {
+                controller.getAddressCustomer(context: context);
+              }
+            },
+          ),
         ),
       ),
     );

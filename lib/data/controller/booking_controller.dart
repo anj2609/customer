@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -72,6 +73,23 @@ class BookingController extends GetxController implements GetxService {
   // amount, etc.) wherever a booking actually exists. The raw Map above
   // is left as-is since other code already reads other fields off it.
   Rx<TripDetailModel?> tripDetailModel = Rx<TripDetailModel?>(null);
+
+  /// The real fare components (base fare, CGST, SGST, booking fee, platform
+  /// fee) for the booking this app session created, captured from
+  /// create-booking's `fare_details` — see
+  /// [PriceBreakdown.fromCreateBooking].
+  ///
+  /// create-booking is the only endpoint confirmed to return these.
+  /// trip-detail, which every fare display actually reads from, often sends
+  /// only the lighter `payment` object, which carries no tax or fee
+  /// components at all — so without holding on to this, the receipt has
+  /// nothing to itemise and collapses to subtotal-and-total.
+  ///
+  /// Persisted rather than kept purely in memory so the breakdown survives
+  /// the app being killed and reopened mid-ride, which is exactly when the
+  /// rider is most likely to be looking at it.
+  PriceBreakdown? _createdBreakdown;
+  String? _createdBreakdownBookingId;
   TrackRideModel? trackRideModel;
   DatTrackRideDetails? rideDetails;
   DriverInfo? driverInfo;
@@ -81,7 +99,6 @@ class BookingController extends GetxController implements GetxService {
   int? selectedReasonId;
   Set<Marker> markers = {};
   BitmapDescriptor? driverCarIcons;
-  BitmapDescriptor? customerProfile;
 
   GoogleMapController? mapController;
   LatLng currentLatLng = const LatLng(28.5355, 77.3910);
@@ -142,13 +159,17 @@ class BookingController extends GetxController implements GetxService {
     );
 
     loadCarIcon();
-    loadUserIcon();
     getVehicleTypeList();
     getHomeBanner();
   }
 
   @override
   void onClose() {
+    // Was declared but never actually set — the pending home-banner retry
+    // Future (see getHomeBanner()) is delayed up to several seconds, and
+    // without this its callback could still fire and call update() on a
+    // controller GetX has already torn down.
+    _isDisposed = true;
     nearbyDriversSearch.dispose();
     super.onClose();
   }
@@ -177,11 +198,30 @@ class BookingController extends GetxController implements GetxService {
     }
   }
 
+  /// getHomeBanner() runs once from onInit(), at the same moment as every
+  /// other startup call this controller fires (nearby drivers, vehicle
+  /// types, etc.) — right when BookingController is first constructed after
+  /// login/app-resume. ApiClient's own known-issue comment
+  /// (_handleSessionExpiry, "Header User id is required") already documents
+  /// that this exact endpoint shape can come back 401 from a startup race
+  /// before the auth headers are consistently attached, and — correctly —
+  /// treats that as "not a real session expiry". But nothing here ever
+  /// retried after that, so a banner that lost that race just stayed blank
+  /// (silently, behind the gradient fallback) for the rest of the app
+  /// session: exactly the "doesn't load in production" pattern reported,
+  /// since production networks/devices hit that startup window far more
+  /// often than a dev device sitting next to a debugger. Bounded retries
+  /// below give the same request a few more chances once that race has had
+  /// time to resolve, instead of a single unrepeated attempt.
+  int _homeBannerRetryCount = 0;
+  static const int _homeBannerMaxRetries = 3;
+
   /////==========  home screen promo banner (title/sub_title/image)  ======================///////
   Future<void> getHomeBanner() async {
     isHomeBannerLoading = true;
     update();
 
+    bool succeeded = false;
     try {
       Response response = await bookingRepo.getBannerApi();
 
@@ -206,13 +246,37 @@ class BookingController extends GetxController implements GetxService {
           // silently produces the exact same "nothing shown" result. This is
           // what actually shows what the backend sent, empty or not.
           log('Home banner image field: "${homeBanner?.image}"');
+          succeeded = true;
         }
+      } else {
+        log(
+          'Home banner request failed: status ${response.statusCode}, '
+          'body ${response.body}',
+        );
       }
     } catch (e) {
       log('Home banner error: $e');
     } finally {
       isHomeBannerLoading = false;
       update();
+    }
+
+    if (succeeded) {
+      _homeBannerRetryCount = 0;
+    } else if (_homeBannerRetryCount < _homeBannerMaxRetries) {
+      _homeBannerRetryCount++;
+      // 2s, 4s, 6s — long enough for a genuine startup-header race (or a
+      // transient network blip) to have cleared, short enough the banner
+      // still shows up well within the same Home-tab visit rather than the
+      // rider having to background/reopen the app to see it.
+      final delay = Duration(seconds: 2 * _homeBannerRetryCount);
+      log(
+        'Home banner retry $_homeBannerRetryCount/$_homeBannerMaxRetries '
+        'in ${delay.inSeconds}s',
+      );
+      Future.delayed(delay, () {
+        if (!_isDisposed) getHomeBanner();
+      });
     }
   }
 
@@ -563,6 +627,13 @@ class BookingController extends GetxController implements GetxService {
 
         var bookingid = body['data']['booking_id'].toString();
         print("Booking ID: $bookingid");
+
+        // Capture the itemised fare while we actually have it. This is the
+        // only response that carries base fare / CGST / SGST / booking fee /
+        // platform fee; trip-detail (what the fare card reads) frequently
+        // does not, and once this response is discarded there is nowhere
+        // left to recover the components from.
+        await _rememberCreatedBreakdown(bookingid, body['data']);
 
         await Future.delayed(const Duration(milliseconds: 500));
 
@@ -1104,6 +1175,65 @@ class BookingController extends GetxController implements GetxService {
     }
   }
 
+  /// SharedPreferences key holding {booking_id, data} for the last booking
+  /// created on this device, where `data` is create-booking's response data
+  /// verbatim.
+  static const String _createdBreakdownPrefsKey = 'last_booking_fare_details';
+
+  Future<void> _rememberCreatedBreakdown(
+    String bookingId,
+    dynamic data,
+  ) async {
+    if (data is! Map) return;
+    try {
+      final map = Map<String, dynamic>.from(data);
+      _createdBreakdown = PriceBreakdown.fromCreateBooking(map);
+      _createdBreakdownBookingId = bookingId;
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _createdBreakdownPrefsKey,
+        jsonEncode({'booking_id': bookingId, 'data': map}),
+      );
+    } catch (e) {
+      // A fare card that falls back to the shorter summary is a far better
+      // outcome than a failed booking, and the booking has already
+      // succeeded by this point — so this must never throw upward.
+      log('Could not store created-booking fare details: $e');
+    }
+  }
+
+  /// The stored breakdown for [bookingId], reloading from disk if this
+  /// controller was rebuilt (or the app restarted) since the booking was
+  /// made. Returns null for any other booking — notably an older ride
+  /// opened from Activity, whose create-booking response is long gone.
+  Future<PriceBreakdown?> _breakdownForBooking(String? bookingId) async {
+    if (bookingId == null || bookingId.isEmpty) return null;
+    if (_createdBreakdownBookingId == bookingId && _createdBreakdown != null) {
+      return _createdBreakdown;
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_createdBreakdownPrefsKey);
+      if (raw == null || raw.isEmpty) return null;
+
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map) return null;
+      if (decoded['booking_id']?.toString() != bookingId) return null;
+      if (decoded['data'] is! Map) return null;
+
+      _createdBreakdown = PriceBreakdown.fromCreateBooking(
+        Map<String, dynamic>.from(decoded['data'] as Map),
+      );
+      _createdBreakdownBookingId = bookingId;
+      return _createdBreakdown;
+    } catch (e) {
+      log('Could not read stored fare details: $e');
+      return null;
+    }
+  }
+
   Future<Response> TripRideDetailsApi({
     required BuildContext context,
     required String? bookingid,
@@ -1122,9 +1252,32 @@ class BookingController extends GetxController implements GetxService {
         tridRideDetails.value = body['data']['status'];
         tridRideDetailsData.value = body['data'];
         try {
-          tripDetailModel.value = TripDetailModel.fromJson(
+          var parsed = TripDetailModel.fromJson(
             Map<String, dynamic>.from(body as Map),
           );
+
+          // trip-detail commonly returns only the lighter `payment` object,
+          // which has no tax or fee components in it — so the fare card had
+          // nothing to itemise and fell back to just a subtotal and a total.
+          // create-booking did send the real components for this booking, so
+          // fill them in from what we stored then rather than leaving the
+          // rider with a receipt that can't show what they were charged for.
+          // Only ever fills a gap: a price_breakdown that trip-detail *did*
+          // send always wins, since that reflects the ride as completed
+          // (waiting charges, extra distance) where the create-booking
+          // figures are the estimate at the time of booking.
+          if (parsed.data != null && parsed.data!.priceBreakdown == null) {
+            final stored = await _breakdownForBooking(bookingid?.toString());
+            if (stored != null) {
+              parsed = TripDetailModel(
+                code: parsed.code,
+                message: parsed.message,
+                data: parsed.data!.copyWithPriceBreakdown(stored),
+              );
+            }
+          }
+
+          tripDetailModel.value = parsed;
         } catch (e) {
           debugPrint('TripDetailModel parse error: $e');
         }
@@ -1339,44 +1492,31 @@ class BookingController extends GetxController implements GetxService {
     driverCarIcons = await resizeMarker('assets/images/ridecar.png', 20);
   }
 
-  Future<void> loadUserIcon() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    String? userProfile = prefs.getString("profile_image");
-
-    print("Stored Image Path: $userProfile");
-
-    if (userProfile != null && userProfile.isNotEmpty) {
-      // Same wrong-host bug as ApiConstants.imageurl — this one just had the
-      // old domain typed directly instead of referencing the constant, so
-      // fixing the constant alone didn't fix this call site.
-      String imageUrl = userProfile.startsWith("http")
-          ? userProfile
-          : "${ApiConstants.imageurl}$userProfile";
-
-      print("Final Image URL: $imageUrl");
-
-      customerProfile = await resizeMarker(imageUrl, 120);
-
-      update();
-    }
-  }
+  // loadUserIcon() lived here: it downloaded and resized the rider's profile
+  // photo into a BitmapDescriptor for the "user" map marker. That marker is
+  // gone (see setMarkers below — the rider's position is the native location
+  // dot and its pulsing ring now), which left this doing a network image
+  // fetch and decode on every app start to produce something nothing draws.
 
   void setMarkers() {
     markers.clear();
 
     List<LatLng> allPositions = [];
 
-    /// USER MARKER
-    markers.add(
-      Marker(
-        markerId: const MarkerId("user"),
-        position: currentLatLng,
-        infoWindow: const InfoWindow(title: "You"),
-        icon: customerProfile ?? BitmapDescriptor.defaultMarker,
-      ),
-    );
-
+    /// NO USER MARKER — the rider's own position is shown by GoogleMap's
+    /// native blue location dot plus the pulsating ring drawn around it (see
+    /// _locationPulseCircles in deshboard.dart), not by a pin.
+    ///
+    /// This used to add a Marker here with `customerProfile ??
+    /// BitmapDescriptor.defaultMarker`. customerProfile is the rider's
+    /// profile photo, which is null whenever they haven't set one or the
+    /// download failed — and defaultMarker is the stock *red* pin, so the
+    /// common case was a red teardrop planted on the rider's own location,
+    /// visually identical to a destination pin and sitting directly on top
+    /// of the blue dot already marking the same spot.
+    ///
+    /// Still contributes to allPositions so the camera-fitting bounds below
+    /// keep including the rider — only the drawn pin is gone.
     allPositions.add(currentLatLng);
 
     /// DRIVER MARKERS — only meaningful once a search has actually

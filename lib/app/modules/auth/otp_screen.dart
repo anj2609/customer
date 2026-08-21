@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:myrideuser/config/utils/colors.dart';
 import 'package:myrideuser/config/utils/style.dart';
 import 'package:myrideuser/data/controller/auth_controller.dart';
+import 'package:myrideuser/data/services/otp_sms_retriever.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,6 +28,11 @@ class _OtpScreenState extends State<OtpScreen> {
   bool _isResending = false;
   bool _isVerifying = false;
   final TextEditingController _otpController = TextEditingController();
+
+  /// Handed to Pinput below, which owns the whole listen/fill lifecycle —
+  /// it starts listening when the field mounts and disposes the listener
+  /// with the field, so there's nothing to start or cancel from here.
+  final OtpSmsRetriever _smsRetriever = const OtpSmsRetriever();
 
   @override
   void initState() {
@@ -122,6 +128,11 @@ class _OtpScreenState extends State<OtpScreen> {
               Center(
                 child: Pinput(
                   controller: _otpController,
+                  // Android: fills the field from the OTP SMS via the User
+                  // Consent API. Pinput only accepts a code whose length
+                  // matches `length` below, so a stray number picked out of
+                  // the message can't partially fill the boxes.
+                  smsRetriever: _smsRetriever,
                   length: 4,
                   autofocus: true,
                   keyboardType: TextInputType.number,

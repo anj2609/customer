@@ -106,6 +106,30 @@ class TripDetailData {
           : null,
     );
   }
+
+  /// Returns a copy carrying [breakdown], for the common case where
+  /// trip-detail itself returned no "price_breakdown" but the real
+  /// component figures are known from create-booking's `fare_details` (see
+  /// [PriceBreakdown.fromCreateBooking]). Everything else is passed through
+  /// untouched — trip-detail stays the source of truth for the ride itself,
+  /// this only fills in the fare components it didn't send.
+  TripDetailData copyWithPriceBreakdown(PriceBreakdown breakdown) {
+    return TripDetailData(
+      bookingId: bookingId,
+      bookingNumber: bookingNumber,
+      rideType: rideType,
+      status: status,
+      pickupOtp: pickupOtp,
+      pickup: pickup,
+      drop: drop,
+      vehicle: vehicle,
+      driver: driver,
+      rideStats: rideStats,
+      createdAt: createdAt,
+      payment: payment,
+      priceBreakdown: breakdown,
+    );
+  }
 }
 
 class TripLocation {
@@ -272,6 +296,56 @@ class PriceBreakdown {
       walletUsed: _toDouble(json['wallet_used']),
       totalFare: _toDouble(json['total_fare']),
       finalAmount: _toDouble(json['final_amount']),
+    );
+  }
+
+  /// Builds the breakdown from **create-booking**'s response `data`, which
+  /// is where the real component figures actually come from — CONFIRMED
+  /// against a live response:
+  ///
+  ///     "data": {
+  ///       "booking_id": 259, "final_amount": 592, "total_fare": 592,
+  ///       "promo_discount": 0, "wallet_used": 0,
+  ///       "fare_details": {
+  ///         "base_fare": 500, "time_charge": 7, "taxable_amount": 507,
+  ///         "gst_percent": 5, "gst_amount": 25.35,
+  ///         "cgst_percent": 2.5, "cgst_amount": 12.68,
+  ///         "sgst_percent": 2.5, "sgst_amount": 12.68,
+  ///         "platform_fee": 30, "booking_fee": 30, "total_fare": 592
+  ///       }
+  ///     }
+  ///
+  /// Three things differ from [PriceBreakdown.fromJson]'s "price_breakdown"
+  /// shape, which is why this can't just reuse it:
+  ///   - the components live under `fare_details`, not `price_breakdown`;
+  ///   - the booking fee is `booking_fee`, not `booking_fee_per_trip`, so
+  ///     the existing key reads null here and that row would print ₹0.00;
+  ///   - `final_amount`, `promo_discount` and `wallet_used` sit on the
+  ///     parent `data` object rather than inside the fare block.
+  factory PriceBreakdown.fromCreateBooking(Map<String, dynamic> data) {
+    final fare = data['fare_details'] is Map
+        ? Map<String, dynamic>.from(data['fare_details'] as Map)
+        : const <String, dynamic>{};
+
+    return PriceBreakdown(
+      baseFare: _toDouble(fare['base_fare']),
+      distanceCharge: _toDouble(fare['distance_charge']),
+      timeCharge: _toDouble(fare['time_charge']),
+      platformFee: _toDouble(fare['platform_fee']),
+      bookingFeePerTrip: _toDouble(fare['booking_fee']),
+      surgeMultiplier: _toDouble(fare['surge_multiplier']),
+      gstPercent: _toDouble(fare['gst_percent']),
+      gstAmount: _toDouble(fare['gst_amount']),
+      cgstPercent: _toDouble(fare['cgst_percent']),
+      cgstAmount: _toDouble(fare['cgst_amount']),
+      sgstPercent: _toDouble(fare['sgst_percent']),
+      sgstAmount: _toDouble(fare['sgst_amount']),
+      // Deductions and the payable figure are the booking's, not the fare
+      // block's — fare_details.total_fare is the pre-deduction sum.
+      promoDiscount: _toDouble(data['promo_discount']),
+      walletUsed: _toDouble(data['wallet_used']),
+      totalFare: _toDouble(fare['total_fare'] ?? data['total_fare']),
+      finalAmount: _toDouble(data['final_amount']),
     );
   }
 }

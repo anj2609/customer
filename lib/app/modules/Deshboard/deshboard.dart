@@ -33,9 +33,13 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with SingleTickerProviderStateMixin {
   final ProfileController controller = Get.find<ProfileController>();
   final BookingController bookingController = Get.find<BookingController>();
+
+  /// Drives the pulsating ring around the rider's own location on the map.
+  late final AnimationController _pulseController;
 
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
@@ -51,10 +55,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // be correct at one sheet size.
   double _mapBottomPadding = 0;
 
-  void _syncMapPaddingToSheet() {
-    if (!_sheetController.isAttached) return;
+  /// The sheet's resting height for a given stage, as a fraction of the
+  /// screen. Used as the padding source whenever the live controller can't
+  /// be read yet — see [_mapPaddingForCurrentSheet].
+  static double _stageSize(_SheetStage stage) => switch (stage) {
+        _SheetStage.idle => _idleSize,
+        _SheetStage.searching => _searchingSize,
+        _SheetStage.vehicleSelect => _vehicleSize,
+      };
+
+  /// How much of the map's bottom edge the sheet is currently covering.
+  ///
+  /// Falls back to the current stage's known resting size when the sheet
+  /// controller isn't attached. That fallback is the whole fix for "my
+  /// location is hidden behind the sheet after switching tabs": the bottom
+  /// bar swaps `_pages[_currentIndex]` rather than keeping tabs alive, so
+  /// coming back to Home builds this State from scratch, and on that first
+  /// frame the DraggableScrollableSheet's builder hasn't run — so
+  /// `_sheetController.isAttached` is still false. The old version simply
+  /// returned early in that case, leaving the padding at 0 with nothing
+  /// scheduled to ever try again, so the map stayed padded for a
+  /// full-height viewport and put the location dot underneath the sheet
+  /// until the user happened to drag it. Reading the stage instead means
+  /// there is always a correct answer available, attached or not.
+  double _mapPaddingForCurrentSheet() {
     final height = MediaQuery.of(context).size.height;
-    final padding = _sheetController.size * height;
+    final fraction = _sheetController.isAttached
+        ? _sheetController.size
+        : _stageSize(_stage);
+    return fraction * height;
+  }
+
+  void _syncMapPaddingToSheet() {
+    if (!mounted) return;
+    final padding = _mapPaddingForCurrentSheet();
     if ((padding - _mapBottomPadding).abs() < 1) return;
     setState(() => _mapBottomPadding = padding);
   }
@@ -103,10 +137,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _sheetController.addListener(_syncMapPaddingToSheet);
-    // The sheet isn't attached yet on this very first frame — its own
-    // builder hasn't run — so the initial padding (idle size) is set once
-    // that first frame lands rather than left at 0 until the first drag.
+    // Belt-and-braces alongside didChangeDependencies below: once the sheet
+    // has actually attached, re-read its real size in case it settled
+    // somewhere other than its stage's resting position.
     WidgetsBinding.instance.addPostFrameCallback((_) => _syncMapPaddingToSheet());
+    // Drives the pulsating "you are here" ring — see _buildMap. repeat()
+    // rather than a one-shot: this is an ambient indicator that runs for as
+    // long as the map is on screen.
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat();
     controller.getAddressCustomer(context: context);
     Get.find<ProfileController>().getActivityData(
       context: context,
@@ -124,7 +165,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Assigned directly rather than through _syncMapPaddingToSheet(), which
+    // calls setState — this already runs immediately before build(), so the
+    // value is picked up by the very frame that follows. This is what makes
+    // the map correctly padded from the first frame on every mount,
+    // including each return to the Home tab, instead of only after the
+    // sheet attaches. Needs MediaQuery, so it can't be done in initState.
+    _mapBottomPadding = _mapPaddingForCurrentSheet();
+  }
+
+  @override
   void dispose() {
+    _pulseController.dispose();
     _sheetController.removeListener(_syncMapPaddingToSheet);
     _sheetController.dispose();
     _destinationController.dispose();
@@ -898,26 +952,110 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // ---------- Map ----------
 
+  /// The expanding, fading ring drawn around the rider's own position — the
+  /// "pulsating dot" that replaced the red default map pin that used to be
+  /// dropped at [BookingController.currentLatLng].
+  ///
+  /// Drawn as a map Circle rather than a Flutter widget layered over the map
+  /// because a Circle is anchored to real coordinates: it stays put through
+  /// pans and zooms for free, where an overlaid widget would have to be
+  /// re-projected to screen space on every camera frame to avoid sliding off
+  /// the rider's actual location.
+  ///
+  /// Only shown in the idle stage. Once a route is on screen (vehicle
+  /// selection) the map is about the pickup→drop line, and an animating ring
+  /// over it is noise — it also stops the per-frame circle updates while the
+  /// rider is reading fares.
+  Set<Circle> _locationPulseCircles(LatLng center) {
+    if (_stage != _SheetStage.idle) return const <Circle>{};
+
+    final t = _pulseController.value;
+    // Radius grows over the cycle while opacity falls to zero, so the ring
+    // reads as a ripple radiating outward rather than a throbbing blob.
+    final radius = 20 + (70 * t);
+    final fade = (1 - t).clamp(0.0, 1.0);
+
+    return {
+      Circle(
+        circleId: const CircleId('user_location_pulse'),
+        center: center,
+        radius: radius,
+        fillColor: const Color(0xFF4285F4).withValues(alpha: 0.16 * fade),
+        strokeColor: const Color(0xFF4285F4).withValues(alpha: 0.55 * fade),
+        strokeWidth: 2,
+      ),
+    };
+  }
+
+  /// Explicitly re-centers the camera so the rider's own location renders
+  /// in the visible area above the sheet, right after a fresh GoogleMap is
+  /// created (which happens on every return to this tab — see
+  /// _mapPaddingForCurrentSheet's own comment on why that is).
+  ///
+  /// `padding` is documented to shift where a camera target renders on
+  /// screen, and _mapBottomPadding is correct by the time this fires — but
+  /// there is a real gap between Flutter handing the native platform view a
+  /// padding value and that view actually finishing applying it internally,
+  /// and the map's very first rendered frame can land before that settles.
+  /// That race is exactly what "correct on a cold app start, hidden again
+  /// after switching tabs" looks like: a slow cold start gives the native
+  /// side plenty of time to settle before anything is shown; a fast, warm
+  /// tab switch does not.
+  ///
+  /// `scrollBy` is a genuine camera move in screen pixels — not a padding
+  /// trick — so it settles the position regardless of whether that native
+  /// timing gap was actually the cause. Deliberately applied exactly once,
+  /// right after creation, and never on a sheet-drag tick: repeating it
+  /// would compound (scrollBy is relative, not absolute) and would fight
+  /// the rider's own manual panning of the map.
+  void _nudgeCameraAboveSheet(GoogleMapController mapController) {
+    if (_mapBottomPadding <= 0) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Gives the native side a frame to actually finish applying the
+      // padding it was just handed, so this is a correction on top of the
+      // settled state rather than a second guess made before that settles.
+      await Future.delayed(const Duration(milliseconds: 200));
+      if (!mounted) return;
+      // Positive dy moves the camera *target* south, which puts the point
+      // that used to be dead-center (the rider) north of it instead — i.e.
+      // visibly higher on screen, up out from behind the sheet.
+      mapController.moveCamera(
+        CameraUpdate.scrollBy(0, _mapBottomPadding / 2),
+      );
+    });
+  }
+
   Widget _buildMap() {
     return GetBuilder<BookingController>(
       builder: (bc) {
-        return GoogleMap(
-          initialCameraPosition: CameraPosition(
-            target: bc.currentLatLng,
-            zoom: 14,
-          ),
-          myLocationEnabled: true,
-          myLocationButtonEnabled: false,
-          // Without this, "centered" meant centered in the map widget's full
-          // bounds, including the portion the bottom sheet permanently
-          // covers — see _syncMapPaddingToSheet for the full story.
-          padding: EdgeInsets.only(bottom: _mapBottomPadding),
-          markers: _stage == _SheetStage.vehicleSelect
-              ? _routeMarkers
-              : bc.markers,
-          polylines: _polylines,
-          onMapCreated: (mapController) {
-            bc.mapController = mapController;
+        return AnimatedBuilder(
+          animation: _pulseController,
+          builder: (context, _) {
+            return GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: bc.currentLatLng,
+                zoom: 14,
+              ),
+              // Google's own location indicator — the solid blue dot at the
+              // centre of the pulse above. Left to the platform rather than
+              // drawn here: it already tracks live position and heading, and
+              // is the marker riders recognise as "me".
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              circles: _locationPulseCircles(bc.currentLatLng),
+              // Without this, "centered" meant centered in the map widget's
+              // full bounds, including the portion the bottom sheet
+              // permanently covers — see _mapPaddingForCurrentSheet.
+              padding: EdgeInsets.only(bottom: _mapBottomPadding),
+              markers: _stage == _SheetStage.vehicleSelect
+                  ? _routeMarkers
+                  : bc.markers,
+              polylines: _polylines,
+              onMapCreated: (mapController) {
+                bc.mapController = mapController;
+                _nudgeCameraAboveSheet(mapController);
+              },
+            );
           },
         );
       },

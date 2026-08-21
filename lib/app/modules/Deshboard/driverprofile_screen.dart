@@ -142,8 +142,19 @@ class DriverProfileScreen extends StatelessWidget {
       ),
 
       /// Bottom Buttons
+      //
+      // The extra padding.bottom is the system navigation bar inset. The app
+      // runs edge-to-edge (SystemUiMode.edgeToEdge in main.dart), so this
+      // slot extends underneath the gesture pill / nav buttons and both of
+      // these would otherwise sit behind them. It resolves to 0 on devices
+      // without such a bar.
       bottomNavigationBar: Container(
-        padding: EdgeInsets.all(width * 0.05),
+        padding: EdgeInsets.fromLTRB(
+          width * 0.05,
+          width * 0.05,
+          width * 0.05,
+          width * 0.05 + MediaQuery.of(context).padding.bottom,
+        ),
         child: Row(
           children: [
             /// Call Button

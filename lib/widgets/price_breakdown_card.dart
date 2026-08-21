@@ -10,18 +10,18 @@ import 'package:myrideuser/data/modal/trip_detail_model.dart';
 /// selection, etc.) since there's no booking to look up yet there.
 ///
 /// Renders whichever shape the API actually returned:
-///   - the requested six-line receipt (subtotal, CGST, SGST, booking fee,
-///     platform fee, total — plus promo/wallet deductions and a final
-///     amount line, but only when either actually applies), if trip-detail
+///   - the full six-line receipt — Subtotal Fare, CGST(x%), SGST(x%),
+///     Booking Fee Trip, Platform Fee, Total Fare — when trip-detail
 ///     included a "price_breakdown" object. CONFIRMED against a real, live,
-///     completed normal-ride response to actually be what this endpoint
-///     sends — this was previously assumed unconfirmed and effectively
-///     unused; the "payment"-only path below is what a normal-ride booking
-///     was rendering from instead.
-///   - otherwise the lighter "payment" summary (total fare, promo discount
-///     if > 0, wallet used if > 0, final amount) as a fallback for whatever
-///     case genuinely lacks a "price_breakdown" object (e.g. still loading,
-///     or a ride type/status this hasn't been reconfirmed against).
+///     completed normal-ride response to be what this endpoint sends. Both
+///     GST lines print the percentage the backend actually reported rather
+///     than a hardcoded 2.5%, so a booking taxed at a different rate can't
+///     be labelled with a rate it wasn't charged.
+///   - otherwise the lighter "payment" summary, using the same labels for
+///     the same roles (see _paymentRows) so a figure never changes name
+///     depending on which shape came back. The tax and fee lines are absent
+///     there because that shape genuinely does not carry them — not because
+///     they were zero.
 ///   - nothing, if trip-detail has neither (e.g. still loading).
 class PriceBreakdownCard extends StatelessWidget {
   final TripDetailData tripData;
@@ -78,30 +78,50 @@ class PriceBreakdownCard extends StatelessWidget {
       _row("SGST(${pct(breakdown.sgstPercent)}%)", breakdown.sgstAmount),
       _row("Booking Fee Trip", breakdown.bookingFeePerTrip),
       _row("Platform Fee", breakdown.platformFee),
-      const Divider(),
-      _row("Total Fare", breakdown.totalFare, isBold: true),
-      // Not part of the requested six rows, but kept: when a promo or wallet
-      // amount actually reduced what the rider paid, hiding that would make
-      // the total on screen not match what they were actually charged.
-      // Silent for the common case (both 0), same as before.
+      // Deductions sit above the total, not below it — they're part of
+      // arriving at what's owed, and a receipt that shows a bold total and
+      // then keeps subtracting from it reads as though the bold figure were
+      // the amount charged. Silent in the common case where both are 0.
       if (breakdown.promoDiscount > 0)
         _row("Promo Discount", breakdown.promoDiscount, isDeduction: true),
       if (breakdown.walletUsed > 0)
         _row("Wallet Used", breakdown.walletUsed, isDeduction: true),
-      if (breakdown.promoDiscount > 0 || breakdown.walletUsed > 0)
-        _row("Final Amount", breakdown.finalAmount, isBold: true),
+      const Divider(),
+      // finalAmount, not totalFare. These are equal on a booking with no
+      // promo or wallet deduction (the confirmed live response has both at
+      // 44.64), but where they differ, finalAmount is the figure the rider
+      // is actually charged — so that's what the closing "Total Fare" line
+      // has to show. Labelling the pre-deduction subtotal as the total
+      // would contradict the deduction rows immediately above it.
+      _row("Total Fare", breakdown.finalAmount, isBold: true),
     ];
   }
 
+  /// Fallback for a booking whose trip-detail carried only the lighter
+  /// "payment" object and no "price_breakdown".
+  ///
+  /// Named to match the full receipt above so the same figure never carries
+  /// two different labels depending on which shape the API happened to
+  /// return: "total_fare" is the pre-deduction subtotal (the same role
+  /// base_fare plays above), and "final_amount" is what the rider actually
+  /// pays, which is the number a receipt calls the total.
+  ///
+  /// The tax and fee lines genuinely cannot be shown from this shape —
+  /// "payment" carries only {promo_discount, wallet_used, total_fare,
+  /// final_amount}, and its own arithmetic (final = total − promo − wallet)
+  /// leaves no room to derive CGST/SGST/platform/booking-fee components; any
+  /// tax is already baked inside total_fare. Printing them as ₹0.00 here
+  /// would state, falsely, that no tax was charged. They appear in full
+  /// whenever the API sends price_breakdown — see _breakdownRows.
   List<Widget> _paymentRows(TripPayment payment) {
     return [
-      _row("Total Fare", payment.totalFare),
+      _row("Subtotal Fare", payment.totalFare),
       if (payment.promoDiscount > 0)
         _row("Promo Discount", payment.promoDiscount, isDeduction: true),
       if (payment.walletUsed > 0)
         _row("Wallet Used", payment.walletUsed, isDeduction: true),
       const Divider(),
-      _row("Final Amount", payment.finalAmount, isBold: true),
+      _row("Total Fare", payment.finalAmount, isBold: true),
     ];
   }
 

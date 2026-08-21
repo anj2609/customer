@@ -1,7 +1,7 @@
 name: myrideuser
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.6+8
+version: 1.0.7+9
 
 environment:
   sdk: ^3.9.0
@@ -43,6 +43,12 @@ dependencies:
   razorpay_flutter: ^1.3.7
   qr_flutter: ^4.1.0
   video_player: ^2.10.1
+  # Backs OTP SMS autofill via Android's SMS User Consent API — the API
+  # Pinput's own `smsRetriever` hook is designed around. Chosen over the SMS
+  # Retriever API because that one only fires for messages carrying this
+  # app's signing-key hash, which would need a backend change to every OTP
+  # message; User Consent works with the SMS exactly as it's sent today.
+  smart_auth: ^3.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
