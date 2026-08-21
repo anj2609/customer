@@ -10,17 +10,18 @@ import 'package:myrideuser/data/modal/trip_detail_model.dart';
 /// selection, etc.) since there's no booking to look up yet there.
 ///
 /// Renders whichever shape the API actually returned:
-///   - the full breakdown (base fare, platform fee, CGST, SGST always;
-///     distance/time/extra-distance charges and wallet used only when
-///     > 0), if trip-detail included a "price_breakdown" object — this
-///     is the original spec, kept for bookings/ride-types that might
-///     still return it (unconfirmed either way).
-///   - otherwise the lighter "payment" summary that's confirmed to be
-///     what a real completed normal-ride booking actually returns today
-///     (total fare, promo discount if > 0, wallet used if > 0, final
-///     amount) — this used to render nothing at all, since the code only
-///     ever looked for "price_breakdown", which doesn't exist on that
-///     response.
+///   - the requested six-line receipt (subtotal, CGST, SGST, booking fee,
+///     platform fee, total — plus promo/wallet deductions and a final
+///     amount line, but only when either actually applies), if trip-detail
+///     included a "price_breakdown" object. CONFIRMED against a real, live,
+///     completed normal-ride response to actually be what this endpoint
+///     sends — this was previously assumed unconfirmed and effectively
+///     unused; the "payment"-only path below is what a normal-ride booking
+///     was rendering from instead.
+///   - otherwise the lighter "payment" summary (total fare, promo discount
+///     if > 0, wallet used if > 0, final amount) as a fallback for whatever
+///     case genuinely lacks a "price_breakdown" object (e.g. still loading,
+///     or a ride type/status this hasn't been reconfirmed against).
 ///   - nothing, if trip-detail has neither (e.g. still loading).
 class PriceBreakdownCard extends StatelessWidget {
   final TripDetailData tripData;
@@ -56,21 +57,39 @@ class PriceBreakdownCard extends StatelessWidget {
   }
 
   List<Widget> _breakdownRows(PriceBreakdown breakdown) {
+    // CONFIRMED against a real, live, completed normal-ride response —
+    // price_breakdown genuinely is sent, with exactly these keys, settling
+    // the "unconfirmed either way" this file used to carry. Rendered as the
+    // six-line receipt requested: subtotal, the two GST components (each
+    // showing its own real percentage, not a hardcoded one — the confirmed
+    // response has 0%, but this can't assume every booking does), the two
+    // fees, then the total.
+    String pct(num value) {
+      // Whole numbers ("0", "2") read cleaner than "0.0"/"2.0" on a receipt
+      // line; a genuinely fractional rate (2.5) still shows in full.
+      return value == value.roundToDouble()
+          ? value.toInt().toString()
+          : value.toString();
+    }
+
     return [
-      _row("Base Fare", breakdown.baseFare),
-      if (breakdown.distanceCharge > 0)
-        _row("Distance Charge", breakdown.distanceCharge),
-      if (breakdown.timeCharge > 0)
-        _row("Time Charge", breakdown.timeCharge),
-      if (breakdown.extraDistanceCharge > 0)
-        _row("Extra Distance Charge", breakdown.extraDistanceCharge),
+      _row("Subtotal Fare", breakdown.baseFare),
+      _row("CGST(${pct(breakdown.cgstPercent)}%)", breakdown.cgstAmount),
+      _row("SGST(${pct(breakdown.sgstPercent)}%)", breakdown.sgstAmount),
+      _row("Booking Fee Trip", breakdown.bookingFeePerTrip),
       _row("Platform Fee", breakdown.platformFee),
-      _row("CGST", breakdown.cgstAmount),
-      _row("SGST", breakdown.sgstAmount),
+      const Divider(),
+      _row("Total Fare", breakdown.totalFare, isBold: true),
+      // Not part of the requested six rows, but kept: when a promo or wallet
+      // amount actually reduced what the rider paid, hiding that would make
+      // the total on screen not match what they were actually charged.
+      // Silent for the common case (both 0), same as before.
+      if (breakdown.promoDiscount > 0)
+        _row("Promo Discount", breakdown.promoDiscount, isDeduction: true),
       if (breakdown.walletUsed > 0)
         _row("Wallet Used", breakdown.walletUsed, isDeduction: true),
-      const Divider(),
-      _row("Final Amount", breakdown.finalAmount, isBold: true),
+      if (breakdown.promoDiscount > 0 || breakdown.walletUsed > 0)
+        _row("Final Amount", breakdown.finalAmount, isBold: true),
     ];
   }
 

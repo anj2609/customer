@@ -200,6 +200,12 @@ class BookingController extends GetxController implements GetxService {
           homeBanner = BannerModel.fromJson(
             Map<String, dynamic>.from(bannerData),
           );
+          // The banner Container's own errorBuilder only fires once
+          // Image.network actually attempts (and fails) to load a URL — an
+          // empty/null image field here never reaches that point at all, and
+          // silently produces the exact same "nothing shown" result. This is
+          // what actually shows what the backend sent, empty or not.
+          log('Home banner image field: "${homeBanner?.image}"');
         }
       }
     } catch (e) {

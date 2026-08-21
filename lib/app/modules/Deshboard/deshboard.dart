@@ -1230,8 +1230,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const SizedBox.shrink(),
+                      // Was silent — a load failure just showed nothing, with
+                      // no way to tell from the app's behavior whether the
+                      // URL was wrong, the image is missing server-side, or
+                      // something else. That's exactly what made "banner
+                      // doesn't load in production" impossible to diagnose:
+                      // there was nowhere for the actual failure to surface.
+                      errorBuilder: (context, error, stackTrace) {
+                        debugPrint(
+                          '[HomeBanner] failed to load "$imageUrl": $error',
+                        );
+                        return const SizedBox.shrink();
+                      },
                     ),
                   ),
                 // Scrim so text stays readable over an arbitrary photo.
