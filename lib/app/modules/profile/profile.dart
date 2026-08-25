@@ -8,6 +8,7 @@ import 'package:myrideuser/data/controller/auth_controller.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:myrideuser/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -33,6 +34,15 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController phoneController = TextEditingController();
 
   final TextEditingController dobController = TextEditingController();
+
+  // A Google-signup rider arrives with widget.phonenumber as an empty
+  // string (see auth_controller.dart's socailLogin) — there's genuinely
+  // nothing to show, so the field becomes editable instead of a blank
+  // read-only box. A phone-OTP signup already has a real, verified number
+  // by this point, so it stays read-only for that case — shared here so
+  // the field itself and its submit-time validation can't disagree about
+  // which case this actually is.
+  bool get hasKnownPhone => (widget.phonenumber ?? '').isNotEmpty;
 
   String selectedGender = "Male";
   List<String> genderList = ["Male", "Female", "Other"];
@@ -78,8 +88,14 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-       phoneController.text = widget.phonenumber ?? '';
-   /// getNumber();
+    phoneController.text = widget.phonenumber ?? '';
+    // Pre-fills a Google-signup rider's real name/email as a starting
+    // point — always editable (see buildTextField's own note on why this
+    // used to be locked). Empty, and so a no-op, for a phone-OTP signup:
+    // ApiConstants.usernames/emailAddress are only ever set by the
+    // Google-auth path.
+    nameController.text = ApiConstants.usernames;
+    emailController.text = ApiConstants.emailAddress;
   }
 
   Future<void> getNumber() async {
@@ -176,71 +192,64 @@ class _ProfilePageState extends State<ProfilePage> {
 
               const SizedBox(height: 22),
 
-              buildLabel("Email"),
+              buildLabel("Email (Optional)"),
               buildTextField(emailController, icon: Icons.mail_outline),
 
               const SizedBox(height: 22),
 
               /// Phone with Flag
+              //
+              // Editable only when there's genuinely no phone number to show
+              // — the Google-signup path (see auth_controller.dart's
+              // socailLogin), where widget.phonenumber arrives as an empty
+              // string because Google's identity token never carries one at
+              // all. A phone-OTP signup already has a real, verified number
+              // by the time it reaches this screen (that's how the OTP was
+              // sent in the first place), so it stays read-only there —
+              // changing it here wouldn't re-verify anything, just create a
+              // mismatch between what the account was actually verified with
+              // and what this screen claims it is.
               buildLabel("Phone Number"),
-              // widget.phonenumber != null
-              //     ?
-                   Container(
-                      height: 55,
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEFEFF1),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Row(
-                        children: [
-                          const Text("🇮🇳", style: TextStyle(fontSize: 18)),
-                          const SizedBox(width: 6),
-                          const Icon(Icons.keyboard_arrow_down, size: 18),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              readOnly: true,
-                              controller: phoneController,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+              Builder(
+                builder: (context) {
+                  return Container(
+                    height: 55,
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEFEFF1),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                
-                  // : Container(
-                  //     height: 55,
-                  //     padding: const EdgeInsets.symmetric(horizontal: 15),
-                  //     decoration: BoxDecoration(
-                  //       color: const Color(0xFFEFEFF1),
-                  //       borderRadius: BorderRadius.circular(15),
-                  //     ),
-                  //     child: Row(
-                  //       children: [
-                  //         const Text("🇮🇳", style: TextStyle(fontSize: 18)),
-                  //         const SizedBox(width: 6),
-                  //         const Icon(Icons.keyboard_arrow_down, size: 18),
-                  //         const SizedBox(width: 10),
-                  //         Expanded(
-                  //           child: TextField(
-                  //             readOnly: false,
-                  //             controller: phoneController,
-                  //             decoration: const InputDecoration(
-                  //               border: InputBorder.none,
-                  //             ),
-                  //             keyboardType: TextInputType.number,
-                  //             inputFormatters: [
-                  //               FilteringTextInputFormatter.digitsOnly,
-                  //               LengthLimitingTextInputFormatter(10),
-                  //             ],
-                  //           ),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
+                    child: Row(
+                      children: [
+                        const Text("🇮🇳", style: TextStyle(fontSize: 18)),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.keyboard_arrow_down, size: 18),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            readOnly: hasKnownPhone,
+                            controller: phoneController,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText:
+                                  hasKnownPhone ? null : "Enter phone number",
+                            ),
+                            keyboardType: hasKnownPhone
+                                ? TextInputType.text
+                                : TextInputType.number,
+                            inputFormatters: hasKnownPhone
+                                ? null
+                                : [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(10),
+                                  ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
 
               const SizedBox(height: 22),
 
@@ -276,7 +285,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
               const SizedBox(height: 22),
 
-              buildLabel("Date of Birth"),
+              buildLabel("Date of Birth (Optional)"),
               GestureDetector(
                 onTap: () async {
                   DateTime? pickedDate = await showDatePicker(
@@ -334,30 +343,33 @@ class _ProfilePageState extends State<ProfilePage> {
                     return;
                   }
 
-                  if (email.isEmpty) {
+                  // Only reachable with a rider-typed value at all on the
+                  // Google-signup path — a phone-OTP signup's number is
+                  // already real and verified by the time it gets here (the
+                  // field is read-only then), so this can't fire for that
+                  // case. digitsOnly + a 10-char limit on the field itself
+                  // already stop most malformed input; this catches
+                  // anything shorter left in an otherwise-valid state.
+                  if (!hasKnownPhone && phone.length != 10) {
                     AnimatedTopToast.show(
                       context: context,
-                      message: "Please enter your email address.",
+                      message: "Please enter a valid 10-digit phone number.",
                       backgroundColor: ColorResources.textColorBaclColor,
                       icon: Icons.error_outline,
                     );
                     return;
                   }
 
-                  if (!GetUtils.isEmail(email)) {
+                  // Email and date of birth are optional on this step — only
+                  // name and phone are required to continue. Email is still
+                  // format-checked when the rider does enter one, since a
+                  // malformed address is worth catching here rather than
+                  // failing silently server-side; an empty field skips that
+                  // check entirely rather than being treated as invalid.
+                  if (email.isNotEmpty && !GetUtils.isEmail(email)) {
                     AnimatedTopToast.show(
                       context: context,
                       message: "Please enter a valid email address.",
-                      backgroundColor: ColorResources.textColorBaclColor,
-                      icon: Icons.error_outline,
-                    );
-                    return;
-                  }
-
-                  if (dob.isEmpty) {
-                    AnimatedTopToast.show(
-                      context: context,
-                      message: "Please select your date of birth.",
                       backgroundColor: ColorResources.textColorBaclColor,
                       icon: Icons.error_outline,
                     );
@@ -368,7 +380,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   try {
                     await Get.find<AuthController>().fillPersonalInfoApi(
-                      phone: widget.phonenumber,
+                      // Was widget.phonenumber — the screen's original
+                      // constructor value, not what's actually in the
+                      // field. Harmless for a phone-OTP signup (the field
+                      // is read-only there, so the two are always the
+                      // same), but for a Google signup it meant whatever
+                      // the rider had just typed and had validated above
+                      // was silently discarded, and the empty
+                      // widget.phonenumber sent instead.
+                      phone: phone,
                       name: name,
                       email: email,
                       gender: selectedGender,
@@ -453,6 +473,18 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // Was readOnly whenever *either* ApiConstants.usernames or
+  // .emailAddress was non-empty — a single combined check controlling
+  // both the Name and the Email field, regardless of which one this call
+  // actually is, so a Google signup (which always sets both together)
+  // locked both fields at once. Compounding that: nothing in this class
+  // ever assigned that Google data into nameController/emailController in
+  // the first place — the only code that did (getNumber(), below) is
+  // never called — so a Google-signup rider landed on two fields that
+  // were simultaneously locked *and* empty: unable to type, with nothing
+  // pre-filled to look at either. Both fields are unconditionally
+  // editable now — pre-filling is a convenience (see initState below),
+  // never a restriction on fixing what it filled in.
   Widget buildTextField(TextEditingController controller, {IconData? icon}) {
     return Container(
       height: 55,
@@ -467,22 +499,12 @@ class _ProfilePageState extends State<ProfilePage> {
             Icon(icon, color: Colors.grey),
             const SizedBox(width: 10),
           ],
-          (ApiConstants.usernames.isNotEmpty ||
-                  ApiConstants.emailAddress.isNotEmpty)
-              ? Expanded(
-                  child: TextField(
-                    controller: controller,
-                    readOnly: true,
-                    decoration: const InputDecoration(border: InputBorder.none),
-                  ),
-                )
-              : Expanded(
-                  child: TextField(
-                    controller: controller,
-                    
-                    decoration: const InputDecoration(border: InputBorder.none),
-                  ),
-                ),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              decoration: const InputDecoration(border: InputBorder.none),
+            ),
+          ),
         ],
       ),
     );

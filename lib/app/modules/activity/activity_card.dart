@@ -113,7 +113,7 @@ class ActivityRideCard extends StatelessWidget {
 
                 /// Amount
                 Text(
-                  "₹ ${item.totalFare ?? 0}",
+                  "₹ ${item.displayFare}",
                   style: TextStyle(
                     fontSize: width * 0.038,
                     fontWeight: FontWeight.bold,

@@ -187,7 +187,17 @@ class RouteHelper {
     ),
     GetPage(
       name: profileScreen,
-      page: () => ProfilePage(phonenumber: Get.arguments['phonenumber']),
+      // Was Get.arguments['phonenumber'] unguarded — any navigation to this
+      // route with no arguments map at all (which the Google-signup call
+      // site did, until fixed — see auth_controller.dart's socailLogin)
+      // left Get.arguments null, and indexing into that threw
+      // NoSuchMethodError before ProfilePage ever got a chance to render.
+      // ProfilePage's own phonenumber is already nullable and handled
+      // throughout with `?? ''`, so there's no reason this needs a real
+      // value to build safely — just something that doesn't crash if a
+      // future call site makes the same mistake again.
+      page: () =>
+          ProfilePage(phonenumber: (Get.arguments as Map?)?['phonenumber']),
       // arguments: {"phonenumber": Get.arguments},
       transitionDuration: const Duration(
         milliseconds: ApiConstants.screenTransitionTime,

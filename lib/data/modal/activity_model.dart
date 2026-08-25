@@ -87,6 +87,15 @@ class ActivityDataMainModel {
   double? dropLng;
   String? pickupOtp;
   int? totalFare;
+
+  /// What the rider was actually charged — see price_breakdown_card.dart's
+  /// note (and trip_completed_screen.dart's _totalFare) on why this, not
+  /// totalFare, is the figure every "Total Fare"/"Final Amount" display
+  /// across both apps is meant to show consistently. Not confirmed present
+  /// on this specific list endpoint the way it is on trip-detail/
+  /// create-booking/track-booking-ride — falls back to totalFare below if
+  /// the backend doesn't send it here.
+  int? finalAmount;
   String? status;
   String? createdAt;
   Driver? driver;
@@ -104,6 +113,7 @@ class ActivityDataMainModel {
     this.dropLng,
     this.pickupOtp,
     this.totalFare,
+    this.finalAmount,
     this.status,
     this.createdAt,
     this.driver,
@@ -140,6 +150,10 @@ class ActivityDataMainModel {
         ? int.tryParse(json['total_fare'].toString())
         : 0;
 
+    finalAmount = json['final_amount'] != null
+        ? int.tryParse(json['final_amount'].toString())
+        : null;
+
     status = json['status'];
     createdAt = json['created_at'];
 
@@ -166,6 +180,12 @@ class ActivityDataMainModel {
     paymentType = json['payment_type'];
   }
 
+  /// The one figure every "Total Fare"/amount display for this ride should
+  /// show — see finalAmount's own note. Single accessor so every screen
+  /// that renders this model reads the same value the same way, rather
+  /// than each repeating its own `finalAmount ?? totalFare` fallback.
+  int get displayFare => finalAmount ?? totalFare ?? 0;
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
 
@@ -178,6 +198,7 @@ class ActivityDataMainModel {
     data['drop_lng'] = dropLng;
     data['pickup_otp'] = pickupOtp;
     data['total_fare'] = totalFare;
+    data['final_amount'] = finalAmount;
     data['status'] = status;
     data['created_at'] = createdAt;
 

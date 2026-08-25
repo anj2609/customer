@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -81,17 +82,60 @@ class AuthController extends GetxController implements GetxService {
     String? provider,
   }) async {
     try {
-      final GoogleSignInAccount? account = await _googleSignIn.signIn();
+      // Clear any cached Google session before opening the picker.
+      //
+      // Without this, signIn() resolves against whatever account the plugin
+      // already holds — and if that cached state is stale (revoked grant,
+      // account removed from the device, a half-finished earlier attempt)
+      // the call can sit unresolved instead of failing, which is what left
+      // the button stuck on "Signing in..." with no picker and no error.
+      // Signing out first costs nothing on a clean state and guarantees the
+      // account chooser is actually shown.
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {
+        // Nothing to sign out of — not a failure worth reporting.
+      }
+
+      // Timeouts on both platform calls. Neither has one of its own, so a
+      // hang inside Play Services (the reported "infinite loading") had
+      // nothing to break it: the await simply never returned and the
+      // caller's finally never ran. 90s is generous for a human picking an
+      // account and still bounded.
+      final GoogleSignInAccount? account = await _googleSignIn
+          .signIn()
+          .timeout(const Duration(seconds: 90));
 
       if (account == null) {
+        // Genuine user cancellation — silent by design, no error toast.
         print("User cancelled login");
         return null;
       }
 
-      final GoogleSignInAuthentication auth = await account.authentication;
+      final GoogleSignInAuthentication auth =
+          await account.authentication.timeout(const Duration(seconds: 30));
 
       final String? idToken = auth.idToken;
       final String? accessToken = auth.accessToken;
+
+      // The backend authenticates on id_token, so without one there is
+      // nothing to send. This used to fall through and post the literal
+      // string "null", which the backend rejected — landing in the silent
+      // else branch of socailLogin below and looking, again, like nothing
+      // had happened at all.
+      if (idToken == null || idToken.isEmpty) {
+        if (context.mounted) {
+          AnimatedTopToast.show(
+            context: context,
+            message:
+                "Couldn't verify your Google account. Please try again or "
+                "sign in with your mobile number.",
+            backgroundColor: ColorResources.textColorBaclColor,
+            icon: Icons.error_outline,
+          );
+        }
+        return null;
+      }
 
       // /// ===== STORE DATA =====
       // ApiConstants.socialtoken = accessToken.toString();
@@ -120,7 +164,27 @@ class AuthController extends GetxController implements GetxService {
 
       return response;
     } catch (e) {
-      print("Error: $e");
+      // Was `print(e); return null;` — every possible failure (a SHA-1
+      // fingerprint not registered for this build, which surfaces as
+      // PlatformException ApiException: 10; no Play Services; a timeout
+      // from above; a dropped network) produced an identical silent no-op.
+      // The caller resets its button and the user is left with a screen
+      // that visibly did nothing, twice over: no error, no progress, no
+      // reason to think retrying would help. Reported as "infinite loading
+      // and the user is not able to sign up".
+      debugPrint("Google sign-in failed: $e");
+      if (context.mounted) {
+        final bool timedOut = e is TimeoutException;
+        AnimatedTopToast.show(
+          context: context,
+          message: timedOut
+              ? "Google sign-in timed out. Check your connection and try again."
+              : "Google sign-in failed. Please try again, or sign in with "
+                  "your mobile number.",
+          backgroundColor: ColorResources.textColorBaclColor,
+          icon: Icons.error_outline,
+        );
+      }
       return null;
     }
   }
@@ -138,7 +202,11 @@ class AuthController extends GetxController implements GetxService {
       idToken: userToken.toString(),
     );
 
-    if (response.body != null && response.body["code"] == "200") {
+    // ?.toString() rather than == "200". The backend is not consistent about
+    // whether `code` is a string or a number across endpoints, and an int
+    // 200 failed this check silently, dropping a perfectly good login into
+    // the do-nothing branch at the bottom.
+    if (response.body != null && response.body["code"]?.toString() == "200") {
     ///  await EasyLoading.dismiss();
       print('social login ${response.body['user']}');
 
@@ -161,7 +229,16 @@ class AuthController extends GetxController implements GetxService {
       );
 
       await Future.delayed(const Duration(milliseconds: 500));
-      ApiConstants.userTokenSocial = response.body['data']['api_token']
+      // CONFIRMED: social-auth's response names this field "token", not
+      // "api_token" — that mismatch meant `.toString()` was called on a
+      // JSON null, producing the four-character *string* "null" (Dart's
+      // Null.toString()) rather than throwing or leaving this empty. That
+      // string is non-empty, so every `.isNotEmpty` guard downstream (the
+      // ones that decide whether to send api_token/id to basic-info, e.g.)
+      // treated it as "this rider has a real session token" and sent the
+      // literal text "null" as the token — a second, more confusing
+      // failure on top of never having a real session in the first place.
+      ApiConstants.userTokenSocial = response.body['data']['token']
           .toString();
       ApiConstants.userIdSocial = response.body['data']['id'].toString();
       ApiConstants.usernames = response.body['data']['name'].toString();
@@ -169,7 +246,7 @@ class AuthController extends GetxController implements GetxService {
 
       ApiConstants.provider = provider.toString();
       if (response.body['data']['status'].toString() == '1' ) {
-        authRepo.saveUserToken(response.body['data']['api_token'].toString());
+        authRepo.saveUserToken(response.body['data']['token'].toString());
         authRepo.saveUserprofileid(response.body['data']['id'].toString());
         Get.offAll(
           MainNavigation(),
@@ -177,7 +254,21 @@ class AuthController extends GetxController implements GetxService {
           transition: Transition.rightToLeft,
         );
       } else {
-        Get.offAllNamed(RouteHelper.getprofileScreenRoute());
+        // ProfilePage's own route unconditionally reads
+        // Get.arguments['phonenumber'] (see route.dart) — calling this
+        // without any arguments at all left Get.arguments null, and
+        // indexing into that threw NoSuchMethodError the instant the route
+        // tried to build. The phone-OTP call site a few hundred lines down
+        // already passes this map; this one — the Google-signup path —
+        // never did. There genuinely is no phone number to hand over here
+        // (Google's identity token doesn't carry one), so this passes an
+        // empty string rather than omitting the key: ProfilePage's own
+        // phone field is read-only, sourced entirely from this value, so a
+        // Google-signup rider currently sees it blank rather than crashing.
+        Get.offAllNamed(
+          RouteHelper.getprofileScreenRoute(),
+          arguments: {'phonenumber': ''},
+        );
       }
     } else if (response.statusCode == 500) {
      /// await EasyLoading.dismiss();
@@ -196,9 +287,31 @@ class AuthController extends GetxController implements GetxService {
       //   snackPosition: SnackPosition.TOP,
       // );
     } else {
-    ///  await EasyLoading.dismiss();
+      // This branch was entirely empty. Every backend rejection of a social
+      // login — an unregistered account, a rejected id_token, a validation
+      // error, any 4xx — returned here and did absolutely nothing: no
+      // message, no navigation, no state change. The button reset itself and
+      // the user was left staring at the same screen with no idea the
+      // request had even failed, let alone why.
+      final dynamic body = response.body;
+      final String? backendMessage =
+          body is Map ? body['message']?.toString() : null;
+      if (context.mounted) {
+        AnimatedTopToast.show(
+          context: context,
+          message: _sanitizeBackendMessage(
+            backendMessage,
+            "Couldn't sign in with Google. Please try again or use your "
+            "mobile number.",
+          ),
+          backgroundColor: ColorResources.textColorBaclColor,
+          icon: Icons.error_outline,
+        );
+      }
+      debugPrint(
+        'Social login rejected: status=${response.statusCode} body=$body',
+      );
     }
-   /// await EasyLoading.dismiss();
     update();
     return response;
   }

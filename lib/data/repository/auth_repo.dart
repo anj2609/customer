@@ -87,6 +87,20 @@ class AuthRepo extends GetxService {
       body["user_id"] = resolvedUserId;
     }
 
+    // A rider who signed up via Google is identified differently to a
+    // phone-OTP one: social-login's response hands back a real session
+    // (api_token + id) rather than the signup_token verify-otp gives a new
+    // phone-OTP user — and never issues a signup_token at all, so that
+    // field is always empty for this case. Sent in addition to, not instead
+    // of, everything above — a rider only ever has a real value for one
+    // identity path, so this doesn't change what a phone-OTP rider sends.
+    if (ApiConstants.userTokenSocial.isNotEmpty) {
+      body["api_token"] = ApiConstants.userTokenSocial;
+    }
+    if (ApiConstants.userIdSocial.isNotEmpty) {
+      body["id"] = ApiConstants.userIdSocial;
+    }
+
     return apiClient.postMultipartData(ApiConstants.basicInfo, body, profile_image);
   }
 

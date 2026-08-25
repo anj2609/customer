@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:myrideuser/app/modules/Deshboard/finding_driver_view.dart';
 import 'package:myrideuser/config/route.dart';
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/dimensions.dart';
@@ -75,10 +76,32 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   /// Frames whatever matters at this point in the ride: the driver on their
   /// way in, or the road ahead once the rider is aboard.
   void _recentreOnRide() {
+    // This — and the WidgetsBinding.instance.addPostFrameCallback() calls
+    // that lead into it from updateDriverLocation() below — can still fire
+    // a frame after this screen has already been popped: payment
+    // confirming (PaymentController._onPaid → Get.offAll(TripCompletedScreen))
+    // can land in the same instant a GetBuilder rebuild here schedules one
+    // of those callbacks, and addPostFrameCallback runs regardless of
+    // whether the widget that scheduled it is still mounted. mapController
+    // itself is still non-null at that point (dispose() never clears it),
+    // so the null check alone let this reach a GoogleMapController whose
+    // underlying native view had already been torn down — "GoogleMapController
+    // ... used after the associated GoogleMap widget had already been
+    // disposed."
+    if (!mounted || mapController == null) return;
     final target = _isRideUnderway ? (_dropLatLng ?? driverLocation) : driverLocation;
-    if (target == null || mapController == null) return;
+    if (target == null) return;
     _programmaticCameraMove = true;
-    mapController?.animateCamera(CameraUpdate.newLatLng(target));
+    // mounted is still no absolute guarantee — the platform channel can
+    // tear the native view down in a narrower window than Flutter's own
+    // mounted flag flips in. A stray StateError from this specific call is
+    // a lost camera animation on a screen that's on its way out anyway, so
+    // swallowing it here is strictly safer than letting it crash the app.
+    try {
+      mapController?.animateCamera(CameraUpdate.newLatLng(target));
+    } catch (e) {
+      debugPrint('[FindingDriver] animateCamera after dispose: $e');
+    }
   }
 
   /// True once the rider is in the car, when the journey being shown stops
@@ -544,34 +567,47 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || mapController == null) return;
-      if (pickup.latitude == destination.latitude &&
-          pickup.longitude == destination.longitude) {
-        mapController?.animateCamera(CameraUpdate.newLatLngZoom(pickup, 15));
-        return;
-      }
-      mapController?.animateCamera(
-        CameraUpdate.newLatLngBounds(
-          LatLngBounds(
-            southwest: LatLng(
-              pickup.latitude < destination.latitude
-                  ? pickup.latitude
-                  : destination.latitude,
-              pickup.longitude < destination.longitude
-                  ? pickup.longitude
-                  : destination.longitude,
+      // mounted is genuinely not enough on its own here — confirmed live:
+      // this exact mounted check was already in place and the app still
+      // hit "GoogleMapController ... used after the associated GoogleMap
+      // widget had already been disposed." The native map view's teardown
+      // and Flutter's own mounted flag don't flip in the same instant, so
+      // there's a real window where this check passes but the platform
+      // channel underneath has already gone. Same fix as _recentreOnRide:
+      // catch it rather than let a lost camera move on a screen that's
+      // already on its way out crash the app.
+      try {
+        if (pickup.latitude == destination.latitude &&
+            pickup.longitude == destination.longitude) {
+          mapController?.animateCamera(CameraUpdate.newLatLngZoom(pickup, 15));
+          return;
+        }
+        mapController?.animateCamera(
+          CameraUpdate.newLatLngBounds(
+            LatLngBounds(
+              southwest: LatLng(
+                pickup.latitude < destination.latitude
+                    ? pickup.latitude
+                    : destination.latitude,
+                pickup.longitude < destination.longitude
+                    ? pickup.longitude
+                    : destination.longitude,
+              ),
+              northeast: LatLng(
+                pickup.latitude > destination.latitude
+                    ? pickup.latitude
+                    : destination.latitude,
+                pickup.longitude > destination.longitude
+                    ? pickup.longitude
+                    : destination.longitude,
+              ),
             ),
-            northeast: LatLng(
-              pickup.latitude > destination.latitude
-                  ? pickup.latitude
-                  : destination.latitude,
-              pickup.longitude > destination.longitude
-                  ? pickup.longitude
-                  : destination.longitude,
-            ),
+            80,
           ),
-          80,
-        ),
-      );
+        );
+      } catch (e) {
+        debugPrint('[FindingDriver] animateCamera after dispose: $e');
+      }
     });
   }
 
@@ -617,6 +653,10 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   }
 
   void updateDriverLocation(double latitude, double longitude) {
+    // See _recentreOnRide's own note — this is reached from a
+    // post-frame callback that can outlive this screen.
+    if (!mounted) return;
+
     driverLocation = LatLng(latitude, longitude);
 
     updateMarkers();
@@ -641,6 +681,39 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   LatLng? driverLocation;
   @override
   Widget build(BuildContext context) {
+    // While the booking is still unassigned, this screen is the full-screen
+    // "Finding you the best driver" search state — not a map with a sheet
+    // over it. There is nothing to track on a map yet: no driver has
+    // accepted, so the only marker would be the rider's own pickup point.
+    //
+    // Only the pending branch is replaced. Every other status still falls
+    // through to the tracking scaffold below with its map, live driver
+    // marker and polling completely untouched.
+    return GetBuilder<BookingController>(
+      builder: (statusController) {
+        if (statusController.rideStatus.value.toLowerCase() == 'pending') {
+          return Scaffold(
+            body: FindingDriverView(
+              onBack: () => Get.back(),
+              // Same action the old pending sheet's Cancel Ride button ran:
+              // stop the poll first, then offAndToNamed so this screen is
+              // disposed rather than left alive behind the cancel screen.
+              onCancelRide: () {
+                _timer?.cancel();
+                Get.offAndToNamed(
+                  RouteHelper.getcancelRideScreen(),
+                  arguments: {'booking_id': widget.booking_id},
+                );
+              },
+            ),
+          );
+        }
+        return _buildTrackingScaffold(context);
+      },
+    );
+  }
+
+  Widget _buildTrackingScaffold(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
@@ -734,15 +807,25 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
 
                         await getCurrentLocation1();
 
-                        if (currentLocation != null) {
-                          mapController?.animateCamera(
-                            CameraUpdate.newCameraPosition(
-                              CameraPosition(
-                                target: currentLocation!,
-                                zoom: 16,
+                        // getCurrentLocation1() awaits a real GPS fix — the
+                        // screen can be gone by the time it resolves (same
+                        // class of race as _showBookingLocations/
+                        // _recentreOnRide above).
+                        if (mounted && currentLocation != null) {
+                          try {
+                            mapController?.animateCamera(
+                              CameraUpdate.newCameraPosition(
+                                CameraPosition(
+                                  target: currentLocation!,
+                                  zoom: 16,
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          } catch (e) {
+                            debugPrint(
+                              '[FindingDriver] animateCamera after dispose: $e',
+                            );
+                          }
                         }
                         // Initial marker placement. Prefer the real live
                         // GPS (driver_info.lat/lng from /track-ride,
@@ -844,8 +927,17 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
             top: MediaQuery.of(context).padding.top + 10,
             left: 16,
             right: 16,
-            child: Obx(() {
-              final controller = Get.find<BookingController>();
+            // Was Obx() — same root cause as the map layer above (see its
+            // own note): BookingController's polling drives everything via
+            // update(), which Obx doesn't reliably pick up. This block's
+            // reads (rideDetails, tridRideDetailsData) apparently didn't
+            // register as an observed dependency either, which is what
+            // GetX's own "improper use of GetX" error was reporting —
+            // an Obx that completed a build without ever subscribing to
+            // anything. GetBuilder sidesteps the question entirely: it
+            // rebuilds on every update() call regardless of which fields
+            // got read.
+            child: GetBuilder<BookingController>(builder: (controller) {
               final data = controller.rideDetails;
               final driverdata = controller.tridRideDetailsData;
               if (!addressLoaded && driverdata.isNotEmpty) {
@@ -1285,6 +1377,25 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
 
   //////////////// ============================ ongoing paire =========================///////////////////////
 
+  /// Small icon+label pair for the vehicle type / registration number row.
+  Widget _vehicleInfoChip(IconData icon, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: Colors.grey.shade600),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade700,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget buildExpandableRideSheet(
     String status,
     DatTrackRideDetails data,
@@ -1381,10 +1492,87 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                             driver!.name.toString(),
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          Text(
-                            "${driver.vehicalName ?? ""} - ${driver.vehicalNumber ?? ""}",
-                            //"${driver['vehical_name']} - ${driver['vehical_number']}",
-                            style: const TextStyle(fontSize: 13),
+                          const SizedBox(height: 4),
+                          Builder(
+                            builder: (_) {
+                              // Vehicle *type* (e.g. "Sedan", "XUV Premium")
+                              // is the ride category picked at booking time
+                              // — /trip-detail's vehicle.name — not the
+                              // driver's own vehicalName, which is closer to
+                              // a make/model label. Falls back to
+                              // vehicalName when trip-detail hasn't loaded
+                              // yet (right after a driver accepts, before
+                              // its first poll lands), so this row never
+                              // sits empty while a value is genuinely known.
+                              final tripVehicle = Get.find<BookingController>()
+                                  .tripDetailModel
+                                  .value
+                                  ?.data
+                                  ?.vehicle;
+                              final vehicleType =
+                                  (tripVehicle?.name?.isNotEmpty == true)
+                                      ? tripVehicle!.name!
+                                      : (driver.vehicalName ?? '');
+                              final vehicleNumber = driver.vehicalNumber ?? '';
+
+                              // "Maruti Swift Dzire" — brand and model
+                              // together as one label, distinct from the
+                              // *type*/category chip below (e.g. "Sedan").
+                              // vehical_brand/vehical_model aren't confirmed
+                              // present on this endpoint (see DriverInfo's
+                              // own note) — if the backend doesn't send
+                              // them, vehicalName is the next best thing:
+                              // it's already confirmed live and reads like
+                              // a make/model label itself (that's the whole
+                              // reason the type chip above only uses it as
+                              // a fallback, not its first choice), so
+                              // showing it here is better than an empty
+                              // line while brand/model stay unconfirmed.
+                              final vehicleBrandModel = [
+                                driver.vehicalBrand ?? '',
+                                driver.vehicalModel ?? '',
+                              ].where((s) => s.isNotEmpty).join(' ');
+                              final vehicleBrandModelText =
+                                  vehicleBrandModel.isNotEmpty
+                                      ? vehicleBrandModel
+                                      : (driver.vehicalName ?? '');
+
+                              if (vehicleType.isEmpty &&
+                                  vehicleNumber.isEmpty &&
+                                  vehicleBrandModelText.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (vehicleBrandModelText.isNotEmpty) ...[
+                                    Text(
+                                      vehicleBrandModelText,
+                                      style: const TextStyle(fontSize: 13),
+                                    ),
+                                    const SizedBox(height: 4),
+                                  ],
+                                  Wrap(
+                                    spacing: 12,
+                                    runSpacing: 4,
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    children: [
+                                      if (vehicleType.isNotEmpty)
+                                        _vehicleInfoChip(
+                                          Icons.directions_car_rounded,
+                                          vehicleType,
+                                        ),
+                                      if (vehicleNumber.isNotEmpty)
+                                        _vehicleInfoChip(
+                                          Icons.confirmation_number_outlined,
+                                          vehicleNumber.toUpperCase(),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ],
                       ),

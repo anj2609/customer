@@ -259,12 +259,31 @@ Future<Response> cancelRideApi({ required String bookingid, required String rese
   }
 
 
-  Future<Response> rateDriver({ required String bookingid, required String rateId}) async {
+  /// CONFIRMED live: POST /rate-driver as multipart form-data (not JSON) —
+  /// {booking_id, rating, review (optional)} — returns {code, message} with
+  /// no data payload.
+  ///
+  /// Switched from myridepostData (JSON body) to the authenticated multipart
+  /// helper so the wire format matches what's actually verified working
+  /// against the backend, rather than relying on Laravel's usually-but-not-
+  /// guaranteed leniency about accepting JSON on a form-data-documented
+  /// endpoint. review is optional on the backend; only sent when non-empty
+  /// so a driver rated with no comment doesn't post a stray empty field.
+  Future<Response> rateDriver({
+    required String bookingid,
+    required String rateId,
+    String review = '',
+  }) async {
     log(' resean idddd ||||||||||||||  $rateId');
-    return apiClient.myridepostData(ApiConstants.rateDriver, {
-      "booking_id": bookingid,
-      "rating": rateId,
-    });
+    return apiClient.postMultipartNewSelectProfile(
+      ApiConstants.rateDriver,
+      {
+        "booking_id": bookingid,
+        "rating": rateId,
+        if (review.isNotEmpty) "review": review,
+      },
+      null,
+    );
   }
 
 

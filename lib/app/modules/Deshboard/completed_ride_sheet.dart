@@ -38,6 +38,14 @@ class _CompletedRideSheetState extends State<CompletedRideSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // Parsed once and reused for both the stats row and the price card
+    // below — was previously built twice: this fresh parse here, plus a
+    // second one inside the Builder further down. Same map, same result,
+    // just duplicated work and a second place for the two to drift apart.
+    final TripDetailData tripData = TripDetailData.fromJson(
+      Map<String, dynamic>.from(widget.tripDetails),
+    );
+
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
       minChildSize: 0.75,
@@ -105,25 +113,42 @@ class _CompletedRideSheetState extends State<CompletedRideSheet> {
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _TripInfoTile(
-                        icon: Icons.access_time,
-                        title: widget.tripDetails['estimated_time']?.toString() ?? '0.0',
-                        subtitle: 'Duration',
-                      ),
-                      _TripInfoTile(
-                        icon: Icons.route,
-                        title: widget.tripDetails['total_fare']?.toString() ?? '0.0',
-                        subtitle: 'Distance',
-                      ),
-                      _TripInfoTile(
-                        icon: Icons.speed,
-                        title: widget.tripDetails['distance_km']?.toString() ?? '0.0',
-                        subtitle: 'Avg. Speed',
-                      ),
-                    ],
+                  child: Builder(
+                    builder: (_) {
+                      final duration = tripData.rideStats?.duration;
+                      final distance = tripData.rideStats?.distance;
+                      // km/h from the same two figures already shown, rather
+                      // than a separate (and previously wrong — this tile
+                      // used to just repeat the distance figure under an
+                      // "Avg. Speed" label) backend field. Left blank rather
+                      // than a divide-by-zero guess when duration isn't
+                      // known yet.
+                      final String avgSpeedText =
+                          (duration != null && duration > 0 && distance != null && distance > 0)
+                              ? '${(distance / (duration / 60)).toStringAsFixed(0)} km/h'
+                              : '-';
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _TripInfoTile(
+                            icon: Icons.access_time,
+                            title: formatTripDuration(duration),
+                            subtitle: 'Duration',
+                          ),
+                          _TripInfoTile(
+                            icon: Icons.route,
+                            title: formatTripDistance(distance),
+                            subtitle: 'Distance',
+                          ),
+                          _TripInfoTile(
+                            icon: Icons.speed,
+                            title: avgSpeedText,
+                            subtitle: 'Avg. Speed',
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -134,21 +159,11 @@ class _CompletedRideSheetState extends State<CompletedRideSheet> {
                 /// the richer "price_breakdown" the UI originally only
                 /// looked for — PriceBreakdownCard now renders whichever
                 /// one is actually present, nothing if neither is.
-                Builder(
-                  builder: (_) {
-                    final tripData = TripDetailData.fromJson(
-                      Map<String, dynamic>.from(widget.tripDetails),
-                    );
-                    if (tripData.priceBreakdown == null &&
-                        tripData.payment == null) {
-                      return const SizedBox.shrink();
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: PriceBreakdownCard(tripData: tripData),
-                    );
-                  },
-                ),
+                if (tripData.priceBreakdown != null || tripData.payment != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: PriceBreakdownCard(tripData: tripData),
+                  ),
 
                 const SizedBox(height: 24),
                 const Divider(),

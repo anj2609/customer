@@ -74,6 +74,18 @@ class BookingController extends GetxController implements GetxService {
   // is left as-is since other code already reads other fields off it.
   Rx<TripDetailModel?> tripDetailModel = Rx<TripDetailModel?>(null);
 
+  /// Latches the last /trip-detail snapshot that actually carried a real
+  /// duration/distance. tripDetailModel above keeps getting overwritten by
+  /// this same 3s poll for as long as findingdriver_screen stays mounted —
+  /// including all the way through the payment step — and if a later poll,
+  /// once the booking is further along (paid/closed out), ever comes back
+  /// without those two fields, the rating screen would silently lose values
+  /// it had already shown correctly moments earlier on the "You have
+  /// arrived!" sheet. Only ever updated when the fresh data actually has
+  /// something in it, so it always holds the last real reading rather than
+  /// being blanked out by a subsequent response that doesn't.
+  TripDetailData? completedTripStats;
+
   /// The real fare components (base fare, CGST, SGST, booking fee, platform
   /// fee) for the booking this app session created, captured from
   /// create-booking's `fare_details` — see
@@ -1278,6 +1290,39 @@ class BookingController extends GetxController implements GetxService {
           }
 
           tripDetailModel.value = parsed;
+
+          // Duration/distance previously came back blank on the rating
+          // screen because their source path in the response wasn't
+          // actually confirmed (see TripDetailData._rideStatsSource). Left
+          // in as a one-line trace rather than removed once fixed, so any
+          // future ride type/shape that still doesn't parse shows up
+          // immediately in logcat instead of silently rendering "-" again.
+          // distance defaults to 0 rather than null when absent (see
+          // TripRideStats), so "has a real reading" is a >0 check on
+          // either field, not a null check.
+          final stats = parsed.data?.rideStats;
+          final bool hasStats =
+              (stats?.duration ?? 0) > 0 || (stats?.distance ?? 0) > 0;
+          if (!hasStats) {
+            final dataMap = body['data'] is Map ? body['data'] as Map : null;
+            debugPrint(
+              '[TripDetail] duration/distance not found in response data keys: '
+              '${dataMap?.keys.toList() ?? body['data']}',
+            );
+            // trip_summary is the current best guess for where the real
+            // figures live (see _rideStatsSource) — if it exists but still
+            // doesn't parse, this shows exactly what's inside it instead of
+            // just "not found" again.
+            final tripSummary = dataMap?['trip_summary'];
+            if (tripSummary != null) {
+              debugPrint('[TripDetail] trip_summary contents: $tripSummary');
+            }
+          } else {
+            // Latched, not just assigned — see completedTripStats' own
+            // comment on why this must never be overwritten by a later
+            // response that came back without a reading.
+            completedTripStats = parsed.data;
+          }
         } catch (e) {
           debugPrint('TripDetailModel parse error: $e');
         }
@@ -1396,6 +1441,7 @@ class BookingController extends GetxController implements GetxService {
     required BuildContext context,
     required String? bookingid,
     required dynamic rateId,
+    String review = '',
   }) async {
     update();
 
@@ -1403,6 +1449,7 @@ class BookingController extends GetxController implements GetxService {
       Response response = await bookingRepo.rateDriver(
         bookingid: bookingid.toString(),
         rateId: rateId.toString(),
+        review: review,
       );
 
       final body = response.body;
@@ -1439,6 +1486,39 @@ class BookingController extends GetxController implements GetxService {
       );
       update();
       rethrow;
+    }
+  }
+
+  /// Posts the post-ride star rating and optional review, for
+  /// [TripCompletedScreen]. Deliberately separate from [rateForDriver]
+  /// above rather than reused directly: that method's job includes showing
+  /// its own toast and navigating Home on success, both of which
+  /// TripCompletedScreen already owns itself (Done navigates Home
+  /// regardless of whether the rating submit succeeded — a failed rating
+  /// must never trap the rider on a finished ride). This just posts and
+  /// reports success/failure, with no side effects of its own.
+  Future<bool> submitTripRating({
+    required String bookingId,
+    required int rating,
+    String review = '',
+  }) async {
+    try {
+      final response = await bookingRepo.rateDriver(
+        bookingid: bookingId,
+        rateId: rating.toString(),
+        review: review,
+      );
+      final body = response.body;
+      final success = response.statusCode == 200 &&
+          body is Map &&
+          body['code']?.toString() == '200';
+      if (!success) {
+        debugPrint('submitTripRating failed: status=${response.statusCode} body=$body');
+      }
+      return success;
+    } catch (e) {
+      debugPrint('submitTripRating error: $e');
+      return false;
     }
   }
 

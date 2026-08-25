@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class TrackRideModel {
   String? code;
   String? message;
@@ -95,6 +97,16 @@ class DriverInfo {
   String? vehicalName;
   String? vehicalNumber;
   String? vehicalColor;
+
+  /// Not confirmed present on this endpoint — the driver app's own
+  /// get-vehicle-info (vehicledetails_model.dart) confirms the backend
+  /// stores these as separate "brand"/"model" fields, so both the
+  /// "vehical_"-prefixed spelling this response already uses for
+  /// name/number/color and the driver-app's own unprefixed spelling are
+  /// tried. Null, and simply left off the ride card, if track-ride doesn't
+  /// actually echo them.
+  String? vehicalBrand;
+  String? vehicalModel;
   String? lat;
   String? lng;
 
@@ -107,6 +119,8 @@ class DriverInfo {
       this.vehicalName,
       this.vehicalNumber,
       this.vehicalColor,
+      this.vehicalBrand,
+      this.vehicalModel,
       this.lat,
       this.lng});
 
@@ -118,6 +132,17 @@ class DriverInfo {
     vehicalName = json['vehical_name'];
     vehicalNumber = json['vehical_number'];
     vehicalColor = json['vehical_color'];
+    vehicalBrand = json['vehical_brand']?.toString() ?? json['brand']?.toString();
+    vehicalModel = json['vehical_model']?.toString() ?? json['model']?.toString();
+    // Neither guessed key name has been confirmed against a real payload —
+    // this endpoint may just not send brand/model as fields separate from
+    // vehical_name at all. Traced once per parse (cheap; this only runs on
+    // an accept/track-ride poll, a few times a minute at most) so the real
+    // keys under driver_info show up in logcat the moment this is tested,
+    // instead of guessing a third name blind.
+    if (vehicalBrand == null && vehicalModel == null) {
+      debugPrint('[DriverInfo] brand/model not found — driver_info keys: ${json.keys.toList()}');
+    }
     // These are declared String? but read via findingdriver_screen.dart's
     // own _coordinate() helper, which already handles either a numeric or
     // string value — so the risk here is purely the *assignment* throwing
@@ -138,6 +163,8 @@ class DriverInfo {
     data['vehical_name'] = this.vehicalName;
     data['vehical_number'] = this.vehicalNumber;
     data['vehical_color'] = this.vehicalColor;
+    data['vehical_brand'] = this.vehicalBrand;
+    data['vehical_model'] = this.vehicalModel;
     data['lat'] = this.lat;
     data['lng'] = this.lng;
     return data;

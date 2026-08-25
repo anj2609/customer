@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:myrideuser/config/route.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/colors.dart';
+import 'package:myrideuser/data/services/version_check_service.dart';
 
 /// Splash animation on the brand gradient (#292B84 → #0004CF). The source
 /// clip ("transparent final.mov") is ProRes 4444 with a real alpha
@@ -72,6 +74,29 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _navigateAfterDelay() async {
     if (_hasNavigated) return;
     _hasNavigated = true;
+
+    // Checked before any navigation decision, so a forced update can block
+    // every path below — logged-in or not — not just one of them. A forced
+    // update never returns from this call: the dialog it shows has no
+    // dismiss and no back button, so this frame just... doesn't proceed,
+    // until the rider updates and reopens. Failure here is silent by design
+    // (see VersionCheckService) — a version-check outage must never be able
+    // to take the app down with it.
+    if (Platform.isAndroid) {
+      final versionResult = await VersionCheckService.check();
+      if (versionResult != null && versionResult.updateAvailable && mounted) {
+        // Not awaited for an optional update — the dialog and the rest of
+        // this function proceed independently, so a rider who taps "Later"
+        // (or just leaves it open) still lands wherever they were headed
+        // instead of being stuck waiting on a dialog they dismissed.
+        final dialogFuture =
+            VersionCheckService.showUpdateDialog(context, versionResult);
+        if (versionResult.mustBlock) {
+          await dialogFuture;
+          return;
+        }
+      }
+    }
 
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString(ApiConstants.token);

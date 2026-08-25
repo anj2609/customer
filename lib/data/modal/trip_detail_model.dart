@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 /// Typed shape for GET /trip-detail. Rebuilt against a real, live-captured
 /// response for a completed booking (not just the original example spec),
 /// which turned out to differ in two real ways:
@@ -69,9 +71,6 @@ class TripDetailData {
   });
 
   factory TripDetailData.fromJson(Map<String, dynamic> json) {
-    final rideDetails = json['ride_details'];
-    final tripStats = rideDetails is Map ? rideDetails['trip'] : null;
-
     return TripDetailData(
       bookingId: json['booking_id'] is int
           ? json['booking_id'] as int
@@ -92,9 +91,7 @@ class TripDetailData {
       driver: json['driver'] != null
           ? TripDriver.fromJson(json['driver'] as Map<String, dynamic>)
           : null,
-      rideStats: tripStats is Map
-          ? TripRideStats.fromJson(tripStats as Map<String, dynamic>)
-          : null,
+      rideStats: TripRideStats.fromJson(_rideStatsSource(json)),
       createdAt: json['created_at']?.toString(),
       payment: json['payment'] != null
           ? TripPayment.fromJson(json['payment'] as Map<String, dynamic>)
@@ -105,6 +102,41 @@ class TripDetailData {
             )
           : null,
     );
+  }
+
+  /// Confirmed live via a captured real /trip-detail response: the actual
+  /// keys are `final_distance` (km — see its sibling `distance_unit`) and
+  /// `final_duration` (minutes — `duration_unit`), present identically in
+  /// both `data.trip_summary` and `data.ride_details.trip`. Every previous
+  /// pass at this got the *location* right at some point (nested
+  /// ride_details.trip, then trip_summary) but not the key names — kept
+  /// guessing `distance`/`duration` or `distance_km`/`estimated_time`,
+  /// neither of which this response actually uses. `trip_summary` is
+  /// tried first since it's the smaller, purpose-built object; the rest
+  /// stay as fallbacks in case some ride types shape this differently.
+  /// Whichever candidate map actually carries one of the recognised keys
+  /// wins; if none do, both fields simply come back null rather than the
+  /// parse guessing further.
+  static Map<String, dynamic> _rideStatsSource(Map<String, dynamic> json) {
+    final tripSummary = json['trip_summary'];
+    final rideDetails = json['ride_details'];
+    final nestedTrip = rideDetails is Map ? rideDetails['trip'] : null;
+    bool hasStats(dynamic m) {
+      if (m is! Map) return false;
+      return m['final_distance'] != null ||
+          m['final_duration'] != null ||
+          m['distance_km'] != null ||
+          m['estimated_time'] != null ||
+          m['distance'] != null ||
+          m['duration'] != null;
+    }
+
+    for (final candidate in [tripSummary, nestedTrip, json, rideDetails]) {
+      if (hasStats(candidate)) {
+        return Map<String, dynamic>.from(candidate as Map);
+      }
+    }
+    return const {};
   }
 
   /// Returns a copy carrying [breakdown], for the common case where
@@ -183,17 +215,25 @@ class TripDriver {
 }
 
 class TripRideStats {
+  /// In kilometres. `final_distance` is the confirmed-live key (see
+  /// _rideStatsSource) — `distance`/`distance_km` kept only as fallbacks.
   final double? distance;
+
+  /// In minutes. `final_duration` is the confirmed-live key — see above.
   final int? duration;
 
   TripRideStats({this.distance, this.duration});
 
   factory TripRideStats.fromJson(Map<String, dynamic> json) {
+    final distanceRaw =
+        json['final_distance'] ?? json['distance'] ?? json['distance_km'];
+    final durationRaw =
+        json['final_duration'] ?? json['duration'] ?? json['estimated_time'];
     return TripRideStats(
-      distance: _toDouble(json['distance']),
-      duration: json['duration'] is int
-          ? json['duration'] as int
-          : int.tryParse(json['duration']?.toString() ?? ''),
+      distance: _toDouble(distanceRaw),
+      duration: durationRaw is int
+          ? durationRaw
+          : int.tryParse(durationRaw?.toString() ?? ''),
     );
   }
 }
@@ -354,4 +394,48 @@ double _toDouble(dynamic value) {
   if (value == null) return 0;
   if (value is num) return value.toDouble();
   return double.tryParse(value.toString()) ?? 0;
+}
+
+/// "18 min" under an hour, "1h 20m" at or above one. Shared by every screen
+/// that shows a completed ride's duration — the post-ride rating screen and
+/// the "You have arrived!" sheet shown right when the ride ends — so the
+/// same [TripRideStats.duration] always reads identically in both places.
+String formatTripDuration(int? minutes) {
+  if (minutes == null || minutes <= 0) return "-";
+  if (minutes < 60) return "$minutes min";
+  return "${minutes ~/ 60}h ${minutes % 60}m";
+}
+
+/// "4.2 km" — shared the same way as [formatTripDuration].
+String formatTripDistance(double? km) {
+  if (km == null || km <= 0) return "-";
+  return "${km.toStringAsFixed(1)} km";
+}
+
+/// Great-circle (Haversine) distance between two coordinates, in
+/// kilometres. Used on the rating screen instead of trip-detail's own
+/// `final_distance` — a live-captured response returned 2429.43 km for a
+/// booking whose pickup and drop were both within India, well outside any
+/// plausible road distance for that pair of points, so the backend figure
+/// can't be trusted as-is. Pickup/drop coordinates are the one part of a
+/// completed booking that can't be wrong in the same way: they're exactly
+/// what was booked, straight from `data.pickup`/`data.drop`.
+///
+/// This is straight-line, not road distance — always somewhat shorter than
+/// the real driven route — but a consistent, sane underestimate beats an
+/// occasionally-wild backend number.
+double? haversineDistanceKm(double? lat1, double? lng1, double? lat2, double? lng2) {
+  if (lat1 == null || lng1 == null || lat2 == null || lng2 == null) return null;
+  const earthRadiusKm = 6371.0;
+  double toRad(double deg) => deg * (math.pi / 180);
+
+  final dLat = toRad(lat2 - lat1);
+  final dLng = toRad(lng2 - lng1);
+  final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+      math.cos(toRad(lat1)) *
+          math.cos(toRad(lat2)) *
+          math.sin(dLng / 2) *
+          math.sin(dLng / 2);
+  final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+  return earthRadiusKm * c;
 }

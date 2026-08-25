@@ -49,6 +49,9 @@ dependencies:
   # app's signing-key hash, which would need a backend change to every OTP
   # message; User Consent works with the SMS exactly as it's sent today.
   smart_auth: ^3.2.0
+  # Reads the app's own installed version number for the Play Store
+  # version-check on launch (see VersionCheckService).
+  package_info_plus: ^9.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
