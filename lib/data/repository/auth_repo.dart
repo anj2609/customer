@@ -79,12 +79,26 @@ class AuthRepo extends GetxService {
       "user_type": ApiConstants.customer,
       "signup_token": signupToken,
       "name": name ?? "",
-      "email": email ?? "",
       "gender": gender ?? "",
-      "date_of_birth": dob ?? "",
     };
     if (resolvedUserId.isNotEmpty) {
       body["user_id"] = resolvedUserId;
+    }
+    // Email and date of birth are optional on this screen — the UI itself
+    // already treats them that way (labelled "(Optional)", never blocked
+    // on by the Continue button's own validation). Previously still sent
+    // as blank strings when left empty, same as user_id used to be above —
+    // if the backend's own validation rule for these two is `required`
+    // (which typically fails on an empty string the same as a missing
+    // key) rather than `nullable`, sending "" would still trip it and
+    // reject the submission, which is indistinguishable from the field
+    // actually being compulsory as far as the rider can tell. Omitted
+    // entirely instead, matching user_id's own precedent just above.
+    if ((email ?? "").isNotEmpty) {
+      body["email"] = email!;
+    }
+    if ((dob ?? "").isNotEmpty) {
+      body["date_of_birth"] = dob!;
     }
 
     // A rider who signed up via Google is identified differently to a

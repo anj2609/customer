@@ -833,10 +833,14 @@ class AuthController extends GetxController implements GetxService {
 
     Response response = await authRepo.fillPersonalApi(
       phone: phone?.trim(),
-      name: name!.trim(),
-      email: email!.trim(),
-      gender: gender!.trim(),
-      dob: dob!.trim(),
+      name: name?.trim(),
+      // Email and date of birth are optional — trimmed if present, left
+      // null (not force-unwrapped) if not, so a genuinely-empty value here
+      // reaches fillPersonalApi as null and gets omitted from the request
+      // entirely rather than crashing this call outright.
+      email: email?.trim(),
+      gender: gender?.trim(),
+      dob: dob?.trim(),
       profile_image: profileimage,
     );
 

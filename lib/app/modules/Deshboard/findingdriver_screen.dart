@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
@@ -35,14 +36,18 @@ class FindingDriverUI extends StatefulWidget {
   State<FindingDriverUI> createState() => _FindingDriverUIState();
 }
 
-class _FindingDriverUIState extends State<FindingDriverUI> {
+class _FindingDriverUIState extends State<FindingDriverUI>
+    with TickerProviderStateMixin {
   Timer? _timer;
   bool _isNavigating = false;
   bool addressLoaded = false;
   bool _isChatOpening = false;
 
-  /// The booking's drop-off, remembered when the pins are first placed so the
-  /// route and camera can switch to it once the ride is under way.
+  /// The booking's pickup and drop-off, remembered when the pins are first
+  /// placed so the camera can always frame both of them together with the
+  /// car, at every stage of the ride — not just whichever one the route is
+  /// currently headed toward.
+  LatLng? _pickupLatLng;
   LatLng? _dropLatLng;
 
   /// Whether the camera should keep following the driver.
@@ -73,8 +78,13 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     });
   }
 
-  /// Frames whatever matters at this point in the ride: the driver on their
-  /// way in, or the road ahead once the rider is aboard.
+  /// Frames the car together with pickup *and* drop-off, at every stage of
+  /// the ride — the driver approaching, or the rider already aboard — so
+  /// neither pin can end up pushed off-screen the way a tight
+  /// centre-on-the-car follow would leave them once the car is far from
+  /// one or the other. Falls back to simply centring on whatever single
+  /// point is actually known yet (car alone, before either pin has loaded)
+  /// rather than doing nothing.
   void _recentreOnRide() {
     // This — and the WidgetsBinding.instance.addPostFrameCallback() calls
     // that lead into it from updateDriverLocation() below — can still fire
@@ -89,8 +99,15 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     // ... used after the associated GoogleMap widget had already been
     // disposed."
     if (!mounted || mapController == null) return;
-    final target = _isRideUnderway ? (_dropLatLng ?? driverLocation) : driverLocation;
-    if (target == null) return;
+
+    final car = _displayedCarPosition ?? driverLocation;
+    final points = <LatLng>[
+      if (car != null) car,
+      if (_pickupLatLng != null) _pickupLatLng!,
+      if (_dropLatLng != null) _dropLatLng!,
+    ];
+    if (points.isEmpty) return;
+
     _programmaticCameraMove = true;
     // mounted is still no absolute guarantee — the platform channel can
     // tear the native view down in a narrower window than Flutter's own
@@ -98,7 +115,30 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     // a lost camera animation on a screen that's on its way out anyway, so
     // swallowing it here is strictly safer than letting it crash the app.
     try {
-      mapController?.animateCamera(CameraUpdate.newLatLng(target));
+      if (points.length == 1) {
+        // Only the car is known yet (pins haven't loaded) — nothing to fit
+        // bounds to, so just centre on it like before.
+        mapController?.animateCamera(CameraUpdate.newLatLng(points.first));
+        return;
+      }
+
+      double minLat = points.first.latitude, maxLat = points.first.latitude;
+      double minLng = points.first.longitude, maxLng = points.first.longitude;
+      for (final p in points) {
+        if (p.latitude < minLat) minLat = p.latitude;
+        if (p.latitude > maxLat) maxLat = p.latitude;
+        if (p.longitude < minLng) minLng = p.longitude;
+        if (p.longitude > maxLng) maxLng = p.longitude;
+      }
+      mapController?.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          LatLngBounds(
+            southwest: LatLng(minLat, minLng),
+            northeast: LatLng(maxLat, maxLng),
+          ),
+          80,
+        ),
+      );
     } catch (e) {
       debugPrint('[FindingDriver] animateCamera after dispose: $e');
     }
@@ -157,6 +197,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   void dispose() {
     _timer?.cancel();
     _refollowTimer?.cancel();
+    _carAnimController?.dispose();
     super.dispose();
   }
 
@@ -275,6 +316,32 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
   final polylines = <Polyline>{}.obs;
   // Set<Marker> markers = {};
   // Set<Polyline> polylines = {};
+
+  // ==================== Smooth driver-marker animation ====================
+  //
+  // Each poll only ever hands over a single new fix, 3s apart — snapping the
+  // marker straight to it made the car visibly jump from point to point
+  // instead of driving. This interpolates the marker (and the map camera,
+  // while following) between the last displayed position and each new fix
+  // over the time actually elapsed since the previous one, and rotates the
+  // marker to face the direction of travel along the way.
+
+  /// The route currently on screen, kept as plain points (not just the
+  /// Polyline objects in [polylines]) so the marker can be snapped onto it
+  /// independently of whichever drawing call last touched the map.
+  List<LatLng> _currentRoutePoints = const [];
+
+  /// Where the driver marker is actually drawn right now — the smoothed,
+  /// in-flight position, not necessarily the latest raw GPS fix.
+  LatLng? _displayedCarPosition;
+  double _displayedCarBearing = 0;
+
+  AnimationController? _carAnimController;
+  LatLng? _carAnimFrom;
+  LatLng? _carAnimTo;
+  double _carBearingFrom = 0;
+  double _carBearingTo = 0;
+  DateTime? _lastCarFixAt;
   Future<void> getCurrentLocation() async {
     await Geolocator.requestPermission();
 
@@ -420,6 +487,8 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
           .map((point) => LatLng(point.latitude, point.longitude))
           .toList();
 
+      _currentRoutePoints = routePoints;
+
       setState(() {
         polylines.clear();
 
@@ -460,13 +529,22 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
       );
     }
 
-    if (driverLocation != null) {
+    // The smoothed, in-flight position/heading from the car animation
+    // (see _animateCarTo) — not the raw driverLocation fix directly, so the
+    // marker on screen is always the one actually gliding along the route,
+    // rotated to face the way it's moving. Falls back to the raw fix only
+    // for the very first frame, before any animation has run yet.
+    final carPosition = _displayedCarPosition ?? driverLocation;
+    if (carPosition != null) {
       updatedMarkers.add(
         Marker(
           markerId: const MarkerId("driver"),
-          position: driverLocation!,
+          position: carPosition,
           icon: carIcon ?? BitmapDescriptor.defaultMarker,
           infoWindow: const InfoWindow(title: "Driver"),
+          rotation: _displayedCarBearing,
+          anchor: const Offset(0.5, 0.5),
+          flat: true,
         ),
       );
     }
@@ -532,7 +610,10 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     final locationKey = _bookingLocationKey(booking);
     final pickup = LatLng(pickupLat, pickupLng);
     final destination = LatLng(dropLat, dropLng);
-    // Kept so the route and camera can aim here once the ride starts.
+    // Kept so the route and camera can aim here once the ride starts, and
+    // so the bounds-fit camera (see _fitCameraToRideBounds) always has both
+    // ends of the trip to frame alongside wherever the car currently is.
+    _pickupLatLng = pickup;
     _dropLatLng = destination;
     if (_visibleBookingLocationKey != locationKey) {
       _visibleBookingLocationKey = locationKey;
@@ -628,10 +709,17 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
           .map((point) => LatLng(point.latitude, point.longitude))
           .toList();
       if (!mounted) return;
+      final routePoints = points.length >= 2 ? points : [pickup, destination];
+      // Gives the marker something real to snap onto immediately, before
+      // drawRoute1()'s live driver-position route has run for the first
+      // time — that one takes over _currentRoutePoints as soon as it does,
+      // since it's the more relevant line for wherever the driver actually
+      // is right now.
+      _currentRoutePoints = routePoints;
       polylines.assignAll({
         Polyline(
           polylineId: const PolylineId('booking_route'),
-          points: points.length >= 2 ? points : [pickup, destination],
+          points: routePoints,
           width: 5,
           color: ColorResources.blueeebutton,
           geodesic: points.length < 2,
@@ -640,6 +728,7 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     } catch (_) {
       // Still show a direct connector if Directions is temporarily unavailable.
       if (!mounted) return;
+      _currentRoutePoints = [pickup, destination];
       polylines.assignAll({
         Polyline(
           polylineId: const PolylineId('booking_route'),
@@ -658,13 +747,168 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
     if (!mounted) return;
 
     driverLocation = LatLng(latitude, longitude);
-
-    updateMarkers();
     drawRoute1();
+    _animateCarTo(driverLocation!);
 
-    // Only if the rider hasn't taken the map over — see [_followMode].
+    // Re-fits the camera to car+pickup+drop once per poll — not every
+    // animation frame the way the marker itself glides, since
+    // _recentreOnRide's bounds-fit is its own eased camera transition
+    // (newLatLngBounds), and re-triggering an eased transition dozens of
+    // times a second would just fight itself instead of tracking smoothly.
+    // Once every ~3s is enough to keep both pins in frame as the car moves,
+    // at every stage of the ride — approaching, or already under way.
     if (!_followMode) return;
     _recentreOnRide();
+  }
+
+  /// Degrees clockwise from north, normalised to [0, 360).
+  double _bearingBetween(LatLng from, LatLng to) {
+    final bearing = Geolocator.bearingBetween(
+      from.latitude,
+      from.longitude,
+      to.latitude,
+      to.longitude,
+    );
+    return (bearing + 360) % 360;
+  }
+
+  /// Interpolates an angle the short way round, so a marker crossing due
+  /// north (359° -> 2°) turns 3° forward instead of spinning the long way
+  /// back through 180°.
+  double _lerpAngle(double from, double to, double t) {
+    double diff = (to - from) % 360;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    return (from + diff * t) % 360;
+  }
+
+  /// Projects [point] onto the nearest segment of [route], so the marker
+  /// tracks the road the driver is actually on rather than the raw GPS fix
+  /// (which can sit a few metres off to either side of the real road).
+  /// Lat/lng aren't a flat plane, but at street scale treating them as one —
+  /// scaling the longitude delta by cos(latitude) so a degree of longitude
+  /// isn't overweighted away from the equator — is accurate enough for this
+  /// and far cheaper than a real geodesic projection. Falls back to the
+  /// untouched point when there's no usable route yet.
+  LatLng _snapToRoute(LatLng point, List<LatLng> route) {
+    if (route.length < 2) return point;
+
+    final latCos = math.cos(point.latitude * math.pi / 180);
+    double bestDistSq = double.infinity;
+    LatLng best = point;
+
+    for (var i = 0; i < route.length - 1; i++) {
+      final a = route[i];
+      final b = route[i + 1];
+
+      final ax = a.longitude * latCos;
+      final ay = a.latitude;
+      final bx = b.longitude * latCos;
+      final by = b.latitude;
+      final px = point.longitude * latCos;
+      final py = point.latitude;
+
+      final dx = bx - ax;
+      final dy = by - ay;
+      final lengthSq = dx * dx + dy * dy;
+
+      double t = lengthSq == 0
+          ? 0
+          : ((px - ax) * dx + (py - ay) * dy) / lengthSq;
+      t = t.clamp(0.0, 1.0);
+
+      final projX = ax + t * dx;
+      final projY = ay + t * dy;
+      final distSq = (px - projX) * (px - projX) + (py - projY) * (py - projY);
+
+      if (distSq < bestDistSq) {
+        bestDistSq = distSq;
+        best = LatLng(projY, projX / latCos);
+      }
+    }
+
+    // A fix that lands nowhere near the drawn route (a stale/cached route,
+    // or GPS drift far off the road) is more honestly shown at its own raw
+    // position than silently teleported onto a road it isn't actually on.
+    // ~120m — comfortably wider than normal GPS/road-snap error, tight
+    // enough to catch a genuinely stale route.
+    const maxSnapDistanceDegrees = 0.0011;
+    if (bestDistSq > maxSnapDistanceDegrees * maxSnapDistanceDegrees) {
+      return point;
+    }
+    return best;
+  }
+
+  /// Kicks off (or redirects, if one is already in flight) the smooth
+  /// transition of the driver marker to a new raw GPS fix.
+  void _animateCarTo(LatLng rawTarget) {
+    if (!mounted) return;
+
+    final target = _snapToRoute(rawTarget, _currentRoutePoints);
+    final from = _displayedCarPosition;
+
+    if (from == null) {
+      // First fix this screen has ever seen — nothing to animate from, so
+      // just place the marker. Faced along the route ahead rather than
+      // defaulted to due north, where a route is already known — the
+      // second point on it is as good a guess at the direction of travel
+      // as anything available before an actual second fix arrives.
+      _displayedCarPosition = target;
+      _displayedCarBearing = _currentRoutePoints.length >= 2
+          ? _bearingBetween(target, _currentRoutePoints[1])
+          : 0;
+      _lastCarFixAt = DateTime.now();
+      updateMarkers();
+      return;
+    }
+
+    final bearing = (from.latitude == target.latitude &&
+            from.longitude == target.longitude)
+        ? _displayedCarBearing
+        : _bearingBetween(from, target);
+
+    final now = DateTime.now();
+    // Matches the interpolation's speed to how much time the fix actually
+    // covers — the poll is nominally every 3s, but clamping (rather than
+    // trusting that exactly) keeps a delayed poll from crawling for tens of
+    // seconds, and a suspiciously fast one from snapping too abruptly.
+    final elapsedMs = _lastCarFixAt == null
+        ? 3000
+        : now.difference(_lastCarFixAt!).inMilliseconds;
+    _lastCarFixAt = now;
+    final durationMs = elapsedMs.clamp(600, 4000);
+
+    _carAnimFrom = from;
+    _carAnimTo = target;
+    _carBearingFrom = _displayedCarBearing;
+    _carBearingTo = bearing;
+
+    final controller = _carAnimController ??=
+        AnimationController(vsync: this)..addListener(_onCarAnimTick);
+    controller
+      ..duration = Duration(milliseconds: durationMs)
+      ..value = 0
+      ..forward();
+  }
+
+  void _onCarAnimTick() {
+    if (!mounted) return;
+    final from = _carAnimFrom;
+    final to = _carAnimTo;
+    final controller = _carAnimController;
+    if (from == null || to == null || controller == null) return;
+
+    final t = controller.value;
+    _displayedCarPosition = LatLng(
+      from.latitude + (to.latitude - from.latitude) * t,
+      from.longitude + (to.longitude - from.longitude) * t,
+    );
+    _displayedCarBearing = _lerpAngle(_carBearingFrom, _carBearingTo, t);
+    updateMarkers();
+    // Camera framing (car + pickup + drop together) happens once per poll
+    // in updateDriverLocation, not per animation frame here — see
+    // _recentreOnRide's own note on why a bounds-fit can't run at that
+    // frequency the way a plain centre-follow could.
   }
 
   Future<void> getCurrentLocation1() async {
@@ -761,7 +1005,14 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                         target: LatLng(28.6139, 77.2090),
                         zoom: 14,
                       ),
-                      myLocationEnabled: true,
+                      // The native pulsating "my location" dot belongs to
+                      // the pre-booking home map (deshboard.dart) — once a
+                      // ride is booked, this screen already has its own
+                      // "user"/"driver" markers doing that job, and the
+                      // native dot just sat on screen redundantly the
+                      // whole time a ride was being searched for or
+                      // tracked.
+                      myLocationEnabled: false,
 
                       myLocationButtonEnabled: false,
                       zoomControlsEnabled: false,
@@ -783,9 +1034,36 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                         target: LatLng(0, 0),
                         zoom: 14,
                       ),
-                      myLocationEnabled: true,
+                      // Same reasoning as the "pending" map above — no
+                      // native pulsating dot once a ride is booked, this
+                      // screen's own markers already cover it.
+                      myLocationEnabled: false,
                       myLocationButtonEnabled: false,
                       zoomControlsEnabled: false,
+                      // Was missing on this instance (present on the
+                      // "pending" one above) — without these, tapping a
+                      // marker can raise the native "open in Maps" toolbar
+                      // button, and rotating the map shows a compass
+                      // button; both are native chrome positioned by the
+                      // platform SDK itself, independent of Flutter's own
+                      // layout, so neither reliably respects the bottom
+                      // sheet sitting on top of this map the way a
+                      // Flutter-drawn widget would.
+                      mapToolbarEnabled: false,
+                      compassEnabled: false,
+                      // Reserves roughly the bottom sheet's own resting
+                      // height so the SDK's notion of the map's visible
+                      // centre sits in the area actually clear of it,
+                      // rather than the geometric centre of the full
+                      // screen (half of which is the sheet). Sized off the
+                      // sheet's initialChildSize, not its live drag
+                      // extent — the sheet can still be dragged taller,
+                      // but re-deriving this on every drag frame isn't
+                      // worth it for a padding value that only affects
+                      // camera framing, not what's actually drawn where.
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.sizeOf(context).height * 0.40,
+                      ),
                       markers: markers.value,
                       polylines: polylines.value,
                       // Fires for our own animateCamera calls as well as real
@@ -1010,7 +1288,19 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
           ),
 
           /// ================= CENTER RIPPLE =================
-          const Center(child: RippleLoader()),
+          // Was unconditional — this "searching for a driver" ripple kept
+          // showing straight through "arrived" and "ongoing" too, long
+          // after a driver had actually been found and the ride was
+          // already under way. Only makes sense while genuinely still
+          // searching.
+          GetBuilder<BookingController>(
+            builder: (controller) {
+              if (controller.rideStatus.value.toLowerCase() != 'pending') {
+                return const SizedBox.shrink();
+              }
+              return const Center(child: RippleLoader());
+            },
+          ),
 
           /// ================= LEFT BACK BUTTON =================
           Positioned(
@@ -1597,11 +1887,28 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
                         print('booking UserId: ${data.bookingId}');
                         print('customer id: $userId');
 
+                        // Captured from the dialog's own builder, not
+                        // dismissed via Get.back()/Get.isDialogOpen — those
+                        // track GetX's own Get.dialog()/Get.defaultDialog()
+                        // calls reliably, but this is a raw showDialog(),
+                        // and moving *when* the dismiss ran (see below)
+                        // didn't stop the loader from still being on
+                        // screen after a chat visit, which points at the
+                        // dismissal itself silently no-op'ing rather than
+                        // firing too late. Popping this exact captured
+                        // context via Navigator directly is unambiguous —
+                        // it doesn't depend on GetX's own bookkeeping
+                        // agreeing that a dialog is open at all.
+                        BuildContext? loaderDialogContext;
+
                         try {
                           showDialog(
                             context: Get.context!,
                             barrierDismissible: false,
-                            builder: (_) => PremiumBlurLoader(),
+                            builder: (dialogCtx) {
+                              loaderDialogContext = dialogCtx;
+                              return PremiumBlurLoader();
+                            },
                           );
                           final response = await Get.find<ChatController>()
                               .startChats(
@@ -1613,26 +1920,47 @@ class _FindingDriverUIState extends State<FindingDriverUI> {
 
                           print('testing on tab ${response.body}');
 
+                          // Closed here, right as the API call that
+                          // justified it finishes — not after the whole
+                          // chat visit, which is when it used to run
+                          // (see the note on Get.toNamed being awaited
+                          // below for why that mattered too).
+                          if (loaderDialogContext != null) {
+                            Navigator.of(loaderDialogContext!).pop();
+                            loaderDialogContext = null;
+                          }
+
                           if (response.body != null &&
                               response.body['code'].toString() == "200") {
                             _timer?.cancel();
 
-                            Get.toNamed(
+                            // This screen's own live tracking timer was
+                            // cancelled above to open chat, and Get.toNamed's
+                            // Future only resolves once the pushed route is
+                            // popped — i.e. exactly when the back arrow is
+                            // tapped — so awaiting it here is what lets
+                            // polling restart the moment the rider is back,
+                            // rather than staying dead for the rest of this
+                            // screen's life.
+                            await Get.toNamed(
                               RouteHelper.getchatScreenScreen(),
                               arguments: {
                                 "acceptData": data,
                                 "bookingId": widget.booking_id,
                               },
                             );
+
+                            if (mounted) startPolling();
                           }
 
                           _isChatOpening = false;
                         } catch (e) {
                           debugPrint('updateVehicleDocument Error: $e');
-                        } finally {
-                          if (Get.isDialogOpen ?? false) {
-                            Get.back();
+                          if (loaderDialogContext != null) {
+                            Navigator.of(loaderDialogContext!).pop();
+                            loaderDialogContext = null;
                           }
+                          _isChatOpening = false;
                         }
                       },
                       child: Icon(Icons.chat_bubble_outline),

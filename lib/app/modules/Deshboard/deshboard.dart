@@ -1345,6 +1345,12 @@ class _DashboardScreenState extends State<DashboardScreen>
             : (Uri.tryParse(image)?.hasScheme ?? false)
                 ? image
                 : '${ApiConstants.imageurl}$image';
+        // Traced unconditionally, not just from Image.network's own
+        // errorBuilder below (which only fires on an actual load failure)
+        // — this also shows the null/empty case, where the backend field
+        // itself never reached this widget at all and there was never a
+        // load attempt for the errorBuilder to catch in the first place.
+        debugPrint('[HomeBanner] resolved imageUrl: $imageUrl');
 
         return GestureDetector(
           onTap: _openSearch,

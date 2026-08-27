@@ -257,17 +257,23 @@ class BookingController extends GetxController implements GetxService {
           // empty/null image field here never reaches that point at all, and
           // silently produces the exact same "nothing shown" result. This is
           // what actually shows what the backend sent, empty or not.
-          log('Home banner image field: "${homeBanner?.image}"');
+          // Was log() (dart:developer) — not reliably visible in adb
+          // logcat on a real device, the same visibility gap already found
+          // and fixed once this session in api_client.dart. That's very
+          // likely why this exact "banner image not showing" symptom has
+          // stayed unresolved despite the trace already being here: the
+          // one thing meant to catch it couldn't actually be seen.
+          debugPrint('[HomeBanner] image field: "${homeBanner?.image}"');
           succeeded = true;
         }
       } else {
-        log(
-          'Home banner request failed: status ${response.statusCode}, '
+        debugPrint(
+          '[HomeBanner] request failed: status ${response.statusCode}, '
           'body ${response.body}',
         );
       }
     } catch (e) {
-      log('Home banner error: $e');
+      debugPrint('[HomeBanner] error: $e');
     } finally {
       isHomeBannerLoading = false;
       update();

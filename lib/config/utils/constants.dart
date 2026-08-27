@@ -63,6 +63,7 @@ class ApiConstants {
   static const String chatMessages = 'chat/messages?';
   static const String messageList = 'chat/list';
   static const String chatRead = 'chat/read';
+  static const String customerChatMasterList = 'customer-chat-master-list';
   static const String customerWallet = 'customer-wallet-balance';
   static const String topCreateAmount = 'create-topup-intent';
   static const String vehicalTypeList = 'vehical-type-list';
