@@ -48,6 +48,20 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2"/>
+        <!-- A tombstone from the driver app (same Flutter version, same
+             image-decode-heavy marker/photo loading pattern this app also
+             has) showed a native SIGSEGV in flutter::ImageDecoderImpeller::
+             UnsafeUploadTextureToPrivate -> impeller::CommandQueueVK::Submit
+             -> pthread_mutex_lock, on the engine's background image-decode
+             thread pool (fml::ConcurrentMessageLoop) — a known Impeller-on-
+             Android/Vulkan crash under concurrent texture uploads. It's a
+             threading bug inside the engine's Vulkan backend itself, not
+             something fixable from app code. Falling back to the older
+             Skia/OpenGL renderer (Impeller's default before Flutter 3.29,
+             and still far more battle-tested on Android) sidesteps it. -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
     </application>
     <queries>
         <intent>

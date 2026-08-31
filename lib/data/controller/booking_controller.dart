@@ -1575,7 +1575,7 @@ class BookingController extends GetxController implements GetxService {
   }
 
   Future<void> loadCarIcon() async {
-    driverCarIcons = await resizeMarker('assets/images/ridecar.png', 20);
+    driverCarIcons = await resizeMarker('assets/images/car_nride_marker.png', 20);
   }
 
   // loadUserIcon() lived here: it downloaded and resized the rider's profile

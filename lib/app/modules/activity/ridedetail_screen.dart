@@ -141,7 +141,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                           ),
 
                           Text(
-                            "₹ ${item.displayFare}",
+                            "₹ ${item.displayFare.toStringAsFixed(2)}",
                             style: PoppinsSemiBold.copyWith(
                               color: ColorResources.blackcolor11,
                             ),
@@ -295,7 +295,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                                 ),
                               ),
                               Text(
-                                "₹ ${item.displayFare}",
+                                "₹ ${item.displayFare.toStringAsFixed(2)}",
                                 style: PoppinsSemiBold.copyWith(
                                   color: ColorResources.blackcolor11,
                                 ),

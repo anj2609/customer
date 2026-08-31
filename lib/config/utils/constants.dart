@@ -22,6 +22,10 @@ class ApiConstants {
   static const String getUserProfileUrl = 'get-profile';
   static const String editProfileUrl = 'update-profile';
   static const String logOutUrl = 'logout';
+  // GET, id + authorizationToken headers only (same as every other
+  // apiClient.getData() call) — no body/params, per the confirmed Postman
+  // request (My Ride API > Auth > Delete Account).
+  static const String deleteAccountUrl = 'delete-account';
   static const String socialAuth = 'social-auth';
   static const String estimateUrl = 'estimate-ride-list';
   static const String trackRide = 'track-ride';

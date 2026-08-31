@@ -81,7 +81,15 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
                       switch (index) {
                         case 0:
-                          slug = "pending";
+                          // Was "pending" — a different ride state from
+                          // "ongoing" everywhere else in this app (track-ride
+                          // status values: pending = still finding a driver,
+                          // ongoing = ride in progress). initState() above
+                          // already correctly fetches this same "Ongoing" tab
+                          // with 'ongoing' on first load; tapping the tab
+                          // itself was silently switching it to show pending
+                          // bookings instead.
+                          slug = "ongoing";
                           break;
                         case 1:
                           slug = "scheduled";

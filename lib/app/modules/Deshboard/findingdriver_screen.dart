@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:myrideuser/app/modules/Deshboard/finding_driver_view.dart';
 import 'package:myrideuser/config/route.dart';
 import 'package:myrideuser/config/utils/constants.dart';
+import 'package:myrideuser/config/utils/vehicle_marker_assets.dart';
 import 'package:myrideuser/config/utils/dimensions.dart';
 import 'package:myrideuser/app/modules/Deshboard/completed_ride_sheet.dart';
 import 'package:myrideuser/config/utils/colors.dart';
@@ -101,9 +102,17 @@ class _FindingDriverUIState extends State<FindingDriverUI>
     if (!mounted || mapController == null) return;
 
     final car = _displayedCarPosition ?? driverLocation;
+    // Pickup drops out of the frame once the ride is under way — it's
+    // already been visited and isn't going anywhere, and keeping it in
+    // the bounds meant fitting the *entire* trip (pickup to drop, often a
+    // real cross-town distance) into frame at once. That zoom level made
+    // the car's actual per-poll movement — tens to low hundreds of
+    // metres — visually negligible, reported as "the car isn't moving"
+    // even though it genuinely was. Drop is kept: it's still the one
+    // thing worth seeing ahead.
     final points = <LatLng>[
       if (car != null) car,
-      if (_pickupLatLng != null) _pickupLatLng!,
+      if (!_isRideUnderway && _pickupLatLng != null) _pickupLatLng!,
       if (_dropLatLng != null) _dropLatLng!,
     ];
     if (points.isEmpty) return;
@@ -149,8 +158,51 @@ class _FindingDriverUIState extends State<FindingDriverUI>
   bool get _isRideUnderway =>
       Get.find<BookingController>().rideStatus.value.toLowerCase() == 'ongoing';
 
+  // Which marker asset carIcon currently holds — starts null (car, loaded
+  // by loadCarIcon() below) and is updated once this booking's actual
+  // vehicle type is known, so a same-vehicle poll response doesn't reload
+  // and rebuild the icon every 3 seconds for nothing.
+  String? _loadedVehicleAsset;
+
   Future<void> loadCarIcon() async {
-    carIcon = await getCustomMarker();
+    // Default/fallback, shown until this booking's real vehicle type is
+    // known — see _refreshCarIconForVehicle, called once trip-detail's
+    // `vehicle` comes back from _hitApi's polling.
+    const defaultAsset = 'assets/images/car_nride_marker.png';
+    carIcon = await getCustomMarker(defaultAsset);
+    _loadedVehicleAsset = defaultAsset;
+    setState(() {});
+  }
+
+  /// Switches the driver marker to the icon matching what was actually
+  /// booked (car/bike/auto/electric auto) once trip-detail reports it —
+  /// this used to always stay the car icon loaded by loadCarIcon() above,
+  /// regardless of what vehicle type the ride was for.
+  Future<void> _refreshCarIconForVehicle(String? vehicleTypeName) async {
+    final asset = vehicleMarkerAssetForName(vehicleTypeName);
+    if (asset == _loadedVehicleAsset) return;
+
+    final icon = await getCustomMarker(
+      asset,
+      vehicleMarkerWidthForName(vehicleTypeName),
+    );
+    if (!mounted) return;
+    setState(() {
+      carIcon = icon;
+      _loadedVehicleAsset = asset;
+    });
+  }
+
+  /// A plain black dot for pickup/destination — replaces the stock
+  /// coloured pin icons, matching the clean "just a dot and a car" look
+  /// asked for. One shared icon for both, since they no longer need a
+  /// colour to tell them apart (their InfoWindow label still does that on
+  /// tap if needed).
+  BitmapDescriptor? dotIcon;
+
+  Future<void> loadDotIcon() async {
+    final data = await rootBundle.load('assets/images/black_dot_marker.png');
+    dotIcon = BitmapDescriptor.bytes(data.buffer.asUint8List());
     setState(() {});
   }
 
@@ -164,6 +216,7 @@ class _FindingDriverUIState extends State<FindingDriverUI>
     });
 
     loadCarIcon();
+    loadDotIcon();
 
     /// Start continuous polling
     startPolling();
@@ -185,10 +238,14 @@ class _FindingDriverUIState extends State<FindingDriverUI>
       context: context,
       bookingid: widget.booking_id,
     );
-    Get.find<BookingController>().TripRideDetailsApi(
-      context: context,
-      bookingid: widget.booking_id,
-    );
+    Get.find<BookingController>()
+        .TripRideDetailsApi(context: context, bookingid: widget.booking_id)
+        .then((_) {
+      if (!mounted) return;
+      final vehicleName =
+          Get.find<BookingController>().tripDetailModel.value?.data?.vehicle?.name;
+      _refreshCarIconForVehicle(vehicleName);
+    });
 
     log("API HIT AGAIN");
   }
@@ -203,12 +260,15 @@ class _FindingDriverUIState extends State<FindingDriverUI>
 
   BitmapDescriptor? carIcon;
 
-  Future<BitmapDescriptor> getCustomMarker() async {
-    ByteData data = await rootBundle.load('assets/images/ridecar.png');
+  Future<BitmapDescriptor> getCustomMarker(
+    String assetPath, [
+    int targetWidth = 20,
+  ]) async {
+    ByteData data = await rootBundle.load(assetPath);
 
     ui.Codec codec = await ui.instantiateImageCodec(
       data.buffer.asUint8List(),
-      targetWidth: 20, // size chhota karo
+      targetWidth: targetWidth, // size chhota karo
     );
 
     ui.FrameInfo fi = await codec.getNextFrame();
@@ -498,6 +558,7 @@ class _FindingDriverUIState extends State<FindingDriverUI>
             points: routePoints,
             width: 5,
             geodesic: true,
+            color: Colors.black,
           ),
         );
       });
@@ -519,15 +580,9 @@ class _FindingDriverUIState extends State<FindingDriverUI>
         )
         .toSet();
 
-    if (currentLocation != null) {
-      updatedMarkers.add(
-        Marker(
-          markerId: const MarkerId("user"),
-          position: currentLocation!,
-          infoWindow: const InfoWindow(title: "My Location"),
-        ),
-      );
-    }
+    // The rider's own "My Location" pin was the last of the extra icons
+    // the clean reference design doesn't have — just the car and a plain
+    // dot at whichever end of the trip is relevant.
 
     // The smoothed, in-flight position/heading from the car animation
     // (see _animateCarTo) — not the raw driverLocation fix directly, so the
@@ -545,6 +600,10 @@ class _FindingDriverUIState extends State<FindingDriverUI>
           rotation: _displayedCarBearing,
           anchor: const Offset(0.5, 0.5),
           flat: true,
+          // Explicit, not left to insertion-order tie-breaking — the car
+          // is the one thing that must never render underneath the
+          // pickup/destination dots.
+          zIndexInt: 2,
         ),
       );
     }
@@ -629,17 +688,18 @@ class _FindingDriverUIState extends State<FindingDriverUI>
           markerId: const MarkerId('pickup'),
           position: pickup,
           infoWindow: const InfoWindow(title: 'Pickup location'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueAzure,
-          ),
+          icon: dotIcon ?? BitmapDescriptor.defaultMarker,
+          anchor: const Offset(0.5, 0.5),
+          // Below the car — see the "driver" marker's own note.
+          zIndexInt: 1,
         ),
         Marker(
           markerId: const MarkerId('destination'),
           position: destination,
           infoWindow: const InfoWindow(title: 'Destination'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueRed,
-          ),
+          icon: dotIcon ?? BitmapDescriptor.defaultMarker,
+          anchor: const Offset(0.5, 0.5),
+          zIndexInt: 1,
         ),
       });
       markers.assignAll(retainedLiveMarkers);
@@ -721,7 +781,7 @@ class _FindingDriverUIState extends State<FindingDriverUI>
           polylineId: const PolylineId('booking_route'),
           points: routePoints,
           width: 5,
-          color: ColorResources.blueeebutton,
+          color: Colors.black,
           geodesic: points.length < 2,
         ),
       });
@@ -734,7 +794,7 @@ class _FindingDriverUIState extends State<FindingDriverUI>
           polylineId: const PolylineId('booking_route'),
           points: [pickup, destination],
           width: 5,
-          color: ColorResources.blueeebutton,
+          color: Colors.black,
           geodesic: true,
         ),
       });
@@ -859,6 +919,7 @@ class _FindingDriverUIState extends State<FindingDriverUI>
           : 0;
       _lastCarFixAt = DateTime.now();
       updateMarkers();
+      debugPrint('[CarAnim] first fix placed at $target');
       return;
     }
 
@@ -866,6 +927,8 @@ class _FindingDriverUIState extends State<FindingDriverUI>
             from.longitude == target.longitude)
         ? _displayedCarBearing
         : _bearingBetween(from, target);
+
+    debugPrint('[CarAnim] animating car: from=$from to=$target (raw fix was $rawTarget)');
 
     final now = DateTime.now();
     // Matches the interpolation's speed to how much time the fix actually
@@ -999,7 +1062,20 @@ class _FindingDriverUIState extends State<FindingDriverUI>
               }
 
               print('sttaus::::::::${status}');
-              return status == "pending"
+              // Obx, not a bare expression — markers/polylines are RxSets
+              // that the smooth car-animation ticker mutates on every
+              // frame (see _onCarAnimTick), not just once per 3s poll like
+              // everything else GetBuilder<BookingController> reacts to.
+              // Without this, the animation was computing a genuinely
+              // smoothed position every frame, but nothing ever told this
+              // GoogleMap to actually redraw with it — the map only ever
+              // showed whatever markers.value happened to be at the next
+              // unrelated poll-driven rebuild, which could be a stale or
+              // mid-animation position rather than the car's real one.
+              // Obx closes that gap: it rebuilds specifically when
+              // markers/polylines change, independent of whether
+              // BookingController.update() also fired.
+              return Obx(() => status == "pending"
                   ? GoogleMap(
                       initialCameraPosition: const CameraPosition(
                         target: LatLng(28.6139, 77.2090),
@@ -1129,7 +1205,7 @@ class _FindingDriverUIState extends State<FindingDriverUI>
                           _visibleDriverLocationKey = '$driverLat,$driverLng';
                         }
                       },
-                    );
+                    ));
             }),
             // check karo
 

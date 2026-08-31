@@ -346,6 +346,7 @@ class _AccountSettingScreensState extends State<AccountSettingScreens> {
                   children: [
                     ...settings.map((e) => SettingTile(model: e)).toList(),
                     const LogoutTile(),
+                    const DeleteAccountTile(),
                   ],
                 ),
               ),
@@ -585,6 +586,124 @@ class LogoutTile extends StatelessWidget {
                           // Get.back();
 
                           /// Logout logic here
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+////////////////////////////////////////////////////////////
+/// 🔹 DELETE ACCOUNT TILE
+////////////////////////////////////////////////////////////
+
+class DeleteAccountTile extends StatelessWidget {
+  const DeleteAccountTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(Icons.delete_forever, color: ColorResources.textColorRed),
+      title: Text(
+        "Delete Account",
+        style: TextStyle(color: ColorResources.textColorRed, fontWeight: FontWeight.w500),
+      ),
+      onTap: () {
+        _showDeleteAccountBottomSheet(context);
+      },
+    );
+  }
+
+  void _showDeleteAccountBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(Dimensions.spacingSize20),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(Dimensions.spacingSize20),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                /// Drag Handle
+                Container(
+                  width: Dimensions.spacingSize40,
+                  height: 5,
+                  margin: const EdgeInsets.only(
+                    bottom: Dimensions.spacingSize20,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(
+                      Dimensions.spacingSize20,
+                    ),
+                  ),
+                ),
+
+                /// Title
+                Text(
+                  "Delete Account",
+                  style: PoppinsExtrabold.copyWith(
+                    color: ColorResources.textColorRed,
+                    fontSize: Dimensions.hight17,
+                  ),
+                ),
+
+                SizedBox(height: Dimensions.spacingSize10),
+                Divider(color: ColorResources.TextColorForGrey),
+                SizedBox(height: Dimensions.spacingSize10),
+
+                /// Message
+                Text(
+                  "This will permanently delete your account and all "
+                  "associated data. This action cannot be undone. Are you "
+                  "sure you want to continue?",
+                  style: PoppinsReguler.copyWith(
+                    color: ColorResources.blackcolor,
+                    fontSize: Dimensions.spacingSize16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                SizedBox(height: Dimensions.spacingSize10),
+                Divider(color: ColorResources.TextColorForGrey),
+                SizedBox(height: Dimensions.spacingSize10),
+
+                /// Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomSecondaryButton(
+                        text: "Cancle",
+                        onTap: () {
+                          Get.back();
+                        },
+                      ),
+                    ),
+                    SizedBox(width: Dimensions.spacingSize14),
+                    Expanded(
+                      child: CustomPrimaryButton(
+                        text: "Yes, Delete",
+                        onTap: () {
+                          Get.find<AuthController>().deleteAccount(
+                            context: context,
+                          );
                         },
                       ),
                     ),

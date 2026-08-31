@@ -39,6 +39,10 @@ class AuthRepo extends GetxService {
     return apiClient.myridepostData(ApiConstants.logOutUrl, {});
   }
 
+  Future<Response> deleteAccount() async {
+    return apiClient.getData(ApiConstants.deleteAccountUrl);
+  }
+
   /////========== verify otp Api ======================///////
   Future<Response> verifyOtpApi({String? phone, String? otp}) async {
     return apiClient.postsignUpData(ApiConstants.verityOtpUrl, {

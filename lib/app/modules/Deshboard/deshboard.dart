@@ -20,7 +20,6 @@ import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
 import 'package:myrideuser/data/modal/address_Model.dart';
 import 'package:myrideuser/data/modal/vehicle_type_model.dart';
-import 'package:myrideuser/data/services/nearby_drivers_search.dart';
 import 'package:myrideuser/widgets/toaster_animation.dart';
 
 /// Which section the single bottom sheet is currently showing.
@@ -43,6 +42,10 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
+
+  /// Last banner debug line printed — see _promoBanner's own note on why
+  /// this dedupes the trace instead of printing on every rebuild.
+  String? _lastBannerDebugState;
 
   // GoogleMap had no `padding`, so "centered" meant centered in the map
   // widget's full bounds — including the portion permanently covered by the
@@ -716,7 +719,10 @@ class _DashboardScreenState extends State<DashboardScreen>
               child: Stack(
                 children: [
                   _buildMap(),
-                  _buildNearbyDriversStatus(),
+                  // Nearby-drivers status banner (loading/empty/error toasts
+                  // like "Couldn't load nearby drivers, please try again")
+                  // removed from the dashboard header per request — the map
+                  // markers alone now communicate driver availability.
                   _buildSheet(),
                 ],
               ),
@@ -822,128 +828,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
               ),
             ],
-          );
-        },
-      ),
-    );
-  }
-
-  // ---------- Nearby-drivers status banner ----------
-  //
-  // Distinct UI for every state the search can be in — loading, found
-  // (no banner, the map markers are the UI), explicitly empty ("no
-  // drivers nearby" — not an error), and the three failure modes
-  // (permission denied, GPS timeout, request failed), each with a retry.
-  // Must be a direct Stack child (Positioned only works there) — the
-  // reactive GetBuilder goes inside it, not the other way round.
-  Widget _buildNearbyDriversStatus() {
-    return Positioned(
-      top: 12,
-      left: 16,
-      right: 16,
-      child: GetBuilder<BookingController>(
-        builder: (bc) {
-          final state = bc.nearbyDriversSearch.state.value;
-
-          if (state.phase == NearbyDriversPhase.idle ||
-              state.phase == NearbyDriversPhase.success) {
-            return const SizedBox.shrink();
-          }
-
-          String message;
-          IconData icon;
-          Color color;
-          bool showRetry = false;
-          bool showLoading = false;
-
-          switch (state.phase) {
-            case NearbyDriversPhase.locating:
-              message = "Finding your location...";
-              icon = Icons.my_location;
-              color = ColorResources.blueeebutton;
-              showLoading = true;
-              break;
-            case NearbyDriversPhase.searching:
-              message = "Looking for nearby drivers...";
-              icon = Icons.directions_car;
-              color = ColorResources.blueeebutton;
-              showLoading = true;
-              break;
-            case NearbyDriversPhase.empty:
-              message = "No drivers nearby right now";
-              icon = Icons.info_outline;
-              color = ColorResources.TextColorForGrey;
-              break;
-            case NearbyDriversPhase.locationDenied:
-              message = state.message ?? "Location permission needed";
-              icon = Icons.location_off;
-              color = ColorResources.textColorRed;
-              showRetry = true;
-              break;
-            case NearbyDriversPhase.locationTimeout:
-              message = state.message ?? "Couldn't get your location";
-              icon = Icons.gps_off;
-              color = ColorResources.textColorRed;
-              showRetry = true;
-              break;
-            case NearbyDriversPhase.requestFailed:
-              message = state.message ?? "Couldn't load nearby drivers";
-              icon = Icons.error_outline;
-              color = ColorResources.textColorRed;
-              showRetry = true;
-              break;
-            case NearbyDriversPhase.idle:
-            case NearbyDriversPhase.success:
-              return const SizedBox.shrink();
-          }
-
-          return Material(
-            color: Colors.transparent,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: ColorResources.whiteColor,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: const [
-                  BoxShadow(blurRadius: 10, color: Colors.black12),
-                ],
-              ),
-              child: Row(
-                children: [
-                  showLoading
-                      ? SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: color,
-                          ),
-                        )
-                      : Icon(icon, color: color, size: 18),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      message,
-                      style: PoppinsMedium.copyWith(
-                        fontSize: 12.5,
-                        color: ColorResources.blackcolor11,
-                      ),
-                    ),
-                  ),
-                  if (showRetry)
-                    GestureDetector(
-                      onTap: () => bc.refreshNearbyDrivers(),
-                      child: Text(
-                        "Retry",
-                        style: PoppinsSemiBold.copyWith(
-                          fontSize: 12.5,
-                          color: ColorResources.blueeebutton,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
           );
         },
       ),
@@ -1350,7 +1234,20 @@ class _DashboardScreenState extends State<DashboardScreen>
         // — this also shows the null/empty case, where the backend field
         // itself never reached this widget at all and there was never a
         // load attempt for the errorBuilder to catch in the first place.
-        debugPrint('[HomeBanner] resolved imageUrl: $imageUrl');
+        // Deduped to once per distinct outcome (this widget rebuilds on
+        // every scroll/fling — GetBuilder<BookingController>, not scoped
+        // to just this banner — so printing unconditionally drowned out
+        // the one line that actually mattered under scroll-event spam),
+        // and self-sufficient: whether homeBanner itself ever loaded at
+        // all is now in the same line, not a separate trace over in
+        // getHomeBanner() that this log slice might not even include.
+        final bannerDebugState =
+            'homeBanner=${banner == null ? "null (fetch never succeeded)" : "loaded"}, '
+            'title=${banner?.title}, rawImage="$image", resolvedUrl=$imageUrl';
+        if (bannerDebugState != _lastBannerDebugState) {
+          _lastBannerDebugState = bannerDebugState;
+          debugPrint('[HomeBanner] $bannerDebugState');
+        }
 
         return GestureDetector(
           onTap: _openSearch,
@@ -2217,17 +2114,29 @@ class _DashboardScreenState extends State<DashboardScreen>
   /// letterboxing blends in instead of looking like empty space.
   static const double _vehicleImageAspectRatio = 1.5;
 
+  /// Traced whenever a vehicle type doesn't have a usable image, at either
+  /// the missing-field or the load-failure point — this fallback (the
+  /// generic cart.png) is what "the vehicle cars on the bottom sheet
+  /// aren't loading" looks like, and neither path was logged at all
+  /// before, so there was no way to tell whether the backend simply never
+  /// sent an image for that vehicle type or a real one failed to load.
+  final Set<String> _loggedMissingVehicleImages = {};
+
   Widget _vehicleTypeImage(String? image) {
     if (image == null || image.isEmpty) {
+      if (_loggedMissingVehicleImages.add('(empty)')) {
+        debugPrint('[VehicleImage] no image field on this vehicle type at all — falling back to cart.png');
+      }
       return Container(
         color: ColorResources.backgroundColor,
         child: Center(child: Image.asset('assets/images/cart.png', height: 26)),
       );
     }
+    final resolvedUrl = '${ApiConstants.imageurl}$image';
     return Container(
       color: ColorResources.backgroundColor,
       child: Image.network(
-        '${ApiConstants.imageurl}$image',
+        resolvedUrl,
         fit: BoxFit.contain,
         alignment: Alignment.center,
         loadingBuilder: (context, child, progress) {
@@ -2241,6 +2150,9 @@ class _DashboardScreenState extends State<DashboardScreen>
           );
         },
         errorBuilder: (context, error, stackTrace) {
+          if (_loggedMissingVehicleImages.add(resolvedUrl)) {
+            debugPrint('[VehicleImage] failed to load "$resolvedUrl": $error');
+          }
           return Center(
             child: Image.asset('assets/images/cart.png', height: 26),
           );

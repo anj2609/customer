@@ -86,7 +86,14 @@ class ActivityDataMainModel {
   double? dropLat;
   double? dropLng;
   String? pickupOtp;
-  int? totalFare;
+
+  /// double, not int — the backend sends these as decimals (e.g. 2166.48).
+  /// Parsing them with int.tryParse silently returns null for every real
+  /// booking (Dart's int.tryParse rejects a string with a decimal point),
+  /// which is why this card always showed ₹0 despite the API actually
+  /// sending a real figure — confirmed via the driver app's mirror of this
+  /// same endpoint shape (see driver_activity_model.dart).
+  double? totalFare;
 
   /// What the rider was actually charged — see price_breakdown_card.dart's
   /// note (and trip_completed_screen.dart's _totalFare) on why this, not
@@ -95,7 +102,7 @@ class ActivityDataMainModel {
   /// on this specific list endpoint the way it is on trip-detail/
   /// create-booking/track-booking-ride — falls back to totalFare below if
   /// the backend doesn't send it here.
-  int? finalAmount;
+  double? finalAmount;
   String? status;
   String? createdAt;
   Driver? driver;
@@ -146,13 +153,22 @@ class ActivityDataMainModel {
 
     pickupOtp = json['pickup_otp']?.toString();
 
+    // total_fare/final_amount are read flat first, but /trip-detail's
+    // confirmed live shape (see trip_detail_model.dart's TripPayment) nests
+    // these under a "payment" object instead — which is why this card used
+    // to always show ₹0: the flat keys this list endpoint may or may not
+    // send were the only ones read. Falling back to payment.total_fare/
+    // payment.final_amount when the flat key is absent covers both shapes
+    // without needing this endpoint's exact response confirmed first.
+    final payment = json['payment'];
+
     totalFare = json['total_fare'] != null
-        ? int.tryParse(json['total_fare'].toString())
-        : 0;
+        ? double.tryParse(json['total_fare'].toString())
+        : (payment is Map ? double.tryParse('${payment['total_fare']}') : null);
 
     finalAmount = json['final_amount'] != null
-        ? int.tryParse(json['final_amount'].toString())
-        : null;
+        ? double.tryParse(json['final_amount'].toString())
+        : (payment is Map ? double.tryParse('${payment['final_amount']}') : null);
 
     status = json['status'];
     createdAt = json['created_at'];
@@ -184,7 +200,7 @@ class ActivityDataMainModel {
   /// show — see finalAmount's own note. Single accessor so every screen
   /// that renders this model reads the same value the same way, rather
   /// than each repeating its own `finalAmount ?? totalFare` fallback.
-  int get displayFare => finalAmount ?? totalFare ?? 0;
+  double get displayFare => finalAmount ?? totalFare ?? 0;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};

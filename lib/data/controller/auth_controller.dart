@@ -739,6 +739,49 @@ class AuthController extends GetxController implements GetxService {
     Get.offAllNamed(RouteHelper.getLestMyRideStartedScreenRoute());
   }
 
+  /// Mirrors userLogOut's flow above — same session cleanup, same
+  /// navigation away from the app — except the backend call is
+  /// delete-account instead of logout, since the account itself no longer
+  /// exists after this succeeds.
+  Future<void> deleteAccount({required BuildContext context}) async {
+    if (Get.isBottomSheetOpen ?? false) {
+      Get.back();
+    }
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
+
+    try {
+      final response = await authRepo.deleteAccount();
+
+      if (response.body is Map && response.body['code']?.toString() == '200') {
+        logOut();
+        if (context.mounted) AnimatedTopToast.show(
+          context: context,
+          message: "Your account has been deleted.",
+          backgroundColor: ColorResources.appColor,
+          icon: Icons.check_circle_rounded,
+        );
+        Get.offAllNamed(RouteHelper.getLestMyRideStartedScreenRoute());
+      } else {
+        if (context.mounted) AnimatedTopToast.show(
+          context: context,
+          message: "Could not delete account. Please try again.",
+          backgroundColor: Colors.red,
+          icon: Icons.error_rounded,
+        );
+      }
+    } catch (e) {
+      debugPrint('Delete account error: $e');
+      if (context.mounted) AnimatedTopToast.show(
+        context: context,
+        message: "Could not delete account. Please try again.",
+        backgroundColor: Colors.red,
+        icon: Icons.error_rounded,
+      );
+    }
+  }
+
   Future<Response> verifyOtpApi({
     required BuildContext context,
     required String mobileNumber,
