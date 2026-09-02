@@ -62,10 +62,10 @@ class _DashboardScreenState extends State<DashboardScreen>
   /// screen. Used as the padding source whenever the live controller can't
   /// be read yet — see [_mapPaddingForCurrentSheet].
   static double _stageSize(_SheetStage stage) => switch (stage) {
-        _SheetStage.idle => _idleSize,
-        _SheetStage.searching => _searchingSize,
-        _SheetStage.vehicleSelect => _vehicleSize,
-      };
+    _SheetStage.idle => _idleSize,
+    _SheetStage.searching => _searchingSize,
+    _SheetStage.vehicleSelect => _vehicleSize,
+  };
 
   /// How much of the map's bottom edge the sheet is currently covering.
   ///
@@ -143,7 +143,9 @@ class _DashboardScreenState extends State<DashboardScreen>
     // Belt-and-braces alongside didChangeDependencies below: once the sheet
     // has actually attached, re-read its real size in case it settled
     // somewhere other than its stage's resting position.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncMapPaddingToSheet());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _syncMapPaddingToSheet(),
+    );
     // Drives the pulsating "you are here" ring — see _buildMap. repeat()
     // rather than a one-shot: this is an ambient indicator that runs for as
     // long as the map is on screen.
@@ -759,7 +761,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                             TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "Good Morning, ",
+                                  text: "Hello, ",
                                   style: PoppinsReguler.copyWith(
                                     fontSize: 15,
                                     color: ColorResources.blackcolor11,
@@ -903,9 +905,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       // Positive dy moves the camera *target* south, which puts the point
       // that used to be dead-center (the rider) north of it instead — i.e.
       // visibly higher on screen, up out from behind the sheet.
-      mapController.moveCamera(
-        CameraUpdate.scrollBy(0, _mapBottomPadding / 2),
-      );
+      mapController.moveCamera(CameraUpdate.scrollBy(0, _mapBottomPadding / 2));
     });
   }
 
@@ -969,7 +969,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                   controller: scrollController,
                   physics: const ClampingScrollPhysics(),
                   padding: EdgeInsets.only(
-                    bottom: 16 +
+                    bottom:
+                        16 +
                         MediaQuery.of(context).padding.bottom +
                         MediaQuery.of(context).viewInsets.bottom,
                   ),
@@ -1227,8 +1228,8 @@ class _DashboardScreenState extends State<DashboardScreen>
         final String? imageUrl = image == null || image.isEmpty
             ? null
             : (Uri.tryParse(image)?.hasScheme ?? false)
-                ? image
-                : '${ApiConstants.imageurl}$image';
+            ? image
+            : '${ApiConstants.imageurl}$image';
         // Traced unconditionally, not just from Image.network's own
         // errorBuilder below (which only fires on an actual load failure)
         // — this also shows the null/empty case, where the backend field
@@ -2125,7 +2126,9 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget _vehicleTypeImage(String? image) {
     if (image == null || image.isEmpty) {
       if (_loggedMissingVehicleImages.add('(empty)')) {
-        debugPrint('[VehicleImage] no image field on this vehicle type at all — falling back to cart.png');
+        debugPrint(
+          '[VehicleImage] no image field on this vehicle type at all — falling back to cart.png',
+        );
       }
       return Container(
         color: ColorResources.backgroundColor,

@@ -70,6 +70,27 @@ class TripDetailData {
     this.priceBreakdown,
   });
 
+  /// The one figure every "Total Fare" display for this booking is meant
+  /// to show — single accessor so it can never again drift the way it did
+  /// between trip_completed_screen.dart's top figure and this same
+  /// object's own breakdown card: that screen read payment.finalAmount
+  /// first, falling back to priceBreakdown.finalAmount, while
+  /// PriceBreakdownCard's closing "Total Fare" row does the opposite —
+  /// showing breakdown.finalAmount whenever a breakdown is present at all,
+  /// only falling back to payment when it's genuinely absent. On a
+  /// booking where both objects are populated but happen to disagree, the
+  /// two screens showed two different numbers for what's supposed to be
+  /// the same figure. This matches PriceBreakdownCard's precedence (the
+  /// fuller itemised breakdown wins when present — it's the one confirmed
+  /// live to include tax/fee components payment's lighter shape doesn't
+  /// carry at all) rather than the other way around, since that's the
+  /// shape actually shown as the primary receipt whenever it exists.
+  double? get displayFare =>
+      priceBreakdown?.finalAmount ??
+      payment?.finalAmount ??
+      priceBreakdown?.totalFare ??
+      payment?.totalFare;
+
   factory TripDetailData.fromJson(Map<String, dynamic> json) {
     return TripDetailData(
       bookingId: json['booking_id'] is int

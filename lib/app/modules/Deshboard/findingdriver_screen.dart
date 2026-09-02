@@ -391,6 +391,19 @@ class _FindingDriverUIState extends State<FindingDriverUI>
   /// independently of whichever drawing call last touched the map.
   List<LatLng> _currentRoutePoints = const [];
 
+  /// Live travel time/distance along the route currently drawn — i.e. how
+  /// far off the driver still is before pickup, and how far the
+  /// destination still is once the rider is aboard.
+  ///
+  /// Comes free with the Directions response [drawRoute1] already fetches
+  /// for the polyline (PolylineResult carries totalDurationValue in
+  /// seconds and totalDistanceValue in metres); before this both were
+  /// simply discarded, which is why the rider only ever saw the bare
+  /// status line ("Driver is heading to pickup") with no sense of *when* —
+  /// the single most-asked question at that point in a ride.
+  int? _routeEtaSeconds;
+  int? _routeDistanceMeters;
+
   /// Where the driver marker is actually drawn right now — the smoothed,
   /// in-flight position, not necessarily the latest raw GPS fix.
   LatLng? _displayedCarPosition;
@@ -550,6 +563,15 @@ class _FindingDriverUIState extends State<FindingDriverUI>
       _currentRoutePoints = routePoints;
 
       setState(() {
+        // Same response, already paid for — see _routeEtaSeconds. Guarded
+        // rather than assigned blind: Directions omits duration/distance on
+        // some responses (and returns 0 on a degenerate same-point route),
+        // and a stale-but-real previous reading beats flashing "0 min".
+        final int? duration = result.totalDurationValue;
+        final int? distance = result.totalDistanceValue;
+        if (duration != null && duration > 0) _routeEtaSeconds = duration;
+        if (distance != null && distance > 0) _routeDistanceMeters = distance;
+
         polylines.clear();
 
         polylines.add(
@@ -1809,6 +1831,40 @@ class _FindingDriverUIState extends State<FindingDriverUI>
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+
+                /// LIVE ETA — the "when", which the status line alone never
+                /// answered. Only while someone is actually travelling
+                /// toward something: en route to the pickup ("accepted"),
+                /// or to the destination once aboard ("ongoing"). Silent on
+                /// "arrived" (the driver is already outside — a countdown to
+                /// a place they're standing at reads as broken) and silent
+                /// until the first route response actually lands, rather
+                /// than showing a placeholder dash.
+                if ((status == "accepted" || status == "ongoing") &&
+                    _routeEtaSeconds != null) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(
+                        status == "ongoing"
+                            ? Icons.flag_rounded
+                            : Icons.directions_car_rounded,
+                        size: 16,
+                        color: ColorResources.blueeebutton,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _etaLabel(status),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: ColorResources.blueeebutton,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+
                 const SizedBox(height: 20),
 
                 /// OTP (only arrived & ongoing)
@@ -2127,6 +2183,33 @@ class _FindingDriverUIState extends State<FindingDriverUI>
       default:
         return "";
     }
+  }
+
+  /// "Arriving in 4 min · 1.2 km away" / "12 min to destination · 5.4 km".
+  ///
+  /// Rounds up rather than down — a driver 90 seconds out is "2 min", not
+  /// "1 min", and a rider who was promised the smaller number and waits the
+  /// larger one is the version that feels broken. Never says "0 min" for
+  /// the same reason: under a minute reads as "Arriving now".
+  String _etaLabel(String status) {
+    final int seconds = _routeEtaSeconds ?? 0;
+    final int minutes = (seconds / 60).ceil();
+    final bool underway = status == "ongoing";
+
+    final String time = minutes <= 1
+        ? (underway ? "Less than a min to destination" : "Arriving now")
+        : (underway ? "$minutes min to destination" : "Arriving in $minutes min");
+
+    final int? meters = _routeDistanceMeters;
+    if (meters == null) return time;
+
+    // Metres below a km — "0.3 km away" is vaguer than "300 m away" at the
+    // exact point the rider is looking out the window for the car.
+    final String distance = meters < 1000
+        ? "${meters}m away"
+        : "${(meters / 1000).toStringAsFixed(1)} km away";
+
+    return "$time  ·  $distance";
   }
 
   /// Replaced by PriceBreakdownCard fed from BookingController's typed

@@ -87,13 +87,17 @@ class PriceBreakdownCard extends StatelessWidget {
       if (breakdown.walletUsed > 0)
         _row("Wallet Used", breakdown.walletUsed, isDeduction: true),
       const Divider(),
-      // finalAmount, not totalFare. These are equal on a booking with no
-      // promo or wallet deduction (the confirmed live response has both at
-      // 44.64), but where they differ, finalAmount is the figure the rider
-      // is actually charged — so that's what the closing "Total Fare" line
-      // has to show. Labelling the pre-deduction subtotal as the total
-      // would contradict the deduction rows immediately above it.
-      _row("Total Fare", breakdown.finalAmount, isBold: true),
+      // tripData.displayFare, not breakdown.finalAmount directly — same
+      // number in practice (this branch only runs when breakdown is the
+      // object displayFare itself prefers), but reading the shared getter
+      // rather than this object's own field is what keeps this row
+      // structurally unable to disagree with any other "Total Fare"
+      // display reading the same tripData (e.g. trip_completed_screen.dart's
+      // top figure — see TripDetailData.displayFare's own note on the two
+      // having actually drifted apart once already). Labelling the
+      // pre-deduction subtotal as the total would contradict the deduction
+      // rows immediately above it, which is why this isn't totalFare.
+      _row("Total Fare", tripData.displayFare ?? breakdown.finalAmount, isBold: true),
     ];
   }
 
@@ -121,7 +125,9 @@ class PriceBreakdownCard extends StatelessWidget {
       if (payment.walletUsed > 0)
         _row("Wallet Used", payment.walletUsed, isDeduction: true),
       const Divider(),
-      _row("Total Fare", payment.finalAmount, isBold: true),
+      // tripData.displayFare, not payment.finalAmount directly — see the
+      // matching note in _breakdownRows above.
+      _row("Total Fare", tripData.displayFare ?? payment.finalAmount, isBold: true),
     ];
   }
 

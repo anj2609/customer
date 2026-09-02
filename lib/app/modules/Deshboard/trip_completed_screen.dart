@@ -93,15 +93,12 @@ class _TripCompletedScreenState extends State<TripCompletedScreen> {
   }
 
   /// The one figure a "Total Fare" line means: what the rider was actually
-  /// charged. finalAmount before totalFare — see price_breakdown_card.dart's
-  /// own note on why the two can differ (a promo or wallet deduction) and
-  /// which one a receipt's closing total has to show.
-  double? _totalFare(TripDetailData? data) {
-    return data?.payment?.finalAmount ??
-        data?.priceBreakdown?.finalAmount ??
-        data?.payment?.totalFare ??
-        data?.priceBreakdown?.totalFare;
-  }
+  /// charged. Delegates to TripDetailData.displayFare — the single source
+  /// every "Total Fare" on this screen (this top figure and the
+  /// PriceBreakdownCard below it) now reads, so they can no longer show
+  /// two different numbers for the same booking the way they used to when
+  /// this method had its own, differently-ordered fallback chain.
+  double? _totalFare(TripDetailData? data) => data?.displayFare;
 
   @override
   Widget build(BuildContext context) {
