@@ -29,6 +29,7 @@ class AuthController extends GetxController implements GetxService {
   void onInit() {
     super.onInit();
     initDeviceData();
+    listenTokenRefresh();
   }
 
   Future<void> initDeviceData() async {
@@ -40,6 +41,32 @@ class AuthController extends GetxController implements GetxService {
 
     print("Saved Token: $deviceToken");
     print("Saved Device Type: $deviceType");
+  }
+
+  /// FCM tokens rotate — app reinstall, device data cleared, restored from
+  /// backup, or just periodic rotation by Play services — and nothing in
+  /// this app previously reacted to that. The token is only ever sent to
+  /// the backend during signup/OTP (see auth_repo.dart's sendOtpApi,
+  /// secoundotpverifyapi, socialSignup); no authenticated endpoint resends
+  /// it afterwards. So a rider who logged in once and then had their token
+  /// rotate would keep an otherwise-working session while the backend kept
+  /// pushing to a token that no longer resolves to this install — dispatched
+  /// server-side, delivered to nobody, and indistinguishable from "backend
+  /// never sent it" on this end.
+  ///
+  /// This at least keeps the locally cached copy current, so the next call
+  /// that does carry device_token sends the live value rather than
+  /// whatever was current at login. It does not, by itself, push the
+  /// refresh to the backend immediately — there is no endpoint for that
+  /// today; one would need to accept device_token on an authenticated call
+  /// (update-profile, or a dedicated route) for this to close the gap
+  /// completely.
+  void listenTokenRefresh() {
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+      deviceToken = newToken;
+      await saveDeviceData();
+      debugPrint("[FCM] Token refreshed: $newToken");
+    });
   }
 
   Future<void> saveDeviceData() async {
@@ -200,6 +227,8 @@ class AuthController extends GetxController implements GetxService {
     Response response = await authRepo.socialSignup(
       provider: provider,
       idToken: userToken.toString(),
+      deviceToken: deviceToken,
+      deviceType: deviceType,
     );
 
     // ?.toString() rather than == "200". The backend is not consistent about

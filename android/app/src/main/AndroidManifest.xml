@@ -11,7 +11,17 @@
     <uses-permission
         android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>    
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <!-- Required from Android 13 (API 33) onward for the app to post any
+         notification at all — including the ones Firebase Cloud Messaging
+         puts in the system tray while the app is backgrounded. It was
+         missing entirely, so on any modern phone every notification was
+         dropped by the OS before it could be shown, and
+         FirebaseMessaging.requestPermission() in main.dart had nothing to
+         grant: a runtime permission can only be requested if it is
+         declared here first. The driver app has always declared it, which
+         is why notifications worked there and not here. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="N ride"
         android:name="${applicationName}"
@@ -48,6 +58,15 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2"/>
+        <!-- Tells FCM which channel to post background/system-tray
+             notifications on. Without it, messages arriving while the app is
+             backgrounded land on a fallback channel this app never
+             configures, so they can be silently downgraded to minimal
+             importance. Matches the channel main.dart creates explicitly on
+             startup, and mirrors what the driver app already declares. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel"/>
         <!-- A tombstone from the driver app (same Flutter version, same
              image-decode-heavy marker/photo loading pattern this app also
              has) showed a native SIGSEGV in flutter::ImageDecoderImpeller::

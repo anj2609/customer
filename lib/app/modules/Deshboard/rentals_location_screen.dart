@@ -45,6 +45,25 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
   final String _placesApiKey = "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU";
   final String _directionsApiKey = "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU";
 
+  // This app operates in Tripura only, and rentals are a same-city hourly
+  // service (unlike Outstation, which is explicitly meant to go elsewhere)
+  // — so, same as the main dashboard search and the standalone search
+  // screen (see deshboard.dart's own copy of this note), results here
+  // should be Tripura-only too. strictbounds=true turns location+radius
+  // from a ranking bias into a hard filter; centred/sized to cover
+  // Tripura's full extent (bounding box roughly 22.98–24.53°N,
+  // 91.15–92.35°E), necessarily over-covering the corners a little since
+  // Tripura's shape isn't a circle — Tripura is bordered by Bangladesh on
+  // three sides, which components=country:in is what actually excludes.
+  static const double _tripuraCenterLat = 23.76;
+  static const double _tripuraCenterLng = 91.75;
+  static const int _tripuraRadiusMeters = 110000;
+  static const String _tripuraLocationParams =
+      '&location=$_tripuraCenterLat,$_tripuraCenterLng'
+      '&radius=$_tripuraRadiusMeters'
+      '&strictbounds=true'
+      '&components=country:in';
+
   @override
   void initState() {
     super.initState();
@@ -217,7 +236,7 @@ class _RentalsLocationScreenState extends State<RentalsLocationScreen> {
       return;
     }
     final url =
-        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$_placesApiKey";
+        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$_placesApiKey$_tripuraLocationParams";
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

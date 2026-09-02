@@ -18,14 +18,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      Get.find<ProfileController>().getCustomerNotificationsSetting();
+      Get.find<ProfileController>().getNotificationListing();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<ProfileController>();
+
     return Scaffold(
-      backgroundColor: ColorResources.appgroundcolor,
+      backgroundColor: const Color(0xffF5F5F5),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -37,288 +39,130 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             color: ColorResources.blackcolor,
             fontSize: Dimensions.spacingSize16,
           ),
-          // style: TextStyle(
-          //   color: Colors.black,
-          //   fontWeight: FontWeight.w600,
-          // ),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(Dimensions.spacingSize16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            ////color: const Color(0xFFEDEDED),
-            borderRadius: BorderRadius.circular(Dimensions.spacingSize16),
-          ),
-          child: GetBuilder<ProfileController>(
-            builder: (controller) {
-              if (controller.isCustomerNotifications) {
-                return const Center(child: PremiumBlurLoader());
-              }
-
-              final data = controller.notificationModel;
-
-              if (data == null) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        "assets/images/notdatafound.png",
-                        height: 150,
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "No Data Found",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return Column(
-                children: [
-                  buildNotificationTile(
-                    title: "General Updates",
-                    value: controller.notificationModel?.generalUpdates == 1,
-                    type: "general_updates",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "Safety & Security Alerts",
-                    value:
-                        controller.notificationModel?.safetySecurityAlerts == 1,
-                    type: "safety_security_alerts",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "Account Notifications",
-                    value:
-                        controller.notificationModel?.accountNotifications == 1,
-                    type: "account_notifications",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "Ride Status Updates",
-                    value: controller.notificationModel?.rideStatusUpdates == 1,
-                    type: "ride_status_updates",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "Promo Alerts",
-                    value: controller.notificationModel?.promoAlerts == 1,
-                    type: "promo_alerts",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "Rating Reviews",
-                    value: controller.notificationModel?.ratingReviews == 1,
-                    type: "rating_reviews",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "Personalized Recommendations",
-                    value:
-                        controller
-                            .notificationModel
-                            ?.personalizedRecommendations ==
-                        1,
-                    type: "personalized_recommendations",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "App Updates",
-                    value: controller.notificationModel?.appUpdates == 1,
-                    type: "app_updates",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "Service Updates",
-                    value: controller.notificationModel?.serviceUpdates == 1,
-                    type: "service_updates",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "Community Forum Activity",
-                    value:
-                        controller.notificationModel?.communityForumActivity ==
-                        1,
-                    type: "community_forum_activity",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "Survey Feedback Requests",
-                    value:
-                        controller.notificationModel?.surveyFeedbackRequests ==
-                        1,
-                    type: "survey_feedback_requests",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "Important Announcements",
-                    value:
-                        controller.notificationModel?.importantAnnouncements ==
-                        1,
-                    type: "important_announcements",
-                    controller: controller,
-                  ),
-
-                  buildNotificationTile(
-                    title: "App Tips Tutorials",
-                    value: controller.notificationModel?.appTipsTutorials == 1,
-                    type: "app_tips_tutorials",
-                    controller: controller,
-                  ),
-                ],
-              );
+        actions: [
+          TextButton(
+            onPressed: () {
+              controller.deleteAllNotifications(context: context);
             },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-Widget buildNotificationTile({
-  required String title,
-  required bool value,
-  required String type,
-  required ProfileController controller,
-}) {
-  return ListTile(
-    title: Text(title),
-    trailing: Switch(
-      value: value,
-      thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
-        if (states.contains(MaterialState.selected)) {
-          return Colors.white;
-        }
-        return Colors.white;
-      }),
-
-      trackColor: MaterialStateProperty.resolveWith<Color>((states) {
-        if (states.contains(MaterialState.selected)) {
-          return ColorResources.blueeebutton;
-        }
-        return ColorResources.greycolorborder;
-      }),
-
-      trackOutlineColor: MaterialStateProperty.resolveWith<Color>((states) {
-        if (states.contains(MaterialState.selected)) {
-          return ColorResources.blueeebutton;
-        }
-        return ColorResources.greycolorborder;
-      }),
-
-      onChanged: (bool newValue) async {
-        // await controller.updatenotificationsetting(
-        //   context: Get.context!,
-        //   type: type,
-        //   status: newValue ? "1" : "0",
-        // );
-
-        // await controller.getCustomerNotificationsSetting();
-        try {
-           showDialog(
-                      context:Get.context!,
-                      barrierDismissible: false,
-                      builder: (_) => PremiumBlurLoader(),
-                    );
-          await controller.updatenotificationsetting(
-            context: Get.context!,
-            type: type,
-            status: newValue ? "1" : "0",
-          );
-
-          await controller.getCustomerNotificationsSetting();
-        } catch (e) {
-          debugPrint('address update Error: $e');
-        } finally {
-          if (Get.isDialogOpen ?? false) {
-            Get.back();
-          }
-        }
-      },
-    ),
-  );
-}
-
-class NotificationTile extends StatelessWidget {
-  final String title;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const NotificationTile({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: Dimensions.spacingSize16,
-        vertical: 6,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
             child: Text(
-              title,
-              style: PoppinsSemiBold.copyWith(color: ColorResources.blackcolor),
+              "Delete All",
+              style: PoppinsSemiBold.copyWith(
+                color: ColorResources.textColorRed,
+              ),
             ),
           ),
-
-          Switch(
-            value: value,
-
-            thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
-              if (states.contains(MaterialState.selected)) {
-                return Colors.white;
-              }
-              return Colors.white;
-            }),
-
-            trackColor: MaterialStateProperty.resolveWith<Color>((states) {
-              if (states.contains(MaterialState.selected)) {
-                return ColorResources.blueeebutton;
-              }
-              return ColorResources.greycolorborder;
-            }),
-
-            trackOutlineColor: MaterialStateProperty.resolveWith<Color>((
-              states,
-            ) {
-              if (states.contains(MaterialState.selected)) {
-                return ColorResources.blueeebutton;
-              }
-              return ColorResources.greycolorborder;
-            }),
-
-            trackOutlineWidth: MaterialStateProperty.all(1.5),
-
-            onChanged: onChanged,
-          ),
         ],
+      ),
+      body: SafeArea(
+        child: GetBuilder<ProfileController>(
+          builder: (controller) {
+            if (controller.isNotificationLoading) {
+              return const Center(child: PremiumBlurLoader());
+            }
+
+            if (controller.notificationList.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/images/notdatafound.png",
+                      height: 150,
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "No Data Found",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              itemCount: controller.notificationList.length,
+              itemBuilder: (context, index) {
+                var item = controller.notificationList[index];
+
+                return Dismissible(
+                  key: ValueKey(item.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 25),
+                    decoration: BoxDecoration(
+                      color: ColorResources.textColorRed,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  onDismissed: (_) {
+                    String deletedId = item.id ?? "";
+                    controller.deleteNotification(
+                      context: context,
+                      id: deletedId,
+                      index: index,
+                    );
+                  },
+                  child: InkWell(
+                    onTap: () {
+                      if (item.isRead == "0") {
+                        controller.readNotification(id: item.id ?? "");
+                      }
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            item.isRead == "0"
+                                ? Icons.notifications_active
+                                : Icons.notifications,
+                            color: item.isRead == "0"
+                                ? const Color(0xFF123EBC)
+                                : Colors.grey,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.message ?? "",
+                                  style: PoppinsReguler.copyWith(
+                                    color: ColorResources.blackcolor,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  item.date ?? "",
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

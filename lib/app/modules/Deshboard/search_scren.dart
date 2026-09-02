@@ -29,6 +29,35 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
   List predictions = [];
   String apiKey = "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU";
 
+  // This app operates in Tripura only — search results outside it are not
+  // actionable (see _isLocationAllowed below, which already rejected a
+  // booking whose pickup/drop were both outside the allowed area). That
+  // check ran only *after* a result was tapped, though; the autocomplete
+  // list itself was unrestricted — one call scoped to the whole of India
+  // (components=country:in) and the other to the entire world with no
+  // scoping at all — so a rider could type a city name anywhere on Earth
+  // and see it suggested, tap it, and only then learn it wasn't served.
+  //
+  // Google's legacy Autocomplete API (the endpoint already in use here) has
+  // no state/region-level restriction — `components` only goes down to
+  // country. The closest real restriction it supports is a location+radius
+  // circle with strictbounds=true, which turns that circle from a mere
+  // ranking bias into a hard filter. Centred and sized to cover Tripura's
+  // full extent (bounding box roughly 22.98–24.53°N, 91.15–92.35°E — this
+  // circle necessarily over-covers the corners a little, since Tripura's
+  // shape isn't a circle, and Tripura is bordered by Bangladesh on three
+  // sides, which components=country:in below is what actually excludes).
+  static const double _tripuraCenterLat = 23.76;
+  static const double _tripuraCenterLng = 91.75;
+  static const int _tripuraRadiusMeters = 110000;
+
+  /// Appended to every Autocomplete request below.
+  static const String _tripuraLocationParams =
+      '&location=$_tripuraCenterLat,$_tripuraCenterLng'
+      '&radius=$_tripuraRadiusMeters'
+      '&strictbounds=true'
+      '&components=country:in';
+
   String currentAddress = "Loading...";
   LatLng? currentLatLng;
   String? _currentAdminArea;
@@ -61,7 +90,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
 
   Future<void> searchPlaces(String input) async {
     final url =
-        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&components=country:in";
+        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey$_tripuraLocationParams";
 
     final response = await http.get(Uri.parse(url));
 
@@ -96,7 +125,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
     }
 
     String url =
-        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey";
+        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey$_tripuraLocationParams";
 
     var response = await http.get(Uri.parse(url));
 
@@ -208,7 +237,11 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
   bool isSearching = false;
   bool _isCheckingLocation = false;
 
-  static const List<String> _allowedStates = ['delhi', 'tripura'];
+  // Was ['delhi', 'tripura'] — this app is strictly Tripura-only, so 'delhi'
+  // let a pickup or drop in Delhi silently pass the one safety check this
+  // screen already had, even though nothing else about this service
+  // operates there.
+  static const List<String> _allowedStates = ['tripura'];
 
   bool _isLocationAllowed(String? administrativeArea) {
     if (administrativeArea == null || administrativeArea.isEmpty) return false;

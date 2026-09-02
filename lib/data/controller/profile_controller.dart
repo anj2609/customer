@@ -14,6 +14,7 @@ import 'package:myrideuser/data/modal/cms_model.dart';
 import 'package:myrideuser/data/modal/contact_model.dart';
 import 'package:myrideuser/data/modal/fql_model.dart';
 import 'package:myrideuser/data/modal/notificationsetting_model.dart';
+import 'package:myrideuser/data/modal/notification_list_model.dart';
 import 'package:myrideuser/data/modal/profileModel.dart';
 import 'package:myrideuser/data/modal/promocategory_model.dart';
 import 'package:myrideuser/data/modal/promodetail_model.dart';
@@ -105,6 +106,11 @@ class ProfileController extends GetxController implements GetxService {
 
   String currentSlug = "pending";
   NotificationSettingsModel? notificationModel;
+
+  // Notification listing state
+  bool isNotificationLoading = false;
+  NotificationListModel? notificationListModel;
+  List<NotificationItemModel> notificationList = [];
 
   @override
   void onInit() {
@@ -644,6 +650,91 @@ class ProfileController extends GetxController implements GetxService {
   }
 
   ///customernoticationUpdate
+
+  // =================== Notification Listing API ===================== //
+
+  Future<void> getNotificationListing() async {
+    try {
+      isNotificationLoading = true;
+      update();
+
+      final Response response = await profileRepo.getNotifications();
+
+      if (response.statusCode == 200 &&
+          response.body != null &&
+          response.body['code']?.toString() == '200') {
+        notificationListModel = NotificationListModel.fromJson(response.body);
+        notificationList = notificationListModel?.data ?? [];
+      } else {
+        notificationList = [];
+      }
+    } catch (e) {
+      debugPrint('getNotificationListing Error => $e');
+      notificationList = [];
+    } finally {
+      isNotificationLoading = false;
+      update();
+    }
+  }
+
+  Future<void> deleteNotification({
+    required BuildContext context,
+    required String id,
+    required int index,
+  }) async {
+    try {
+      notificationList.removeAt(index);
+      update();
+
+      await profileRepo.deleteNotification(id: id);
+    } catch (e) {
+      debugPrint('deleteNotification Error => $e');
+      getNotificationListing();
+    }
+  }
+
+  Future<void> deleteAllNotifications({
+    required BuildContext context,
+  }) async {
+    try {
+      notificationList.clear();
+      update();
+
+      final response = await profileRepo.deleteNotificationAll();
+      final body = response.body;
+
+      if (body != null && body['code']?.toString() == '200') {
+        AnimatedTopToast.show(
+          context: context,
+          message: body['message'] ?? "All notifications cleared.",
+          backgroundColor: ColorResources.blueeebutton,
+          icon: Icons.check_circle_rounded,
+        );
+      }
+    } catch (e) {
+      debugPrint('deleteAllNotifications Error => $e');
+      getNotificationListing();
+    }
+  }
+
+  Future<void> readNotification({
+    required String id,
+  }) async {
+    try {
+      // Update locally first
+      for (var item in notificationList) {
+        if (item.id == id) {
+          item.isRead = "1";
+          break;
+        }
+      }
+      update();
+
+      await profileRepo.readNotification(id: id);
+    } catch (e) {
+      debugPrint('readNotification Error => $e');
+    }
+  }
 
   Future<Response?> getAddressCustomer({required BuildContext context}) async {
     try {

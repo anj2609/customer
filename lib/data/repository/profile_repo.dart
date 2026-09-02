@@ -202,4 +202,22 @@ class ProfiileRepo extends GetxService {
 
   ///topCreateAmount
   /////// customerWallet
+
+  Future<Response> getNotifications() async {
+    return apiClient.getDataApi(ApiConstants.getnotification);
+  }
+
+  Future<Response> deleteNotification({required String id}) async {
+    return apiClient.myridepostData(ApiConstants.getdeletNofitions, {"id": id});
+  }
+
+  Future<Response> deleteNotificationAll() async {
+    return apiClient.getData(ApiConstants.getDeleteNotificationAll);
+  }
+
+  Future<Response> readNotification({required String id}) async {
+    return apiClient.myridepostData(ApiConstants.getReadNotification, {
+      "id": id,
+    });
+  }
 }

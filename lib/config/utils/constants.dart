@@ -26,6 +26,14 @@ class ApiConstants {
   // apiClient.getData() call) — no body/params, per the confirmed Postman
   // request (My Ride API > Auth > Delete Account).
   static const String deleteAccountUrl = 'delete-account';
+  // POST, body {is_app_killed: 1|0}, same id + authorizationToken headers.
+  // Called from main.dart's app-lifecycle observer: 1 when the app leaves
+  // the foreground (paused/detached — Flutter has no true "process killed"
+  // callback, since Dart code stops running the moment that actually
+  // happens; this is the closest available signal, and the same
+  // simplification every app taking this approach makes), 0 when it
+  // returns to resumed.
+  static const String updateAppKilledStatusUrl = 'update-app-killed-status';
   static const String socialAuth = 'social-auth';
   static const String estimateUrl = 'estimate-ride-list';
   static const String trackRide = 'track-ride';
@@ -42,6 +50,10 @@ class ApiConstants {
       'customer-notification-settings';
   static const String customernotificationupdate =
       'customer-notification-settings-update';
+  static const String getnotification = 'notification/get';
+  static const String getdeletNofitions = 'notification/delete';
+  static const String getDeleteNotificationAll = 'notification/delete-all';
+  static const String getReadNotification = 'notification/read';
   static const String customeraccountsecurity = 'customer-account-security';
   static const String customeraccountsecurityupdate =
       'customer-account-security-update';

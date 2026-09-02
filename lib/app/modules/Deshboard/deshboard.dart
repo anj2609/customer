@@ -111,13 +111,38 @@ class _DashboardScreenState extends State<DashboardScreen>
   List predictions = [];
   final String _placesApiKey = "AIzaSyBNHiJLxFa2qcs079P5TaYrB770_CVMldU";
 
+  // This app operates in Tripura only. See search_scren.dart's own copy of
+  // this same note (this screen's search was "merged from
+  // SearchLocationScreen" per the section header above, and inherited the
+  // exact same unrestricted-autocomplete gap that file had — fixing one
+  // without the other left this one, the version actually embedded in the
+  // main dashboard sheet, still showing results from anywhere on Earth).
+  // strictbounds=true turns location+radius from a ranking bias into a hard
+  // filter; centred/sized to cover Tripura's full extent (bounding box
+  // roughly 22.98–24.53°N, 91.15–92.35°E), necessarily over-covering the
+  // corners a little since Tripura's shape isn't a circle — Tripura is
+  // bordered by Bangladesh on three sides, which components=country:in is
+  // what actually excludes.
+  static const double _tripuraCenterLat = 23.76;
+  static const double _tripuraCenterLng = 91.75;
+  static const int _tripuraRadiusMeters = 110000;
+  static const String _tripuraLocationParams =
+      '&location=$_tripuraCenterLat,$_tripuraCenterLng'
+      '&radius=$_tripuraRadiusMeters'
+      '&strictbounds=true'
+      '&components=country:in';
+
   String _currentAddress = "Loading...";
   LatLng? _pickupLatLng;
   String? _currentAdminArea;
   bool _isEditingPickup = false;
   bool _isCheckingLocation = false;
 
-  static const List<String> _allowedStates = ['delhi', 'tripura'];
+  // Was ['delhi', 'tripura'] — this app is strictly Tripura-only, so
+  // 'delhi' let a pickup or drop in Delhi silently pass the one safety
+  // check this screen already had, even though nothing else about this
+  // service operates there.
+  static const List<String> _allowedStates = ['tripura'];
 
   // ================= VEHICLE SELECTION (merged from RideOptionScreen) =================
   LatLng? _dropLatLng;
@@ -278,7 +303,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     }
 
     final url =
-        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$_placesApiKey";
+        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$_placesApiKey$_tripuraLocationParams";
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {

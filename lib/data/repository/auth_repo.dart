@@ -43,6 +43,12 @@ class AuthRepo extends GetxService {
     return apiClient.getData(ApiConstants.deleteAccountUrl);
   }
 
+  Future<Response> updateAppKilledStatus({required bool isAppKilled}) async {
+    return apiClient.myridepostData(ApiConstants.updateAppKilledStatusUrl, {
+      "is_app_killed": isAppKilled ? 1 : 0,
+    });
+  }
+
   /////========== verify otp Api ======================///////
   Future<Response> verifyOtpApi({String? phone, String? otp}) async {
     return apiClient.postsignUpData(ApiConstants.verityOtpUrl, {
@@ -158,11 +164,15 @@ class AuthRepo extends GetxService {
   Future<Response> socialSignup({
     required String provider,
     required String idToken,
+    String? deviceToken,
+    String? deviceType,
   }) async {
     return apiClient.postsignUpData(ApiConstants.socialAuth, {
       "provider": provider,
       "id_token": idToken,
       "user_type": ApiConstants.customer,
+      "device_token": deviceToken,
+      "device_type": deviceType,
     });
   }
 
