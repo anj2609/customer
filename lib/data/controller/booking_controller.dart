@@ -520,9 +520,38 @@ class BookingController extends GetxController implements GetxService {
         icon: Icons.error_outline,
       );
     } else {
+      // This branch used to blame the rider's connection for everything it
+      // caught, which is wrong for the case that actually brings riders
+      // here: the server answering 500. /estimate-ride-list throws
+      // "Unable to calculate distance." whenever Google has no drivable
+      // route between the two pins (a drop inside a reserve forest, say) —
+      // the network is fine, the destination just can't be driven to, and
+      // "check your connection" sends the rider off debugging their wifi.
+      //
+      // Only ApiClient's own synthetic failures mean the request never
+      // completed: statusCode 1 (request threw), 0 (empty body) and -1
+      // (VPN blocked it before sending). A real HTTP status is the server
+      // talking, so relay what it said instead.
+      final bool requestNeverCompleted =
+          response.statusCode == null ||
+          response.statusCode == 1 ||
+          response.statusCode == 0 ||
+          response.statusCode == -1;
+
+      final String rawServerMessage =
+          (response.body is Map ? response.body['message'] : null)?.toString() ??
+              '';
+
       AnimatedTopToast.show(
         context: context,
-        message: "Unable to get ride estimates. Please check your connection and try again.",
+        message: requestNeverCompleted
+            ? (response.statusText?.isNotEmpty == true &&
+                    response.statusCode == -1
+                ? response.statusText!
+                : "Couldn't reach the server. Please check your connection and try again.")
+            : (rawServerMessage.isNotEmpty
+                ? _getUserFriendlyMessage(rawServerMessage)
+                : "We couldn't work out a fare for this trip. Please try a different destination."),
         backgroundColor: ColorResources.textColorBaclColor,
         icon: Icons.error_outline,
       );
@@ -916,6 +945,19 @@ class BookingController extends GetxController implements GetxService {
   String _getUserFriendlyMessage(String backendMessage) {
     final msg = backendMessage.toLowerCase().trim();
 
+    // /estimate-ride-list raises this (as a 500) when Google returns
+    // ZERO_RESULTS for the pickup→drop pair — i.e. there is no drivable
+    // route to the pin the rider chose. Verified with the exact
+    // coordinates from a real failure: the drop sat inside Central
+    // Catchment R.F., which reverse-geocodes to a Plus Code because no
+    // street address exists there, and points a few km away route fine.
+    // Retrying can't help, so the message has to say what will: move the
+    // pin. Must stay above the generic server/exception rule below, which
+    // would otherwise swallow this into "trouble connecting".
+    if (msg.contains('calculate distance') ||
+        msg.contains('unable to calculate dist')) {
+      return "We couldn't find a road route to that drop-off point. Please pick a spot closer to a main road.";
+    }
     if (msg.contains('server') || msg.contains('internal') || msg.contains('exception') || msg.contains('500')) {
       return "We're having trouble connecting. Please try again.";
     }

@@ -40,6 +40,13 @@ class ApiClient extends GetxService {
         ? ApiConstants.userTokenSocial
         : (sharedPreferences.getString(ApiConstants.token) ?? "");
 
+    // TEMP: for grabbing a real id/authorizationToken pair to test the
+    // backend directly in Postman. Remove once done — this fires on every
+    // authenticated request and will spam the console otherwise.
+    if (Foundation.kDebugMode) {
+      print('AUTH HEADERS  id=$profileId  authorizationToken=$authToken');
+    }
+
     final headers = <String, String>{
       'Accept': 'application/json',
       'id': profileId,
@@ -150,10 +157,26 @@ class ApiClient extends GetxService {
 
       if (Foundation.kDebugMode) {
         print("STATUS: ${httpResponse.statusCode}");
+        // A bare status code says a call failed but not why. On anything
+        // that isn't a clean 200 the server's own error payload is the
+        // only thing that explains it (a Laravel 500 carries the exception
+        // message), and the exact body we sent is what makes it
+        // reproducible outside the app.
+        if (httpResponse.statusCode != 200) {
+          print('  ↳ FAILED "$uri"');
+          print('  ↳ REQUEST : ${jsonEncode(body)}');
+          print('  ↳ RESPONSE: ${httpResponse.body}');
+        }
       }
 
       return handleResponse(httpResponse, uri);
     } catch (e) {
+      // Was silently swallowed — a timeout, a DNS failure and a dropped
+      // socket all collapsed into the same generic "no internet" response
+      // with nothing printed to tell them apart.
+      if (Foundation.kDebugMode) {
+        print('API ERROR on "$uri": ${e.runtimeType} — $e');
+      }
       return Response(statusCode: 1, statusText: noInternetMessage);
     }
   }

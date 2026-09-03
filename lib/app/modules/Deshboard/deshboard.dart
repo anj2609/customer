@@ -138,6 +138,15 @@ class _DashboardScreenState extends State<DashboardScreen>
   bool _isEditingPickup = false;
   bool _isCheckingLocation = false;
 
+  /// True when the searching stage was reopened from the vehicle-select
+  /// route summary (rider tapped pickup/drop to change it after a
+  /// destination was already picked — e.g. hailing on someone else's
+  /// behalf, where "current location" isn't their actual pickup point) as
+  /// opposed to the normal idle -> "Where to?" entry. Governs where the
+  /// back arrow / system back returns to (see _closeSearch), so editing
+  /// either field from that summary doesn't discard the trip already set up.
+  bool _editingFromVehicleSelect = false;
+
   // Was ['delhi', 'tripura'] — this app is strictly Tripura-only, so
   // 'delhi' let a pickup or drop in Delhi silently pass the one safety
   // check this screen already had, even though nothing else about this
@@ -264,13 +273,58 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   void _closeSearch() {
+    // Editing pickup/drop from the vehicle-select summary reopens this same
+    // searching stage — backing out of it (arrow or system back) should
+    // return to that summary with the trip still intact, not fall all the
+    // way back to idle and discard the destination already picked.
+    if (_editingFromVehicleSelect && _dropLatLng != null) {
+      setState(() {
+        _stage = _SheetStage.vehicleSelect;
+        _isEditingPickup = false;
+        _editingFromVehicleSelect = false;
+        predictions = [];
+      });
+      _animateSheetTo(_vehicleSize);
+      return;
+    }
+
     setState(() {
       _stage = _SheetStage.idle;
       predictions = [];
       _isEditingPickup = false;
+      _editingFromVehicleSelect = false;
       _destinationController.clear();
     });
     _animateSheetTo(_idleSize);
+  }
+
+  /// Reopens the search sheet to change the pickup point after a
+  /// destination is already set — e.g. hailing on someone else's behalf,
+  /// where the rider's current GPS location isn't the actual pickup point.
+  void _editPickupFromVehicleSelect() {
+    setState(() {
+      _stage = _SheetStage.searching;
+      _isEditingPickup = true;
+      _editingFromVehicleSelect = true;
+      _pickupEditController.text = _currentAddress;
+      _destinationController.text = _dropAddress;
+      predictions = [];
+    });
+    _animateSheetTo(_searchingSize);
+  }
+
+  /// Reopens the search sheet to change the destination after one is
+  /// already set, from the vehicle-select route summary.
+  void _editDestinationFromVehicleSelect() {
+    setState(() {
+      _stage = _SheetStage.searching;
+      _isEditingPickup = false;
+      _editingFromVehicleSelect = true;
+      _pickupEditController.text = _currentAddress;
+      _destinationController.text = _dropAddress;
+      predictions = [];
+    });
+    _animateSheetTo(_searchingSize);
   }
 
   void _backToIdleFromVehicleSelect() {
@@ -333,13 +387,26 @@ class _DashboardScreenState extends State<DashboardScreen>
     final data = jsonDecode(response.body);
     final loc = data['result']['geometry']['location'];
 
-    if (mounted) {
-      setState(() {
-        _pickupLatLng = LatLng(loc['lat'], loc['lng']);
-        _currentAddress = place['description'];
-        _isEditingPickup = false;
-        predictions = [];
-      });
+    if (!mounted) return;
+
+    setState(() {
+      _pickupLatLng = LatLng(loc['lat'], loc['lng']);
+      _currentAddress = place['description'];
+      _isEditingPickup = false;
+      predictions = [];
+    });
+
+    // Editing pickup from the vehicle-select summary (destination already
+    // set) — go straight back there with the route/estimates refreshed for
+    // the new pickup point, instead of stranding the rider on the search
+    // sheet waiting to re-pick a destination they'd already chosen.
+    if (_editingFromVehicleSelect && _dropLatLng != null) {
+      _editingFromVehicleSelect = false;
+      await _fetchEstimates(
+        dropLat: _dropLatLng!.latitude,
+        dropLng: _dropLatLng!.longitude,
+        dropAddressText: _dropAddress,
+      );
     }
   }
 
@@ -445,9 +512,20 @@ class _DashboardScreenState extends State<DashboardScreen>
       return;
     }
 
+    // Where to put the rider back if the estimate fails. The sheet moves to
+    // vehicleSelect optimistically just below, before the fare call has
+    // answered, so the loading skeletons have somewhere to show — but when
+    // that call fails there are no vehicles to choose from, and leaving
+    // them parked on "Choose a ride" showing "No vehicles available for
+    // this route" under a live Next button is a dead end. Sending them back
+    // where they came from puts the destination field in front of them
+    // again, which is the one thing that can actually fix it.
+    final _SheetStage stageBeforeFetch = _stage;
+
     setState(() {
       _stage = _SheetStage.vehicleSelect;
       _isLoadingEstimate = true;
+      _editingFromVehicleSelect = false;
       _dropLatLng = LatLng(dropLat, dropLng);
       _dropAddress = dropAddressText;
       _pickupAddress = _currentAddress;
@@ -458,7 +536,8 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     await _drawRoute();
 
-    await bookingController.bookingestimateListApi(
+    final Response estimateResponse =
+        await bookingController.bookingestimateListApi(
       pickup_lat: _pickupLatLng!.latitude,
       pickup_lng: _pickupLatLng!.longitude,
       drop_lat: dropLat,
@@ -467,7 +546,38 @@ class _DashboardScreenState extends State<DashboardScreen>
       navigateToRideOption: false,
     );
 
-    if (mounted) setState(() => _isLoadingEstimate = false);
+    if (!mounted) return;
+
+    // Mirrors what bookingestimateListApi itself treats as success: a real
+    // 200 whose body also carries code 200. Anything else (the 500 this
+    // endpoint returns for an unroutable drop pin included) left the
+    // vehicle list empty, and the toast has already explained why.
+    final dynamic responseBody = estimateResponse.body;
+    final bool estimateSucceeded = estimateResponse.statusCode == 200 &&
+        responseBody is Map &&
+        responseBody['code']?.toString() == '200';
+
+    if (!estimateSucceeded) {
+      setState(() {
+        _isLoadingEstimate = false;
+        // vehicleSelect would just bounce them straight back to the dead
+        // end; searching at least lets them pick a different destination.
+        _stage = stageBeforeFetch == _SheetStage.vehicleSelect
+            ? _SheetStage.searching
+            : stageBeforeFetch;
+        // The half-built trip is not usable — drop it rather than leave a
+        // stale pin, route line, or previous route's vehicles behind.
+        _dropLatLng = null;
+        _polylines = {};
+        _routeMarkers = {};
+        _selectedVehicleIndex = -1;
+        bookingController.vehicleList.clear();
+      });
+      _animateSheetTo(_stageSize(_stage));
+      return;
+    }
+
+    setState(() => _isLoadingEstimate = false);
   }
 
   // ================= ROUTE DRAWING (same Directions API logic as before) =================
@@ -1803,11 +1913,21 @@ class _DashboardScreenState extends State<DashboardScreen>
                         color: ColorResources.TextColorForGrey,
                       ),
                       prefixIcon: const Icon(Icons.search, size: 20),
+                      // Clears the box and leaves it open to retype — it must
+                      // NOT also set _isEditingPickup = false in the same
+                      // setState, or this TextField gets swapped out for the
+                      // static summary row (which shows _currentAddress, the
+                      // one thing this button never touches) in the very
+                      // same frame. That's why "first tap on a freshly
+                      // opened pickup field, then X" looked like it did
+                      // nothing: the field was pre-filled with _currentAddress
+                      // by _openSearch, the clear did happen, but it was
+                      // instantly hidden behind that unchanged summary text.
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.close, size: 18),
                         onPressed: () {
                           setState(() {
-                            _isEditingPickup = false;
+                            _pickupEditController.clear();
                             predictions = [];
                           });
                         },
@@ -1825,6 +1945,24 @@ class _DashboardScreenState extends State<DashboardScreen>
                   maxLines: 1,
                   textAlignVertical: TextAlignVertical.center,
                   style: PoppinsReguler.copyWith(fontSize: 14),
+                  // Tapping here while pickup is still mid-edit (e.g. the
+                  // rider just typed a friend's address as pickup but hasn't
+                  // tapped a suggestion yet) must hand "active field" status
+                  // back to destination — otherwise onChanged below stays
+                  // gated by _isEditingPickup forever, since nothing else on
+                  // this field ever clears that flag, and destination search
+                  // silently does nothing no matter what's typed. The
+                  // pickup TextField itself (and whatever's typed into it)
+                  // isn't lost: it's just not shown while _isEditingPickup
+                  // is false, same as tapping its own close icon.
+                  onTap: () {
+                    if (_isEditingPickup) {
+                      setState(() {
+                        _isEditingPickup = false;
+                        predictions = [];
+                      });
+                    }
+                  },
                   onChanged: (value) {
                     if (!_isEditingPickup) _searchPlaces(value);
                   },
@@ -1844,6 +1982,18 @@ class _DashboardScreenState extends State<DashboardScreen>
                     prefixIconConstraints: const BoxConstraints(
                       minWidth: 36,
                       minHeight: 24,
+                    ),
+                    // Destination had no clear button at all — added to
+                    // match pickup's, so either field can be emptied
+                    // without backspacing through it manually.
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      onPressed: () {
+                        setState(() {
+                          _destinationController.clear();
+                          predictions = [];
+                        });
+                      },
                     ),
                     border: InputBorder.none,
                   ),
@@ -2064,6 +2214,11 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
+  /// Pickup/drop are always editable here, not just at the initial search
+  /// step — a rider hailing on someone else's behalf routinely needs to
+  /// swap the pickup away from their own current location (or fix the
+  /// destination) after already seeing vehicle options, and previously had
+  /// no way to do that short of backing out and losing the whole trip.
   Widget _routeSummary() {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -2073,40 +2228,66 @@ class _DashboardScreenState extends State<DashboardScreen>
       ),
       child: Column(
         children: [
-          Row(
-            children: [
-              Icon(Icons.circle, size: 9, color: ColorResources.blueeebutton),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  _pickupAddress.isEmpty ? "Loading..." : _pickupAddress,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: PoppinsMedium.copyWith(
-                    fontSize: 13,
-                    color: ColorResources.blackcolor11,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _editPickupFromVehicleSelect,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.circle,
+                  size: 9,
+                  color: ColorResources.blueeebutton,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _pickupAddress.isEmpty ? "Loading..." : _pickupAddress,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: PoppinsMedium.copyWith(
+                      fontSize: 13,
+                      color: ColorResources.blackcolor11,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Icon(
+                  Icons.edit,
+                  size: 14,
+                  color: ColorResources.TextColorForGrey,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.circle, size: 9, color: ColorResources.textColorRed),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  _dropAddress.isEmpty ? "Loading..." : _dropAddress,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: PoppinsMedium.copyWith(
-                    fontSize: 13,
-                    color: ColorResources.blackcolor11,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _editDestinationFromVehicleSelect,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.circle,
+                  size: 9,
+                  color: ColorResources.textColorRed,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _dropAddress.isEmpty ? "Loading..." : _dropAddress,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: PoppinsMedium.copyWith(
+                      fontSize: 13,
+                      color: ColorResources.blackcolor11,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Icon(
+                  Icons.edit,
+                  size: 14,
+                  color: ColorResources.TextColorForGrey,
+                ),
+              ],
+            ),
           ),
         ],
       ),
