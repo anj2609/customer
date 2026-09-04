@@ -18,6 +18,7 @@ import 'package:myrideuser/config/utils/constants.dart';
 import 'package:myrideuser/config/utils/style.dart';
 import 'package:myrideuser/data/controller/booking_controller.dart';
 import 'package:myrideuser/data/controller/profile_controller.dart';
+import 'package:myrideuser/data/services/pickup_marker_icon.dart';
 import 'package:myrideuser/data/modal/address_Model.dart';
 import 'package:myrideuser/data/modal/vehicle_type_model.dart';
 import 'package:myrideuser/widgets/toaster_animation.dart';
@@ -32,13 +33,32 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen>
-    with SingleTickerProviderStateMixin {
+class _DashboardScreenState extends State<DashboardScreen> {
   final ProfileController controller = Get.find<ProfileController>();
   final BookingController bookingController = Get.find<BookingController>();
 
-  /// Drives the pulsating ring around the rider's own location on the map.
-  late final AnimationController _pulseController;
+  /// The draggable pickup pin's icon, replacing the pulsating ring that used
+  /// to mark the rider's location. Null until the asset finishes decoding —
+  /// [_pickupMarker] falls back to a stock pin for those first frames rather
+  /// than drawing nothing.
+  BitmapDescriptor? _pickupPinIcon;
+
+  /// Guards against stale reverse-geocode results from overlapping drags:
+  /// each drag captures this, and only commits if it is still the newest.
+  /// Without it, dragging twice quickly can land the *first* drag's address
+  /// on the *second* drag's coordinates.
+  int _pickupDragGeneration = 0;
+
+  /// True while a dropped pin is being reverse-geocoded and service-area
+  /// checked. Blocks a second drag mid-resolve and drives the sheet's
+  /// "Updating pickup..." line.
+  bool _isResolvingPickupDrag = false;
+
+  /// Set once the rider drags the pin, and never cleared for the life of
+  /// this screen. A deliberate placement outranks anything automatic — see
+  /// [_loadCurrentAddress], where a GPS fix that resolves late would
+  /// otherwise overwrite it.
+  bool _pickupPlacedByDrag = false;
 
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
@@ -81,12 +101,30 @@ class _DashboardScreenState extends State<DashboardScreen>
   /// full-height viewport and put the location dot underneath the sheet
   /// until the user happened to drag it. Reading the stage instead means
   /// there is always a correct answer available, attached or not.
+  /// Height of the box the map and sheet actually share, captured from the
+  /// LayoutBuilder in build(). Falls back to 0 until the first layout.
+  double _mapViewportHeight = 0;
+
   double _mapPaddingForCurrentSheet() {
-    final height = MediaQuery.of(context).size.height;
+    // Was MediaQuery.of(context).size.height — the whole screen, including
+    // the status bar and the greeting header sitting above this box. The
+    // sheet's fractions are relative to its parent, which is that box and
+    // not the screen, so every padding value came out overstated. At the
+    // searching stage's 0.9 that overshoot is enough to meet or exceed the
+    // map's own height: padding then leaves no usable viewport at all, and
+    // a camera move has nowhere valid to put its target — which is exactly
+    // where "the map still shows the previous location" comes from.
+    final double height = _mapViewportHeight > 0
+        ? _mapViewportHeight
+        : MediaQuery.of(context).size.height;
     final fraction = _sheetController.isAttached
         ? _sheetController.size
         : _stageSize(_stage);
-    return fraction * height;
+    // Never let the sheet claim the entire map. Google Maps has no sensible
+    // interpretation of padding >= the view, and the rider needs some strip
+    // of map left to actually see what the camera was pointed at.
+    final double maxPadding = height * 0.85;
+    return (fraction * height).clamp(0.0, maxPadding);
   }
 
   void _syncMapPaddingToSheet() {
@@ -180,13 +218,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _syncMapPaddingToSheet(),
     );
-    // Drives the pulsating "you are here" ring — see _buildMap. repeat()
-    // rather than a one-shot: this is an ambient indicator that runs for as
-    // long as the map is on screen.
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat();
+    _loadPickupPinIcon();
     controller.getAddressCustomer(context: context);
     Get.find<ProfileController>().getActivityData(
       context: context,
@@ -215,9 +247,18 @@ class _DashboardScreenState extends State<DashboardScreen>
     _mapBottomPadding = _mapPaddingForCurrentSheet();
   }
 
+  /// Decoded once per mount; the service itself caches across mounts, so
+  /// returning to the Home tab doesn't re-run the pixel work.
+  Future<void> _loadPickupPinIcon() async {
+    final BitmapDescriptor icon = await PickupMarkerIcon.load(
+      'assets/images/location marker.jpg',
+    );
+    if (!mounted) return;
+    setState(() => _pickupPinIcon = icon);
+  }
+
   @override
   void dispose() {
-    _pulseController.dispose();
     _sheetController.removeListener(_syncMapPaddingToSheet);
     _sheetController.dispose();
     _destinationController.dispose();
@@ -232,12 +273,22 @@ class _DashboardScreenState extends State<DashboardScreen>
       Position pos = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+
+      // A GPS fix can take several seconds — long enough for the rider to
+      // have already dragged the pin somewhere deliberate (the pin is
+      // draggable from the first frame precisely so a slow or denied fix
+      // isn't a dead end). Landing this result on top of that choice would
+      // silently move their pickup back, so a manual placement wins.
+      if (_pickupPlacedByDrag) return;
+
       _pickupLatLng = LatLng(pos.latitude, pos.longitude);
 
       List<Placemark> placemarks = await placemarkFromCoordinates(
         pos.latitude,
         pos.longitude,
       );
+
+      if (_pickupPlacedByDrag) return;
 
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
@@ -389,9 +440,14 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     if (!mounted) return;
 
+    final LatLng selected = LatLng(loc['lat'], loc['lng']);
+
     setState(() {
-      _pickupLatLng = LatLng(loc['lat'], loc['lng']);
+      _pickupLatLng = selected;
       _currentAddress = place['description'];
+      // Keeps the pickup field itself in step, so reopening it shows the
+      // pickup that is actually set rather than the last thing typed.
+      _pickupEditController.text = _currentAddress;
       _isEditingPickup = false;
       predictions = [];
     });
@@ -407,7 +463,42 @@ class _DashboardScreenState extends State<DashboardScreen>
         dropLng: _dropLatLng!.longitude,
         dropAddressText: _dropAddress,
       );
+      // _fetchEstimates fits the camera to the whole pickup->drop route,
+      // which is the more useful framing once a trip exists — don't fight it.
+      return;
     }
+
+    // No destination yet, so nothing else will ever move the camera: the
+    // only camera work in this flow is _fitRouteBounds, and that needs a
+    // route. Without this the pin dutifully moved to the newly chosen
+    // pickup and the map carried on showing the *previous* area, leaving
+    // the rider looking at the wrong place with the pin somewhere off
+    // screen entirely.
+    _moveCameraToPickup(selected);
+  }
+
+  /// Zoom used when framing a freshly chosen pickup — close enough to make
+  /// out which side of the street it landed on, where the map's initial 14
+  /// is a neighbourhood overview.
+  static const double _pickupZoom = 16;
+
+  /// Centres the map on [target].
+  ///
+  /// No-ops before the map exists (the controller is only set in
+  /// onMapCreated). The GoogleMap already carries bottom padding equal to
+  /// the sheet's height, so "centre" here means centred in the strip the
+  /// rider can actually see above the sheet, not behind it.
+  void _moveCameraToPickup(LatLng target) {
+    // From here on the rider's framing is the one that counts — otherwise
+    // the nearby-driver refresh re-frames the map back onto the raw GPS fix
+    // within seconds. See BookingController.suppressCameraAutoFit.
+    bookingController.suppressCameraAutoFit = true;
+
+    final GoogleMapController? mapController = bookingController.mapController;
+    if (mapController == null) return;
+    mapController.animateCamera(
+      CameraUpdate.newLatLngZoom(target, _pickupZoom),
+    );
   }
 
   Future<void> _confirmDestination(dynamic place) async {
@@ -522,6 +613,11 @@ class _DashboardScreenState extends State<DashboardScreen>
     // again, which is the one thing that can actually fix it.
     final _SheetStage stageBeforeFetch = _stage;
 
+    // A priced trip gets framed to its own pickup->drop bounds by
+    // _fitRouteBounds; the nearby-driver auto-fit would pull the camera off
+    // that route every refresh.
+    bookingController.suppressCameraAutoFit = true;
+
     setState(() {
       _stage = _SheetStage.vehicleSelect;
       _isLoadingEstimate = true;
@@ -586,14 +682,11 @@ class _DashboardScreenState extends State<DashboardScreen>
     if (_pickupLatLng == null || _dropLatLng == null) return;
 
     setState(() {
+      // Drop only. The pickup end of the route is the draggable pickup pin
+      // (see _pickupMarker), which _buildMap unions in on every stage — a
+      // second static marker here would sit underneath it at the same
+      // coordinate and, worse, would not move when the rider drags.
       _routeMarkers = {
-        Marker(
-          markerId: const MarkerId("pickup"),
-          position: _pickupLatLng!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueAzure,
-          ),
-        ),
         Marker(
           markerId: const MarkerId("drop"),
           position: _dropLatLng!,
@@ -853,15 +946,24 @@ class _DashboardScreenState extends State<DashboardScreen>
           children: [
             SafeArea(bottom: false, child: _buildHeader()),
             Expanded(
-              child: Stack(
-                children: [
-                  _buildMap(),
-                  // Nearby-drivers status banner (loading/empty/error toasts
-                  // like "Couldn't load nearby drivers, please try again")
-                  // removed from the dashboard header per request — the map
-                  // markers alone now communicate driver availability.
-                  _buildSheet(),
-                ],
+              // The sheet's size fractions are relative to *this* box, not
+              // to the screen — so this is the height the map padding has to
+              // be computed against (see _mapPaddingForCurrentSheet).
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  _mapViewportHeight = constraints.maxHeight;
+                  return Stack(
+                    children: [
+                      _buildMap(),
+                      // Nearby-drivers status banner (loading/empty/error
+                      // toasts like "Couldn't load nearby drivers, please
+                      // try again") removed from the dashboard header per
+                      // request — the map markers alone now communicate
+                      // driver availability.
+                      _buildSheet(),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -973,39 +1075,180 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   // ---------- Map ----------
 
-  /// The expanding, fading ring drawn around the rider's own position — the
-  /// "pulsating dot" that replaced the red default map pin that used to be
-  /// dropped at [BookingController.currentLatLng].
+  /// The pickup pin — draggable, and the replacement for the pulsating ring
+  /// that used to mark the rider's position.
   ///
-  /// Drawn as a map Circle rather than a Flutter widget layered over the map
-  /// because a Circle is anchored to real coordinates: it stays put through
-  /// pans and zooms for free, where an overlaid widget would have to be
-  /// re-projected to screen space on every camera frame to avoid sliding off
-  /// the rider's actual location.
+  /// It marks the *pickup point*, which is not always where the rider is
+  /// standing: hailing for someone else is exactly the case where those
+  /// differ, and dragging this is the fastest way to say so. GoogleMap's
+  /// native blue dot stays enabled alongside it and keeps showing true GPS
+  /// position, so once the pin is moved away the rider can still see where
+  /// they actually are.
   ///
-  /// Only shown in the idle stage. Once a route is on screen (vehicle
-  /// selection) the map is about the pickup→drop line, and an animating ring
-  /// over it is noise — it also stops the per-frame circle updates while the
-  /// rider is reading fares.
-  Set<Circle> _locationPulseCircles(LatLng center) {
-    if (_stage != _SheetStage.idle) return const <Circle>{};
+  /// Falls back to [BitmapDescriptor.defaultMarker] for the frames before
+  /// the asset finishes decoding, so the pin is never missing.
+  ///
+  /// Anchored bottom-centre because the artwork is a pin on a stick: the tip
+  /// is the coordinate, and the default (0.5, 0.5) would float the point
+  /// half an icon-height north of the place it claims to mark.
+  Marker? _pickupMarker(LatLng fallbackCenter) {
+    // Before GPS resolves — or when permission was denied outright — there
+    // is no pickup yet, but that is precisely when placing one by hand
+    // matters most. Showing the pin at the map's centre gives the rider a
+    // way to set pickup manually instead of a dead screen.
+    final LatLng position = _pickupLatLng ?? fallbackCenter;
 
-    final t = _pulseController.value;
-    // Radius grows over the cycle while opacity falls to zero, so the ring
-    // reads as a ripple radiating outward rather than a throbbing blob.
-    final radius = 20 + (70 * t);
-    final fade = (1 - t).clamp(0.0, 1.0);
-
-    return {
-      Circle(
-        circleId: const CircleId('user_location_pulse'),
-        center: center,
-        radius: radius,
-        fillColor: const Color(0xFF4285F4).withValues(alpha: 0.16 * fade),
-        strokeColor: const Color(0xFF4285F4).withValues(alpha: 0.55 * fade),
-        strokeWidth: 2,
+    return Marker(
+      markerId: const MarkerId('pickup_pin'),
+      position: position,
+      icon: _pickupPinIcon ?? BitmapDescriptor.defaultMarker,
+      anchor: const Offset(0.5, 1.0),
+      // Above the nearby-driver cars, which are drawn at zIndex 0..n.
+      zIndexInt: 1000,
+      // Frozen while a booking is being created or fares are being fetched
+      // for the current pickup — letting it move then would send the rider
+      // a fare, or a driver, for a point they are no longer choosing.
+      draggable: !_isBooking && !_isLoadingEstimate && !_isResolvingPickupDrag,
+      onDragEnd: _onPickupPinDragEnd,
+      infoWindow: InfoWindow(
+        title: _pickupLatLng == null ? 'Set pickup' : 'Pickup',
+        snippet: _isResolvingPickupDrag
+            ? 'Updating…'
+            : 'Drag to adjust',
       ),
-    };
+    );
+  }
+
+  /// Commits a dragged pickup pin: reverse-geocode, service-area check, then
+  /// re-price the trip if a destination is already chosen.
+  ///
+  /// The pin is moved into state immediately rather than after the async
+  /// work, because the marker's drawn position comes from that state — a
+  /// rebuild landing mid-resolve (the nearby-driver refresh fires one every
+  /// few seconds) would otherwise snap the pin back under the rider's
+  /// finger. On rejection it is put back deliberately, below.
+  Future<void> _onPickupPinDragEnd(LatLng dropped) async {
+    final LatLng? previousLatLng = _pickupLatLng;
+    final String previousAddress = _currentAddress;
+    final String? previousAdminArea = _currentAdminArea;
+    final bool previouslyPlacedByDrag = _pickupPlacedByDrag;
+
+    // A drag that ends where it started is a tap-and-release, not a move.
+    if (previousLatLng != null &&
+        (previousLatLng.latitude - dropped.latitude).abs() < 0.000001 &&
+        (previousLatLng.longitude - dropped.longitude).abs() < 0.000001) {
+      return;
+    }
+
+    final int generation = ++_pickupDragGeneration;
+
+    // The rider just placed this by hand, so the camera is already framed
+    // the way they want it — the job here is only to stop the nearby-driver
+    // refresh from animating it back onto the raw GPS fix a few seconds
+    // later. No camera move of our own: moving it after a drag would fight
+    // the gesture that just ended.
+    bookingController.suppressCameraAutoFit = true;
+
+    setState(() {
+      _pickupLatLng = dropped;
+      _pickupPlacedByDrag = true;
+      _isResolvingPickupDrag = true;
+    });
+
+    String? resolvedAddress;
+    String? resolvedAdminArea;
+    bool geocodeFailed = false;
+
+    try {
+      final List<Placemark> placemarks = await placemarkFromCoordinates(
+        dropped.latitude,
+        dropped.longitude,
+      );
+      if (placemarks.isNotEmpty) {
+        final Placemark place = placemarks.first;
+        resolvedAdminArea = place.administrativeArea;
+        resolvedAddress = [
+          place.name,
+          place.subLocality,
+          place.locality,
+          place.administrativeArea,
+        ].where((p) => p != null && p.trim().isNotEmpty).join(', ');
+      }
+    } catch (e) {
+      // Offline, or the platform geocoder is unavailable. Not fatal — see
+      // the service-area decision below.
+      geocodeFailed = true;
+      debugPrint('Pickup drag reverse-geocode failed: $e');
+    }
+
+    if (!mounted) return;
+    // A newer drag started while this one was resolving; that one owns the
+    // pin now, and committing this stale result would put an older address
+    // on newer coordinates.
+    if (generation != _pickupDragGeneration) return;
+
+    // Same rule the destination check already uses: only block on a
+    // *known* out-of-area result. An unknown area (geocoder down, offline)
+    // must not strand a rider who is in fact inside the service area — the
+    // booking call itself remains the backstop.
+    final bool outsideServiceArea =
+        resolvedAdminArea != null && !_isLocationAllowed(resolvedAdminArea);
+
+    if (outsideServiceArea) {
+      setState(() {
+        _pickupLatLng = previousLatLng;
+        _currentAddress = previousAddress;
+        _currentAdminArea = previousAdminArea;
+        // Restored, not left set: a rejected drag is not a placement. If
+        // this stayed true after reverting to a null pickup (dragged before
+        // the GPS fix landed), _loadCurrentAddress would be locked out for
+        // good and the rider would be left with no pickup at all.
+        _pickupPlacedByDrag = previouslyPlacedByDrag;
+        _isResolvingPickupDrag = false;
+      });
+      AnimatedTopToast.show(
+        context: context,
+        message: "We don't operate there yet — pickup moved back.",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.location_off_outlined,
+      );
+      return;
+    }
+
+    setState(() {
+      _currentAdminArea = resolvedAdminArea ?? previousAdminArea;
+      _currentAddress = (resolvedAddress != null && resolvedAddress.isNotEmpty)
+          ? resolvedAddress
+          // Coordinates are a poor label, but they are honest and they keep
+          // the booking usable when the geocoder can't name the spot.
+          : '${dropped.latitude.toStringAsFixed(5)}, '
+              '${dropped.longitude.toStringAsFixed(5)}';
+      _pickupEditController.text = _currentAddress;
+      _pickupAddress = _currentAddress;
+      _isResolvingPickupDrag = false;
+    });
+
+    if (geocodeFailed) {
+      AnimatedTopToast.show(
+        context: context,
+        message: "Couldn't look up that address — pickup set to the pin.",
+        backgroundColor: ColorResources.textColorBaclColor,
+        icon: Icons.info_outline,
+      );
+    }
+
+    // A destination is already chosen, so the fare and route on screen were
+    // priced from the old pickup and are now wrong. _fetchEstimates redraws
+    // the route, re-prices, and handles its own failure path (including
+    // dropping back out of vehicle-select when the new pickup can't be
+    // routed from).
+    if (_dropLatLng != null) {
+      await _fetchEstimates(
+        dropLat: _dropLatLng!.latitude,
+        dropLng: _dropLatLng!.longitude,
+        dropAddressText: _dropAddress,
+      );
+    }
   }
 
   /// Explicitly re-centers the camera so the rider's own location renders
@@ -1047,34 +1290,38 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget _buildMap() {
     return GetBuilder<BookingController>(
       builder: (bc) {
-        return AnimatedBuilder(
-          animation: _pulseController,
-          builder: (context, _) {
-            return GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: bc.currentLatLng,
-                zoom: 14,
-              ),
-              // Google's own location indicator — the solid blue dot at the
-              // centre of the pulse above. Left to the platform rather than
-              // drawn here: it already tracks live position and heading, and
-              // is the marker riders recognise as "me".
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              circles: _locationPulseCircles(bc.currentLatLng),
-              // Without this, "centered" meant centered in the map widget's
-              // full bounds, including the portion the bottom sheet
-              // permanently covers — see _mapPaddingForCurrentSheet.
-              padding: EdgeInsets.only(bottom: _mapBottomPadding),
-              markers: _stage == _SheetStage.vehicleSelect
-                  ? _routeMarkers
-                  : bc.markers,
-              polylines: _polylines,
-              onMapCreated: (mapController) {
-                bc.mapController = mapController;
-                _nudgeCameraAboveSheet(mapController);
-              },
-            );
+        // The nearby-driver cars while choosing, the route's drop pin once a
+        // trip is priced — and the draggable pickup pin in both, so pickup
+        // stays adjustable right up until the ride is booked.
+        final Set<Marker> baseMarkers = _stage == _SheetStage.vehicleSelect
+            ? _routeMarkers
+            : bc.markers;
+        final Marker? pickupPin = _pickupMarker(bc.currentLatLng);
+
+        return GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: bc.currentLatLng,
+            zoom: 14,
+          ),
+          // Google's own blue location dot, off deliberately: the pickup pin
+          // is the only location marker on this map now. With both drawn,
+          // the untouched case stacks a dot and a pin on the identical
+          // coordinate, and after a drag the two read as competing claims
+          // about where the rider is.
+          myLocationEnabled: false,
+          myLocationButtonEnabled: false,
+          // Without this, "centered" meant centered in the map widget's
+          // full bounds, including the portion the bottom sheet
+          // permanently covers — see _mapPaddingForCurrentSheet.
+          padding: EdgeInsets.only(bottom: _mapBottomPadding),
+          markers: {
+            ...baseMarkers,
+            if (pickupPin != null) pickupPin,
+          },
+          polylines: _polylines,
+          onMapCreated: (mapController) {
+            bc.mapController = mapController;
+            _nudgeCameraAboveSheet(mapController);
           },
         );
       },
@@ -1126,6 +1373,61 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
+  /// The pickup line shown above "Where to?" in the idle sheet.
+  ///
+  /// Without this the idle sheet named no pickup at all, so dragging the map
+  /// pin — the whole point of which is to change that pickup — produced no
+  /// visible confirmation of where it actually landed. Tapping it opens the
+  /// same search sheet with the pickup field focused, so the pin and the
+  /// text field are two routes to one value.
+  Widget _pickupPinBar() {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        _openSearch();
+        setState(() => _isEditingPickup = true);
+      },
+      child: Row(
+        children: [
+          Icon(
+            Icons.trip_origin,
+            size: 14,
+            color: ColorResources.blueeebutton,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _isResolvingPickupDrag ? 'Updating pickup…' : _currentAddress,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PoppinsMedium.copyWith(
+                fontSize: 12.5,
+                color: _isResolvingPickupDrag
+                    ? ColorResources.TextColorForGrey
+                    : ColorResources.blackcolor11,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (_isResolvingPickupDrag)
+            const SizedBox(
+              width: 12,
+              height: 12,
+              child: CircularProgressIndicator(strokeWidth: 1.8),
+            )
+          else
+            Text(
+              'Change',
+              style: PoppinsMedium.copyWith(
+                fontSize: 11.5,
+                color: ColorResources.blueeebutton,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   /// Idle stage only: the "Where to?" bar (+ drag handle) is a fixed-height
   /// Column child above an Expanded SingleChildScrollView carrying the rest
   /// of the idle content — still driven by the same scrollController the
@@ -1138,6 +1440,10 @@ class _DashboardScreenState extends State<DashboardScreen>
           child: Column(
             children: [
               _dragHandle(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: _pickupPinBar(),
+              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
                 child: _whereToBar(),

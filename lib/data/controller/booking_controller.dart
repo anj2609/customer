@@ -1631,9 +1631,12 @@ class BookingController extends GetxController implements GetxService {
 
     List<LatLng> allPositions = [];
 
-    /// NO USER MARKER — the rider's own position is shown by GoogleMap's
-    /// native blue location dot plus the pulsating ring drawn around it (see
-    /// _locationPulseCircles in deshboard.dart), not by a pin.
+    /// NO USER MARKER HERE — the rider's own position is GoogleMap's native
+    /// blue location dot, and the *pickup* pin is owned by the dashboard
+    /// screen (see _pickupMarker in deshboard.dart) rather than this set,
+    /// specifically because this method clears and rebuilds `markers` on
+    /// every nearby-driver refresh: a draggable pin living in here would be
+    /// wiped out from under the rider's finger every few seconds.
     ///
     /// This used to add a Marker here with `customerProfile ??
     /// BitmapDescriptor.defaultMarker`. customerProfile is the rider's
@@ -1751,7 +1754,26 @@ class BookingController extends GetxController implements GetxService {
   //   update();
   // }
 
+  /// Set once the rider has deliberately positioned the map themselves —
+  /// choosing a pickup from search, dragging the pickup pin, or having a
+  /// priced route framed for them.
+  ///
+  /// [fitMapToBounds] below runs off [setMarkers], which fires on every
+  /// nearby-drivers state change — i.e. on a 20s auto-refresh, more than
+  /// once per cycle. It framed `currentLatLng` (the raw GPS fix) plus the
+  /// nearby cars, and it did so unconditionally, so within seconds of the
+  /// rider moving the map it animated the camera straight back to where
+  /// they had just moved it away from. That is the "it jumps back to the
+  /// past location" report: not the pickup reverting (the pin and the
+  /// booking coordinates were correct throughout) but the camera being
+  /// yanked out from under it on a timer.
+  ///
+  /// Auto-framing is only ever appropriate before the rider has expressed
+  /// an intent. After that their framing wins, permanently.
+  bool suppressCameraAutoFit = false;
+
   void fitMapToBounds(List<LatLng> positions) {
+    if (suppressCameraAutoFit) return;
     if (mapController == null || positions.isEmpty) return;
 
     double minLat = positions.first.latitude;
